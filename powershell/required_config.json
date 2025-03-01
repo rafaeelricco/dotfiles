@@ -94,7 +94,7 @@
       },
       {
         "colorScheme": "Dark+",
-        "commandline": "\"C:\\Program Files (x86)\\PowerShell\\7\\pwsh.exe\" -NoLogo -NoExit -ExecutionPolicy RemoteSigned -File \"D:\\personal\\projects\\dotfiles\\recovery_last_session_profile.ps1\"",
+        "commandline": "\"C:\\Program Files (x86)\\PowerShell\\7\\pwsh.exe\" -NoLogo -NoExit -ExecutionPolicy RemoteSigned -File \"D:\\personal\\projects\\dotfiles\\powershell\\in_testing_profile.ps1\"",
         "font": {
           "cellHeight": "1.4",
           "face": "JetBrainsMono Nerd Font",
