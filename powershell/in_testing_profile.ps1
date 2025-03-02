@@ -211,12 +211,21 @@ try {
 .NOTICE Import required PowerShell modules
 .DEV Loads modules for git integration, command line improvements, and Docker completion
 #>
-$modules = @('posh-git', 'PSReadLine', 'Get-ChildItemColor', 'DockerCompletion')
+$modules = @('posh-git', 'Get-ChildItemColor', 'DockerCompletion')
 foreach ($module in $modules) {
     try {
         Import-Module $module -ErrorAction Stop
     } catch {
         Write-Warning "Erro ao importar o módulo $($module): $($_.Exception.Message)"
+    }
+}
+
+# PSReadLine is loaded separately since it's often already loaded in PowerShell 7
+if (-not (Get-Module -Name PSReadLine)) {
+    try {
+        Import-Module PSReadLine -ErrorAction Stop
+    } catch {
+        Write-Warning "Erro ao importar o módulo PSReadLine: $($_.Exception.Message)"
     }
 }
 
@@ -277,8 +286,10 @@ Set-Alias l Get-ChildItem
 function ll { Get-ChildItem | Format-Table }
 function la { Get-ChildItem | Format-Wide }
 function lb { Get-ChildItem | Format-List }
+function activate { & .\venv\Scripts\activate.ps1 }
 
 function infox { Set-Location -Path D:\infoxhub }
+
 function home { Set-Location -Path C:\Users\rafae }
 function personal { Set-Location -Path D:\personal\projects }
 
