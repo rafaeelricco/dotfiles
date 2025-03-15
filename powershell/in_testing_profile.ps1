@@ -191,7 +191,6 @@ function Clear-OldDirectoryFiles {
 
 # Initialize directory tracking on profile load
 Clear-OldDirectoryFiles
-Set-LocationFromTabDirectories
 
 # Configure command history size
 $MaximumHistoryCount = 20000
