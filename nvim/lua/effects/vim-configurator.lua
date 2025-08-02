@@ -1,32 +1,38 @@
--- [[ Setting options ]]
--- See `:help vim.opt`
+-- [[ Vim Configurator ]]
+-- This file contains core editor settings that define the default behavior of Neovim.
+-- Each option is configured to create a modern and efficient editing experience.
+-- For more details on any option, see `:help vim.opt`.
 -- NOTE: You can change these options as you wish!
 --  For more options, you can see `:help option-list`
 
--- Automatically reload files when they are changed outside of Neovim
+-- Ensures buffer state is consistent with the file system by automatically
+-- reloading files when they are changed externally.
 vim.opt.autoread = true
 
--- Make line numbers default
+-- Displays line numbers in the gutter, which is essential for navigation.
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
 -- vim.opt.relativenumber = true
 
--- Enable mouse mode, can be useful for resizing splits for example!
+-- Enables mouse support in all modes, allowing for intuitive window resizing
+-- and text selection.
 vim.opt.mouse = "a"
 
--- Don't show the mode, since it's already in the status line
+-- Hides the default mode indicator, as this information is already provided
+-- by the statusline.
 vim.opt.showmode = false
 
--- Sync clipboard between OS and Neovim.
+-- Integrates the system clipboard with Neovim's registers, allowing for seamless
+-- copy-paste operations between Neovim and other applications.
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
 vim.opt.clipboard = "unnamedplus"
 
--- Enable break indent
+-- Preserves indentation for wrapped lines, maintaining code structure.
 vim.opt.breakindent = true
 
--- Tab and indentation settings
+-- Configures indentation to use two spaces, promoting a consistent code style.
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.softtabstop = 2
@@ -34,57 +40,67 @@ vim.opt.expandtab = true
 vim.opt.smartindent = true
 vim.opt.autoindent = true
 
--- Save undo history
+-- Persists the undo history to a file, allowing undo operations to be
+-- performed even after closing and reopening Neovim.
 vim.opt.undofile = true
 
--- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
+-- Configures search to be case-insensitive by default, unless the search
+-- query contains an uppercase letter.
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
--- Keep signcolumn on by default
+-- Always displays the sign column, preventing the editor from shifting when
+-- diagnostics or Git signs appear.
 vim.opt.signcolumn = "yes"
 
--- Decrease update time
+-- Reduces the delay for writing swap files to disk, improving performance.
 vim.opt.updatetime = 250
 
--- Decrease mapped sequence wait time
+-- Shortens the timeout for mapped key sequences, making the editor feel more responsive.
 -- Displays which-key popup sooner
 vim.opt.timeoutlen = 300
 
--- Configure how new splits should be opened
+-- Defines the default behavior for creating new splits, ensuring a predictable
+-- window layout.
 vim.opt.splitright = true
 vim.opt.splitbelow = true
 
--- Sets how neovim will display certain whitespace characters in the editor.
+-- Makes whitespace characters visible, which helps in identifying and
+-- correcting formatting issues.
 --  See `:help 'listchars'`
 vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 
--- Preview substitutions live, as you type!
+-- Provides a live preview for substitutions, allowing you to see the changes
+-- before they are applied.
 vim.opt.inccommand = "split"
 
--- Show which line your cursor is on
+-- Highlights the current line, improving cursor visibility.
 vim.opt.cursorline = true
 
--- Minimal number of screen lines to keep above and below the cursor.
+-- Maintains a consistent number of lines above and below the cursor when
+-- scrolling, which improves context awareness.
 vim.opt.scrolloff = 8
 
--- Confirm before quitting without saving
+-- Prevents accidental data loss by requiring confirmation before quitting
+-- with unsaved changes.
 vim.opt.confirm = true
 
--- Disable paste mode
+-- Disables paste mode, as modern terminals handle bracketed paste correctly.
 vim.opt.paste = false
 
--- Format options
+-- Customizes the format options to control automatic formatting behavior.
 vim.opt.formatoptions:remove({ "c", "r", "o" })
 
--- Wrap settings
+-- Disables line wrapping to prevent unintended line breaks in code.
 vim.opt.wrap = false
 vim.opt.textwidth = 0
 
--- [[ Basic Autocommands ]]
+-- [[ Core Autocommands ]]
+-- Defines fundamental autocommands that enhance the editing experience.
 --  See `:help lua-guide-autocommands`
 
--- Highlight when yanking (copying) text
+-- Provides visual feedback when yanking text by briefly highlighting the
+-- selected region.
 --  Try it with `yap` in normal mode
 --  See `:help vim.highlight.on_yank()`
 vim.api.nvim_create_autocmd("TextYankPost", {

@@ -1,5 +1,8 @@
--- [[ Install `lazy.nvim` plugin manager ]]
---    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
+-- [[ Plugin Loader ]]
+-- This file is responsible for bootstrapping the `lazy.nvim` plugin manager and
+-- loading all the plugins defined in the `domains` directory.
+-- It ensures that `lazy.nvim` is installed before attempting to load any plugins.
+-- For more information, see `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim.
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
   local lazyrepo = "https://github.com/folke/lazy.nvim.git"
@@ -10,9 +13,10 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
--- [[ Configure and install plugins ]]
+-- Configures `lazy.nvim` to load all plugins from the `domains` directory.
+-- Each domain represents a specific area of functionality, such as UI, LSP, or Git.
 require("lazy").setup({
-  -- Load plugins from domains
+  -- Imports all plugin configurations from their respective domain files.
   { import = "domains.ai" },
   { import = "domains.completion" },
   { import = "domains.editor" },
@@ -21,8 +25,8 @@ require("lazy").setup({
   { import = "domains.ui" },
 }, {
   ui = {
-    -- If you are using a Nerd Font: set icons to an empty table which will use the
-    -- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
+    -- Configures the UI for `lazy.nvim`, including custom icons that adapt based
+    -- on whether a Nerd Font is available.
     icons = vim.g.have_nerd_font and {} or {
       cmd = "⌘",
       config = "🛠",
