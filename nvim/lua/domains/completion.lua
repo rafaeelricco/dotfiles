@@ -1,11 +1,17 @@
+-- [[ Completion Domain ]]
+-- This file configures autocompletion, snippets, and related UI elements to create
+-- a modern, VSCode-like completion experience.
+
 return {
-  -- Autocompletion
+  -- Configures `blink.cmp`, a powerful and extensible completion engine.
+  -- It integrates with various sources like LSP, snippets, and buffer text.
   {
     "saghen/blink.cmp",
     event = "VimEnter",
     version = "1.*",
     dependencies = {
-      -- Snippet Engine
+      -- Configures `LuaSnip`, the snippet engine responsible for expanding text snippets.
+      -- It includes a build step for regex support and can be extended with snippet libraries.
       {
         "L3MON4D3/LuaSnip",
         version = "2.*",
@@ -33,11 +39,11 @@ return {
       },
       "folke/lazydev.nvim",
     },
-    --- @module 'blink.cmp'
-    --- @type blink.cmp.Config
+    -- Defines the main configuration for `blink.cmp`.
     opts = {
       keymap = {
-        -- Enhanced completion keymaps for VSCode-like experience
+        -- Sets up keymaps for a VSCode-like completion experience, including
+        -- navigation, acceptance, and documentation scrolling.
         -- 'default' (recommended) for mappings similar to built-in completions
         --   <c-y> to accept ([y]es) the completion.
         --    This will auto-import if your LSP supports it.
@@ -71,13 +77,13 @@ return {
       },
 
       appearance = {
-        -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
-        -- Adjusts spacing to ensure icons are aligned
+        -- Configures the appearance to use a monospaced Nerd Font, ensuring icons are aligned correctly.
         nerd_font_variant = "mono",
       },
 
       completion = {
-        -- Enable auto-show documentation for VSCode-like experience
+        -- Configures the completion documentation to appear automatically, mimicking VSCode's behavior.
+        -- The window style is customized for a clean, modern look.
         documentation = {
           auto_show = true,
           auto_show_delay_ms = 200,
@@ -90,7 +96,8 @@ return {
           }
         },
         menu = {
-          -- VSCode-style completion menu configuration
+          -- Defines the appearance and behavior of the completion menu to resemble VSCode.
+          -- This includes custom drawing for columns and a rounded border.
           draw = {
             -- Modified columns to focus on path information
             columns = {
@@ -126,7 +133,7 @@ return {
           direction_priority = { 's', 'n' },
           max_items = 200,
         },
-        -- VSCode-style completion behavior
+        -- Configures completion acceptance behavior, such as automatically adding brackets.
         accept = {
           auto_brackets = {
             enabled = true,
@@ -147,14 +154,15 @@ return {
             end,
           },
         },
-        -- Enhanced ghost text (inline suggestions)
+        -- Enables inline ghost text for completion suggestions, providing a preview of the completed code.
         ghost_text = {
           enabled = true,
         },
       },
 
       sources = {
-        -- Enhanced source configuration for comprehensive autocomplete
+        -- Defines the sources for completion suggestions, including LSP, paths, snippets, and buffer text.
+        -- Each source is configured with a priority and specific options.
         default = { "lsp", "path", "snippets", "lazydev", "buffer" },
         providers = {
           -- LSP with enhanced capabilities
@@ -213,7 +221,7 @@ return {
         },
       },
 
-      -- Command line completion (moved from sources.cmdline)
+      -- Configures completion sources for the command line, providing suggestions for commands and searches.
       cmdline = {
         sources = function()
           local type = vim.fn.getcmdtype()
@@ -229,7 +237,8 @@ return {
 
       snippets = { preset = "luasnip" },
 
-      -- Blink.cmp includes an optional, recommended rust fuzzy matcher,
+      -- Configures the fuzzy matching algorithm used for filtering completion items.
+      -- This setup uses the Lua implementation with enhanced settings for better results.
       -- which automatically downloads a prebuilt binary when enabled.
       --
       -- By default, we use the Lua implementation instead, but you may enable
@@ -244,7 +253,7 @@ return {
         use_frecency = true,
       },
 
-      -- Enhanced signature help for VSCode-like parameter hints
+      -- Enables and configures the signature help window, which displays function parameter information.
       signature = {
         enabled = true,
         window = {

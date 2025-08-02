@@ -1,5 +1,10 @@
+-- [[ Editor Domain ]]
+-- This file configures plugins that enhance the core editing experience, such as
+-- indentation guides, text manipulation tools, and visual aids.
+
 return {
-  -- Indentation detection
+  -- Configures `indent-blankline`, which adds indentation guides to the editor.
+  -- This setup uses custom characters for a more visual and modern look.
   {
     "NMAC427/guess-indent.nvim",
     config = function()

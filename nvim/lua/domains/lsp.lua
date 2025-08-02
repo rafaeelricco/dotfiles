@@ -1,3 +1,8 @@
+-- [[ LSP Domain ]]
+-- This file configures the Language Server Protocol (LSP) and related tools,
+-- including formatters, linters, and code actions to provide a rich development
+-- experience for various programming languages.
+
 return {
   -- LSP Plugins
   {
@@ -13,7 +18,8 @@ return {
     },
   },
   {
-    -- Main LSP Configuration
+    -- Configures `nvim-lspconfig`, the core plugin for managing Language Servers.
+    -- It provides a unified interface for configuring and interacting with LSPs.
     "neovim/nvim-lspconfig",
     dependencies = {
       -- Automatically install LSPs and related tools to stdpath for Neovim

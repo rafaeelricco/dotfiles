@@ -1,5 +1,11 @@
+-- [[ AI Domain ]]
+-- This file configures plugins related to artificial intelligence, including
+-- code assistants and other AI-powered tools.
+
 return {
-  -- AI/Claude Code integration
+  -- Configures the Claude Code plugin for AI-assisted development.
+  -- Provides keymaps for interacting with the Claude AI, managing diffs,
+  -- and sending code snippets.
   {
     "rafaeelricco/claude-code.nvim",
     name = "claude",
@@ -21,23 +27,27 @@ return {
     },
   },
 
-  -- GitHub Copilot
+  -- Configures GitHub Copilot, a popular AI pair programmer.
+  -- This setup disables the default tab mapping to avoid conflicts and sets
+  -- custom keybindings for a more integrated experience.
   {
     "github/copilot.vim",
     event = "InsertEnter",
     config = function()
-      -- Disable default tab mapping
+      -- Prevents Copilot from overriding the default <Tab> behavior.
       vim.g.copilot_no_tab_map = true
       vim.g.copilot_assume_mapped = true
 
-      -- Disable Copilot as LSP server to avoid conflicts
+      -- Ensures Copilot does not register as an LSP server, which could cause
+      -- conflicts with other language servers. It also sets the correct Node.js path.
       local node_path = vim.fn.exepath("node")
       if node_path == "" then
         vim.notify("Node.js not found in PATH", vim.log.levels.ERROR)
       end
       vim.g.copilot_node_command = node_path
 
-      -- Copilot filetypes
+      -- Defines which filetypes Copilot should be active in, disabling it for
+      -- specific buffers like git commits, help pages, and file explorers.
       vim.g.copilot_filetypes = {
         ["*"] = true,
         gitcommit = false,
@@ -51,14 +61,16 @@ return {
         ["neo-tree"] = false,     -- Disable in file explorer
       }
 
-       -- Enhanced keymaps
+       -- Sets a custom keymap for accepting Copilot suggestions, providing a more
+      -- familiar and ergonomic experience.
       vim.keymap.set("i", "<Tab>", 'copilot#Accept("<CR>")', {
         expr = true,
         silent = true,
         desc = "Accept Copilot suggestion",
       })
       
-      -- Additional useful keymaps
+      -- Defines extra keymaps for more granular control over Copilot, such as
+      -- accepting individual words and navigating between suggestions.
       vim.keymap.set("i", "<C-L>", "<Plug>(copilot-accept-word)", { desc = "Accept word" })
       vim.keymap.set("i", "<C-]>", "<Plug>(copilot-dismiss)", { desc = "Dismiss suggestion" })
       vim.keymap.set("i", "<M-]>", "<Plug>(copilot-next)", { desc = "Next suggestion" })

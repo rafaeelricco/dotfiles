@@ -1,3 +1,7 @@
+-- [[ UI Domain ]]
+-- This file configures plugins that define the visual appearance and user interface
+-- of Neovim, including the colorscheme, statusline, file explorer, and more.
+
 return {
   -- Useful plugin to show you pending keybinds.
   {
@@ -75,7 +79,8 @@ return {
       },
       { "nvim-telescope/telescope-ui-select.nvim" },
 
-      -- Useful for getting pretty icons, but requires a Nerd Font.
+      -- Configures `nvim-web-devicons`, which provides icons for various filetypes
+      -- and plugins, enhancing the visual appeal of the UI.
       { "nvim-tree/nvim-web-devicons", enabled = vim.g.have_nerd_font },
     },
     config = function()
@@ -177,9 +182,8 @@ return {
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require("mini.surround").setup()
 
-      -- Simple and easy statusline.
-      --  You could remove this setup call if you don't like it,
-      --  and try some other statusline plugin
+      -- Configures `mini.statusline`, a lightweight and customizable statusline.
+      -- It displays information about the current buffer, Git status, and more.
       local statusline = require("mini.statusline")
       -- set use_icons to true if you have a Nerd Font
       statusline.setup({ use_icons = vim.g.have_nerd_font })
@@ -197,7 +201,8 @@ return {
     end,
   },
 
-  -- File explorer sidebar
+  -- Configures `neo-tree.filesystem`, a modern file explorer that replaces `netrw`.
+  -- It provides a better user experience for navigating the file system.
   {
     "nvim-neo-tree/neo-tree.nvim",
     branch = "v3.x",
