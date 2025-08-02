@@ -1,14 +1,18 @@
 -- [[ Custom Dark Colorscheme ]]
--- Clear existing highlights
+-- This file defines a custom dark colorscheme inspired by modern code editors.
+-- It includes a detailed color palette and a comprehensive set of highlight groups
+-- for core Neovim UI, syntax, plugins, and diagnostics.
+-- Resets all existing highlight groups to their default values to ensure a clean slate.
 vim.cmd("highlight clear")
 if vim.fn.exists("syntax_on") then
   vim.cmd("syntax reset")
 end
 
--- Enable true colors
+-- Enables 24-bit RGB color support for a richer color experience in compatible terminals.
 vim.opt.termguicolors = true
 
--- Extract colors from your VS Code theme
+-- Defines the color palette used throughout the colorscheme.
+-- Each color is mapped to a specific UI element or syntax token.
 local colors = {
   -- Main UI colors from your VS Code theme
   bg = "#0f0f0f",   -- editor.background
@@ -110,7 +114,8 @@ local colors = {
   terminal_fg = "#cccccc",   -- terminal.foreground
 }
 
--- Apply highlight groups
+-- Defines the highlight groups that map the color palette to specific Neovim UI elements and syntax tokens.
+-- See `:help highlight-groups` for a comprehensive list of standard groups.
 local highlights = {
   -- === EDITOR CORE ===
   Normal = { fg = colors.fg, bg = colors.bg },
@@ -459,7 +464,8 @@ local highlights = {
   IndentBlanklineContextChar = { fg = colors.indent_guide_active },
 }
 
--- Apply all highlights
+-- Iterates over the `highlights` table and applies each group using `nvim_set_hl`.
+-- This function is wrapped in a protected call to prevent errors from halting the script.
 for group, settings in pairs(highlights) do
   local success, err = pcall(vim.api.nvim_set_hl, 0, group, settings)
   if not success then
@@ -467,7 +473,8 @@ for group, settings in pairs(highlights) do
   end
 end
 
--- Apply TSX-specific bracket highlights after colorscheme loads
+-- Sets up an autocommand to apply language-specific and plugin highlights after the colorscheme has loaded.
+-- This ensures that custom highlights override any defaults set by the colorscheme or other plugins.
 vim.api.nvim_create_autocmd("ColorScheme", {
   callback = function()
     -- TSX-specific bracket highlights that override general ones
