@@ -42,6 +42,6 @@ vim.keymap.set("i", "<M-BS>", "<C-w>", { desc = "Delete word backward" })
 -- Triggers omni-completion suggestions using Control+Backspace in insert mode.
 vim.keymap.set("i", "<C-BS>", "<C-x><C-o>", { desc = "Show suggestions" })
 
--- Sets up Command+Z for undo and Command+Shift+Z for redo across modes.
-vim.keymap.set({ "n", "v", "i" }, "<D-z>", "<Esc>ua", { desc = "Undo" })
-vim.keymap.set({ "n", "v", "i" }, "<D-S-z>", "<Esc><C-r>a", { desc = "Redo" })
+-- Sets up Control+Z for undo and Control+Shift+Z for redo across modes.
+vim.keymap.set({ "n", "v", "i" }, "<C-z>", "<Esc>ua", { desc = "Undo" })
+vim.keymap.set({ "n", "v", "i" }, "<C-S-z>", "<Esc><C-r>a", { desc = "Redo" })
