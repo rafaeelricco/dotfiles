@@ -462,6 +462,81 @@ local highlights = {
   -- Indentation guides
   IndentBlanklineChar = { fg = colors.indent_guide },
   IndentBlanklineContextChar = { fg = colors.indent_guide_active },
+
+  -- === TROUBLE.NVIM ===
+  -- Main Trouble window
+  TroubleNormal = { fg = colors.fg, bg = colors.bg },
+  TroubleNormalNC = { fg = colors.fg, bg = colors.bg },
+
+  -- Trouble item highlights
+  TroubleText = { fg = colors.fg },
+  TroubleSource = { fg = colors.comment },
+  TroubleCode = { fg = colors.number },
+  TroubleDirectory = { fg = colors.type },
+  TroubleFilename = { fg = colors.variable, bold = true },
+  TroubleLocation = { fg = colors.description_fg },
+  TroublePos = { fg = colors.number },
+  TroubleCount = { fg = colors.warning, bg = colors.cursor_line, bold = true },
+
+  -- Icons and signs
+  TroubleIconArray = { fg = colors.type },
+  TroubleIconBoolean = { fg = colors.boolean },
+  TroubleIconClass = { fg = colors.type },
+  TroubleIconConstant = { fg = colors.constant },
+  TroubleIconConstructor = { fg = colors.function_name },
+  TroubleIconEnum = { fg = colors.type },
+  TroubleIconEnumMember = { fg = colors.constant },
+  TroubleIconEvent = { fg = colors.keyword },
+  TroubleIconField = { fg = colors.property },
+  TroubleIconFile = { fg = colors.fg },
+  TroubleIconFunction = { fg = colors.function_name },
+  TroubleIconInterface = { fg = colors.type },
+  TroubleIconKey = { fg = colors.property },
+  TroubleIconMethod = { fg = colors.function_name },
+  TroubleIconModule = { fg = colors.storage },
+  TroubleIconNamespace = { fg = colors.type },
+  TroubleIconNull = { fg = colors.comment },
+  TroubleIconNumber = { fg = colors.number },
+  TroubleIconObject = { fg = colors.type },
+  TroubleIconOperator = { fg = colors.operator },
+  TroubleIconPackage = { fg = colors.storage },
+  TroubleIconProperty = { fg = colors.property },
+  TroubleIconString = { fg = colors.string },
+  TroubleIconStruct = { fg = colors.type },
+  TroubleIconTypeParameter = { fg = colors.type },
+  TroubleIconVariable = { fg = colors.variable },
+
+  -- Diagnostic severity icons
+  TroubleIconError = { fg = colors.error },
+  TroubleIconWarning = { fg = colors.warning },
+  TroubleIconInformation = { fg = colors.info },
+  TroubleIconHint = { fg = colors.hint },
+
+  -- Preview window
+  TroublePreview = { bg = colors.cursor_line },
+  TroublePreviewMatch = { bg = colors.selection, fg = colors.fg },
+
+  -- Signs in sign column
+  TroubleSignError = { fg = colors.error },
+  TroubleSignWarning = { fg = colors.warning },
+  TroubleSignInformation = { fg = colors.info },
+  TroubleSignHint = { fg = colors.hint },
+  TroubleSignOther = { fg = colors.description_fg },
+
+  -- Text highlights for different severities
+  TroubleTextError = { fg = colors.error },
+  TroubleTextWarning = { fg = colors.warning },
+  TroubleTextInformation = { fg = colors.info },
+  TroubleTextHint = { fg = colors.hint },
+
+  -- Indent guides in Trouble
+  TroubleIndent = { fg = colors.indent_guide },
+  TroubleIndentLast = { fg = colors.indent_guide_active },
+
+  -- Folding in Trouble
+  TroubleFoldIcon = { fg = colors.description_fg },
+  TroubleFoldIconClosed = { fg = colors.description_fg },
+  TroubleFoldIconOpen = { fg = colors.description_fg },
 }
 
 -- Iterates over the `highlights` table and applies each group using `nvim_set_hl`.
@@ -510,6 +585,33 @@ vim.api.nvim_create_autocmd("ColorScheme", {
     vim.api.nvim_set_hl(0, "BlinkCmpKindConstant", { fg = "#4fc1ff" })
     vim.api.nvim_set_hl(0, "BlinkCmpKindConstructor", { fg = "#dcdcaa" })
     vim.api.nvim_set_hl(0, "BlinkCmpKindTypeParameter", { fg = "#4ec9b0" })
+
+    -- Apply Trouble.nvim highlights to match VS Code theme
+    vim.api.nvim_set_hl(0, "TroubleNormal", { fg = "#cccccc", bg = "#0f0f0f" })
+    vim.api.nvim_set_hl(0, "TroubleText", { fg = "#cccccc" })
+    vim.api.nvim_set_hl(0, "TroubleSource", { fg = "#6A9955", italic = true })
+    vim.api.nvim_set_hl(0, "TroubleCode", { fg = "#B5CEA8" })
+    vim.api.nvim_set_hl(0, "TroubleDirectory", { fg = "#4EC9B0" })
+    vim.api.nvim_set_hl(0, "TroubleFilename", { fg = "#9CDCFE", bold = true })
+    vim.api.nvim_set_hl(0, "TroubleLocation", { fg = "#9d9d9d" })
+    vim.api.nvim_set_hl(0, "TroublePos", { fg = "#B5CEA8" })
+    vim.api.nvim_set_hl(0, "TroubleCount", { fg = "#CD9731", bg = "#1a1a1a", bold = true })
+
+    -- Trouble diagnostic icons with VS Code colors
+    vim.api.nvim_set_hl(0, "TroubleIconError", { fg = "#F44747" })
+    vim.api.nvim_set_hl(0, "TroubleIconWarning", { fg = "#CD9731" })
+    vim.api.nvim_set_hl(0, "TroubleIconInformation", { fg = "#6796E6" })
+    vim.api.nvim_set_hl(0, "TroubleIconHint", { fg = "#B267E6" })
+
+    -- Trouble text highlights for different severities
+    vim.api.nvim_set_hl(0, "TroubleTextError", { fg = "#F44747" })
+    vim.api.nvim_set_hl(0, "TroubleTextWarning", { fg = "#CD9731" })
+    vim.api.nvim_set_hl(0, "TroubleTextInformation", { fg = "#6796E6" })
+    vim.api.nvim_set_hl(0, "TroubleTextHint", { fg = "#B267E6" })
+
+    -- Trouble preview and selection
+    vim.api.nvim_set_hl(0, "TroublePreview", { bg = "#1a1a1a" })
+    vim.api.nvim_set_hl(0, "TroublePreviewMatch", { bg = "#264f78", fg = "#ffffff" })
   end,
 })
 
@@ -531,6 +633,33 @@ vim.api.nvim_set_hl(0, "BlinkCmpDocBorder", { bg = "#252526", fg = "#454545" })
 -- Signature help highlights
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelp", { bg = "#1e1e1e", fg = "#cccccc" })
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { bg = "#1e1e1e", fg = "#454545" })
+
+-- Apply Trouble.nvim highlights immediately
+vim.api.nvim_set_hl(0, "TroubleNormal", { fg = "#cccccc", bg = "#0f0f0f" })
+vim.api.nvim_set_hl(0, "TroubleText", { fg = "#cccccc" })
+vim.api.nvim_set_hl(0, "TroubleSource", { fg = "#6A9955", italic = true })
+vim.api.nvim_set_hl(0, "TroubleCode", { fg = "#B5CEA8" })
+vim.api.nvim_set_hl(0, "TroubleDirectory", { fg = "#4EC9B0" })
+vim.api.nvim_set_hl(0, "TroubleFilename", { fg = "#9CDCFE", bold = true })
+vim.api.nvim_set_hl(0, "TroubleLocation", { fg = "#9d9d9d" })
+vim.api.nvim_set_hl(0, "TroublePos", { fg = "#B5CEA8" })
+vim.api.nvim_set_hl(0, "TroubleCount", { fg = "#CD9731", bg = "#1a1a1a", bold = true })
+
+-- Trouble diagnostic icons
+vim.api.nvim_set_hl(0, "TroubleIconError", { fg = "#F44747" })
+vim.api.nvim_set_hl(0, "TroubleIconWarning", { fg = "#CD9731" })
+vim.api.nvim_set_hl(0, "TroubleIconInformation", { fg = "#6796E6" })
+vim.api.nvim_set_hl(0, "TroubleIconHint", { fg = "#B267E6" })
+
+-- Trouble text highlights for different severities
+vim.api.nvim_set_hl(0, "TroubleTextError", { fg = "#F44747" })
+vim.api.nvim_set_hl(0, "TroubleTextWarning", { fg = "#CD9731" })
+vim.api.nvim_set_hl(0, "TroubleTextInformation", { fg = "#6796E6" })
+vim.api.nvim_set_hl(0, "TroubleTextHint", { fg = "#B267E6" })
+
+-- Trouble preview and selection
+vim.api.nvim_set_hl(0, "TroublePreview", { bg = "#1a1a1a" })
+vim.api.nvim_set_hl(0, "TroublePreviewMatch", { bg = "#264f78", fg = "#ffffff" })
 
 -- Terminal colors (16 ANSI colors) - mapped from your VS Code theme
 vim.g.terminal_color_0 = "#000000"  -- Black
