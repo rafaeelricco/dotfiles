@@ -33,6 +33,7 @@
 - [williamboman/mason-lspconfig.nvim](https://github.com/williamboman/mason-lspconfig.nvim): A bridge between `mason.nvim` and `nvim-lspconfig`.
 - [WhoIsSethDaniel/mason-tool-installer.nvim](https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim): Helps ensure specified tools are installed via Mason.
 - [j-hui/fidget.nvim](https://github.com/j-hui/fidget.nvim): Provides useful status updates for LSP actions.
+- [folke/trouble.nvim](https://github.com/folke/trouble.nvim): Better diagnostics, references, and quickfix list interface - provides VSCode-like "Problems" panel.
 
 ### UI & UX
 - [folke/which-key.nvim](https://github.com/folke/which-key.nvim): Shows pending keybinds to help you learn your mappings.
@@ -94,7 +95,6 @@ Here are modern alternatives and enhancements to consider for better performance
 - **[git-blame.nvim](https://github.com/f-person/git-blame.nvim)**: Inline Git blame annotations with commit details
 
 ### LSP Enhancements
-- **[trouble.nvim](https://github.com/folke/trouble.nvim)**: Better diagnostics, references, and quickfix list interface
 - **[lspsaga.nvim](https://github.com/nvimdev/lspsaga.nvim)**: Enhanced LSP UI with better code actions, hover, and navigation
 - **[inc-rename.nvim](https://github.com/smjonas/inc-rename.nvim)**: Live preview for LSP rename operations
 - **[lsp-zero.nvim](https://github.com/VonHeikemen/lsp-zero.nvim)**: Simpler LSP setup alternative (if you prefer minimal configuration)
