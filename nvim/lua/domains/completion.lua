@@ -131,7 +131,6 @@ return {
           -- VSCode-style behavior
           scrollbar = false,
           direction_priority = { 's', 'n' },
-          max_items = 200,
         },
         -- Configures completion acceptance behavior, such as automatically adding brackets.
         accept = {
@@ -238,19 +237,12 @@ return {
       snippets = { preset = "luasnip" },
 
       -- Configures the fuzzy matching algorithm used for filtering completion items.
-      -- This setup uses the Lua implementation with enhanced settings for better results.
-      -- which automatically downloads a prebuilt binary when enabled.
-      --
-      -- By default, we use the Lua implementation instead, but you may enable
-      -- the rust implementation via `'prefer_rust_with_warning'`
+      -- This setup uses the Lua implementation for better performance.
+      -- You can also use "fzf" implementation which automatically downloads a prebuilt binary.
       --
       -- See :h blink-cmp-config-fuzzy for more information
       fuzzy = {
         implementation = "lua",
-        -- Enhanced fuzzy matching for better Python completions
-        use_typo_resistance = true,
-        use_proximity = true,
-        use_frecency = true,
       },
 
       -- Enables and configures the signature help window, which displays function parameter information.

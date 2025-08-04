@@ -226,7 +226,7 @@ return {
             vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
 
             -- Enable code action menu
-            vim.api.nvim_buf_set_option(bufnr, "formatexpr", "v:lua.vim.lsp.formatexpr()")
+              vim.api.nvim_buf_set_option(bufnr, "formatexpr", "v:lua.vim.lsp.formatexpr()")
           end,
         },
         pylsp = {
@@ -237,9 +237,19 @@ return {
                 mccabe = { enabled = false },
                 pyflakes = { enabled = false },
                 flake8 = { enabled = false },
+                autopep8 = { enabled = false },
+                yapf = { enabled = false },
+                black = { enabled = false },
               },
             },
           },
+          on_attach = function(client, bufnr)
+            -- Disable formatting capabilities for Python LSP
+            client.server_capabilities.documentFormattingProvider = false
+            client.server_capabilities.documentRangeFormattingProvider = false
+            -- Clear formatexpr for Python files to prevent any LSP formatting
+            vim.api.nvim_buf_set_option(bufnr, "formatexpr", "")
+          end,
         },
         lua_ls = {
           settings = {
