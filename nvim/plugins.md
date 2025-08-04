@@ -1,11 +1,3 @@
-
-
-
-          
-Of course! I've analyzed your Neovim configuration files and compiled a list of the plugins you are using, along with a description of their functionality based on the comments in your configuration.
-
-Here is the list of your plugins and what they do:
-
 ### AI
 - [rafaeelricco/claude-code.nvim](https://github.com/rafaeelricco/claude-code.nvim): Configures the Claude Code plugin for AI-assisted development.
 - [github/copilot.vim](https://github.com/github/copilot.vim): Configures GitHub Copilot, a popular AI pair programmer.
@@ -23,6 +15,16 @@ Here is the list of your plugins and what they do:
 
 ### Git
 - [lewis6991/gitsigns.nvim](https://github.com/lewis6991/gitsigns.nvim): Provides Git decorations in the sign column to show added, modified, or deleted lines.
+
+#### Git Management Alternatives (VSCode-like functionality)
+- **[neogit](https://github.com/NeogitOrg/neogit)**: Full-featured Git interface with staging, committing, branching, and history viewing - closest to VSCode's Git panel
+- **[lazygit.nvim](https://github.com/kdheepak/lazygit.nvim)**: Terminal UI for comprehensive Git operations including staging, committing, pushing, pulling, and branch management
+- **[fugitive.vim](https://github.com/tpope/vim-fugitive)**: The classic and most comprehensive Git plugin with commands for every Git operation
+- **[diffview.nvim](https://github.com/sindrets/diffview.nvim)**: Enhanced diff viewing, file history, and merge conflict resolution with side-by-side comparisons
+- **[git-conflict.nvim](https://github.com/akinsho/git-conflict.nvim)**: Specialized plugin for resolving merge conflicts with visual indicators and quick actions
+- **[octo.nvim](https://github.com/pwntester/octo.nvim)**: GitHub integration for managing issues, pull requests, and reviews directly from Neovim
+- **[gitlinker.nvim](https://github.com/ruifm/gitlinker.nvim)**: Generate shareable links to Git hosting services (GitHub, GitLab, etc.)
+- **[git-worktree.nvim](https://github.com/ThePrimeagen/git-worktree.nvim)**: Manage Git worktrees for working on multiple branches simultaneously
 
 ### LSP (Language Server Protocol)
 - [folke/lazydev.nvim](https://github.com/folke/lazydev.nvim): Configures the Lua LSP specifically for Neovim configuration development.
@@ -70,11 +72,26 @@ Here are modern alternatives and enhancements to consider for better performance
 - **[nvim-treesitter-context](https://github.com/nvim-treesitter/nvim-treesitter-context)**: Enhancement showing current function/class context at top of buffer
 - **[indent-blankline.nvim](https://github.com/lukas-reineke/indent-blankline.nvim)**: Enhancement for better indentation visualization
 
-### Git Enhancements
-- **[lazygit.nvim](https://github.com/kdheepak/lazygit.nvim)**: Terminal UI for git operations within Neovim
-- **[diffview.nvim](https://github.com/sindrets/diffview.nvim)**: Enhanced diff viewing and merge conflict resolution
-- **[neogit](https://github.com/NeogitOrg/neogit)**: Magit-like git interface for Neovim
-- **[git-conflict.nvim](https://github.com/akinsho/git-conflict.nvim)**: Better merge conflict resolution tools
+### Git Management & Workflow Enhancements
+#### Complete Git Interfaces (VSCode-like experience)
+- **[neogit](https://github.com/NeogitOrg/neogit)**: Full Git interface with staging area, commit editor, branch management, and log viewing
+- **[lazygit.nvim](https://github.com/kdheepak/lazygit.nvim)**: Terminal-based Git UI with intuitive keybindings for all Git operations
+- **[fugitive.vim](https://github.com/tpope/vim-fugitive)**: Comprehensive Git wrapper with commands for every Git operation
+
+#### Specialized Git Tools
+- **[diffview.nvim](https://github.com/sindrets/diffview.nvim)**: Advanced diff viewer with file history, merge conflict resolution, and side-by-side comparisons
+- **[git-conflict.nvim](https://github.com/akinsho/git-conflict.nvim)**: Visual merge conflict resolution with choose-ours/theirs/both actions
+- **[gitsigns.nvim](https://github.com/lewis6991/gitsigns.nvim)**: Git decorations, hunk navigation, and inline blame (already in use)
+
+#### GitHub/GitLab Integration
+- **[octo.nvim](https://github.com/pwntester/octo.nvim)**: Manage GitHub issues, PRs, and reviews without leaving Neovim
+- **[gitlinker.nvim](https://github.com/ruifm/gitlinker.nvim)**: Generate and open links to Git hosting services
+- **[gh.nvim](https://github.com/ldelossa/gh.nvim)**: GitHub CLI integration for repository management
+
+#### Advanced Git Workflows
+- **[git-worktree.nvim](https://github.com/ThePrimeagen/git-worktree.nvim)**: Manage multiple Git worktrees for parallel development
+- **[telescope-git-file-history.nvim](https://github.com/isak102/telescope-git-file-history.nvim)**: Browse file history with Telescope integration
+- **[git-blame.nvim](https://github.com/f-person/git-blame.nvim)**: Inline Git blame annotations with commit details
 
 ### LSP Enhancements
 - **[trouble.nvim](https://github.com/folke/trouble.nvim)**: Better diagnostics, references, and quickfix list interface
