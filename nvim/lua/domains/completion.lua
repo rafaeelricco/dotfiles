@@ -9,36 +9,7 @@ return {
     "saghen/blink.cmp",
     event = "VimEnter",
     version = "1.*",
-    dependencies = {
-      -- Configures `LuaSnip`, the snippet engine responsible for expanding text snippets.
-      -- It includes a build step for regex support and can be extended with snippet libraries.
-      {
-        "L3MON4D3/LuaSnip",
-        version = "2.*",
-        build = (function()
-          -- Build Step is needed for regex support in snippets.
-          -- This step is not supported in many windows environments.
-          -- Remove the below condition to re-enable on windows.
-          if vim.fn.has("win32") == 1 or vim.fn.executable("make") == 0 then
-            return
-          end
-          return "make install_jsregexp"
-        end)(),
-        dependencies = {
-          -- `friendly-snippets` contains a variety of premade snippets.
-          --    See the README about individual language/framework/plugin snippets:
-          --    https://github.com/rafamadriz/friendly-snippets
-          -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
-          -- },
-        },
-        opts = {},
-      },
-      "folke/lazydev.nvim",
-    },
+    dependencies = {},
     -- Defines the main configuration for `blink.cmp`.
     opts = {
       keymap = {
@@ -162,7 +133,7 @@ return {
       sources = {
         -- Defines the sources for completion suggestions, including LSP, paths, snippets, and buffer text.
         -- Each source is configured with a priority and specific options.
-        default = { "lsp", "path", "snippets", "lazydev", "buffer" },
+        default = { "lsp", "path", "snippets", "buffer" },
         providers = {
           -- LSP with enhanced capabilities
           lsp = {
@@ -208,15 +179,7 @@ return {
             max_items = 20,
             fallbacks = {},
           },
-          -- LazyDev for Neovim Lua development
-          lazydev = {
-            name = "lazydev",
-            module = "lazydev.integrations.blink",
-            score_offset = 100,
-            enabled = function()
-              return vim.bo.filetype == "lua"
-            end,
-          },
+
         },
       },
 
@@ -234,7 +197,7 @@ return {
         end,
       },
 
-      snippets = { preset = "luasnip" },
+      snippets = { preset = "default" },
 
       -- Configures the fuzzy matching algorithm used for filtering completion items.
       -- This setup uses the Lua implementation for better performance.
