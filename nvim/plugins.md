@@ -1,28 +1,26 @@
 # Neovim Plugin Configuration
 
-## Currently Installed Plugins (27 total)
+## Currently Installed Plugins (24 total)
 
 ### AI (1 plugin)
 - [github/copilot.vim](https://github.com/github/copilot.vim): GitHub Copilot AI pair programmer with custom keybindings for accepting suggestions and navigating completions.
 
 *Note: `claude-code.nvim` is commented out in the AI domain configuration but remains available for future use.*
 
-### Completion (2 plugins)
+### Completion (1 plugin)
 - [saghen/blink.cmp](https://github.com/saghen/blink.cmp): A powerful and extensible completion engine that integrates with various sources like LSP, snippets, and buffer text.
-- [L3MON4D3/LuaSnip](https://github.com/L3MON4D3/LuaSnip): The snippet engine responsible for expanding text snippets with regex support.
 
-### Core Editor Enhancements (5 plugins)
+### Core Editor Enhancements (3 plugins)
 - [NMAC427/guess-indent.nvim](https://github.com/NMAC427/guess-indent.nvim): Automatically guesses and sets indentation settings for files.
-- [nvim-treesitter/playground](https://github.com/nvim-treesitter/playground): Provides a playground for debugging Treesitter parsers and queries.
-- [stevearc/conform.nvim](https://github.com/stevearc/conform.nvim): Handles auto-formatting of code with support for multiple formatters per filetype.
+
 - [terryma/vim-multiple-cursors](https://github.com/terryma/vim-multiple-cursors): Enables multiple cursors for simultaneous editing operations.
 - [nvim-treesitter/nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter): Manages Treesitter for advanced syntax highlighting, indentation, and text objects.
 
 ### Git (1 plugin)
 - [lewis6991/gitsigns.nvim](https://github.com/lewis6991/gitsigns.nvim): Provides Git decorations in the sign column to show added, modified, or deleted lines.
 
-### LSP (Language Server Protocol) (7 plugins)
-- [folke/lazydev.nvim](https://github.com/folke/lazydev.nvim): Configures the Lua LSP specifically for Neovim configuration development with luv types.
+### LSP (Language Server Protocol) (6 plugins)
+
 - [neovim/nvim-lspconfig](https://github.com/neovim/nvim-lspconfig): The core plugin for managing Language Servers with configured servers for TypeScript/JavaScript, Python, and Lua.
 - [williamboman/mason.nvim](https://github.com/williamboman/mason.nvim): Automatically installs and manages LSPs and other development tools.
 - [williamboman/mason-lspconfig.nvim](https://github.com/williamboman/mason-lspconfig.nvim): A bridge between `mason.nvim` and `nvim-lspconfig`.
@@ -38,8 +36,8 @@
 - [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons): Adds file-type icons to enhance the UI when Nerd Font is available.
 - [folke/todo-comments.nvim](https://github.com/folke/todo-comments.nvim): Highlights TODO, NOTE, and other keywords in your comments.
 - [echasnovski/mini.nvim](https://github.com/echasnovski/mini.nvim): A collection of small, independent plugins. You are using:
-    - `mini.ai`: For better around/inside text objects with 500-line scope.
-    - `mini.surround`: To add, delete, and replace surroundings like brackets and quotes.
+    <!-- - `mini.ai`: For better around/inside text objects with 500-line scope. -->
+    <!-- - `mini.surround`: To add, delete, and replace surroundings like brackets and quotes. -->
     - `mini.statusline`: A lightweight and customizable statusline with cursor location display.
 - [nvim-neo-tree/neo-tree.nvim](https://github.com/nvim-neo-tree/neo-tree.nvim): A modern file explorer that replaces the default `netrw` with toggle functionality.
 
@@ -53,7 +51,7 @@
 
 ## Configuration Summary
 
-This setup provides a comprehensive and modern Neovim experience with **27 installed plugins** organized by domain. The configuration emphasizes:
+This setup provides a comprehensive and modern Neovim experience with **24 installed plugins** organized by domain. The configuration emphasizes:
 
 - **Functional Programming Principles**: Pure functions, immutability, and composition
 - **Domain-Driven Design**: Clear separation of concerns across domains
@@ -62,10 +60,10 @@ This setup provides a comprehensive and modern Neovim experience with **27 insta
 
 ### Domain Organization
 - **AI**: 1 plugin (GitHub Copilot)
-- **Completion**: 2 plugins (blink.cmp + LuaSnip)
-- **Core Editor**: 5 plugins (formatting, syntax, multiple cursors)
+- **Completion**: 1 plugin (blink.cmp)
+- **Core Editor**: 3 plugins (indentation, syntax, multiple cursors)
 - **Git**: 1 plugin (gitsigns for decorations)
-- **LSP**: 7 plugins (comprehensive language server support)
+- **LSP**: 6 plugins (comprehensive language server support)
 - **UI & UX**: 8 plugins (fuzzy finder, file explorer, statusline)
 - **Infrastructure**: 4 plugins (plugin manager + dependencies)
 
@@ -85,12 +83,12 @@ Here are modern alternatives and enhancements to consider for better performance
 
 ### Completion System Alternatives
 - **[nvim-cmp](https://github.com/hrsh7th/nvim-cmp)**: More popular alternative to blink.cmp with extensive ecosystem
-- **[friendly-snippets](https://github.com/rafamadriz/friendly-snippets)**: Enhancement to LuaSnip with pre-built snippets for many languages
+- **[friendly-snippets](https://github.com/rafamadriz/friendly-snippets)**: Pre-built snippets for many languages that can be used with various snippet engines
 - **[nvim-snippets](https://github.com/garymjr/nvim-snippets)**: Modern snippet engine alternative built for Neovim 0.10+
 
 ### Core Editor Alternatives & Enhancements
 - **[flash.nvim](https://github.com/folke/flash.nvim)**: Modern alternative to vim-multiple-cursors with better performance and features
-- **[none-ls.nvim](https://github.com/nvimtools/none-ls.nvim)**: More comprehensive alternative to conform.nvim for formatting, linting, and code actions
+- **[none-ls.nvim](https://github.com/nvimtools/none-ls.nvim)**: Comprehensive solution for formatting, linting, and code actions
 - **[nvim-treesitter-context](https://github.com/nvim-treesitter/nvim-treesitter-context)**: Enhancement showing current function/class context at top of buffer
 - **[indent-blankline.nvim](https://github.com/lukas-reineke/indent-blankline.nvim)**: Enhancement for better indentation visualization
 
@@ -151,7 +149,7 @@ Here are modern alternatives and enhancements to consider for better performance
 - **avante.nvim**: AI chat interface similar to Cursor
 
 #### Enhanced Functionality
-- **none-ls.nvim**: More comprehensive formatting/linting than conform.nvim
+- **none-ls.nvim**: Comprehensive formatting/linting solution
 - **diffview.nvim**: Advanced Git diff capabilities
 - **trouble.nvim**: Enhanced diagnostic management (already installed)
         
