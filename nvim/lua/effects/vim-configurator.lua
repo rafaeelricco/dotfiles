@@ -9,6 +9,24 @@
 -- reloading files when they are changed externally.
 vim.opt.autoread = true
 
+-- Swap file and recovery configuration to avoid prompts
+-- Disables swap files entirely to prevent conflicts
+vim.opt.swapfile = false
+
+-- Alternative: Keep swap files but handle conflicts automatically
+-- vim.opt.swapfile = true
+-- vim.opt.directory = vim.fn.stdpath("cache") .. "/swap//"
+
+-- Automatically reload files when they change externally
+vim.opt.autoread = true
+
+-- Set shorter update time for better file change detection
+vim.opt.updatetime = 250
+
+-- Configure how to handle file conflicts (always use disk version)
+vim.opt.autowrite = false
+vim.opt.autowriteall = false
+
 -- Displays line numbers in the gutter, which is essential for navigation.
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
@@ -52,9 +70,6 @@ vim.opt.smartcase = true
 -- Always displays the sign column, preventing the editor from shifting when
 -- diagnostics or Git signs appear.
 vim.opt.signcolumn = "yes"
-
--- Reduces the delay for writing swap files to disk, improving performance.
-vim.opt.updatetime = 250
 
 -- Shortens the timeout for mapped key sequences, making the editor feel more responsive.
 -- Displays which-key popup sooner
@@ -108,5 +123,25 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
   callback = function()
     vim.highlight.on_yank()
+  end,
+})
+
+-- Automatically reload files when they change externally without prompting
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI" }, {
+  desc = "Auto reload files when changed externally",
+  group = vim.api.nvim_create_augroup("auto-reload", { clear = true }),
+  callback = function()
+    if vim.fn.mode() ~= "c" then
+      vim.cmd("checktime")
+    end
+  end,
+})
+
+-- Automatically reload file if it has been changed externally and buffer is not modified
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  desc = "Actions after shell command changed file",
+  group = vim.api.nvim_create_augroup("auto-reload-changed", { clear = true }),
+  callback = function()
+    vim.notify("File changed externally, reloaded automatically", vim.log.levels.INFO)
   end,
 })
