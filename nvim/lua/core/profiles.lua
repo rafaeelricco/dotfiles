@@ -74,8 +74,8 @@ local colors = {
   git_delete = "#f85149",   -- editorGutter.deletedBackground
 
   -- Diff colors
-  diff_add = "#9bb955",      -- diffEditor.insertedLineBackground (solid color)
-  diff_delete = "#ff0000",   -- diffEditor.removedLineBackground (solid color)
+  diff_add = "#2d4a2b",      -- diffEditor.insertedLineBackground (darker green for better readability)
+  diff_delete = "#4a2d2d",   -- diffEditor.removedLineBackground (darker red for better readability)
   diff_change = "#569CD6",   -- markup.changed
 
   -- Activity and status
@@ -432,6 +432,17 @@ local highlights = {
   TelescopeSelection = { fg = colors.fg, bg = colors.selection },
   TelescopePromptPrefix = { fg = colors.focus_border },
   TelescopeMatching = { fg = colors.search, bold = true },
+  
+  -- Additional Telescope highlights for better text visibility
+  TelescopeTitle = { fg = colors.fg, bg = colors.menu_bg, bold = true },
+  TelescopePromptTitle = { fg = colors.focus_border, bg = colors.menu_bg, bold = false },
+  TelescopeResultsTitle = { fg = colors.fg, bg = colors.menu_bg, bold = true },
+  TelescopePreviewTitle = { fg = colors.fg, bg = colors.menu_bg, bold = true },
+  TelescopePromptNormal = { fg = colors.fg, bg = colors.menu_bg },
+  TelescopeResultsNormal = { fg = colors.fg, bg = colors.menu_bg },
+  TelescopePreviewNormal = { fg = colors.fg, bg = colors.menu_bg },
+  TelescopePromptCounter = { fg = colors.description_fg },
+  TelescopeMultiSelection = { fg = colors.warning, bold = true },
 
   -- NvimTree (if using)
   NvimTreeNormal = { fg = colors.fg, bg = colors.bg },
