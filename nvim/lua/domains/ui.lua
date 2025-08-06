@@ -137,22 +137,7 @@ return {
         local text = vim.fn.getregion(vim.fn.getpos("v"), vim.fn.getpos("."), { type = vim.fn.mode() })
         builtin.grep_string({ search = table.concat(text, "\n") })
       end, { desc = "[S]earch selected [W]ord" })
-
-      -- Search selected text with live grep using Shift+Command+F
-      vim.keymap.set("v", "<D-S-f>", function()
-        -- Exit visual mode and get the last visual selection
-        vim.cmd('normal! "vy')
-        local selected_text = vim.fn.getreg('v')
-
-        -- Clean up the text (remove leading/trailing whitespace and newlines)
-        selected_text = vim.trim(selected_text):gsub('\n', ' ')
-
-        if selected_text ~= "" then
-          builtin.live_grep({ default_text = selected_text })
-        else
-          builtin.live_grep()
-        end
-      end, { desc = "Search selected text with live grep" })
+      
     end,
   },
 
@@ -173,14 +158,14 @@ return {
       --  - va)  - [V]isually select [A]round [)]paren
       --  - yinq - [Y]ank [I]nside [N]ext [']quote
       --  - ci'  - [C]hange [I]nside [']quote
-      require("mini.ai").setup({ n_lines = 500 })
+      -- require("mini.ai").setup({ n_lines = 500 })
 
-      -- Add/delete/replace surroundings (brackets, quotes, etc.)
-      --
-      -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
-      -- - sd'   - [S]urround [D]elete [']quotes
-      -- - sr)'  - [S]urround [R]eplace [)] [']
-      require("mini.surround").setup()
+      -- -- Add/delete/replace surroundings (brackets, quotes, etc.)
+      -- --
+      -- -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
+      -- -- - sd'   - [S]urround [D]elete [']quotes
+      -- -- - sr)'  - [S]urround [R]eplace [)] [']
+      -- require("mini.surround").setup()
 
       -- Configures `mini.statusline`, a lightweight and customizable statusline.
       -- It displays information about the current buffer, Git status, and more.
