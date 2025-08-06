@@ -36,8 +36,7 @@
 - [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons): Adds file-type icons to enhance the UI when Nerd Font is available.
 - [folke/todo-comments.nvim](https://github.com/folke/todo-comments.nvim): Highlights TODO, NOTE, and other keywords in your comments.
 - [echasnovski/mini.nvim](https://github.com/echasnovski/mini.nvim): A collection of small, independent plugins. You are using:
-    <!-- - `mini.ai`: For better around/inside text objects with 500-line scope. -->
-    <!-- - `mini.surround`: To add, delete, and replace surroundings like brackets and quotes. -->
+
     - `mini.statusline`: A lightweight and customizable statusline with cursor location display.
 - [nvim-neo-tree/neo-tree.nvim](https://github.com/nvim-neo-tree/neo-tree.nvim): A modern file explorer that replaces the default `netrw` with toggle functionality.
 
