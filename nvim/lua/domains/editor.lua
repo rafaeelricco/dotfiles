@@ -47,15 +47,14 @@ return {
       --     lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
       --   }
       -- end,
-      formatters_by_ft = {
-        lua = { "stylua" },
+      -- formatters_by_ft = {
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
         -- javascript = { { "prettierd", "prettier" } },
-      },
+      -- },
     },
   },
 
@@ -99,6 +98,55 @@ return {
     config = function(_, opts)
       require("nvim-treesitter.install").prefer_git = true
       require("nvim-treesitter.configs").setup(opts)
+    end,
+  },
+
+  -- Auto-close and auto-rename HTML/XML/JSX tags using Treesitter
+  {
+    "windwp/nvim-ts-autotag",
+    event = "InsertEnter",
+    config = function()
+      require('nvim-ts-autotag').setup({
+        opts = {
+          -- Enable automatic tag closing (e.g., typing <div> creates <div></div>)
+          enable_close = true,
+          -- Enable automatic tag renaming (changing opening tag updates closing tag)
+          enable_rename = true,
+          -- Disable auto-close on trailing </
+          enable_close_on_slash = false,
+        },
+      })
+    end,
+  },
+
+  -- Auto-pairing for brackets, quotes, and other characters
+  {
+    "windwp/nvim-autopairs",
+    event = "InsertEnter",
+    opts = {
+      -- Use Treesitter to avoid adding pairs inside strings or comments
+      check_ts = true,
+      -- Configure Treesitter integration for specific filetypes
+      ts_config = {
+        lua = { "string" },
+        javascript = { "template_string" },
+        java = false,
+      },
+      -- Disable in specific filetypes
+      disable_filetype = { "TelescopePrompt", "spectre_panel" },
+      -- Enable smart backspace behavior
+      map_bs = true,
+      -- Enable smart enter behavior
+      map_cr = true,
+    },
+    config = function(_, opts)
+      local npairs = require("nvim-autopairs")
+      npairs.setup(opts)
+      
+      -- Note: This configuration uses blink.cmp instead of nvim-cmp
+      -- blink.cmp has built-in auto_brackets functionality that may overlap
+      -- with nvim-autopairs. You can disable blink.cmp's auto_brackets
+      -- in completion.lua if you prefer nvim-autopairs' behavior.
     end,
   },
 }

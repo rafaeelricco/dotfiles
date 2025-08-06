@@ -21,7 +21,7 @@ return {
       -- Better diagnostics, references, and quickfix list interface
       {
         "folke/trouble.nvim",
-        dependencies = { "nvim-tree/nvim-web-devicons" },
+        dependencies = { "DaikyXendo/nvim-material-icon" },
         opts = {},
         cmd = "Trouble",
         keys = {
@@ -136,185 +136,135 @@ return {
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       capabilities = vim.tbl_deep_extend("force", capabilities, require("blink.cmp").get_lsp_capabilities())
 
-      -- Enable the following language servers
-      local servers = {
-        -- clangd = {},
-        -- gopls = {},
-        -- pyright = {},
-        -- rust_analyzer = {},
-        -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
-        --
-        -- Some languages (like typescript) have entire language plugins that can be useful:
-        --    https://github.com/pmizio/typescript-tools.nvim
-        --
-        -- But for many setups, the LSP (`ts_ls`) will work just fine
-        ts_ls = {
-          settings = {
-            typescript = {
-              preferences = {
-                disableSuggestions = false,
-                quotePreference = "double",
-                includeCompletionsForModuleExports = true,
-                includeCompletionsForImportStatements = true,
-                includeCompletionsWithSnippetText = true,
-                includeAutomaticOptionalChainCompletions = true,
-              },
-              format = {
-                enable = true,
-                semicolons = "insert",
-                insertSpaceAfterCommaDelimiter = true,
-                insertSpaceAfterSemicolonInForStatements = true,
-                insertSpaceBeforeAndAfterBinaryOperators = true,
-                insertSpaceAfterConstructor = false,
-                insertSpaceAfterKeywordsInControlFlowStatements = true,
-                insertSpaceAfterFunctionKeywordForAnonymousFunctions = true,
-                insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis = false,
-                insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets = false,
-                insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces = true,
-                insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces = false,
-                insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces = false,
-                insertSpaceAfterTypeAssertion = false,
-                insertSpaceBeforeFunctionParenthesis = false,
-                placeOpenBraceOnNewLineForFunctions = false,
-                placeOpenBraceOnNewLineForControlBlocks = false,
-                insertSpaceBeforeTypeAnnotation = false,
-              },
-              suggest = {
-                enabled = true,
-                names = true,
-                paths = true,
-                autoImports = true,
-                completeFunctionCalls = true,
-              },
-              inlayHints = {
-                includeInlayParameterNameHints = "all",
-                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-                includeInlayFunctionParameterTypeHints = true,
-                includeInlayVariableTypeHints = true,
-                includeInlayVariableTypeHintsWhenTypeMatchesName = false,
-                includeInlayPropertyDeclarationTypeHints = true,
-                includeInlayFunctionLikeReturnTypeHints = true,
-                includeInlayEnumMemberValueHints = true,
-              },
+      -- Configure language servers before enabling them
+      -- TypeScript/JavaScript configuration
+      vim.lsp.config('ts_ls', {
+        settings = {
+          typescript = {
+            preferences = {
+              disableSuggestions = false,
+              quotePreference = "double",
+              includeCompletionsForModuleExports = true,
+              includeCompletionsForImportStatements = true,
+              includeCompletionsWithSnippetText = true,
+              includeAutomaticOptionalChainCompletions = true,
             },
-            javascript = {
-              preferences = {
-                disableSuggestions = false,
-                quotePreference = "double",
-                includeCompletionsForModuleExports = true,
-                includeCompletionsForImportStatements = true,
-                includeCompletionsWithSnippetText = true,
-                includeAutomaticOptionalChainCompletions = true,
-              },
-              format = {
-                enable = true,
-                semicolons = "insert",
-                insertSpaceAfterCommaDelimiter = true,
-                insertSpaceAfterSemicolonInForStatements = true,
-                insertSpaceBeforeAndAfterBinaryOperators = true,
-                insertSpaceAfterConstructor = false,
-                insertSpaceAfterKeywordsInControlFlowStatements = true,
-                insertSpaceAfterFunctionKeywordForAnonymousFunctions = true,
-                insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis = false,
-                insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets = false,
-                insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces = true,
-                insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces = false,
-                insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces = false,
-                insertSpaceAfterTypeAssertion = false,
-                insertSpaceBeforeFunctionParenthesis = false,
-                placeOpenBraceOnNewLineForFunctions = false,
-                placeOpenBraceOnNewLineForControlBlocks = false,
-                insertSpaceBeforeTypeAnnotation = false,
-              },
-              suggest = {
-                enabled = true,
-                names = true,
-                paths = true,
-                autoImports = true,
-                completeFunctionCalls = true,
-              },
-              inlayHints = {
-                includeInlayParameterNameHints = "all",
-                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-                includeInlayFunctionParameterTypeHints = true,
-                includeInlayVariableTypeHints = true,
-                includeInlayVariableTypeHintsWhenTypeMatchesName = false,
-                includeInlayPropertyDeclarationTypeHints = true,
-                includeInlayFunctionLikeReturnTypeHints = true,
-                includeInlayEnumMemberValueHints = true,
-              },
+            format = {
+              enable = true,
+              semicolons = "insert",
+              insertSpaceAfterCommaDelimiter = true,
+              insertSpaceAfterSemicolonInForStatements = true,
+              insertSpaceBeforeAndAfterBinaryOperators = true,
+              insertSpaceAfterConstructor = false,
+              insertSpaceAfterKeywordsInControlFlowStatements = true,
+              insertSpaceAfterFunctionKeywordForAnonymousFunctions = true,
+              insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis = false,
+              insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets = false,
+              insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces = true,
+              insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces = false,
+              insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces = false,
+              insertSpaceAfterTypeAssertion = false,
+              insertSpaceBeforeFunctionParenthesis = false,
+              placeOpenBraceOnNewLineForFunctions = false,
+              placeOpenBraceOnNewLineForControlBlocks = false,
+              insertSpaceBeforeTypeAnnotation = false,
+            },
+            suggest = {
+              enabled = true,
+              names = true,
+              paths = true,
+              autoImports = true,
+              completeFunctionCalls = true,
+            },
+            inlayHints = {
+              includeInlayParameterNameHints = "all",
+              includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+              includeInlayFunctionParameterTypeHints = true,
+              includeInlayVariableTypeHints = true,
+              includeInlayVariableTypeHintsWhenTypeMatchesName = false,
+              includeInlayPropertyDeclarationTypeHints = true,
+              includeInlayFunctionLikeReturnTypeHints = true,
+              includeInlayEnumMemberValueHints = true,
             },
           },
-          on_attach = function(client, bufnr)
-            -- Disable formatting if you have prettier
-            -- client.server_capabilities.documentFormattingProvider = false
-            -- client.server_capabilities.documentRangeFormattingProvider = false
-
-            -- Enable completion triggered by <c-x><c-o>
-            vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
-
-            -- Enable code action menu
-              vim.api.nvim_buf_set_option(bufnr, "formatexpr", "v:lua.vim.lsp.formatexpr()")
-          end,
-        },
-        pylsp = {
-          settings = {
-            pylsp = {
-              plugins = {
-                pycodestyle = { enabled = false },
-                mccabe = { enabled = false },
-                pyflakes = { enabled = false },
-                flake8 = { enabled = false },
-                autopep8 = { enabled = false },
-                yapf = { enabled = false },
-                black = { enabled = false },
-              },
+          javascript = {
+            preferences = {
+              disableSuggestions = false,
+              quotePreference = "double",
+              includeCompletionsForModuleExports = true,
+              includeCompletionsForImportStatements = true,
+              includeCompletionsWithSnippetText = true,
+              includeAutomaticOptionalChainCompletions = true,
             },
-          },
-          on_attach = function(client, bufnr)
-            -- Disable formatting capabilities for Python LSP
-            client.server_capabilities.documentFormattingProvider = false
-            client.server_capabilities.documentRangeFormattingProvider = false
-            -- Clear formatexpr for Python files to prevent any LSP formatting
-            vim.api.nvim_buf_set_option(bufnr, "formatexpr", "")
-          end,
-        },
-        lua_ls = {
-          settings = {
-            Lua = {
-              completion = {
-                callSnippet = "Replace",
-              },
-              diagnostics = {
-                disable = { "missing-fields", "undefined-global", "lowercase-global" },
-              },
+            format = {
+              enable = true,
+              semicolons = "insert",
+              insertSpaceAfterCommaDelimiter = true,
+              insertSpaceAfterSemicolonInForStatements = true,
+              insertSpaceBeforeAndAfterBinaryOperators = true,
+              insertSpaceAfterConstructor = false,
+              insertSpaceAfterKeywordsInControlFlowStatements = true,
+              insertSpaceAfterFunctionKeywordForAnonymousFunctions = true,
+              insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis = false,
+              insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets = false,
+              insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces = true,
+              insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces = false,
+              insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces = false,
+              insertSpaceAfterTypeAssertion = false,
+              insertSpaceBeforeFunctionParenthesis = false,
+              placeOpenBraceOnNewLineForFunctions = false,
+              placeOpenBraceOnNewLineForControlBlocks = false,
+              insertSpaceBeforeTypeAnnotation = false,
+            },
+            suggest = {
+              enabled = true,
+              names = true,
+              paths = true,
+              autoImports = true,
+              completeFunctionCalls = true,
+            },
+            inlayHints = {
+              includeInlayParameterNameHints = "all",
+              includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+              includeInlayFunctionParameterTypeHints = true,
+              includeInlayVariableTypeHints = true,
+              includeInlayVariableTypeHintsWhenTypeMatchesName = false,
+              includeInlayPropertyDeclarationTypeHints = true,
+              includeInlayFunctionLikeReturnTypeHints = true,
+              includeInlayEnumMemberValueHints = true,
             },
           },
         },
-      }
+        capabilities = capabilities,
+        on_attach = function(client, bufnr)
+          -- Disable formatting if you have prettier
+          -- client.server_capabilities.documentFormattingProvider = false
+          -- client.server_capabilities.documentRangeFormattingProvider = false
 
-      -- Ensure the servers and tools above are installed
+          -- Enable completion triggered by <c-x><c-o>
+          vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
+
+          -- Enable code action menu
+          vim.api.nvim_buf_set_option(bufnr, "formatexpr", "v:lua.vim.lsp.formatexpr()")
+        end,
+      })
+
+      -- Enable all language servers using the modern approach
+      vim.lsp.enable('pyright')
+      vim.lsp.enable('ts_ls')
+
+      -- Setup Mason and ensure language servers are installed
       require("mason").setup()
 
-      -- You can add other tools here that you want Mason to install
-      -- for you, so that they are available from within Neovim.
-      local ensure_installed = vim.tbl_keys(servers or {})
-      vim.list_extend(ensure_installed, {
-        "stylua", -- Used to format Lua code
-      })
-      require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
-
       require("mason-lspconfig").setup({
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            -- This handles overriding only values explicitly passed
-            -- by the server configuration above. Useful when disabling
-            -- certain features of an LSP (for example, turning off formatting for ts_ls)
-            server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-            require("lspconfig")[server_name].setup(server)
-          end,
-        },
+        ensure_installed = { "pyright", "ts_ls" },
+        -- automatic_enable = true is the default, so mason-lspconfig will
+        -- automatically enable installed servers via vim.lsp.enable()
+      })
+
+      -- Install additional tools
+      require("mason-tool-installer").setup({ 
+        ensure_installed = {} -- No additional tools needed
       })
     end,
   },

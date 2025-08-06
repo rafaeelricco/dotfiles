@@ -21,6 +21,7 @@ require("lazy").setup({
   { import = "domains.completion" },
   { import = "domains.editor" },
   { import = "domains.git" },
+  { import = "domains.icons" },
   { import = "domains.lsp" },
   { import = "domains.ui" },
 }, {

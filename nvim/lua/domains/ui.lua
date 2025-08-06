@@ -79,12 +79,23 @@ return {
       },
       { "nvim-telescope/telescope-ui-select.nvim" },
 
-      -- Configures `nvim-web-devicons`, which provides icons for various filetypes
-      -- and plugins, enhancing the visual appeal of the UI.
-      { "nvim-tree/nvim-web-devicons", enabled = vim.g.have_nerd_font },
+      -- Icons are now configured in the dedicated icons domain
+      { "DaikyXendo/nvim-material-icon", enabled = vim.g.have_nerd_font },
     },
     config = function()
       require("telescope").setup({
+        defaults = {
+          mappings = {
+            n = {
+              -- Preview scrolling in normal mode
+              ["<C-u>"] = require("telescope.actions").preview_scrolling_up,
+              ["<C-d>"] = require("telescope.actions").preview_scrolling_down,
+              -- Mouse wheel scrolling
+              ["<ScrollWheelUp>"] = require("telescope.actions").preview_scrolling_up,
+              ["<ScrollWheelDown>"] = require("telescope.actions").preview_scrolling_down,
+            },
+          },
+        },
         extensions = {
           ["ui-select"] = {
             require("telescope.themes").get_dropdown(),
@@ -141,13 +152,7 @@ return {
     end,
   },
 
-  -- Highlight todo, notes, etc in comments
-  {
-    "folke/todo-comments.nvim",
-    event = "VimEnter",
-    dependencies = { "nvim-lua/plenary.nvim" },
-    opts = { signs = false },
-  },
+
 
   { -- Collection of various small independent plugins/modules
     "echasnovski/mini.nvim",
@@ -193,7 +198,7 @@ return {
     branch = "v3.x",
     dependencies = {
       "nvim-lua/plenary.nvim",
-      "nvim-tree/nvim-web-devicons",
+      "DaikyXendo/nvim-material-icon",
       "MunifTanjim/nui.nvim",
     },
     keys = {
