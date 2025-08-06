@@ -6,18 +6,6 @@
 return {
   -- LSP Plugins
   {
-    -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
-    -- used for completion, annotations and signatures of Neovim apis
-    "folke/lazydev.nvim",
-    ft = "lua",
-    opts = {
-      library = {
-        -- Load luvit types when the `vim.uv` word is found
-        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
-      },
-    },
-  },
-  {
     -- Configures `nvim-lspconfig`, the core plugin for managing Language Servers.
     -- It provides a unified interface for configuring and interacting with LSPs.
     "neovim/nvim-lspconfig",
