@@ -12,12 +12,6 @@ return {
     end,
   },
 
-  -- Treesitter playground for debugging
-  {
-    "nvim-treesitter/playground",
-    cmd = "TSPlaygroundToggle",
-  },
-
   -- Autoformatting
   {
     "stevearc/conform.nvim",
