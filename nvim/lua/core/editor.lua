@@ -8,6 +8,10 @@
 -- See `:help hlsearch` for more information.
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
+-- Quick replace mappings for efficient text substitution
+vim.keymap.set("n", "<Leader>r", ":%s/<C-r><C-w>//g<Left><Left>", { desc = "Replace word under cursor" })
+vim.keymap.set("v", "<Leader>r", "\"ay:%s/<C-r>a//g<Left><Left>", { desc = "Replace selected text" })
+
 -- Diagnostic keymaps for quick access to problem lists.
 vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
 
@@ -31,10 +35,10 @@ vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper win
 vim.keymap.set("n", "<leader>w", "<cmd>close<CR>", { desc = "Close current [W]indow" })
 
 -- Allows moving the current line or visual selection up and down using Option+Up/Down.
-vim.keymap.set("n", "<M-Down>", "<cmd>m .+1<CR>==", { desc = "Move current line down" })
-vim.keymap.set("n", "<M-Up>", "<cmd>m .-2<CR>==", { desc = "Move current line up" })
-vim.keymap.set("v", "<M-Up>", ":m '<-2<CR>gv=gv", { desc = "Move selected lines up" })
-vim.keymap.set("v", "<M-Down>", ":m '>+1<CR>gv=gv", { desc = "Move selected lines down" })
+vim.keymap.set("n", "<C-S-Down>", "<cmd>m .+1<CR>==", { desc = "Move current line down" })
+vim.keymap.set("n", "<C-S-Up>", "<cmd>m .-2<CR>==", { desc = "Move current line up" })
+vim.keymap.set("v", "<C-S-Up>", ":m '<-2<CR>gv=gv", { desc = "Move selected lines up" })
+vim.keymap.set("v", "<C-S-Down>", ":m '>+1<CR>gv=gv", { desc = "Move selected lines down" })
 
 -- Binds Option+Backspace to delete the word backward in insert mode.
 vim.keymap.set("i", "<M-BS>", "<C-w>", { desc = "Delete word backward" })

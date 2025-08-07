@@ -40,11 +40,6 @@ return {
     },
   },
 
-  -- Multiple cursors
-  {
-    "terryma/vim-multiple-cursors",
-  },
-
   -- Treesitter for syntax highlighting and more
   {
     "nvim-treesitter/nvim-treesitter",

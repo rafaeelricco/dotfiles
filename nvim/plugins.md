@@ -13,7 +13,7 @@
 ### Core Editor Enhancements (3 plugins)
 - [NMAC427/guess-indent.nvim](https://github.com/NMAC427/guess-indent.nvim): Automatically guesses and sets indentation settings for files.
 
-- [terryma/vim-multiple-cursors](https://github.com/terryma/vim-multiple-cursors): Enables multiple cursors for simultaneous editing operations.
+- [mg979/vim-visual-multi](https://github.com/mg979/vim-visual-multi): Plugin avançado para múltiplos cursores no vim/neovim.
 - [nvim-treesitter/nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter): Manages Treesitter for advanced syntax highlighting, indentation, and text objects.
 
 ### Git (1 plugin)
