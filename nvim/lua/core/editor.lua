@@ -49,3 +49,13 @@ vim.keymap.set("i", "<C-BS>", "<C-x><C-o>", { desc = "Show suggestions" })
 -- Sets up Control+Z for undo and Control+Shift+Z for redo across modes.
 vim.keymap.set({ "n", "v", "i" }, "<C-z>", "<Esc>ua", { desc = "Undo" })
 vim.keymap.set({ "n", "v", "i" }, "<C-S-z>", "<Esc><C-r>a", { desc = "Redo" })
+
+-- Visual mode indentation using Tab and Shift+Tab for intuitive block indenting.
+-- The 'gv' suffix re-selects the visual area after indentation for consecutive operations.
+vim.keymap.set("v", "<Tab>", ">gv", { desc = "Indent selected block" })
+vim.keymap.set("v", "<S-Tab>", "<gv", { desc = "Unindent selected block" })
+
+-- Normal mode indentation using Tab and Shift+Tab for current line.
+-- Uses '>>' and '<<' commands which respect shiftwidth settings.
+vim.keymap.set("n", "<Tab>", ">>", { desc = "Indent current line" })
+vim.keymap.set("n", "<S-Tab>", "<<", { desc = "Unindent current line" })
