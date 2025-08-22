@@ -73,7 +73,7 @@ vim.opt.signcolumn = "yes"
 
 -- Shortens the timeout for mapped key sequences, making the editor feel more responsive.
 -- Displays which-key popup sooner
-vim.opt.timeoutlen = 300
+vim.opt.timeoutlen = 1000
 
 -- Defines the default behavior for creating new splits, ensuring a predictable
 -- window layout.
@@ -99,6 +99,17 @@ vim.opt.scrolloff = 8
 -- Prevents accidental data loss by requiring confirmation before quitting
 -- with unsaved changes.
 vim.opt.confirm = true
+
+-- Configure modelines safely to prevent E518 errors from malformed modelines
+-- Modelines can contain vim options but may cause issues if malformed
+-- Alternative 1: Disable modelines completely (safest)
+vim.opt.modeline = false
+vim.opt.modelines = 0
+
+-- Alternative 2: Enable modelines with safer settings (uncomment if needed)
+-- vim.opt.modeline = true
+-- vim.opt.modelines = 5  -- Check only first/last 5 lines
+-- vim.opt.modelineexpr = false  -- Disable expression evaluation in modelines
 
 -- Disables paste mode, as modern terminals handle bracketed paste correctly.
 vim.opt.paste = false

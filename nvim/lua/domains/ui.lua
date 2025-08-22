@@ -86,10 +86,25 @@ return {
       require("telescope").setup({
         defaults = {
           mappings = {
+            i = {
+              -- Preview scrolling in insert mode (non-conflicting keys)
+              ["<M-u>"] = require("telescope.actions").preview_scrolling_up,
+              ["<M-d>"] = require("telescope.actions").preview_scrolling_down,
+              ["<M-k>"] = require("telescope.actions").preview_scrolling_up,
+              ["<M-j>"] = require("telescope.actions").preview_scrolling_down,
+              -- Mouse wheel scrolling
+              ["<ScrollWheelUp>"] = require("telescope.actions").preview_scrolling_up,
+              ["<ScrollWheelDown>"] = require("telescope.actions").preview_scrolling_down,
+            },
             n = {
-              -- Preview scrolling in normal mode
+              -- Preview scrolling in normal mode (default C-u/C-d should work)
               ["<C-u>"] = require("telescope.actions").preview_scrolling_up,
               ["<C-d>"] = require("telescope.actions").preview_scrolling_down,
+              -- Additional preview scrolling
+              ["<M-u>"] = require("telescope.actions").preview_scrolling_up,
+              ["<M-d>"] = require("telescope.actions").preview_scrolling_down,
+              ["<M-k>"] = require("telescope.actions").preview_scrolling_up,
+              ["<M-j>"] = require("telescope.actions").preview_scrolling_down,
               -- Mouse wheel scrolling
               ["<ScrollWheelUp>"] = require("telescope.actions").preview_scrolling_up,
               ["<ScrollWheelDown>"] = require("telescope.actions").preview_scrolling_down,
