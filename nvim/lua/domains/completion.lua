@@ -25,9 +25,14 @@ return {
         preset = "enter",
 
         -- Additional custom keymaps for better experience
+        -- Note: Keybindings configured to avoid conflicts with Augment Code
+        -- Augment Code uses <C-y> and Tab (disabled) for AI suggestions
+        -- Blink.cmp uses separate keybindings for manual control
         ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
         ['<C-e>'] = { 'hide' },
-        ['<C-y>'] = { 'select_and_accept' },
+        -- Removed <C-y> to avoid conflict with Augment Code
+        ['<C-l>'] = { 'select_and_accept' }, -- Alternative keybind for Blink.cmp acceptance
+        ['<C-k>'] = { 'show' }, -- Manual trigger for Blink.cmp suggestions
 
         -- Navigation
         ['<Up>'] = { 'select_prev', 'fallback' },
@@ -53,6 +58,13 @@ return {
       },
 
       completion = {
+        -- Add trigger configuration to prevent conflicts with Augment Code
+        trigger = {
+          keyword_length = 2, -- Require at least 2 characters before triggering
+          keyword_regex = '[%w_-]+', -- Only trigger on word characters
+          blocked_trigger_characters = {}, -- Characters that should not trigger completion
+          show_on_insert_on_trigger_character = false, -- Don't auto-show on trigger chars
+        },
         -- Configures the completion documentation to appear automatically, mimicking VSCode's behavior.
         -- The window style is customized for a clean, modern look.
         documentation = {
