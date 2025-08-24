@@ -43,13 +43,6 @@ vim.keymap.set("v", "<C-S-Down>", ":m '>+1<CR>gv=gv", { desc = "Move selected li
 -- Binds Option+Backspace to delete the word backward in insert mode.
 vim.keymap.set("i", "<M-BS>", "<C-w>", { desc = "Delete word backward" })
 
--- Triggers omni-completion suggestions using Control+Backspace in insert mode.
-vim.keymap.set("i", "<C-BS>", "<C-x><C-o>", { desc = "Show suggestions" })
-
--- Sets up Control+Z for undo and Control+Shift+Z for redo across modes.
-vim.keymap.set({ "n", "v", "i" }, "<C-z>", "<Esc>ua", { desc = "Undo" })
-vim.keymap.set({ "n", "v", "i" }, "<C-S-z>", "<Esc><C-r>a", { desc = "Redo" })
-
 -- Visual mode indentation using Tab and Shift+Tab for intuitive block indenting.
 -- The 'gv' suffix re-selects the visual area after indentation for consecutive operations.
 vim.keymap.set("v", "<Tab>", ">gv", { desc = "Indent selected block" })
