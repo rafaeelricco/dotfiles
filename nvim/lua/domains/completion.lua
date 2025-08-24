@@ -156,6 +156,8 @@ return {
         -- Defines the sources for completion suggestions, including LSP, paths, snippets, and buffer text.
         -- Each source is configured with a priority and specific options.
         default = { "lsp", "path", "snippets", "buffer" },
+        -- Global minimum keyword length - require at least 3 characters before showing suggestions
+        min_keyword_length = 3,
         providers = {
           -- LSP with enhanced capabilities
           lsp = {
@@ -165,6 +167,7 @@ return {
             fallbacks = { "buffer" },
             async = true,
             timeout_ms = 500,
+            min_keyword_length = 3, -- Require 3 characters for LSP suggestions
             enabled = function()
               -- Enable LSP for all file types except specific ones
               return vim.bo.buftype ~= "prompt" and vim.bo.buftype ~= "nofile"
@@ -176,6 +179,7 @@ return {
             module = "blink.cmp.sources.path",
             score_offset = 50,
             fallbacks = { "buffer" },
+            min_keyword_length = 3, -- Require 3 characters for path suggestions
             opts = {
               trailing_slash = false,
               label_trailing_slash = true,
@@ -188,8 +192,8 @@ return {
             name = "snippets",
             module = "blink.cmp.sources.snippets",
             score_offset = 25,
-            -- Only show snippets when specifically triggered
-            min_keyword_length = 1,
+            -- Require 4 characters for snippet suggestions
+            min_keyword_length = 3,
             fallbacks = { "buffer" },
           },
           -- Buffer completion as fallback
@@ -197,7 +201,7 @@ return {
             name = "Buffer",
             module = "blink.cmp.sources.buffer",
             score_offset = 10,
-            min_keyword_length = 3, -- Only suggest after 3 characters
+            min_keyword_length = 3, -- Require 3 characters for buffer suggestions
             max_items = 20,
             fallbacks = {},
           },
