@@ -58,12 +58,22 @@ return {
       },
 
       completion = {
+        -- Configure keyword matching behavior
+        keyword = {
+          -- 'prefix' will fuzzy match on the text before the cursor
+          -- 'full' will fuzzy match on the text before _and_ after the cursor
+          range = 'prefix',
+        },
         -- Add trigger configuration to prevent conflicts with Augment Code
         trigger = {
-          keyword_length = 2, -- Require at least 2 characters before triggering
-          keyword_regex = '[%w_-]+', -- Only trigger on word characters
-          blocked_trigger_characters = {}, -- Characters that should not trigger completion
-          show_on_insert_on_trigger_character = false, -- Don't auto-show on trigger chars
+          -- When true, will show the completion window after typing any of alphanumerics, `-` or `_`
+          show_on_keyword = true,
+          -- When true, will show the completion window after typing a trigger character
+          show_on_trigger_character = true,
+          -- Characters that should not trigger completion
+          show_on_blocked_trigger_characters = { ' ', '\n', '\t' },
+          -- Don't auto-show on trigger chars to prevent conflicts
+          show_on_insert_on_trigger_character = false,
         },
         -- Configures the completion documentation to appear automatically, mimicking VSCode's behavior.
         -- The window style is customized for a clean, modern look.
