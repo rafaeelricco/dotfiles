@@ -1,40 +1,44 @@
 -- [[ Completion Domain ]]
--- This file configures autocompletion, snippets, and related UI elements to create
--- a modern, VSCode-like completion experience.
+-- Blink.cmp setup tailored for:
+-- - Manual Ctrl+Space to show LSP + Path items (great for imports and paths)
+-- - Non‑conflicting mappings with Augment Code (keeps Tab and <C-y> for Augment)
+-- - Clear menu/docs/selection behavior with predictable triggers
 
 return {
-  -- Configures `blink.cmp`, a powerful and extensible completion engine.
-  -- It integrates with various sources like LSP, snippets, and buffer text.
+  -- blink.cmp completion engine and sources (LSP/snippets/path/buffer)
   {
     "saghen/blink.cmp",
     event = "VimEnter",
     version = "1.*",
     dependencies = {},
-    -- Defines the main configuration for `blink.cmp`.
+    -- Main configuration
     opts = {
       keymap = {
-        -- Sets up keymaps for a VSCode-like completion experience, including
-        -- navigation, acceptance, and documentation scrolling.
-        -- 'default' (recommended) for mappings similar to built-in completions
-        --   <c-y> to accept ([y]es) the completion.
-        --    This will auto-import if your LSP supports it.
-        --    This will expand snippets if the LSP sent a snippet.
-        -- 'super-tab' for tab to accept
-        -- 'enter' for enter to accept
-        -- 'none' for no mappings
+        
+        -- Preset: base binding scheme
+        --   'enter'    -> Enter accepts (recommended)
+        --   'default'  -> C-y accepts
+        --   'super-tab'-> Tab accepts
+        --   'none'     -> no preset maps
         preset = "enter",
 
-        -- Additional custom keymaps for better experience
-        -- Note: Keybindings configured to avoid conflicts with Augment Code
-        -- Augment Code uses <C-y> and Tab (disabled) for AI suggestions
-        -- Blink.cmp uses separate keybindings for manual control
-        ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
-        ['<C-e>'] = { 'hide' },
-        -- Removed <C-y> to avoid conflict with Augment Code
-        ['<C-l>'] = { 'select_and_accept' }, -- Alternative keybind for Blink.cmp acceptance
-        ['<C-k>'] = { 'show' }, -- Manual trigger for Blink.cmp suggestions
+        -- Custom keymaps (kept off Augment's Tab / <C-y>):
+        -- Ctrl+Space: show LSP + Path items (clean imports + file paths)
+        ['<C-space>'] = {
+          function(cmp) cmp.show({ providers = { 'lsp', 'path' } }) end,
+          'show_documentation', 'hide_documentation'
+        },
+        -- Terminals that send <C-@> for Ctrl+Space
+        ['<C-@>'] = {
+          function(cmp) cmp.show({ providers = { 'lsp', 'path' } }) end,
+          'show_documentation', 'hide_documentation'
+        },
+        -- Hide menu; fall back so native <C-e> still works when closed
+        ['<C-e>'] = { 'hide', 'fallback' },
+        ['<C-l>'] = { 'select_and_accept' }, -- accept (alternative to Enter)
+        ['<C-k>'] = { 'show' },               -- generic manual show (all providers)
 
-        -- Navigation
+        -- Navigation in the menu
         ['<Up>'] = { 'select_prev', 'fallback' },
         ['<Down>'] = { 'select_next', 'fallback' },
         ['<C-p>'] = { 'select_prev', 'fallback' },
@@ -44,39 +48,33 @@ return {
         ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
         ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
 
-        -- Tab completion behavior
+        -- Snippet navigation
         ['<Tab>'] = { 'snippet_forward', 'fallback' },
         ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
 
-        -- Accept with detailed import information
+        -- Accept current item
         ['<CR>'] = { 'accept', 'fallback' },
       },
 
       appearance = {
-        -- Configures the appearance to use a monospaced Nerd Font, ensuring icons are aligned correctly.
+        -- Ensure icon spacing matches Nerd Font Mono
         nerd_font_variant = "mono",
       },
 
       completion = {
-        -- Configure keyword matching behavior
+        -- Keyword matching strategy used by the fuzzy matcher
         keyword = {
-          -- 'prefix' will fuzzy match on the text before the cursor
-          -- 'full' will fuzzy match on the text before _and_ after the cursor
+          -- 'prefix' -> match only text before cursor; 'full' -> match before & after
           range = 'prefix',
         },
-        -- Add trigger configuration to prevent conflicts with Augment Code
+        -- Auto-show behavior when typing or after trigger characters (manual show unaffected)
         trigger = {
-          -- When true, will show the completion window after typing any of alphanumerics, `-` or `_`
           show_on_keyword = true,
-          -- When true, will show the completion window after typing a trigger character
           show_on_trigger_character = true,
-          -- Characters that should not trigger completion
           show_on_blocked_trigger_characters = { ' ', '\n', '\t' },
-          -- Don't auto-show on trigger chars to prevent conflicts
           show_on_insert_on_trigger_character = false,
         },
-        -- Configures the completion documentation to appear automatically, mimicking VSCode's behavior.
-        -- The window style is customized for a clean, modern look.
+        -- Documentation window behavior and styling
         documentation = {
           auto_show = true,
           auto_show_delay_ms = 200,
@@ -89,22 +87,17 @@ return {
           }
         },
         menu = {
-          -- Defines the appearance and behavior of the completion menu to resemble VSCode.
-          -- This includes custom drawing for columns and a rounded border.
+          -- Popup menu look-and-feel and item layout
           draw = {
-            -- Modified columns to focus on path information
             columns = {
               { "kind_icon" },
               { "label",    "label_description", gap = 1 },
-              -- Removed the kind/source display
             },
             components = {
-              -- Keep other components...
-              -- Modified label_description to focus on showing paths
+              -- Show import detail/paths when LSP provides them
               label_description = {
                 width = { max = 40 },
                 text = function(ctx)
-                  -- Focus on showing import paths
                   local detail = ""
                   if ctx.item.labelDetails and ctx.item.labelDetails.description then
                     detail = ctx.item.labelDetails.description
@@ -115,17 +108,15 @@ return {
                 end,
                 highlight = 'BlinkCmpLabelDescription',
               },
-              -- Keep other components...
             },
           },
           border = "rounded",
           winhighlight =
           "Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None",
-          -- VSCode-style behavior
           scrollbar = false,
           direction_priority = { 's', 'n' },
         },
-        -- Configures completion acceptance behavior, such as automatically adding brackets.
+        -- Accept behavior (auto-insert brackets for functions/methods)
         accept = {
           auto_brackets = {
             enabled = true,
@@ -146,40 +137,52 @@ return {
             end,
           },
         },
-        -- Enables inline ghost text for completion suggestions, providing a preview of the completed code.
-        ghost_text = {
-          enabled = true,
-        },
+        -- Inline preview of the selected item
+        ghost_text = { enabled = true },
       },
 
       sources = {
-        -- Defines the sources for completion suggestions, including LSP, paths, snippets, and buffer text.
-        -- Each source is configured with a priority and specific options.
+        -- Providers used globally unless overridden
         default = { "lsp", "path", "snippets", "buffer" },
-        -- Global minimum keyword length - require at least 3 characters before showing suggestions
+        -- Global min keyword chars for auto triggers (manual show may override)
         min_keyword_length = 3,
         providers = {
-          -- LSP with enhanced capabilities
+          -- LSP provider (primary)
           lsp = {
             name = "LSP",
             module = "blink.cmp.sources.lsp",
-            score_offset = 100, -- Prioritize LSP suggestions
-            fallbacks = { "buffer" },
-            async = true,
+            -- Sort boost to favor LSP items
+            score_offset = 100,
+            -- No fallback to buffer; keep lists clean on manual show
+            fallbacks = {},
+            -- Wait for LSP response; avoids flashing non-LSP items first
+            async = false,
             timeout_ms = 500,
-            min_keyword_length = 3, -- Require 3 characters for LSP suggestions
-            enabled = function()
-              -- Enable LSP for all file types except specific ones
-              return vim.bo.buftype ~= "prompt" and vim.bo.buftype ~= "nofile"
+            -- On manual show (Ctrl+Space) allow 0-char prefix; otherwise require 3
+            min_keyword_length = function(ctx)
+              local trig = ctx and ctx.trigger or {}
+              if trig.kind == 'manual' or trig.initial_kind == 'manual' then
+                return 0
+              end
+              return 3
             end,
+            -- Disable on special buffers where completion isn't appropriate
+            enabled = function() return vim.bo.buftype ~= "prompt" and vim.bo.buftype ~= "nofile" end,
           },
-          -- Path completion for file paths
+          -- File path provider
           path = {
             name = "Path",
             module = "blink.cmp.sources.path",
             score_offset = 50,
             fallbacks = { "buffer" },
-            min_keyword_length = 3, -- Require 3 characters for path suggestions
+            -- Allow path suggestions on manual show with 0-char prefix
+            min_keyword_length = function(ctx)
+              local trig = ctx and ctx.trigger or {}
+              if trig.kind == 'manual' or trig.initial_kind == 'manual' then
+                return 0
+              end
+              return 3
+            end,
             opts = {
               trailing_slash = false,
               label_trailing_slash = true,
@@ -187,21 +190,32 @@ return {
               show_hidden_files_by_default = false,
             },
           },
-          -- Enhanced snippet support
+          -- Snippet provider
           snippets = {
             name = "snippets",
             module = "blink.cmp.sources.snippets",
             score_offset = 25,
-            -- Require 4 characters for snippet suggestions
+            -- Hide snippets on manual show to keep lists LSP-only
+            should_show_items = function(ctx)
+              local trig = ctx and ctx.trigger or {}
+              return not (trig.kind == 'manual' or trig.initial_kind == 'manual')
+            end,
+            -- Require 3 characters for auto snippet suggestions
             min_keyword_length = 3,
             fallbacks = { "buffer" },
           },
-          -- Buffer completion as fallback
+          -- Buffer words provider (low priority)
           buffer = {
             name = "Buffer",
             module = "blink.cmp.sources.buffer",
             score_offset = 10,
-            min_keyword_length = 3, -- Require 3 characters for buffer suggestions
+            -- Keep buffer items off manual show to avoid UUID-like noise
+            should_show_items = function(ctx)
+              local trig = ctx and ctx.trigger or {}
+              return not (trig.kind == 'manual' or trig.initial_kind == 'manual')
+            end,
+            -- Require 3 characters for auto buffer suggestions
+            min_keyword_length = 3,
             max_items = 20,
             fallbacks = {},
           },
@@ -209,8 +223,16 @@ return {
         },
       },
 
-      -- Configures completion sources for the command line, providing suggestions for commands and searches.
+      -- Cmdline mode configuration (/, ?, :)
       cmdline = {
+        -- Inherit top-level mappings; add Ctrl+Space show
+        keymap = {
+          preset = 'inherit',
+          ['<C-space>'] = { 'show', 'fallback' },
+          ['<C-@>'] = { 'show', 'fallback' },
+        },
+        -- Avoid auto-show in cmdline; prefer explicit show
+        completion = { menu = { auto_show = false } },
         sources = function()
           local type = vim.fn.getcmdtype()
           if type == '/' or type == '?' then
@@ -223,18 +245,15 @@ return {
         end,
       },
 
+      -- Snippet engine preset: 'default' (built-in) / 'luasnip' / 'mini_snippets'
       snippets = { preset = "default" },
 
-      -- Configures the fuzzy matching algorithm used for filtering completion items.
-      -- This setup uses the Lua implementation for better performance.
-      -- You can also use "fzf" implementation which automatically downloads a prebuilt binary.
-      --
-      -- See :h blink-cmp-config-fuzzy for more information
+      -- Fuzzy matching implementation; see :h blink-cmp-config-fuzzy
       fuzzy = {
         implementation = "lua",
       },
 
-      -- Enables and configures the signature help window, which displays function parameter information.
+      -- Signature help window (parameter hints)
       signature = {
         enabled = true,
         window = {
