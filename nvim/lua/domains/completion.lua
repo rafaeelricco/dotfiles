@@ -28,15 +28,16 @@ return {
           function(cmp) cmp.show({ providers = { 'lsp', 'path' } }) end,
           'show_documentation', 'hide_documentation'
         },
+        -- Ctrl+Leader: show LSP + Path items (clean imports + file paths)
+        ['<C-;>'] = {
+          function(cmp) cmp.show({ providers = { 'lsp', 'path' } }) end,
+          'show_documentation', 'hide_documentation'
+        },
         -- Terminals that send <C-@> for Ctrl+Space
         ['<C-@>'] = {
           function(cmp) cmp.show({ providers = { 'lsp', 'path' } }) end,
           'show_documentation', 'hide_documentation'
         },
-        -- Hide menu; fall back so native <C-e> still works when closed
-        ['<C-e>'] = { 'hide', 'fallback' },
-        ['<C-l>'] = { 'select_and_accept' }, -- accept (alternative to Enter)
-        ['<C-k>'] = { 'show' },               -- generic manual show (all providers)
 
         -- Navigation in the menu
         ['<Up>'] = { 'select_prev', 'fallback' },
@@ -57,7 +58,7 @@ return {
       },
 
       appearance = {
-        -- Ensure icon spacing matches Nerd Font Mono
+        use_nvim_cmp_as_default = true,
         nerd_font_variant = "mono",
       },
 
@@ -76,23 +77,22 @@ return {
         },
         -- Documentation window behavior and styling
         documentation = {
-          auto_show = true,
+          auto_show = false,
           auto_show_delay_ms = 200,
           window = {
-            border = "rounded",
+            border = "none",
             winhighlight = "Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,EndOfBuffer:BlinkCmpDoc",
             min_width = 15,
             max_width = 60,
-            max_height = 20,
+            max_height = 20
           }
         },
         menu = {
-          -- Popup menu look-and-feel and item layout
           draw = {
-            columns = {
-              { "kind_icon" },
-              { "label",    "label_description", gap = 1 },
-            },
+            padding = 0,
+            gap=1,
+            columns = {{ "kind_icon" }, { "label", "label_description" }},
+
             components = {
               -- Show import detail/paths when LSP provides them
               label_description = {
@@ -110,9 +110,8 @@ return {
               },
             },
           },
-          border = "rounded",
-          winhighlight =
-          "Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None",
+          border = "none",
+          winhighlight = "Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None",
           scrollbar = false,
           direction_priority = { 's', 'n' },
         },
@@ -230,6 +229,7 @@ return {
           preset = 'inherit',
           ['<C-space>'] = { 'show', 'fallback' },
           ['<C-@>'] = { 'show', 'fallback' },
+          ['<C-;>'] = { 'show', 'fallback' },
         },
         -- Avoid auto-show in cmdline; prefer explicit show
         completion = { menu = { auto_show = false } },
