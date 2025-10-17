@@ -300,7 +300,8 @@ return {
 
       for key, func in pairs(keymap) do
         vim.keymap.set('n', key, function()
-          require('neoscroll').scroll(func, { move_cursor = false, duration = 110 })
+          local cmd = func()
+          require('neoscroll').scroll(cmd, { move_cursor = false, duration = 110 })
         end, { desc = "Smooth horizontal scroll" })
       end
     end,
