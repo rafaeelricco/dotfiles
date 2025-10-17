@@ -90,8 +90,10 @@ return {
         menu = {
           draw = {
             padding = 0,
-            gap=1,
-            columns = {{ "kind_icon" }, { "label", "label_description" }},
+            columns = {
+              { "kind_icon" },
+              { "label", "label_description", gap = 1 },
+            },
 
             components = {
               -- Show import detail/paths when LSP provides them
