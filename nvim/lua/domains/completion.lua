@@ -84,7 +84,7 @@ return {
             winhighlight = "Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,EndOfBuffer:BlinkCmpDoc",
             min_width = 15,
             max_width = 60,
-            max_height = 20
+            max_height = 20,
           }
         },
         menu = {
