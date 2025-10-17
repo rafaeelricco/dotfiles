@@ -78,8 +78,6 @@ vim.opt.sidescrolloff = 5   -- Keep 5 columns visible around cursor horizontally
 vim.opt.whichwrap = "b,s,<,>,[,]"  -- Allow cursor to wrap at line boundaries
 
 -- Performance optimizations for smooth scrolling
--- Enable fast terminal mode for better rendering performance
-vim.opt.ttyfast = true       -- Indicate fast terminal connection
 -- Skip screen redraws during macro execution for smoother performance
 vim.opt.lazyredraw = true    -- Don't redraw while executing macros
 
