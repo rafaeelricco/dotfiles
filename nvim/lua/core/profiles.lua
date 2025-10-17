@@ -25,7 +25,7 @@ local colors = {
   -- UI Elements
   status_bg = "#181818",      -- statusBar.background
   panel_bg = "#181818",       -- panel.background
-  menu_bg = "#1f1f1f",        -- menu.background / dropdown.listBackground
+  menu_bg = "#0f0f0f",        -- menu.background / dropdown.listBackground
   widget_bg = "#0f0f0f",      -- editorWidget.background
   input_bg = "#313131",       -- input.background
   button_bg = "#0078d4",      -- button.background

@@ -220,16 +220,90 @@ return {
       { "<leader>e", "<cmd>Neotree toggle<cr>", desc = "Toggle file explorer" },
     },
     opts = {
+      -- Closes Neo-tree if it's the last open window in Neovim
       close_if_last_window = false,
+      -- Automatically refresh the tree when buffers are written/created
+      enable_refresh_on_write = true,
+      -- Tracks open buffers to keep up with new files
+      buffers = {
+        follow_current_file = {
+          enabled = true,
+          leave_dirs_open = false,
+        },
+        group_empty_dirs = true,
+        show_unloaded = true,
+      },
+      -- Filesystem configuration
       filesystem = {
+        -- Filtered items in the filesystem
         filtered_items = {
+          -- Hide dotfiles (hidden files starting with a dot); false shows everything
           hide_dotfiles = false,
+          -- Hide Git-ignored files; false shows everything
           hide_gitignored = false,
         },
+        -- Automatically follows the current file in the explorer
         follow_current_file = {
-          enabled = false,
+          -- Enables tracking of the current file
+          enabled = true,
+        },
+        -- Use system (libuv) watchers to detect new files directly from disk
+        use_libuv_file_watcher = true,
+      },
+      -- Neo-tree window settings
+      window = {
+        -- Custom key mappings for the window
+        mappings = {
+          -- Navigate to the parent directory
+          [","] = "navigate_up",
         },
       },
     },
+  },
+
+  -- Smooth scrolling plugin for both horizontal and vertical movement
+  {
+    "karb94/neoscroll.nvim",
+    config = function()
+      require('neoscroll').setup({
+        -- All these keys will be mapped to their corresponding default scrolling animation
+        mappings = {'<C-u>', '<C-d>', '<C-b>', '<C-f>',
+                    '<C-y>', 'zt', 'zz', 'zb'},
+        hide_cursor = false,          -- Hide cursor while scrolling
+        stop_eof = true,             -- Stop at <EOF> when scrolling downwards
+        respect_scrolloff = false,   -- Stop scrolling when the cursor reaches the scrolloff margin of the file
+        cursor_scrolls_alone = true, -- The cursor will keep on scrolling even if the window cannot scroll further
+        easing_function = "quadratic", -- Smoother easing function
+        pre_hook = nil,              -- Function to run before the scrolling animation starts
+        post_hook = nil,             -- Function to run after the scrolling animation ends
+        performance_mode = false,    -- Disable "Performance Mode" on all buffers.
+      })
+
+      -- Add horizontal scrolling mappings
+      -- Use Alt+h/l to avoid conflict with window navigation (<C-h>/<C-l>)
+      local keymap = {
+        ["<M-h>"] = function()
+          if vim.v.count > 0 then
+            return vim.v.count .. "zh"
+          else
+            return "zh"
+          end
+        end,
+        ["<M-l>"] = function()
+          if vim.v.count > 0 then
+            return vim.v.count .. "zl"
+          else
+            return "zl"
+          end
+        end,
+      }
+
+      for key, func in pairs(keymap) do
+        vim.keymap.set('n', key, function()
+          local cmd = func()
+          require('neoscroll').scroll(cmd, { move_cursor = false, duration = 110 })
+        end, { desc = "Smooth horizontal scroll" })
+      end
+    end,
   },
 }
