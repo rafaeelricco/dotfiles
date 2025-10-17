@@ -1,7 +1,7 @@
 -- [[ Completion Domain ]]
 -- Blink.cmp setup tailored for:
 -- - Manual Ctrl+Space to show LSP + Path items (great for imports and paths)
--- - Non‑conflicting mappings with Augment Code (keeps Tab and <C-y> for Augment)
+-- - Non‑conflicting with Copilot: Tab reserved for snippets; <C-y> accepts Copilot
 -- - Clear menu/docs/selection behavior with predictable triggers
 
 return {

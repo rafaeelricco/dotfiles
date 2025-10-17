@@ -70,9 +70,9 @@ return {
       -- specific buffers like git commits, help pages, and file explorers.
       vim.g.copilot_filetypes = { ["*"] = true }
 
-      -- Sets a custom keymap for accepting Copilot suggestions with Tab, falling back
-      -- to snippet navigation when no Copilot suggestion is available.
-      vim.keymap.set("i", "<Tab>", 'copilot#Accept("<CR>")', {
+      -- Sets a custom keymap for accepting Copilot suggestions with <C-y> to avoid
+      -- conflicts with snippet navigation that uses <Tab>.
+      vim.keymap.set("i", "<C-y>", 'copilot#Accept("<CR>")', {
         expr = true,
         silent = true,
         desc = "Accept Copilot suggestion",
