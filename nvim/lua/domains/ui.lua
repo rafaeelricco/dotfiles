@@ -280,15 +280,16 @@ return {
       })
 
       -- Add horizontal scrolling mappings
+      -- Use Alt+h/l to avoid conflict with window navigation (<C-h>/<C-l>)
       local keymap = {
-        ["<C-h>"] = function()
+        ["<M-h>"] = function()
           if vim.v.count > 0 then
             return vim.v.count .. "zh"
           else
             return "zh"
           end
         end,
-        ["<C-l>"] = function()
+        ["<M-l>"] = function()
           if vim.v.count > 0 then
             return vim.v.count .. "zl"
           else
