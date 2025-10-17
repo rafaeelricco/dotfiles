@@ -220,11 +220,11 @@ return {
       { "<leader>e", "<cmd>Neotree toggle<cr>", desc = "Toggle file explorer" },
     },
     opts = {
-      -- Fecha a janela do Neo-tree se for a última janela aberta no Neovim
+      -- Closes Neo-tree if it's the last open window in Neovim
       close_if_last_window = false,
-      -- Atualiza o tree automaticamente quando buffers são salvos/criados
+      -- Automatically refresh the tree when buffers are written/created
       enable_refresh_on_write = true,
-      -- Lista de buffers abertos, para acompanhar novos arquivos
+      -- Tracks open buffers to keep up with new files
       buffers = {
         follow_current_file = {
           enabled = true,
@@ -233,28 +233,28 @@ return {
         group_empty_dirs = true,
         show_unloaded = true,
       },
-      -- Configurações do filesystem
+      -- Filesystem configuration
       filesystem = {
-        -- Itens filtrados no filesystem
+        -- Filtered items in the filesystem
         filtered_items = {
-          -- Oculta arquivos dotfiles (arquivos ocultos começando com ponto); false mostra todos
+          -- Hide dotfiles (hidden files starting with a dot); false shows everything
           hide_dotfiles = false,
-          -- Oculta arquivos ignorados pelo Git; false mostra todos
+          -- Hide Git-ignored files; false shows everything
           hide_gitignored = false,
         },
-        -- Segue automaticamente o arquivo atual no explorador
+        -- Automatically follows the current file in the explorer
         follow_current_file = {
-          -- Habilita o acompanhamento do arquivo atual
+          -- Enables tracking of the current file
           enabled = true,
         },
-        -- Usa watchers do sistema (libuv) para detectar novos arquivos direto no disco
+        -- Use system (libuv) watchers to detect new files directly from disk
         use_libuv_file_watcher = true,
       },
-      -- Configurações da janela do Neo-tree
+      -- Neo-tree window settings
       window = {
-        -- Mapeamentos de teclas personalizados para a janela
+        -- Custom key mappings for the window
         mappings = {
-          -- Navega para o diretório pai (up)
+          -- Navigate to the parent directory
           [","] = "navigate_up",
         },
       },
