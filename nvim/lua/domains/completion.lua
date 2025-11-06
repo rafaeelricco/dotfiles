@@ -1,7 +1,7 @@
 -- [[ Completion Domain ]]
 -- Blink.cmp setup tailored for:
 -- - Manual Ctrl+Space to show LSP + Path items (great for imports and paths)
--- - Non‑conflicting with Copilot: Tab reserved for snippets; <C-y> accepts Copilot
+-- - Non‑conflicting with Copilot: <Tab> accepts Copilot, snippets live on Ctrl+j/k
 -- - Clear menu/docs/selection behavior with predictable triggers
 
 return {
@@ -11,7 +11,6 @@ return {
     event = "VimEnter",
     version = "1.*",
     dependencies = {},
-    -- Main configuration
     opts = {
       keymap = {
         
@@ -22,7 +21,7 @@ return {
         --   'none'     -> no preset maps
         preset = "enter",
 
-        -- Custom keymaps (kept off Augment's Tab / <C-y>):
+        -- Custom keymaps (kept off Copilot Tab / snippet Ctrl+j maps):
         -- Ctrl+Space: show LSP + Path items (clean imports + file paths)
         ['<C-space>'] = {
           function(cmp) cmp.show({ providers = { 'lsp', 'path' } }) end,
@@ -50,8 +49,8 @@ return {
         ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
 
         -- Snippet navigation
-        ['<Tab>'] = { 'snippet_forward', 'fallback' },
-        ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+        ['<C-j>'] = { 'snippet_forward', 'fallback' },
+        ['<C-k>'] = { 'snippet_backward', 'fallback' },
 
         -- Accept current item
         ['<CR>'] = { 'accept', 'fallback' },
