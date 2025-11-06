@@ -1,6 +1,6 @@
 -- [[ AI Domain ]]
 -- This file configures AI-powered code assistance plugins.
--- Currently configured with Augment Code for context-aware suggestions.
+-- Currently configured with Augment Code for context-aware code suggestions.
 
 return {
   {
@@ -16,9 +16,8 @@ return {
       { "<leader>ar", "<cmd>ClaudeCode --resume<cr>",   desc = "Resume Claude" },
       { "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude" },
       { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>",       desc = "Add current buffer" },
-      { "<leader>as", "<cmd>ClaudeCodeSend<cr>",        mode = "v",                 desc = "Send to Claude" },
-      { "<leader>as", "<cmd>ClaudeCodeTreeAdd<cr>",     desc = "Add file",          ft = { "NvimTree", "neo-tree", "oil" } },
-      -- Diff management
+      { "<leader>as", "<cmd>ClaudeCodeSend<cr>",        mode = "v", desc = "Send to Claude" },
+      { "<leader>as", "<cmd>ClaudeCodeTreeAdd<cr>",     desc = "Add file", ft = { "NvimTree", "neo-tree", "oil" } },
       { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>",  desc = "Accept diff" },
       { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>",    desc = "Deny diff" },
     },
@@ -70,11 +69,12 @@ return {
       -- specific buffers like git commits, help pages, and file explorers.
       vim.g.copilot_filetypes = { ["*"] = true }
 
-      -- Sets a custom keymap for accepting Copilot suggestions with <C-y> to avoid
-      -- conflicts with snippet navigation that uses <Tab>.
-      vim.keymap.set("i", "<C-y>", 'copilot#Accept("<CR>")', {
+      -- Sets a custom keymap for accepting Copilot suggestions with <Tab>. Snippet
+      -- navigation is kept on other keys to let Copilot take priority.
+      vim.keymap.set("i", "<Tab>", 'copilot#Accept("<Tab>")', {
         expr = true,
         silent = true,
+        replace_keycodes = false,
         desc = "Accept Copilot suggestion",
       })
 
