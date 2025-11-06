@@ -24,44 +24,44 @@ return {
       -- { "j-hui/fidget.nvim", opts = {} },
 
       -- Better diagnostics, references, and quickfix list interface
-      -- {
-      --   "folke/trouble.nvim",
-      --   dependencies = { "DaikyXendo/nvim-material-icon" },
-      --   opts = {},
-      --   cmd = "Trouble",
-      --   keys = {
-      --     {
-      --       "<leader>xx",
-      --       "<cmd>Trouble diagnostics toggle<cr>",
-      --       desc = "Diagnostics (Trouble)",
-      --     },
-      --     {
-      --       "<leader>xX",
-      --       "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
-      --       desc = "Buffer Diagnostics (Trouble)",
-      --     },
-      --     {
-      --       "<leader>cs",
-      --       "<cmd>Trouble symbols toggle focus=false<cr>",
-      --       desc = "Symbols (Trouble)",
-      --     },
-      --     {
-      --       "<leader>cl",
-      --       "<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
-      --       desc = "LSP Definitions / references / ... (Trouble)",
-      --     },
-      --     {
-      --       "<leader>xL",
-      --       "<cmd>Trouble loclist toggle<cr>",
-      --       desc = "Location List (Trouble)",
-      --     },
-      --     {
-      --       "<leader>xQ",
-      --       "<cmd>Trouble qflist toggle<cr>",
-      --       desc = "Quickfix List (Trouble)",
-      --     },
-      --   },
-      -- },
+      {
+        "folke/trouble.nvim",
+        dependencies = { "DaikyXendo/nvim-material-icon" },
+        opts = {},
+        cmd = "Trouble",
+        keys = {
+          {
+            "<leader>xx",
+            "<cmd>Trouble diagnostics toggle<cr>",
+            desc = "Diagnostics (Trouble)",
+          },
+          {
+            "<leader>xX",
+            "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
+            desc = "Buffer Diagnostics (Trouble)",
+          },
+          {
+            "<leader>cs",
+            "<cmd>Trouble symbols toggle focus=false<cr>",
+            desc = "Symbols (Trouble)",
+          },
+          {
+            "<leader>cl",
+            "<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
+            desc = "LSP Definitions / references / ... (Trouble)",
+          },
+          {
+            "<leader>xL",
+            "<cmd>Trouble loclist toggle<cr>",
+            desc = "Location List (Trouble)",
+          },
+          {
+            "<leader>xQ",
+            "<cmd>Trouble qflist toggle<cr>",
+            desc = "Quickfix List (Trouble)",
+          },
+        },
+      },
 
       -- Allows extra capabilities provided by nvim-cmp
       "saghen/blink.cmp",
@@ -97,6 +97,12 @@ return {
 
           -- Execute a code action, usually your cursor needs to be on top of an error
           map("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction")
+
+          -- Inspect documentation and types for the symbol under the cursor
+          map("K", vim.lsp.buf.hover, "Hover Documentation")
+
+          -- Show function parameter information similar to VSCode signature help
+          map("<leader>sh", vim.lsp.buf.signature_help, "[S]ignature [H]elp")
 
           -- WARN: This is not Goto Definition, this is Goto Declaration.
           map("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
