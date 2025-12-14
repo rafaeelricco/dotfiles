@@ -259,6 +259,19 @@ return {
         },
       },
     },
+    config = function(_, opts)
+      require("neo-tree").setup(opts)
+
+      -- Refresh git status when Neovim gains focus (catches external commits)
+      vim.api.nvim_create_autocmd("FocusGained", {
+        group = vim.api.nvim_create_augroup("NeoTreeGitRefresh", { clear = true }),
+        callback = function()
+          if package.loaded["neo-tree.sources.manager"] then
+            require("neo-tree.sources.manager").refresh("filesystem")
+          end
+        end,
+      })
+    end,
   },
 
   -- Smooth scrolling plugin for both horizontal and vertical movement
