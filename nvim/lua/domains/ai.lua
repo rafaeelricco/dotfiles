@@ -4,7 +4,7 @@
 
 return {
   {
-    "rafaeelricco/claude-code.nvim",
+    dir = "/Users/rafaelricco/Projects/r1cco/claude-code.nvim",
     name = "claude",
     dependencies = { "folke/snacks.nvim" },
     lazy = false,
@@ -22,33 +22,36 @@ return {
       { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>",    desc = "Deny diff" },
     },
   },
+  {
+    "NickvanDyke/opencode.nvim",
+    dependencies = {
+      -- Recommended for `ask()` and `select()`.
+      -- Required for `snacks` provider.
+      ---@module 'snacks' <- Loads `snacks.nvim` types for configuration intellisense.
+      { "folke/snacks.nvim", opts = { input = {}, picker = {}, terminal = {} } },
+    },
+    config = function()
+      ---@type opencode.Opts
+      vim.g.opencode_opts = {
+        -- Your configuration, if any — see `lua/opencode/config.lua`, or "goto definition" on the type or field.
+      }
 
-  -- -- Configures OpenCode, an AI assistant that integrates with various LLMs
-  -- -- to provide code suggestions, explanations, and more directly within Neovim.
-  -- {
-  --   'NickvanDyke/opencode.nvim',
-  --   dependencies = {{ 'folke/snacks.nvim', opts = { input = { enabled = true } } }},
-  --   config = function()
-  --     -- Required for `opts.auto_reload`
-  --     vim.opt.autoread = true
-  --
-  --     -- Recommended keymaps
-  --     vim.keymap.set("n", "<leader>ot", function() require("opencode").toggle() end, { desc = "Toggle embedded" })
-  --     vim.keymap.set("n", "<leader>oa", function() require("opencode").ask("@cursor: ") end, { desc = "Ask about this" })
-  --     vim.keymap.set("v", "<leader>oa", function() require("opencode").ask("@selection: ") end, { desc = "Ask about selection" })
-  --     vim.keymap.set("n", "<leader>o+", function() require("opencode").prompt("@buffer", { append = true }) end, { desc = "Add buffer to prompt" })
-  --     vim.keymap.set("v", "<leader>o+", function() require("opencode").prompt("@selection", { append = true }) end, { desc = "Add selection to prompt" })
-  --     vim.keymap.set("n", "<leader>oe", function() require("opencode").prompt("Explain @cursor and its context") end, { desc = "Explain this code" })
-  --     vim.keymap.set("n", "<leader>on", function() require("opencode").command("session_new") end, { desc = "New session" })
-  --     vim.keymap.set("n", "<S-C-u>",    function() require("opencode").command("messages_half_page_up") end, { desc = "Messages half page up" })
-  --     vim.keymap.set("n", "<S-C-d>",    function() require("opencode").command("messages_half_page_down") end, { desc = "Messages half page down" })
-  --     vim.keymap.set({ "n", "v" }, "<leader>os", function() require("opencode").select() end, { desc = "Select prompt" })
-  --   end,
-  -- },
-  --
-  -- Configures GitHub Copilot, a popular AI pair programmer.
-  -- This setup disables the default tab mapping to avoid conflicts and sets
-  -- custom keybindings for a more integrated experience.
+      -- Required for `opts.events.reload`.
+      vim.o.autoread = true
+
+      -- Recommended/example keymaps.
+      -- vim.keymap.set({ "n", "x" }, "<C-s>", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask opencode…" })
+      vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end,                          { desc = "Execute opencode action…" })
+      vim.keymap.set({ "n", "t" }, "<C-.>", function() require("opencode").toggle() end,                          { desc = "Toggle opencode" })
+
+      vim.keymap.set({ "n", "x" }, "go",  function() return require("opencode").operator("@this ") end, { desc = "Add range to opencode", expr = true })
+      vim.keymap.set("n", "goo", function() return require("opencode").operator("@this ") .. "_" end, { desc = "Add line to opencode", expr = true })
+
+      -- You may want these if you stick with the opinionated "<C-a>" and "<C-x>" above — otherwise consider "<leader>o…".
+      vim.keymap.set("n", "+", "<C-a>", { desc = "Increment under cursor", noremap = true })
+      vim.keymap.set("n", "-", "<C-x>", { desc = "Decrement under cursor", noremap = true })
+    end,
+  },
   {
     "github/copilot.vim",
     event = "InsertEnter",
@@ -59,11 +62,11 @@ return {
 
       -- Ensures Copilot does not register as an LSP server, which could cause
       -- conflicts with other language servers. It also sets the correct Node.js path.
-      local node_path = vim.fn.exepath("node")
-      if node_path == "" then
-        vim.notify("Node.js not found in PATH", vim.log.levels.ERROR)
-      end
-      vim.g.copilot_node_command = node_path
+      -- local node_path = vim.fn.exepath("node")
+      -- if node_path == "" then
+      --   vim.notify("Node.js not found in PATH", vim.log.levels.ERROR)
+      -- end
+      -- vim.g.copilot_node_command = node_path
 
       -- Defines which filetypes Copilot should be active in, disabling it for
       -- specific buffers like git commits, help pages, and file explorers.
