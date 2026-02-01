@@ -130,3 +130,23 @@ vim.keymap.set("n", "[e", diagnostic_goto(false, "ERROR"), { desc = "Prev Error"
 -- Navigate between warnings only
 vim.keymap.set("n", "]w", diagnostic_goto(true, "WARN"), { desc = "Next Warning" })
 vim.keymap.set("n", "[w", diagnostic_goto(false, "WARN"), { desc = "Prev Warning" })
+
+-- =============================================
+-- Diagnostic Copy to Clipboard
+-- =============================================
+
+-- Copy all diagnostics on the current line to clipboard
+vim.keymap.set("n", "<leader>yd", function()
+  local line = vim.api.nvim_win_get_cursor(0)[1] - 1
+  local diagnostics = vim.diagnostic.get(0, { lnum = line })
+  if #diagnostics == 0 then
+    vim.notify("No diagnostics on current line", vim.log.levels.WARN)
+    return
+  end
+  local messages = vim.tbl_map(function(d)
+    local prefix = d.source and ("[" .. d.source .. "] ") or ""
+    return prefix .. d.message
+  end, diagnostics)
+  vim.fn.setreg("+", table.concat(messages, "\n"))
+  vim.notify(string.format("Copied %d diagnostic(s) to clipboard", #diagnostics), vim.log.levels.INFO)
+end, { desc = "[Y]ank line [D]iagnostics to clipboard" })
