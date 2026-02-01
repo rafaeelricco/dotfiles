@@ -53,6 +53,7 @@ return {
         "lua",
         "luadoc",
         "markdown",
+        "markdown_inline",
         "vim",
         "vimdoc",
         "javascript",
@@ -68,7 +69,9 @@ return {
       auto_install = true,
       highlight = {
         enable = true,
-        additional_vim_regex_highlighting = { "ruby" },
+        -- Disabled for performance: using Tree-sitter exclusively for syntax highlighting
+        -- Enabling this causes duplicate processing and potential visual conflicts
+        additional_vim_regex_highlighting = false,
       },
       indent = { enable = true, disable = { "ruby" } },
     },

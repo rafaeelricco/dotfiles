@@ -15,7 +15,7 @@ vim.opt.termguicolors = true
 -- Each color is mapped to a specific UI element or syntax token.
 local colors = {
   -- Main UI colors from your VS Code theme
-  bg = "#0f0f0f",   -- editor.background
+  bg = "#181818",   -- editor.background
   fg = "#cccccc",   -- editor.foreground / foreground
 
   -- Line numbers (your specific customization)
@@ -25,8 +25,8 @@ local colors = {
   -- UI Elements
   status_bg = "#181818",      -- statusBar.background
   panel_bg = "#181818",       -- panel.background
-  menu_bg = "#0f0f0f",        -- menu.background / dropdown.listBackground
-  widget_bg = "#0f0f0f",      -- editorWidget.background
+  menu_bg = "#181818",        -- menu.background / dropdown.listBackground
+  widget_bg = "#181818",      -- editorWidget.background
   input_bg = "#313131",       -- input.background
   button_bg = "#0078d4",      -- button.background
   border = "#2b2b2b",         -- various borders
@@ -37,7 +37,7 @@ local colors = {
   visual = "#3a3d41",                -- editor.inactiveSelectionBackground
   search = "#9e6a03",                -- editor.findMatchBackground
   search_highlight = "#ea5c00",      -- editor.findMatchHighlightBackground (solid color)
-  cursor_line = "#1a1a1a",           -- Custom cursor line (slightly lighter than bg)
+  cursor_line = "#222222",           -- Custom cursor line (slightly lighter than bg)
   selection_highlight = "#add6ff",   -- editor.selectionHighlightBackground (solid color)
 
   -- Syntax highlighting colors from tokenColors
@@ -92,7 +92,7 @@ local colors = {
   -- Additional colors from JSON
   activity_border = "#0078d4",         -- activityBar.activeBorder
   panel_border = "#2b2b2b",            -- panel.border
-  sidebar_bg = "#0f0f0f",              -- sideBar.background
+  sidebar_bg = "#181818",              -- sideBar.background
   sidebar_fg = "#cccccc",              -- sideBar.foreground
   badge_bg = "#616161",                -- badge.background
   badge_fg = "#f8f8f8",                -- badge.foreground
@@ -598,7 +598,7 @@ vim.api.nvim_create_autocmd("ColorScheme", {
     vim.api.nvim_set_hl(0, "BlinkCmpKindTypeParameter", { fg = "#4ec9b0" })
 
     -- Apply Trouble.nvim highlights to match VS Code theme
-    vim.api.nvim_set_hl(0, "TroubleNormal", { fg = "#cccccc", bg = "#0f0f0f" })
+    vim.api.nvim_set_hl(0, "TroubleNormal", { fg = "#cccccc", bg = "#181818" })
     vim.api.nvim_set_hl(0, "TroubleText", { fg = "#cccccc" })
     vim.api.nvim_set_hl(0, "TroubleSource", { fg = "#6A9955", italic = true })
     vim.api.nvim_set_hl(0, "TroubleCode", { fg = "#B5CEA8" })
@@ -606,7 +606,7 @@ vim.api.nvim_create_autocmd("ColorScheme", {
     vim.api.nvim_set_hl(0, "TroubleFilename", { fg = "#9CDCFE", bold = true })
     vim.api.nvim_set_hl(0, "TroubleLocation", { fg = "#9d9d9d" })
     vim.api.nvim_set_hl(0, "TroublePos", { fg = "#B5CEA8" })
-    vim.api.nvim_set_hl(0, "TroubleCount", { fg = "#CD9731", bg = "#1a1a1a", bold = true })
+    vim.api.nvim_set_hl(0, "TroubleCount", { fg = "#CD9731", bg = "#222222", bold = true })
 
     -- Trouble diagnostic icons with VS Code colors
     vim.api.nvim_set_hl(0, "TroubleIconError", { fg = "#F44747" })
@@ -621,7 +621,7 @@ vim.api.nvim_create_autocmd("ColorScheme", {
     vim.api.nvim_set_hl(0, "TroubleTextHint", { fg = "#B267E6" })
 
     -- Trouble preview and selection
-    vim.api.nvim_set_hl(0, "TroublePreview", { bg = "#1a1a1a" })
+    vim.api.nvim_set_hl(0, "TroublePreview", { bg = "#222222" })
     vim.api.nvim_set_hl(0, "TroublePreviewMatch", { bg = "#264f78", fg = "#ffffff" })
   end,
 })
@@ -646,7 +646,7 @@ vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelp", { bg = "#1e1e1e", fg = "#cccccc"
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { bg = "#1e1e1e", fg = "#454545" })
 
 -- Apply Trouble.nvim highlights immediately
-vim.api.nvim_set_hl(0, "TroubleNormal", { fg = "#cccccc", bg = "#0f0f0f" })
+vim.api.nvim_set_hl(0, "TroubleNormal", { fg = "#cccccc", bg = "#181818" })
 vim.api.nvim_set_hl(0, "TroubleText", { fg = "#cccccc" })
 vim.api.nvim_set_hl(0, "TroubleSource", { fg = "#6A9955", italic = true })
 vim.api.nvim_set_hl(0, "TroubleCode", { fg = "#B5CEA8" })
@@ -654,7 +654,7 @@ vim.api.nvim_set_hl(0, "TroubleDirectory", { fg = "#4EC9B0" })
 vim.api.nvim_set_hl(0, "TroubleFilename", { fg = "#9CDCFE", bold = true })
 vim.api.nvim_set_hl(0, "TroubleLocation", { fg = "#9d9d9d" })
 vim.api.nvim_set_hl(0, "TroublePos", { fg = "#B5CEA8" })
-vim.api.nvim_set_hl(0, "TroubleCount", { fg = "#CD9731", bg = "#1a1a1a", bold = true })
+vim.api.nvim_set_hl(0, "TroubleCount", { fg = "#CD9731", bg = "#222222", bold = true })
 
 -- Trouble diagnostic icons
 vim.api.nvim_set_hl(0, "TroubleIconError", { fg = "#F44747" })
@@ -669,7 +669,7 @@ vim.api.nvim_set_hl(0, "TroubleTextInformation", { fg = "#6796E6" })
 vim.api.nvim_set_hl(0, "TroubleTextHint", { fg = "#B267E6" })
 
 -- Trouble preview and selection
-vim.api.nvim_set_hl(0, "TroublePreview", { bg = "#1a1a1a" })
+vim.api.nvim_set_hl(0, "TroublePreview", { bg = "#222222" })
 vim.api.nvim_set_hl(0, "TroublePreviewMatch", { bg = "#264f78", fg = "#ffffff" })
 
 -- Terminal colors (16 ANSI colors) - mapped from your VS Code theme

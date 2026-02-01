@@ -65,6 +65,48 @@ return {
 
       -- Allows extra capabilities provided by nvim-cmp
       "saghen/blink.cmp",
+
+      -- Better inline diagnostics with real-time updates in insert mode
+      {
+        "rachartier/tiny-inline-diagnostic.nvim",
+        event = "VeryLazy",
+        priority = 1000,
+        config = function()
+          require("tiny-inline-diagnostic").setup({
+            -- Available presets: "modern", "classic", "minimal", "powerline", "ghost", "simple", "nonerdfont", "amongus"
+            preset = "minimal",
+
+            options = {
+              -- Show errors while typing in insert mode
+              enable_on_insert = true,
+
+              -- Show diagnostic source (e.g., "pyright", "ts_ls")
+              show_source = { enabled = true, if_many = true },
+
+              -- Show diagnostic codes
+              show_code = true,
+
+              -- Multiline diagnostics support
+              multilines = { enabled = true },
+
+              -- Show all diagnostics on cursor line
+              show_all_diags_on_cursorline = true,
+
+              -- Show related LSP information
+              show_related = { enabled = true, max_count = 3 },
+
+              -- Handle long messages
+              overflow = { mode = "wrap" },
+
+              -- Throttle updates (lower = more responsive, higher = better performance)
+              throttle = 20,
+            },
+          })
+
+          -- Disable default virtual text to avoid duplicates
+          vim.diagnostic.config({ virtual_text = false })
+        end,
+      },
     },
     config = function()
       vim.api.nvim_create_autocmd("LspAttach", {

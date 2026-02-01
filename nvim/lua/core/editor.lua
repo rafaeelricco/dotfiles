@@ -100,3 +100,33 @@ vim.keymap.set("v", "<C-E>", "$", { desc = "Extend selection to end of line" })
 
 -- Delete word backward using Option+Backspace
 vim.keymap.set("i", "<M-BS>", "<C-w>", { desc = "Delete word backward" })
+
+-- =============================================
+-- Diagnostic Navigation
+-- =============================================
+
+-- Helper function for diagnostic navigation with optional severity filter
+local diagnostic_goto = function(next, severity)
+  return function()
+    vim.diagnostic.jump({
+      count = (next and 1 or -1) * vim.v.count1,
+      severity = severity and vim.diagnostic.severity[severity] or nil,
+      float = true,
+    })
+  end
+end
+
+-- Open floating diagnostic window for current line
+vim.keymap.set("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line [D]iagnostics" })
+
+-- Navigate between all diagnostics
+vim.keymap.set("n", "]d", diagnostic_goto(true), { desc = "Next Diagnostic" })
+vim.keymap.set("n", "[d", diagnostic_goto(false), { desc = "Prev Diagnostic" })
+
+-- Navigate between errors only
+vim.keymap.set("n", "]e", diagnostic_goto(true, "ERROR"), { desc = "Next Error" })
+vim.keymap.set("n", "[e", diagnostic_goto(false, "ERROR"), { desc = "Prev Error" })
+
+-- Navigate between warnings only
+vim.keymap.set("n", "]w", diagnostic_goto(true, "WARN"), { desc = "Next Warning" })
+vim.keymap.set("n", "[w", diagnostic_goto(false, "WARN"), { desc = "Prev Warning" })
