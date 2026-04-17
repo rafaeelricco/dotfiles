@@ -103,6 +103,7 @@ pwsh -Command "Import-Module .\powershell\in_testing_profile.ps1; tabs"
 | PowerShell Profile | `powershell/in_testing_profile.ps1` | Full session automation: Oh My Posh prompt, PSReadLine tweaks, directory persistence. |
 | Recovery Profile | `powershell/recovery_last_session_profile.ps1` | Lightweight profile that prioritizes restoring the last working directory. |
 | Terminal Template | `powershell/required_config.json` | Windows Terminal settings with JetBrainsMono, acrylic, and custom keybindings. |
+| Windows Cleanup | `scripts/windows/system-cleanup.bat` | Elevated maintenance script: clears TEMP, empties Recycle Bin, and runs SFC + DISM repairs. |
 
 ### Type Checking
 
