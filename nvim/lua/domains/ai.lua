@@ -4,7 +4,7 @@
 
 return {
   {
-    dir = "/Users/rafaelricco/Projects/r1cco/claude-code.nvim",
+    "rafaeelricco/claude-code.nvim",
     name = "claude",
     dependencies = { "folke/snacks.nvim" },
     lazy = false,
