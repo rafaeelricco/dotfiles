@@ -40,12 +40,16 @@ return {
     },
   },
 
-  -- Treesitter for syntax highlighting and more
+  -- Treesitter for syntax highlighting and indentation.
+  -- Uses the new `main` branch API (post-rewrite). The legacy
+  -- `nvim-treesitter.configs` module no longer exists.
   {
     "nvim-treesitter/nvim-treesitter",
+    branch = "main",
+    lazy = false,
     build = ":TSUpdate",
-    opts = {
-      ensure_installed = {
+    init = function()
+      local ensure_installed = {
         "bash",
         "c",
         "diff",
@@ -65,19 +69,24 @@ return {
         "python",
         "rust",
         "go",
-      },
-      auto_install = true,
-      highlight = {
-        enable = true,
-        -- Disabled for performance: using Tree-sitter exclusively for syntax highlighting
-        -- Enabling this causes duplicate processing and potential visual conflicts
-        additional_vim_regex_highlighting = false,
-      },
-      indent = { enable = true, disable = { "ruby" } },
-    },
-    config = function(_, opts)
-      require("nvim-treesitter.install").prefer_git = true
-      require("nvim-treesitter.configs").setup(opts)
+      }
+
+      local installed = require("nvim-treesitter.config").get_installed()
+      local to_install = vim.iter(ensure_installed)
+        :filter(function(p) return not vim.tbl_contains(installed, p) end)
+        :totable()
+      if #to_install > 0 then
+        require("nvim-treesitter").install(to_install)
+      end
+
+      vim.api.nvim_create_autocmd("FileType", {
+        callback = function(args)
+          if pcall(vim.treesitter.start, args.buf) then
+            vim.bo[args.buf].indentexpr =
+              "v:lua.require'nvim-treesitter'.indentexpr()"
+          end
+        end,
+      })
     end,
   },
 

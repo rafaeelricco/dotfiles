@@ -12,11 +12,28 @@ Domain-driven Neovim and Windows Terminal configuration focused on reproducible 
 ## Quick Start
 
 ### Prerequisites
-- **Neovim 0.9+** with clipboard support and Git available in `PATH`
+- **Neovim 0.12+** with clipboard support and Git available in `PATH` (required by the rewritten `nvim-treesitter` on the `main` branch)
+- **`tree-sitter` CLI 0.26+** — required at runtime to compile parsers; `nvim-treesitter` no longer bundles it
+- **C compiler** on `PATH` (Xcode Command Line Tools on macOS: `xcode-select --install`; `build-essential` on Linux; MSVC Build Tools on Windows) — used by `tree-sitter` to build parsers
 - **Node.js 18+** (required for GitHub Copilot and TypeScript tooling)
 - **PowerShell 7+** and **Windows Terminal 1.18+** on Windows
 - **oh-my-posh**, **posh-git**, **DockerCompletion**, **Get-ChildItemColor**, **PSReadLine** modules installed
 - **JetBrainsMono Nerd Font** (or any Nerd Font 3.2+) selected in your terminal
+
+#### Install the `tree-sitter` CLI
+
+```bash
+# macOS (Homebrew)
+brew install tree-sitter-cli
+
+# Linux / generic (requires npm)
+npm install -g tree-sitter-cli
+
+# Alternative: cargo
+cargo install tree-sitter-cli
+```
+
+Verify with `tree-sitter --version` — `nvim`'s `:checkhealth nvim-treesitter` must report it as ✅ before parsers will compile.
 
 ### Installation
 
