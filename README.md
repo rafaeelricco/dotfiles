@@ -53,6 +53,24 @@ ln -s "$(pwd)/nvim/lua" "$HOME/.config/nvim/lua"
 # ln -s "$(pwd)/nvim/lazy-lock.json" "$HOME/.config/nvim/lazy-lock.json"
 ```
 
+#### Claude Code Skills
+
+Link the versioned skills directory so Claude Code resolves it via `~/.claude/skills`:
+
+```bash
+# macOS / Linux
+mkdir -p "$HOME/.claude"
+ln -s "$(pwd)/.claude/skills" "$HOME/.claude/skills"
+```
+
+```powershell
+# Windows (PowerShell as Administrator, or with Developer Mode enabled)
+New-Item -ItemType Directory -Force -Path "$HOME\.claude" | Out-Null
+New-Item -ItemType SymbolicLink -Path "$HOME\.claude\skills" -Target "$PWD\.claude\skills"
+```
+
+If `~/.claude/skills` already exists as a real directory, move its contents into `./.claude/skills/` first, then remove the original before creating the symlink.
+
 On Windows Terminal, reference `powershell/in_testing_profile.ps1` in your profile command line or import the bundled settings template:
 
 ```powershell
@@ -121,6 +139,7 @@ pwsh -Command "Import-Module .\powershell\in_testing_profile.ps1; tabs"
 | Recovery Profile | `powershell/recovery_last_session_profile.ps1` | Lightweight profile that prioritizes restoring the last working directory. |
 | Terminal Template | `powershell/required_config.json` | Windows Terminal settings with JetBrainsMono, acrylic, and custom keybindings. |
 | Windows Cleanup | `scripts/windows/system-cleanup.bat` | Elevated maintenance script: clears TEMP, empties Recycle Bin, and runs SFC + DISM repairs. |
+| Claude Skills | `.claude/skills/` | Versioned Claude Code skills, symlinked into `~/.claude/skills` for the CLI to discover. |
 
 ### Type Checking
 
