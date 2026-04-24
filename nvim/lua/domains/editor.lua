@@ -131,11 +131,41 @@ return {
     config = function(_, opts)
       local npairs = require("nvim-autopairs")
       npairs.setup(opts)
-      
+
       -- Note: This configuration uses blink.cmp instead of nvim-cmp
       -- blink.cmp has built-in auto_brackets functionality that may overlap
       -- with nvim-autopairs. You can disable blink.cmp's auto_brackets
       -- in completion.lua if you prefer nvim-autopairs' behavior.
     end,
+  },
+
+  -- Inline color swatches for hex, rgb/hsl, CSS vars, named colors, and Tailwind.
+  -- Uses virtual symbol rendering so the original source text stays untouched.
+  {
+    "brenoprata10/nvim-highlight-colors",
+    event = { "BufReadPost", "BufNewFile" },
+    cmd = "HighlightColors",
+    keys = {
+      { "<leader>tc", "<cmd>HighlightColors Toggle<cr>", desc = "[T]oggle [C]olor highlights" },
+    },
+    opts = {
+      render = "virtual",
+      virtual_symbol = "■",
+      virtual_symbol_prefix = "",
+      virtual_symbol_suffix = " ",
+      virtual_symbol_position = "inline",
+      enable_hex = true,
+      enable_short_hex = true,
+      enable_rgb = true,
+      enable_hsl = true,
+      enable_hsl_without_function = true,
+      enable_ansi = true,
+      enable_xterm256 = true,
+      enable_var_usage = true,
+      enable_named_colors = true,
+      enable_tailwind = true,
+      exclude_filetypes = {},
+      exclude_buftypes = {},
+    },
   },
 }
