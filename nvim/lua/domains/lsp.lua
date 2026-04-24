@@ -20,9 +20,6 @@ return {
       "williamboman/mason-lspconfig.nvim",
       "WhoIsSethDaniel/mason-tool-installer.nvim",
 
-      -- Useful status updates for LSP.
-      -- { "j-hui/fidget.nvim", opts = {} },
-
       -- Better diagnostics, references, and quickfix list interface
       {
         "folke/trouble.nvim",
@@ -109,6 +106,16 @@ return {
       },
     },
     config = function()
+      -- Safe global K: LSP hover if any client is attached, notify otherwise.
+      -- Avoids falling through to :Man (keywordprg default) in buffers without LSP.
+      vim.keymap.set("n", "K", function()
+        if #vim.lsp.get_clients({ bufnr = 0 }) > 0 then
+          vim.lsp.buf.hover()
+        else
+          vim.notify("No LSP attached — hover unavailable", vim.log.levels.INFO)
+        end
+      end, { desc = "LSP Hover (safe fallback)" })
+
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
         callback = function(event)
@@ -140,9 +147,6 @@ return {
           -- Execute a code action, usually your cursor needs to be on top of an error
           map("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction")
 
-          -- Inspect documentation and types for the symbol under the cursor
-          map("K", vim.lsp.buf.hover, "Hover Documentation")
-
           -- Show function parameter information similar to VSCode signature help
           map("<leader>sh", vim.lsp.buf.signature_help, "[S]ignature [H]elp")
 
@@ -152,7 +156,7 @@ return {
           -- The following two autocommands are used to highlight references of the
           -- word under your cursor when your cursor rests there for a little while.
           local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
+          if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
             local highlight_augroup = vim.api.nvim_create_augroup("kickstart-lsp-highlight", { clear = false })
             vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
               buffer = event.buf,
@@ -177,7 +181,7 @@ return {
 
           -- The following code creates a keymap to toggle inlay hints in your
           -- code, if the language server you are using supports them
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
+          if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
             map("<leader>th", function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf }))
             end, "[T]oggle Inlay [H]ints")
@@ -295,22 +299,39 @@ return {
           -- client.server_capabilities.documentRangeFormattingProvider = false
 
           -- Enable completion triggered by <c-x><c-o>
-          vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
+          vim.bo[bufnr].omnifunc = "v:lua.vim.lsp.omnifunc"
 
           -- Enable code action menu
-          vim.api.nvim_buf_set_option(bufnr, "formatexpr", "v:lua.vim.lsp.formatexpr()")
+          vim.bo[bufnr].formatexpr = "v:lua.vim.lsp.formatexpr()"
         end,
+      })
+
+      -- Lua configuration (Neovim-aware)
+      vim.lsp.config('lua_ls', {
+        capabilities = capabilities,
+        settings = {
+          Lua = {
+            runtime = { version = "LuaJIT" },
+            diagnostics = { globals = { "vim" } },
+            workspace = {
+              library = vim.api.nvim_get_runtime_file("", true),
+              checkThirdParty = false,
+            },
+            telemetry = { enable = false },
+          },
+        },
       })
 
       -- Enable all language servers using the modern approach
       vim.lsp.enable('pyright')
       vim.lsp.enable('ts_ls')
+      vim.lsp.enable('lua_ls')
 
       -- Setup Mason and ensure language servers are installed
       require("mason").setup()
 
       require("mason-lspconfig").setup({
-        ensure_installed = { "pyright", "ts_ls" },
+        ensure_installed = { "pyright", "ts_ls", "lua_ls" },
         -- automatic_enable = true is the default, so mason-lspconfig will
         -- automatically enable installed servers via vim.lsp.enable()
       })
