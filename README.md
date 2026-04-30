@@ -63,13 +63,26 @@ mkdir -p "$HOME/.claude"
 ln -s "$(pwd)/.claude/skills" "$HOME/.claude/skills"
 ```
 
-```powershell
-# Windows (PowerShell as Administrator, or with Developer Mode enabled)
-New-Item -ItemType Directory -Force -Path "$HOME\.claude" | Out-Null
-New-Item -ItemType SymbolicLink -Path "$HOME\.claude\skills" -Target "$PWD\.claude\skills"
+On Windows, double-click [`scripts/windows/setup-claude-skills.bat`](scripts/windows/setup-claude-skills.bat) (or right-click → "Run as administrator"). It self-elevates via UAC and creates the symlink. If `~/.claude/skills` already exists as a non-empty real directory, the script aborts so you can move its contents into `./.claude/skills/` first.
+
+#### Codex Skills
+
+Reuse the same `.claude/skills/` directory in the Codex CLI. Codex stores user skills under `~/.codex/skills/`, but its bundled skills live in `~/.codex/skills/.system/`, so we link **per skill** instead of the whole directory:
+
+```bash
+# macOS / Linux
+mkdir -p "$HOME/.codex/skills"
+for dir in .claude/skills/*/; do
+  name=$(basename "$dir")
+  ln -sfn "$(pwd)/$dir" "$HOME/.codex/skills/$name"
+done
 ```
 
-If `~/.claude/skills` already exists as a real directory, move its contents into `./.claude/skills/` first, then remove the original before creating the symlink.
+On Windows, double-click [`scripts/windows/setup-codex-skills.bat`](scripts/windows/setup-codex-skills.bat) (or right-click → "Run as administrator"). It self-elevates via UAC, then loops through `.claude/skills/` and refreshes the per-skill symlinks. Re-run after pulling new skills into the repo.
+
+Both approaches preserve `~/.codex/skills/.system/` (Codex's bundled skills) by linking per skill instead of symlinking the whole directory.
+
+To verify both setups at any time, run [`scripts/windows/check-skills.bat`](scripts/windows/check-skills.bat) (no elevation needed) — it inspects `~/.claude/skills` and `~/.codex/skills/`, validates link targets against the repo, and reports any orphan or missing entries.
 
 On Windows Terminal, reference `powershell/in_testing_profile.ps1` in your profile command line or import the bundled settings template:
 
@@ -139,7 +152,10 @@ pwsh -Command "Import-Module .\powershell\in_testing_profile.ps1; tabs"
 | Recovery Profile | `powershell/recovery_last_session_profile.ps1` | Lightweight profile that prioritizes restoring the last working directory. |
 | Terminal Template | `powershell/required_config.json` | Windows Terminal settings with JetBrainsMono, acrylic, and custom keybindings. |
 | Windows Cleanup | `scripts/windows/system-cleanup.bat` | Elevated maintenance script: clears TEMP, empties Recycle Bin, and runs SFC + DISM repairs. |
-| Claude Skills | `.claude/skills/` | Versioned Claude Code skills, symlinked into `~/.claude/skills` for the CLI to discover. |
+| Claude Skills Setup | `scripts/windows/setup-claude-skills.bat` | Self-elevating script that symlinks `.claude/skills/` into `~/.claude/skills`. |
+| Codex Skills Setup | `scripts/windows/setup-codex-skills.bat` | Self-elevating script that links each skill in `.claude/skills/` into `~/.codex/skills/`, preserving `.system/`. |
+| Skills Check | `scripts/windows/check-skills.bat` | Read-only verifier (no elevation) that validates Claude and Codex skill links against the repo and flags orphans or missing entries. |
+| Claude / Codex Skills | `.claude/skills/` | Versioned skills shared between Claude Code (`~/.claude/skills`) and Codex CLI (`~/.codex/skills/<skill>`). |
 
 ### Type Checking
 
