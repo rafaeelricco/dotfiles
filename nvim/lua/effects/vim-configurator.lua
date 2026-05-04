@@ -118,8 +118,8 @@ vim.opt.paste = false
 vim.opt.formatoptions:remove({ "c", "r", "o" })
 
 -- Disables line wrapping to prevent unintended line breaks in code.
-vim.opt.wrap = false
-vim.opt.textwidth = 0
+vim.opt.wrap = true
+vim.opt.textwidth = 120
 
 -- [[ Core Autocommands ]]
 -- Defines fundamental autocommands that enhance the editing experience.
