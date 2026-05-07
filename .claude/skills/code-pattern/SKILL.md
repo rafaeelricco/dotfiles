@@ -7,10 +7,7 @@ description: >
   that should follow CONVENTIONS — especially when the request mentions code
   conventions, refactoring, type-safe style, `Maybe`, `Result`, `ts-pattern`,
   discriminated unions, prop drilling, inline prop types/styles, `cn()`/`cva()`,
-  named prop types, or component boundary smells. Invoke this skill any time an
-  AI coding agent is touching TS/React code in a HartAgency project, even when
-  the user doesn't explicitly say "follow conventions" — convention adherence
-  and component boundaries are the skill's job to enforce.
+  named prop types, or component boundary smells.
 ---
 
 # Code Pattern
@@ -31,7 +28,8 @@ Use the fast path only for local, mechanical changes:
 
 For fast path:
 1. Read only the convention source selected by touched surface:
-   - styling/component-only changes: use this file's Code Rules; no `CONVENTIONS.md` section is needed unless types, state, absence, errors, async, collections, or parsing are touched;
+   - styling/component-only: use this file's Code Rules;
+   - skip `CONVENTIONS.md` unless touching types, state, absence, errors, async, collections, or parsing;
    - props/types/unions: Type Design;
    - entity/data modeling: Domain Modeling;
    - absence/null/undefined: Maybe;
@@ -53,35 +51,31 @@ Escalate to the full workflow immediately when the work touches:
 
 ## Workflow
 
-Always:
+### Always
 1. Read the target file and nearest owning package's `package.json` before deciding whether a change is trivial.
 2. Use fast path only when the triage criteria allow it.
 3. Use full workflow when the work is not clearly local and mechanical.
 
-If asked for review, audit, or evaluation only:
-4. Don't edit. Return findings, risks, and actionable suggestions.
+### Full workflow
+1. Read the relevant `references/CONVENTIONS.md` section(s). Expand to the full reference when the change spans multiple domains or the relevant section is unclear.
+2. Find 2-3 nearby pattern files in the same module to ground style decisions — only ask the user if no obvious neighbours exist.
+3. Make only the approved or mechanically implied change. Keep diffs scoped.
 
-Full workflow:
-5. Read the relevant `references/CONVENTIONS.md` section(s). Expand to the full reference when the change spans multiple domains or the relevant section is unclear.
-6. Find 2-3 nearby pattern files in the same module to ground style decisions — only ask the user if no obvious neighbours exist.
-7. Make only the approved or mechanically implied change. Keep diffs scoped.
+### Component Boundary Audit triggers
+Run the audit per `references/component-boundaries.md` before editing when the work touches any of:
+- a screen/page or complex component;
+- a component with `match()`/`switch` over UI state;
+- `Maybe`, `RemoteData`, `Just`, `Nothing`, or `.maybe()` in render logic;
+- dense conditional JSX (`&&`, nested ternaries, repeated conditional regions);
+- branches that return the same child component with different props.
 
-Run the Component Boundary Audit per `references/component-boundaries.md` before editing when the work touches any of:
-8. A screen/page or complex component.
-9. A component with `match()`/`switch` over UI state.
-10. `Maybe`, `RemoteData`, `Just`, `Nothing`, or `.maybe()` in render logic.
-11. Dense conditional JSX (`&&`, nested ternaries, repeated conditional regions).
-12. Branches that return the same child component with different props.
-
-If a product/API/dependency/naming/persistence/data-model/error-handling decision is needed:
-13. Ask the user before editing.
-
-If local codebase patterns differ from CONVENTIONS:
-14. For isolated style or structure changes, follow the nearest local pattern and keep the diff scoped.
-15. For API contracts, shared types, data models, persistence, error handling, dependencies, routes, or broad normalization work, flag the conflict and ask the user before editing.
-
-If in plan mode or asked for a plan only:
-16. Don't edit. Return a concrete implementation plan.
+### Stop and ask
+- **Review-only request:** don't edit. Return findings, risks, and actionable suggestions.
+- **Plan-only request / plan mode:** don't edit. Return a concrete implementation plan.
+- **Decision needed** (product/API/dependency/naming/persistence/data-model/error-handling): ask the user before editing.
+- **Local pattern conflicts with CONVENTIONS:**
+  - isolated style/structure → follow nearest local pattern, scoped diff;
+  - shared contracts, types, data models, persistence, error handling, dependencies, routes, or broad normalization → flag the conflict and ask the user before editing.
 
 ## Code Rules
 
@@ -108,13 +102,16 @@ These complement `references/CONVENTIONS.md` — that file owns TypeScript model
 - Don't: Branch in the parent when every branch returns the same child component — boundary smell. See `references/component-boundaries.md`.
 
 **Scope** — *unauthorized dependencies, route changes, and shared-contract edits create cross-cutting decisions that need stakeholder input.*
+- Do: Stay within the requested edit's surface; flag broader changes for approval.
 - Don't: Introduce new dependencies, shared contracts, route changes, or new persistence/error strategies without approval.
+
+<!-- If Code Rules grow beyond ~30 lines, migrate to references/react-rules.md per skill-creator Pattern 1. -->
 
 ## References
 
 - `references/CONVENTIONS.md` — TypeScript modeling conventions. Read sections selected by triage; for styling/component-only fast path, use this file's Code Rules unless the change touches types, state, absence, errors, async, collections, or parsing. Load broader context when triage escalates.
 - `references/component-boundaries.md` — Component Boundary Audit checklist + preferred patterns for `Maybe` vs discriminated unions, parent/child boundary placement, typed presentation helpers. Read when the audit applies.
-- `references/examples.md` — Plan-style output example.
+- `references/examples.md` — Plan-style output example. Read when asked for plan-only output (plan mode, "give me a plan", review-only requests that need a structured deliverable).
 
 ## Verification
 
