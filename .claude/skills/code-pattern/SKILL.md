@@ -17,29 +17,71 @@ description: >
 
 Apply project conventions to code changes. Ground in patterns before editing.
 
+## Triage
+
+Start by reading the target file and the nearest owning package's `package.json`.
+Then classify the touched surface before loading broad references.
+
+Use the fast path only for local, mechanical changes:
+- copy/text tweaks;
+- className/layout tweaks;
+- replacing inline `style={}` with existing className/`cn()` patterns;
+- extracting named local prop types;
+- moving a small local JSX fragment without changing behavior.
+
+For fast path:
+1. Read only the convention source selected by touched surface:
+   - styling/component-only changes: use this file's Code Rules; no `CONVENTIONS.md` section is needed unless types, state, absence, errors, async, collections, or parsing are touched;
+   - props/types/unions: Type Design;
+   - entity/data modeling: Domain Modeling;
+   - absence/null/undefined: Maybe;
+   - fallible operations/errors: Result;
+   - async UI state: RemoteData;
+   - lazy/cancelable async: Future;
+   - persistent collections: Collections;
+   - DTOs/parsing/schemas: Parsing & Validation.
+2. Read 1 nearby pattern file if the local pattern is obvious; read 2-3 if style is unclear.
+3. Keep the diff local and mechanical.
+
+Escalate to the full workflow immediately when the work touches:
+- exported/shared types;
+- API contracts, schemas, decoders, persistence, routes, or dependencies;
+- error-handling strategy, data-model decisions, or broad normalization;
+- any Component Boundary Audit trigger;
+- unclear or conflicting local patterns;
+- behavior changes beyond the requested edit.
+
 ## Workflow
 
 Always:
-1. Read `references/CONVENTIONS.md` (sections: Type Design, Domain Modeling, Maybe, Result, RemoteData, Future, Collections, Parsing & Validation — jump to whichever applies) and the nearest owning package's `package.json`.
-2. Read the target file. Find 2-3 nearby pattern files in the same module to ground style decisions — only ask the user if no obvious neighbours exist.
-3. Make only the approved or mechanically implied change. Keep diffs scoped.
+1. Read the target file and nearest owning package's `package.json` before deciding whether a change is trivial.
+2. Use fast path only when the triage criteria allow it.
+3. Use full workflow when the work is not clearly local and mechanical.
+
+If asked for review, audit, or evaluation only:
+4. Don't edit. Return findings, risks, and actionable suggestions.
+
+Full workflow:
+5. Read the relevant `references/CONVENTIONS.md` section(s). Expand to the full reference when the change spans multiple domains or the relevant section is unclear.
+6. Find 2-3 nearby pattern files in the same module to ground style decisions — only ask the user if no obvious neighbours exist.
+7. Make only the approved or mechanically implied change. Keep diffs scoped.
 
 Run the Component Boundary Audit per `references/component-boundaries.md` before editing when the work touches any of:
-4. A screen/page or complex component.
-5. A component with `match()`/`switch` over UI state.
-6. `Maybe`, `RemoteData`, `Just`, `Nothing`, or `.maybe()` in render logic.
-7. Dense conditional JSX (`&&`, nested ternaries, repeated conditional regions).
-8. Branches that return the same child component with different props.
+8. A screen/page or complex component.
+9. A component with `match()`/`switch` over UI state.
+10. `Maybe`, `RemoteData`, `Just`, `Nothing`, or `.maybe()` in render logic.
+11. Dense conditional JSX (`&&`, nested ternaries, repeated conditional regions).
+12. Branches that return the same child component with different props.
 
 If a product/API/dependency/naming/persistence/data-model/error-handling decision is needed:
-9. Ask the user before editing.
+13. Ask the user before editing.
 
 If local codebase patterns differ from CONVENTIONS:
-10. For isolated style or structure changes, follow the nearest local pattern and keep the diff scoped.
-11. For API contracts, shared types, data models, persistence, error handling, dependencies, routes, or broad normalization work, flag the conflict and ask the user before editing.
+14. For isolated style or structure changes, follow the nearest local pattern and keep the diff scoped.
+15. For API contracts, shared types, data models, persistence, error handling, dependencies, routes, or broad normalization work, flag the conflict and ask the user before editing.
 
 If in plan mode or asked for a plan only:
-12. Don't edit. Return a concrete implementation plan.
+16. Don't edit. Return a concrete implementation plan.
 
 ## Code Rules
 
@@ -70,10 +112,10 @@ These complement `references/CONVENTIONS.md` — that file owns TypeScript model
 
 ## References
 
-- `references/CONVENTIONS.md` — TypeScript modeling conventions. Read on every invocation.
+- `references/CONVENTIONS.md` — TypeScript modeling conventions. Read sections selected by triage; for styling/component-only fast path, use this file's Code Rules unless the change touches types, state, absence, errors, async, collections, or parsing. Load broader context when triage escalates.
 - `references/component-boundaries.md` — Component Boundary Audit checklist + preferred patterns for `Maybe` vs discriminated unions, parent/child boundary placement, typed presentation helpers. Read when the audit applies.
 - `references/examples.md` — Plan-style output example.
 
 ## Verification
 
-Read the owning package's `package.json` scripts from the package directory. Run `typecheck` and `lint` if those scripts exist. If either script is missing, state that it was unavailable and do not invent a substitute command.
+Read the owning package's `package.json` scripts from the package directory. Choose the package manager from `packageManager` first; otherwise use the local lockfile (`pnpm-lock.yaml`, `yarn.lock`, `package-lock.json`, `bun.lockb`, or `bun.lock`); otherwise follow the evident workspace pattern. Run `typecheck` and `lint` only if those scripts exist. If either script is missing, state that it was unavailable and do not invent a substitute command.
