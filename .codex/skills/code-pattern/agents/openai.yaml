@@ -1,0 +1,4 @@
+interface:
+  display_name: "Code Pattern"
+  short_description: "Apply HartAgency conventions to refactors and reviews"
+  default_prompt: "Use $code-pattern to refactor or review this code following HartAgency conventions and nearby patterns."

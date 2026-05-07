@@ -1,5 +1,7 @@
 # Examples
 
+This file shows the *shape* of plan-style output the skill should produce when invoked in plan mode or asked for a plan only. The specific files below are illustrative — pick whatever 2-3 pattern files actually fit the change you're planning.
+
 ## Input
 
 Refactor `/Users/rafaelricco/Projects/ambar/HartAgency/app/mobile/src/app/(tabs)/events/[eventId]/venue-intelligence.tsx`.
@@ -17,7 +19,7 @@ Follow `app/CONVENTIONS.md`, use `cn()` for conditionals, avoid inline styles, a
 - State the context read.
 - Identify whether a user-owned decision is needed.
 - If planning only, produce a scoped plan with target files, constraints, implementation steps, and verification.
-- If implementing, edit only the target and direct dependents, then run mobile typecheck/lint when feasible.
+- If implementing, edit only the target and direct dependents, then run the owning package's typecheck/lint when feasible.
 
 ## Example Plan Output
 
@@ -38,4 +40,4 @@ Deliverable:
 - Extract repeated header/action/photo UI into small local components.
 - Replace conditional class strings with `cn()`.
 - Keep reducer/data helpers pure and typed.
-- Verify with `pnpm --filter hart-educator-mobile-app typecheck` and `pnpm --filter hart-educator-mobile-app lint`.
+- Verify by running typecheck and lint from `app/mobile/` (exact commands are in its `package.json` scripts).

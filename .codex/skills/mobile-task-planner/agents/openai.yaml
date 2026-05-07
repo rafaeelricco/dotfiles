@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mobile Task Planner"
+  short_description: "Plan mobile tasks from repo context"
+  default_prompt: "Use $mobile-task-planner to turn this mobile task into a structured plan before implementation."
