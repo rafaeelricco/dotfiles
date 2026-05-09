@@ -82,7 +82,26 @@ On Windows, double-click [`scripts/windows/setup-codex-skills.bat`](scripts/wind
 
 Both approaches preserve `~/.codex/skills/.system/` (Codex's bundled skills) by linking per skill instead of symlinking the whole directory.
 
-To verify both setups at any time, run [`scripts/windows/check-skills.bat`](scripts/windows/check-skills.bat) (no elevation needed) — it inspects `~/.claude/skills` and `~/.codex/skills/`, validates link targets against the repo, and reports any orphan or missing entries.
+#### Global Instructions
+
+Link the versioned instruction files so Claude Code and Codex pick them up from the repo:
+
+```bash
+# macOS / Linux — verify content first to avoid losing local edits
+diff ~/.claude/CLAUDE.md "$(pwd)/.claude/CLAUDE.md"   # expect no output
+diff ~/.codex/AGENTS.md  "$(pwd)/.codex/AGENTS.md"    # expect no output
+
+# Then create the symlinks
+mkdir -p "$HOME/.claude" "$HOME/.codex"
+ln -sfn "$(pwd)/.claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+ln -sfn "$(pwd)/.codex/AGENTS.md"  "$HOME/.codex/AGENTS.md"
+```
+
+On Windows, the updated [`setup-claude-skills.bat`](scripts/windows/setup-claude-skills.bat) and [`setup-codex-skills.bat`](scripts/windows/setup-codex-skills.bat) handle these links alongside the skills. Re-run them after pulling.
+
+> **Note:** `.claude/CLAUDE.md` and `.codex/AGENTS.md` carry identical content. Edit both files together when changing instructions.
+
+To verify all setups at any time, run [`scripts/windows/check-skills.bat`](scripts/windows/check-skills.bat) (no elevation needed) — it inspects `~/.claude/skills`, `~/.codex/skills/`, the two instruction files, validates link targets against the repo, and reports any orphan or missing entries.
 
 On Windows Terminal, reference `powershell/in_testing_profile.ps1` in your profile command line or import the bundled settings template:
 
@@ -152,10 +171,12 @@ pwsh -Command "Import-Module .\powershell\in_testing_profile.ps1; tabs"
 | Recovery Profile | `powershell/recovery_last_session_profile.ps1` | Lightweight profile that prioritizes restoring the last working directory. |
 | Terminal Template | `powershell/required_config.json` | Windows Terminal settings with JetBrainsMono, acrylic, and custom keybindings. |
 | Windows Cleanup | `scripts/windows/system-cleanup.bat` | Elevated maintenance script: clears TEMP, empties Recycle Bin, and runs SFC + DISM repairs. |
-| Claude Skills Setup | `scripts/windows/setup-claude-skills.bat` | Self-elevating script that symlinks `.claude/skills/` into `~/.claude/skills`. |
-| Codex Skills Setup | `scripts/windows/setup-codex-skills.bat` | Self-elevating script that links each skill in `.claude/skills/` into `~/.codex/skills/`, preserving `.system/`. |
-| Skills Check | `scripts/windows/check-skills.bat` | Read-only verifier (no elevation) that validates Claude and Codex skill links against the repo and flags orphans or missing entries. |
+| Claude Skills Setup | `scripts/windows/setup-claude-skills.bat` | Self-elevating script that symlinks `.claude/skills/` and `.claude/CLAUDE.md` into `~/.claude/`. |
+| Codex Skills Setup | `scripts/windows/setup-codex-skills.bat` | Self-elevating script that links each skill in `.claude/skills/` plus `.codex/AGENTS.md` into `~/.codex/`, preserving `.system/`. |
+| Skills Check | `scripts/windows/check-skills.bat` | Read-only verifier (no elevation) that validates skill links and the two instruction-file links against the repo and flags orphans or missing entries. |
 | Claude / Codex Skills | `.claude/skills/` | Versioned skills shared between Claude Code (`~/.claude/skills`) and Codex CLI (`~/.codex/skills/<skill>`). |
+| Claude Instructions | `.claude/CLAUDE.md` | Global Claude Code instructions: quality mode + writing style. Symlinked into `~/.claude/CLAUDE.md`. |
+| Codex Instructions | `.codex/AGENTS.md` | Global Codex CLI instructions; identical content to `.claude/CLAUDE.md`. Symlinked into `~/.codex/AGENTS.md`. |
 
 ### Type Checking
 

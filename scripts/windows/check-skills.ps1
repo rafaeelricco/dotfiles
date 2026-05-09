@@ -8,9 +8,13 @@ if (-not $RepoPath) {
     $RepoPath = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 }
 
-$SkillsSrc  = Join-Path $RepoPath ".claude\skills"
-$ClaudeLink = Join-Path $HOME ".claude\skills"
-$CodexDir   = Join-Path $HOME ".codex\skills"
+$SkillsSrc    = Join-Path $RepoPath ".claude\skills"
+$ClaudeLink   = Join-Path $HOME ".claude\skills"
+$CodexDir     = Join-Path $HOME ".codex\skills"
+$ClaudeMdSrc  = Join-Path $RepoPath ".claude\CLAUDE.md"
+$ClaudeMdLink = Join-Path $HOME ".claude\CLAUDE.md"
+$AgentsMdSrc  = Join-Path $RepoPath ".codex\AGENTS.md"
+$AgentsMdLink = Join-Path $HOME ".codex\AGENTS.md"
 
 $script:pass = 0
 $script:fail = 0
@@ -36,7 +40,8 @@ function Check-Link {
 
     $item = Get-Item -LiteralPath $Link -Force
     if (-not $item.LinkType) {
-        Write-Host "  [FAIL] $Label : exists but is not a link (real directory)" -ForegroundColor Red
+        $kind = if ($item.PSIsContainer) { "real directory" } else { "real file" }
+        Write-Host "  [FAIL] $Label : exists but is not a link ($kind)" -ForegroundColor Red
         $script:fail++
         return
     }
@@ -102,6 +107,21 @@ if (-not (Test-Path -LiteralPath $CodexDir)) {
             Write-Host "    - $($o.Name) [$type]" -ForegroundColor Yellow
         }
     }
+}
+Write-Host ""
+
+Write-Host "--- Global Instructions ---" -ForegroundColor Cyan
+if (-not (Test-Path -LiteralPath $ClaudeMdSrc)) {
+    Write-Host "  [FAIL] source file missing: $ClaudeMdSrc" -ForegroundColor Red
+    $script:fail++
+} else {
+    Check-Link -Link $ClaudeMdLink -Expected $ClaudeMdSrc -Label "~/.claude/CLAUDE.md"
+}
+if (-not (Test-Path -LiteralPath $AgentsMdSrc)) {
+    Write-Host "  [FAIL] source file missing: $AgentsMdSrc" -ForegroundColor Red
+    $script:fail++
+} else {
+    Check-Link -Link $AgentsMdLink -Expected $AgentsMdSrc -Label "~/.codex/AGENTS.md"
 }
 Write-Host ""
 
