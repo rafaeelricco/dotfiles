@@ -22,8 +22,6 @@ The user may reorder sections in the questionnaire. Respect their chosen order.
 
 {{ USER_MOTIVATION }}
 
----
-
 <!-- OPTIONAL: Only if user opted in -->
 ## Demo Video
 

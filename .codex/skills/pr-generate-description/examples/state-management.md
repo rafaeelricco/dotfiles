@@ -2,8 +2,6 @@
 
 Style: Concise | Sections: What's New, Store Interface Table, Key Actions Table, Testing
 
----
-
 ## What's New
 
 **State Management Architecture**
