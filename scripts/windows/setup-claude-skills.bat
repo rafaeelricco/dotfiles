@@ -13,11 +13,19 @@ set "REPO=%CD%"
 popd
 
 set "SKILLS_SRC=%REPO%\.claude\skills"
+set "INSTRUCTIONS_SRC=%REPO%\.claude\CLAUDE.md"
 set "CLAUDE_DIR=%USERPROFILE%\.claude"
 set "LINK=%CLAUDE_DIR%\skills"
+set "INSTRUCTIONS_LINK=%CLAUDE_DIR%\CLAUDE.md"
 
 if not exist "%SKILLS_SRC%" (
     echo ERROR: source directory not found: %SKILLS_SRC%
+    pause
+    exit /b 1
+)
+
+if not exist "%INSTRUCTIONS_SRC%" (
+    echo ERROR: source file not found: %INSTRUCTIONS_SRC%
     pause
     exit /b 1
 )
@@ -37,6 +45,10 @@ if exist "%LINK%" (
 
 echo === Linking %LINK% -^> %SKILLS_SRC% ===
 mklink /D "%LINK%" "%SKILLS_SRC%" >nul && (echo   Done.) || (echo   FAILED.)
+
+echo === Linking %INSTRUCTIONS_LINK% -^> %INSTRUCTIONS_SRC% ===
+if exist "%INSTRUCTIONS_LINK%" del /f /q "%INSTRUCTIONS_LINK%" >nul 2>&1
+mklink "%INSTRUCTIONS_LINK%" "%INSTRUCTIONS_SRC%" >nul && (echo   Done.) || (echo   FAILED.)
 
 echo.
 echo === Result ===
