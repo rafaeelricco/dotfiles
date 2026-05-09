@@ -2,8 +2,6 @@
 
 Style: Concise | Sections: Motivation, What's New, Testing
 
----
-
 ## Motivation
 
 Establish comprehensive coding and type design conventions to help everyone understand the project patterns. This improves codebase consistency, reduces onboarding friction for new contributors, and ensures alignment on functional programming principles, type safety standards, and React component patterns across the team.
