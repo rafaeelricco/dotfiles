@@ -27,6 +27,10 @@ Optimize for correctness, maintainability, and evidence over speed, but scale in
 - Before finishing, self-review the diff for regressions, missed call sites, unsafe assumptions, and missing validation.
 - Done means: the request is satisfied, relevant checks were run or explicitly skipped with reason, and the final answer summarizes what changed and how it was verified.
 
+### Pull requests
+
+Before creating or opening a pull request, use the `pr-generate-description` skill to produce the PR body and title options from the branch diff. If the agent will run `gh pr create`, use the skill first and pass the body via `--body` or `--body-file` (do not skip the skill and invent the description).
+
 ## Writing style
 
 These rules apply to every prose output: chat replies, commit messages, PR descriptions, GitHub issues, code comments, and docs.

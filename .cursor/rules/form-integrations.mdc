@@ -1,0 +1,50 @@
+---
+description: Conventions for building forms in HartAgency web (`app/frontend`) and mobile (`app/mobile`). Apply when creating or modifying any form UI, field validation, or submit handler that uses `useForm`, `FormInput`, `TextInput`/`CheckboxInput`, the typed `api` + `call` endpoint helpers, or `RemoteData` submit state. Trigger on tasks like "add a sign-in/forgot-password/activation form", "wire this form to an endpoint", "validate this input", or any change touching `forms.tsx` helpers or `endpoints.ts` / `request.ts` from a form.
+alwaysApply: false
+---
+
+# Form integrations
+
+Use form integrations as typed UI boundaries. Build fields with `useForm`, render them with `FormInput`, keep field validation inside `validate`, call typed endpoints through `api` + `call`, and put integration work inside the `onSubmit` callback.
+
+## Form setup
+
+- Use the platform form helper: `@fe/components/ui/forms` on web, `@/components/ui/forms` on mobile.
+- Define supported controls with `new TextInput(...)` and `new CheckboxInput(...)`; do not hand-roll local input state for those controls.
+- Return every field key from `validate`, with `string | null` values.
+- Normalize values in submit handlers. Trim emails before store or API calls.
+- Keep field errors in `validate`; keep backend/store errors in submit state.
+
+## Endpoints
+
+- Import `api` from the platform endpoint map: `@fe/api/endpoints` on web, `@/api/endpoints` on mobile.
+- Import `call` from the platform request helper: `@fe/api/request` on web, `@/api/request` on mobile.
+- Use `call(api.someEndpoint, body).fork(...)` for direct endpoint integrations.
+- If an endpoint is missing, add it to the platform `endpoints.ts` map from `@be/api`; do not hard-code paths or duplicate fetch wiring in the component.
+- Use platform request helpers for auth headers, base URLs, encoding, decoding, and typed errors.
+
+## Submit flow
+
+- Model submit state with `RemoteData` following `app/CONVENTIONS.md`.
+- Initialize state explicitly, for example `React.useState<RemoteData<string, AuthIdentity>>(NotAsked())`.
+- Wrap integration work in a named handler: `const handleSubmit = onSubmit(values => { ... })`.
+- Set `Loading()` before the store/API call.
+- Set `Failed(...)` in the recoverable error branch.
+- Set `Ready(...)`, persist side effects, and navigate only from the success branch.
+- Web forms call `e.preventDefault()`, clear stale submit errors with `setSubmission(NotAsked())` when needed, then `void handleSubmit()`.
+- Mobile buttons call the submit listener directly: `<Button onPress={handleSubmit} disabled={state.isLoading}>`.
+
+## Rendering
+
+- Render fields through `<FormInput config={fields.name} disabled={state.isLoading} />`.
+- Disable fields and submit buttons while loading.
+- Show field errors through `FormInput`.
+- Show submit errors through a separate alert block, using `state instanceof Failed` on mobile or `state.isFailed` where the local code already uses boolean helpers.
+- Show a loading label or spinner inside the submit button while `state.isLoading`.
+
+## Reference pattern
+
+- Follow `app/CONVENTIONS.md` for `RemoteData`, `Maybe`, `Result`, and typed async state conventions.
+- Follow `app/mobile/src/app/(auth)/sign-in.tsx` for mobile forms that call store actions, persist follow-up state, and navigate on success.
+- Follow `app/frontend/src/pages/sign-in.tsx` for web forms that wrap `onSubmit` in a `<form>` submit handler.
+- Follow `app/frontend/src/api/request.ts`, `app/frontend/src/api/endpoints.ts`, `app/mobile/src/api/request.ts`, and `app/mobile/src/api/endpoints.ts` for typed endpoint access.

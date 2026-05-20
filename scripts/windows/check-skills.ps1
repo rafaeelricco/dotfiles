@@ -15,6 +15,9 @@ $ClaudeMdSrc  = Join-Path $RepoPath ".claude\CLAUDE.md"
 $ClaudeMdLink = Join-Path $HOME ".claude\CLAUDE.md"
 $AgentsMdSrc  = Join-Path $RepoPath ".codex\AGENTS.md"
 $AgentsMdLink = Join-Path $HOME ".codex\AGENTS.md"
+$RulesSrc     = Join-Path $RepoPath ".cursor\rules"
+$CursorLink   = Join-Path $HOME ".cursor\rules"
+$ExpectedRules = @("pr-workflow.mdc", "form-integrations.mdc")
 
 $script:pass = 0
 $script:fail = 0
@@ -110,6 +113,25 @@ if (-not (Test-Path -LiteralPath $CodexDir)) {
 }
 Write-Host ""
 
+Write-Host "--- Cursor ($CursorLink) ---" -ForegroundColor Cyan
+if (-not (Test-Path -LiteralPath $RulesSrc)) {
+    Write-Host "  [FAIL] source directory missing: $RulesSrc" -ForegroundColor Red
+    $script:fail++
+} else {
+    Check-Link -Link $CursorLink -Expected $RulesSrc -Label "rules"
+    foreach ($rule in $ExpectedRules) {
+        $path = Join-Path $RulesSrc $rule
+        if (Test-Path -LiteralPath $path) {
+            Write-Host "  [OK]   $rule present in repo" -ForegroundColor Green
+            $script:pass++
+        } else {
+            Write-Host "  [FAIL] $rule missing in repo" -ForegroundColor Red
+            $script:fail++
+        }
+    }
+}
+Write-Host ""
+
 Write-Host "--- Global Instructions ---" -ForegroundColor Cyan
 if (-not (Test-Path -LiteralPath $ClaudeMdSrc)) {
     Write-Host "  [FAIL] source file missing: $ClaudeMdSrc" -ForegroundColor Red
@@ -129,7 +151,7 @@ Write-Host "=== Summary: $script:pass pass, $script:fail fail ===" -ForegroundCo
 if ($script:fail -eq 0) {
     Write-Host "All good." -ForegroundColor Green
 } else {
-    Write-Host "Run setup-claude-skills.bat / setup-codex-skills.bat to fix." -ForegroundColor Yellow
+    Write-Host "Run setup-claude-skills.bat / setup-codex-skills.bat / setup-cursor-rules.bat to fix." -ForegroundColor Yellow
 }
 
 if ($script:fail -gt 0) { exit 1 } else { exit 0 }
