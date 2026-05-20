@@ -82,6 +82,18 @@ On Windows, double-click [`scripts/windows/setup-codex-skills.bat`](scripts/wind
 
 Both approaches preserve `~/.codex/skills/.system/` (Codex's bundled skills) by linking per skill instead of symlinking the whole directory.
 
+#### Cursor Rules
+
+Link the versioned rules directory so Cursor applies them globally via `~/.cursor/rules`:
+
+```bash
+# macOS / Linux
+mkdir -p "$HOME/.cursor"
+ln -sfn "$(pwd)/.cursor/rules" "$HOME/.cursor/rules"
+```
+
+On Windows, double-click [`scripts/windows/setup-cursor-rules.bat`](scripts/windows/setup-cursor-rules.bat) (or right-click → "Run as administrator"). It self-elevates via UAC and creates the symlink. If `~/.cursor/rules` already exists as a non-empty real directory, the script aborts so you can move its contents into `./.cursor/rules/` first.
+
 #### Global Instructions
 
 Link the versioned instruction files so Claude Code and Codex pick them up from the repo:
@@ -101,7 +113,7 @@ On Windows, the updated [`setup-claude-skills.bat`](scripts/windows/setup-claude
 
 > **Note:** `.claude/CLAUDE.md` and `.codex/AGENTS.md` carry identical content. Edit both files together when changing instructions.
 
-To verify all setups at any time, run [`scripts/windows/check-skills.bat`](scripts/windows/check-skills.bat) (no elevation needed) — it inspects `~/.claude/skills`, `~/.codex/skills/`, the two instruction files, validates link targets against the repo, and reports any orphan or missing entries.
+To verify all setups at any time, run [`scripts/windows/check-skills.bat`](scripts/windows/check-skills.bat) (no elevation needed) — it inspects `~/.claude/skills`, `~/.codex/skills/`, `~/.cursor/rules`, the two instruction files, validates link targets against the repo, and reports any orphan or missing entries.
 
 On Windows Terminal, reference `powershell/in_testing_profile.ps1` in your profile command line or import the bundled settings template:
 
@@ -173,7 +185,9 @@ pwsh -Command "Import-Module .\powershell\in_testing_profile.ps1; tabs"
 | Windows Cleanup | `scripts/windows/system-cleanup.bat` | Elevated maintenance script: clears TEMP, empties Recycle Bin, and runs SFC + DISM repairs. |
 | Claude Skills Setup | `scripts/windows/setup-claude-skills.bat` | Self-elevating script that symlinks `.claude/skills/` and `.claude/CLAUDE.md` into `~/.claude/`. |
 | Codex Skills Setup | `scripts/windows/setup-codex-skills.bat` | Self-elevating script that links each skill in `.claude/skills/` plus `.codex/AGENTS.md` into `~/.codex/`, preserving `.system/`. |
-| Skills Check | `scripts/windows/check-skills.bat` | Read-only verifier (no elevation) that validates skill links and the two instruction-file links against the repo and flags orphans or missing entries. |
+| Skills Check | `scripts/windows/check-skills.bat` | Read-only verifier (no elevation) that validates skill links, Cursor rules, and the two instruction-file links against the repo and flags orphans or missing entries. |
+| Cursor Rules Setup | `scripts/windows/setup-cursor-rules.bat` | Self-elevating script that symlinks `.cursor/rules/` into `~/.cursor/rules`. |
+| Cursor Rules | `.cursor/rules/` | Global Cursor agent rules (`pr-workflow.mdc`, `form-integrations.mdc`). Symlinked into `~/.cursor/rules`. |
 | Claude / Codex Skills | `.claude/skills/` | Versioned skills shared between Claude Code (`~/.claude/skills`) and Codex CLI (`~/.codex/skills/<skill>`). |
 | Claude Instructions | `.claude/CLAUDE.md` | Global Claude Code instructions: quality mode + writing style. Symlinked into `~/.claude/CLAUDE.md`. |
 | Codex Instructions | `.codex/AGENTS.md` | Global Codex CLI instructions; identical content to `.claude/CLAUDE.md`. Symlinked into `~/.codex/AGENTS.md`. |

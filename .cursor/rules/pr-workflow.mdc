@@ -1,0 +1,29 @@
+---
+description: Conventions for git branch names and pull request descriptions. Apply when creating branches, opening or updating pull requests, or running git/gh commands like `git checkout -b`, `gh pr create`, or `gh pr edit`. Use the pr-generate-description skill for PR bodies.
+alwaysApply: false
+---
+
+Use branch names and PR descriptions as durable project artifacts. Branches should describe the work, not the person, agent, vendor, editor, or automation that created them.
+
+## Branches
+
+- Create branch names in concise kebab-case.
+- Name the change itself: `fix-login-redirect`, `add-sharepoint-sync`, `refactor-invite-seeding`.
+- Keep ownership, tooling, and execution context out of branch names.
+- If the user provides a branch name, use it as given unless it conflicts with Git rules.
+
+## Pull request descriptions
+
+When the user asks to create, open, update, or draft a pull request (or needs a PR body):
+
+1. Follow the **pr-generate-description** skill at `~/.claude/skills/pr-generate-description/SKILL.md`.
+2. Analyze `git diff` against `main` (or the repo default branch).
+3. **Always ask the user for Motivation (why)** — never invent it.
+4. Run the skill questionnaire (demo video, mermaid, files table, style, sections).
+5. Save output to `PR_DESCRIPTION.md` at the repo root.
+6. Suggest 2–3 conventional-commit PR titles.
+7. Use `gh pr create --body-file PR_DESCRIPTION.md` (or update an existing PR) unless the user says otherwise.
+
+If the skill is unavailable, ask before writing or submitting the PR body.
+
+Default writing style: concise. Include **Testing & Feedback** unless the user excludes it.

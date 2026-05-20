@@ -1,15 +1,26 @@
 ---
 name: pr-generate-description
 description: >
-  Generate structured, high-quality Pull Request descriptions by analyzing git diffs and interacting with the user.
-  Use this skill whenever the user asks to create, write, or generate a PR description, pull request description,
-  or mentions "PR description", "pull request", "PR template", "describe my changes", "write my PR",
-  or any variation of creating documentation for a code review submission. Also trigger when the user says
-  "generate PR", "PR for this branch", "describe this PR", or references comparing branches for a PR.
-  This skill is interactive — it asks the user key questions before generating the final output.
+  Generates structured pull request descriptions from git diffs via an interactive questionnaire.
+  Use this skill REQUIRED before opening or creating any GitHub pull request — including when
+  the user or agent will run gh pr create, gh pr edit --body, or says create/open/submit a PR,
+  open a pull request, ready for review, ship this branch, merge request, or compare branches
+  for review — even if they never say "PR description". Also trigger for describe my changes,
+  write the PR, PR body, PR summary, PR template, generate PR, document changes for code review,
+  or refresh an existing PR description after substantive commits. Prefer this skill over
+  improvising PR bodies from scratch. Interactive: asks motivation and formatting preferences first.
 ---
 
 # PR Description Generator
+
+## When to use (mandatory)
+
+Load and follow this skill before any of these unless the user explicitly opts out:
+- Creating or opening a pull request (`gh pr create`, GitHub UI, or equivalent)
+- Writing or updating PR description/body text
+- User asks to "create PR", "open PR", "submit for review", or similar
+
+Do not draft PR descriptions from memory alone when the above applies.
 
 Generate comprehensive, well-structured Pull Request descriptions by analyzing code changes and collaborating with the user through an interactive questionnaire.
 
@@ -26,7 +37,7 @@ The motivation section is always requested from the user — never auto-generate
 2. Analyze all changes
 3. Ask the user the interactive questionnaire
 4. Generate the PR description following the template
-5. Save to file and suggest a PR title
+5. Deliver description (save pr-description.markdown only if no PR exists and PR is not being created now), then suggest title options
 ```
 
 
@@ -50,6 +61,21 @@ git diff <base_branch>...HEAD
 ```
 
 If no git repo is found or the diff is empty, inform the user and ask them to provide context manually.
+
+### PR state (required before Step 5)
+
+Determine whether a PR already exists for the current branch:
+
+```bash
+# Prefer GitHub CLI when available
+gh pr view --json number,url,state 2>/dev/null
+# Fallback if view fails
+gh pr list --head "$(git rev-parse --abbrev-ref HEAD)" --state all --json number,url,state
+```
+
+- If a PR is found → treat as **PR exists** (do not save a draft file by default).
+- If `gh` is unavailable or commands fail → assume **no PR** unless the user says one is already open.
+- Record whether the user or current task intends to **create the PR in this session** (e.g. "create PR", "open pull request", or agent is running `gh pr create` next).
 
 ## Step 2: Analyze Changes
 
@@ -153,21 +179,38 @@ Read `references/template.md` for the output structure. Then compose the PR desc
 - Language: Match the language of the codebase/PR. If the repo is in English, write in English. If ambiguous, default to English.
 
 
-## Step 5: Save and Suggest Title
+## Step 5: Deliver, Save (if needed), and Suggest Title
 
-1. Save the PR description as `PR_DESCRIPTION.md` in the root of the current repository directory.
-2. Present the file to the user.
-3. Suggest a PR title following conventional commit style:
-   - Format: `type(scope): description`
-   - Types: `feat`, `fix`, `refactor`, `docs`, `chore`, `style`, `test`, `perf`, `ci`
+1. **Decide how to deliver** (use PR state from Step 1):
+
+   **A — PR will be created in this session** (user asked, or next step is `gh pr create`):
+   - Do **not** write `pr-description.markdown`.
+   - Pass the description to GitHub via `gh pr create --title "..." --body "..."` or `--body-file` (stdin/temp file is fine; delete temp file after).
+   - If the user only wanted a description for an automated create, present a one-line confirmation with the title used.
+
+   **B — PR already exists** for this branch:
+   - Do **not** write `pr-description.markdown` by default.
+   - Present the full description in the response.
+   - Offer to update the open PR with `gh pr edit --body "..."` only if the user asks.
+
+   **C — No PR yet, and not creating one now** (default draft path):
+   - Write the description to `pr-description.markdown` in the repository root.
+   - Tell the user the path and that they can paste it when opening the PR.
+
+2. **Present output**: In all cases, show the description (or confirm file path / PR URL). Never leave the user without the text in chat when a file was skipped.
+
+3. Suggest a plain, descriptive PR title (no conventional-commit prefix):
+   - Format: short imperative or descriptive phrase (e.g. `Add LangChain agent with streaming and property search`)
+   - Do **not** use `type(scope):` prefixes such as `feat(frontend):`, `fix:`, or `chore:`
    - Keep under 72 characters
    - Provide 2-3 title options for the user to choose from
+   - Use conventional-commit style (`type(scope): description`) only if the user explicitly requests it or repo contributing docs require it
 
 Example suggestions:
 ```
-1. feat(chatbot): add LangChain agent with streaming and property search
-2. feat(chatbot): integrate LangChain agent architecture with SSE streaming
-3. feat: implement AI chatbot with vector search and real-time streaming
+1. Add LangChain agent with streaming and property search
+2. Integrate LangChain agent architecture with SSE streaming
+3. Implement AI chatbot with vector search and real-time streaming
 ```
 
 
@@ -177,6 +220,7 @@ Example suggestions:
 - **Empty diff**: "The diff between your branch and the base branch is empty. Are you on the right branch? You can also paste a diff or describe changes manually."
 - **No base branch**: Try `main`, then `master`, then ask the user.
 - **Very large diff (>5000 lines)**: Focus on the `--stat` summary and file-level analysis. Warn the user that the diff is large and the description may miss fine details. Offer to focus on specific directories.
+- **gh unavailable**: Skip PR detection; default to path C (save `pr-description.markdown`) unless the user states a PR is already open or will be created automatically.
 
 
 ## Reference Files
