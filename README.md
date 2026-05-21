@@ -187,7 +187,7 @@ pwsh -Command "Import-Module .\powershell\in_testing_profile.ps1; tabs"
 | Codex Skills Setup | `scripts/windows/setup-codex-skills.bat` | Self-elevating script that links each skill in `.claude/skills/` plus `.codex/AGENTS.md` into `~/.codex/`, preserving `.system/`. |
 | Skills Check | `scripts/windows/check-skills.bat` | Read-only verifier (no elevation) that validates skill links, Cursor rules, and the two instruction-file links against the repo and flags orphans or missing entries. |
 | Cursor Rules Setup | `scripts/windows/setup-cursor-rules.bat` | Self-elevating script that symlinks `.cursor/rules/` into `~/.cursor/rules`. |
-| Cursor Rules | `.cursor/rules/` | Global Cursor agent rules (`pr-workflow.mdc`, `form-integrations.mdc`). Symlinked into `~/.cursor/rules`. |
+| Cursor Rules | `.cursor/rules/` | Global Cursor agent rules (currently `pr-workflow.mdc`). Symlinked into `~/.cursor/rules`. |
 | Claude / Codex Skills | `.claude/skills/` | Versioned skills shared between Claude Code (`~/.claude/skills`) and Codex CLI (`~/.codex/skills/<skill>`). |
 | Claude Instructions | `.claude/CLAUDE.md` | Global Claude Code instructions: quality mode + writing style. Symlinked into `~/.claude/CLAUDE.md`. |
 | Codex Instructions | `.codex/AGENTS.md` | Global Codex CLI instructions; identical content to `.claude/CLAUDE.md`. Symlinked into `~/.codex/AGENTS.md`. |
