@@ -17,7 +17,7 @@ $AgentsMdSrc  = Join-Path $RepoPath ".codex\AGENTS.md"
 $AgentsMdLink = Join-Path $HOME ".codex\AGENTS.md"
 $RulesSrc     = Join-Path $RepoPath ".cursor\rules"
 $CursorLink   = Join-Path $HOME ".cursor\rules"
-$ExpectedRules = @("pr-workflow.mdc", "form-integrations.mdc")
+$ExpectedRules = @("pr-workflow.mdc")
 
 $script:pass = 0
 $script:fail = 0
