@@ -1,0 +1,7 @@
+interface:
+  display_name: "Babysit PR"
+  short_description: "Drive a PR to a merge-ready state"
+  default_prompt: "Use $babysit to triage comments, resolve conflicts, and fix CI on the current PR."
+
+policy:
+  allow_implicit_invocation: false
