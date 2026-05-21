@@ -1,5 +1,5 @@
 ---
-description: Conventions for building forms in HartAgency web (`app/frontend`) and mobile (`app/mobile`). Apply when creating or modifying any form UI, field validation, or submit handler that uses `useForm`, `FormInput`, `TextInput`/`CheckboxInput`, the typed `api` + `call` endpoint helpers, or `RemoteData` submit state. Trigger on tasks like "add a sign-in/forgot-password/activation form", "wire this form to an endpoint", "validate this input", or any change touching `forms.tsx` helpers or `endpoints.ts` / `request.ts` from a form.
+description: Conventions for building forms in HartAgency web (`app/frontend`) and mobile (`app/mobile`). Apply when creating or modifying any form UI, field validation, or submit handler that uses `useForm`, `FormInput`, `TextInput`/`CheckboxInput`/`ComboboxInput`, the typed `api` + `call` endpoint helpers, or `RemoteData` submit state. Trigger on tasks like "add a sign-in/forgot-password/activation form", "wire this form to an endpoint", "validate this input", or any change touching `forms.tsx` helpers or `endpoints.ts` / `request.ts` from a form.
 alwaysApply: false
 ---
 
@@ -10,7 +10,8 @@ Use form integrations as typed UI boundaries. Build fields with `useForm`, rende
 ## Form setup
 
 - Use the platform form helper: `@fe/components/ui/forms` on web, `@/components/ui/forms` on mobile.
-- Define supported controls with `new TextInput(...)` and `new CheckboxInput(...)`; do not hand-roll local input state for those controls.
+- Define supported controls with `new TextInput(...)`, `new CheckboxInput(...)`, and on web also `new DateInput(...)`, `new TextareaInput(...)`, `new ComboboxInput(...)`; do not hand-roll local input state for those controls.
+- Web `ComboboxInput` outputs `string | null` by default (single-select) or `string[]` when `multiple: true`. Provide `items`, `getValue`, `getLabel`, and optional `getKey`, `itemToStringValue`, `allowClear`, `emptyMessage`.
 - Return every field key from `validate`, with `string | null` values.
 - Normalize values in submit handlers. Trim emails before store or API calls.
 - Keep field errors in `validate`; keep backend/store errors in submit state.
