@@ -84,15 +84,7 @@ Both approaches preserve `~/.codex/skills/.system/` (Codex's bundled skills) by 
 
 #### Cursor Rules
 
-Link the versioned rules directory so Cursor applies them globally via `~/.cursor/rules`:
-
-```bash
-# macOS / Linux
-mkdir -p "$HOME/.cursor"
-ln -sfn "$(pwd)/.cursor/rules" "$HOME/.cursor/rules"
-```
-
-On Windows, double-click [`scripts/windows/setup-cursor-rules.bat`](scripts/windows/setup-cursor-rules.bat) (or right-click → "Run as administrator"). It self-elevates via UAC and creates the symlink. If `~/.cursor/rules` already exists as a non-empty real directory, the script aborts so you can move its contents into `./.cursor/rules/` first.
+Optional rule snippets live under [`.cursor/rules/`](.cursor/rules/) in this repo (for example `pr-workflow.mdc`). Cursor applies **project** rules from each workspace’s own `.cursor/rules` and **user** rules from **Cursor Settings → Rules**. Copy or recreate what you want per project or as a user rule; this repo does not automate a global install.
 
 #### Global Instructions
 
@@ -113,7 +105,7 @@ On Windows, the updated [`setup-claude-skills.bat`](scripts/windows/setup-claude
 
 > **Note:** `.claude/CLAUDE.md` and `.codex/AGENTS.md` carry identical content. Edit both files together when changing instructions.
 
-To verify all setups at any time, run [`scripts/windows/check-skills.bat`](scripts/windows/check-skills.bat) (no elevation needed) — it inspects `~/.claude/skills`, `~/.codex/skills/`, `~/.cursor/rules`, the two instruction files, validates link targets against the repo, and reports any orphan or missing entries.
+To verify all setups at any time, run [`scripts/windows/check-skills.bat`](scripts/windows/check-skills.bat) (no elevation needed) — it inspects `~/.claude/skills`, `~/.codex/skills/`, optional rule files under `./.cursor/rules`, the two instruction files, validates link targets against the repo, and reports any orphan or missing entries.
 
 On Windows Terminal, reference `powershell/in_testing_profile.ps1` in your profile command line or import the bundled settings template:
 
@@ -185,9 +177,8 @@ pwsh -Command "Import-Module .\powershell\in_testing_profile.ps1; tabs"
 | Windows Cleanup | `scripts/windows/system-cleanup.bat` | Elevated maintenance script: clears TEMP, empties Recycle Bin, and runs SFC + DISM repairs. |
 | Claude Skills Setup | `scripts/windows/setup-claude-skills.bat` | Self-elevating script that symlinks `.claude/skills/` and `.claude/CLAUDE.md` into `~/.claude/`. |
 | Codex Skills Setup | `scripts/windows/setup-codex-skills.bat` | Self-elevating script that links each skill in `.claude/skills/` plus `.codex/AGENTS.md` into `~/.codex/`, preserving `.system/`. |
-| Skills Check | `scripts/windows/check-skills.bat` | Read-only verifier (no elevation) that validates skill links, Cursor rules, and the two instruction-file links against the repo and flags orphans or missing entries. |
-| Cursor Rules Setup | `scripts/windows/setup-cursor-rules.bat` | Self-elevating script that symlinks `.cursor/rules/` into `~/.cursor/rules`. |
-| Cursor Rules | `.cursor/rules/` | Global Cursor agent rules (currently `pr-workflow.mdc`). Symlinked into `~/.cursor/rules`. |
+| Skills Check | `scripts/windows/check-skills.bat` | Read-only verifier (no elevation) that validates skill links, optional `.cursor/rules` files in the repo, and the two instruction-file links against the repo and flags orphans or missing entries. |
+| Cursor Rules | `.cursor/rules/` | Optional reference rules (for example `pr-workflow.mdc`). Install into a project or as a user rule in Cursor Settings when you want them. |
 | Claude / Codex Skills | `.claude/skills/` | Versioned skills shared between Claude Code (`~/.claude/skills`) and Codex CLI (`~/.codex/skills/<skill>`). |
 | Claude Instructions | `.claude/CLAUDE.md` | Global Claude Code instructions: quality mode + writing style. Symlinked into `~/.claude/CLAUDE.md`. |
 | Codex Instructions | `.codex/AGENTS.md` | Global Codex CLI instructions; identical content to `.claude/CLAUDE.md`. Symlinked into `~/.codex/AGENTS.md`. |
