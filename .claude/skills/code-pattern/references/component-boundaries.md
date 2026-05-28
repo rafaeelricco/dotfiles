@@ -1,6 +1,6 @@
 # Component Boundary Audit
 
-For HartAgency React/TypeScript UI surfaces with optional UI, `Maybe`, discriminated unions, `ts-pattern`, or dense conditional JSX. Decide which layer owns each branch, separate absence from variants, push variant rendering down to the smallest component that owns the visual difference.
+For React/TypeScript UI surfaces with optional UI, `Maybe`, discriminated unions, `ts-pattern`, or dense conditional JSX. Decide which layer owns each branch, separate absence from variants, push variant rendering down to the smallest component that owns the visual difference.
 
 ## Boundaries
 
@@ -103,4 +103,7 @@ Component Boundary Audit:
 - Branches rendering the same child:
 - `none`/empty variants that should be `Maybe`:
 - Boundary changes to make:
+- Decision: no change | local refactor | ask because shared contract
 ```
+
+Choose `ask because shared contract` when the proposed boundary change touches exported types, APIs, persistence, schemas, DTOs, routes, or domain models.

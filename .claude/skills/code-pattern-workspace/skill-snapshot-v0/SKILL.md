@@ -1,19 +1,13 @@
 ---
 name: code-pattern
 description: >
-  Apply project code patterns when refactoring, implementing, or reviewing
+  Apply HartAgency code conventions when refactoring, implementing, or reviewing
   TypeScript and React code. Use whenever an AI coding agent is asked to write,
-  polish, modernize, or refactor components, hooks, stores, services, forms,
-  API integrations, or UI flows that should follow local conventions —
-  especially when the request mentions code conventions, refactoring,
-  type-safe style, `Maybe`, `Result`, `ts-pattern`, discriminated unions, prop
-  drilling, inline prop types/styles, `cn()`/`cva()`, named prop types,
-  component boundary smells, `useForm`, validation, submit flows, `FormInput`,
-  API calls through `api` / `call`, `Future.fork`, `RemoteData`,
-  refetch/navigation/close-after-write flows, or read-after-write projection
-  delays. Invoke this skill any time an AI coding agent touches TypeScript or
-  React code in a project codebase that should preserve consistent patterns,
-  even when the user does not explicitly ask to follow conventions.
+  polish, modernize, or refactor components, hooks, stores, services, or UI flows
+  that should follow CONVENTIONS — especially when the request mentions code
+  conventions, refactoring, type-safe style, `Maybe`, `Result`, `ts-pattern`,
+  discriminated unions, prop drilling, inline prop types/styles, `cn()`/`cva()`,
+  named prop types, or component boundary smells.
 ---
 
 # Code Pattern
@@ -24,8 +18,6 @@ Apply project conventions to code changes. Ground in patterns before editing.
 
 Start by reading the target file and the nearest owning package's `package.json`.
 Then classify the touched surface before loading broad references.
-
-Before using fast path, scan the target file for audit triggers: `match`, `switch`, `.maybe`, `RemoteData`, `return null`, inline prop types, repeated child branches, `useForm`, request helpers, and post-write refetch.
 
 Use the fast path only for local, mechanical changes:
 - copy/text tweaks;
@@ -53,7 +45,6 @@ Escalate to the full workflow immediately when the work touches:
 - API contracts, schemas, decoders, persistence, routes, or dependencies;
 - error-handling strategy, data-model decisions, or broad normalization;
 - any Component Boundary Audit trigger;
-- any Forms and API Integration Audit trigger;
 - unclear or conflicting local patterns;
 - behavior changes beyond the requested edit.
 
@@ -77,13 +68,6 @@ Run the audit per `references/component-boundaries.md` before editing when the w
 - dense conditional JSX (`&&`, nested ternaries, repeated conditional regions);
 - branches that return the same child component with different props.
 
-### Forms and API Integration Audit triggers
-Run the audit per `references/forms-and-api.md` before editing when the work touches any of:
-- `useForm`, form config classes, `FormInput`, validation, default values, derived values, or controlled field state;
-- package request helpers, endpoint maps, `api` / `call`, multipart helpers, `Future.fork`, `Future.chain`, `Future.parallel` / `Future.concurrently`, `RemoteData`, or transport error display;
-- submit handlers, loading state, duplicate-submit guards, write success callbacks, refetch, navigation, dialog close, or parent callback behavior;
-- read-after-write consistency, projection delay, or any write flow whose success path reads projected data.
-
 ### Stop and ask
 - **Review-only request:** don't edit. Return findings, risks, and actionable suggestions.
 - **Plan-only request / plan mode:** don't edit. Return a concrete implementation plan.
@@ -91,7 +75,6 @@ Run the audit per `references/forms-and-api.md` before editing when the work tou
 - **Local pattern conflicts with CONVENTIONS:**
   - isolated style/structure → follow nearest local pattern, scoped diff;
   - shared contracts, types, data models, persistence, error handling, dependencies, routes, or broad normalization → flag the conflict and ask the user before editing.
-- **Local examples conflict with references:** improve the touched code when scope stays local, do not normalize unrelated files, and mention the mismatch in the plan or final response.
 
 ## Conventions
 
@@ -100,14 +83,12 @@ These references own the prescriptive rules. Read the one selected by triage:
 - **TypeScript modeling** (`Maybe`, `Result`, discriminated unions, decoders, schemas): `references/typescript-conventions.md`.
 - **React/UI structure** (styling, components, prop types, local state, boundaries, scope): `references/react-conventions.md`.
 - **Component boundary audit**: `references/component-boundaries.md`.
-- **Forms/API integration**: `references/forms-and-api.md`.
 
 ## References
 
 - `references/typescript-conventions.md` — TypeScript modeling conventions (types, absence, errors, async, collections, parsing).
 - `references/react-conventions.md` — React/UI conventions (styling, components, prop types, local state, boundaries, scope).
 - `references/component-boundaries.md` — Component Boundary Audit checklist + preferred patterns. Read when the audit applies.
-- `references/forms-and-api.md` — Frontend/mobile form, submit, API call, Future, RemoteData, and read-after-write integration patterns. Read when the audit applies.
 - `references/examples.md` — Plan-style output example. Read when asked for plan-only output.
 
 ## Verification

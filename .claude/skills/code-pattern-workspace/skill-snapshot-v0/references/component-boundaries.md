@@ -1,6 +1,6 @@
 # Component Boundary Audit
 
-For HartAgency mobile screens with optional UI, `Maybe`, discriminated unions, `ts-pattern`, or dense conditional JSX. Decide which layer owns each branch, separate absence from variants, push variant rendering down to the smallest component that owns the visual difference.
+For HartAgency React/TypeScript UI surfaces with optional UI, `Maybe`, discriminated unions, `ts-pattern`, or dense conditional JSX. Decide which layer owns each branch, separate absence from variants, push variant rendering down to the smallest component that owns the visual difference.
 
 ## Boundaries
 
@@ -15,6 +15,7 @@ Separate absence from meaningful variants.
 - Do: Use `Maybe<T>` for absence — no renderable data, no configured feature, no optional region.
 - Do: Use discriminated unions for meaningful renderable/domain variants.
 - Don't: Mix absence into a discriminated union with a `type: "none"` arm.
+- Treat `type: "none"`/`empty` → `Maybe<T>` as mechanical only when the type is local and render-only. If it touches shared types, APIs, persistence, schemas, DTOs, or domain models, stop and ask for confirmation before editing.
 
 ```tsx
 // Don't: parent dispatches absence as a variant

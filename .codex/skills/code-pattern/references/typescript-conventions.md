@@ -48,13 +48,13 @@ Favour static types, explicit data flow, immutability, pure functions, compositi
   ```
 
 - Don't use **empty objects** (e.g. `ConversationId.empty()`) to represent absence. Use `Maybe<T>` with `Nothing()` instead.
-- Use **`as const` tuples** instead of `enum`. Derive the type with `type X = (typeof X)[number]`.
+- Prefer **`as const` tuples** for new finite value sets. Avoid converting existing local `enum` usage unless the requested change already touches that contract. Derive the type with `type X = (typeof X)[number]`.
   ```ts
   const PACK_STATUSES = ["Draft", "Approved", "Shipped"] as const;
   type PackStatus = (typeof PACK_STATUSES)[number];
   ```
 - **Declare return types** on top-level module functions. Exception: JSX components returning JSX.
-- **Don't use `any`**. Use strict generics to preserve type information:
+- Avoid app-level `any`. Use strict generics to preserve type information. Constrained type erasure is acceptable inside framework helpers, schema registries, constructor plumbing, and generic UI internals when the boundary restores type safety:
   ```ts
   function parse<T>(data: { result: T }): T {
     return data.result;
@@ -118,7 +118,8 @@ Favour static types, explicit data flow, immutability, pure functions, compositi
 
 ## Maybe — Representing Absence
 
-- Use `Maybe<T>` instead of `null`/`undefined` for return values, entity fields, and persisted shapes. Construct with `Just(value)` or `Nothing()`.
+- Use `Maybe<T>` for optional computation, display helpers, and domain absence that should be handled explicitly. Construct with `Just(value)` or `Nothing()`.
+- Keep `null`/`undefined` where the boundary owns that shape: JSON/API `s.nullable`, form empty values, DOM/file inputs, persisted read models, repository misses, and external SDK contracts.
 
 - Pattern match with `instanceof Just` / `instanceof Nothing` + `satisfies never` in default. Don't use `isJust()`/`isNothing()` — they don't narrow types.
   ```ts
@@ -145,7 +146,7 @@ Favour static types, explicit data flow, immutability, pure functions, compositi
 
 ## Result — Typed Error Handling
 
-Use `Result<E, T>` for fallible operations. Return `Failure(error)` instead of throwing. Never `throw`.
+Use `Result<E, T>` for recoverable domain, decode, parse, and validation flows. Throw only for invariants, startup config, projection retry, and framework boundaries where the caller cannot recover locally.
 
 - Construct with `Success<E, T>(value)` or `Failure<E, T>(error)` — callable without `new`.
 - Use `.either(onError, onSuccess)` for exhaustive fold.
@@ -192,13 +193,13 @@ Prefer `RemoteData<E, T>` to model async UI state.
 - `.map(fn)` transforms only `Ready`; preserves `Loading`/`Failed`/`NotAsked`.
 - `.chain(fn)` for `RemoteData`-returning functions — avoids double wrapping.
 - `NotAsked` means "haven't asked yet". For "asked but empty", use `Ready([])`.
-- Don't check `isReady` without `instanceof` — boolean flags don't narrow types.
+- Use `instanceof` for exhaustive rendering. Use `isReady`, `isLoading`, and similar helpers for guards, derived flags, and compact branches when no variant narrowing is needed.
 
 ---
 
 ## Future — Lazy Async Computation
 
-Prefer `Future<E, T>` over `Promise` for lazy, cancelable async.
+Prefer `Future<E, T>` for app API calls, cancellable effects, and composed async flows. Keep `Promise` for Express handlers, repository methods, browser/native APIs, SecureStore, and framework contracts that require promises.
 
 - Create with `Future.create<E, T>((reject, resolve) => { ... return cancelFn })`. Return the cancel function.
   ```ts
@@ -258,9 +259,9 @@ Prefer `Future<E, T>` over `Promise` for lazy, cancelable async.
 - `TreeSet`: `.insert()`, `.remove()`, `.union()` mutate in place. Use `TreeSet.from()` to clone first.
 - Use `.has()` for O(log n) membership. Don't use `.values().includes()` — that's O(n).
 
-### MVar & BoundedBuffer — Async Coordination
+### MVar & BoundedBuffer — Streaming Coordination
 
-- Use `MVar<T>` for async synchronization. `put(v)` blocks if full, `take()` blocks if empty. Resolves in FIFO order.
+- Use `MVar<T>` and `BoundedBuffer<T>` for streaming, backpressure, and callback-to-awaitable coordination. Do not introduce them for ordinary UI state or simple request state.
 - Use `BoundedBuffer<T>` for backpressure queues with max capacity. `enqueue(v)` blocks if full, `dequeue()` blocks if empty.
 
   ```ts
