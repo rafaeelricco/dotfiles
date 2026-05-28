@@ -4,19 +4,20 @@ This file shows the *shape* of plan-style output the skill should produce when i
 
 ## Input
 
-Refactor `/Users/rafaelricco/Projects/ambar/HartAgency/app/mobile/src/app/(tabs)/events/[eventId]/venue-intelligence.tsx`.
+Refactor `/workspace/example-app/app/mobile/src/screens/events/event-detail.tsx`.
 
 Start by reading:
 
-- `/Users/rafaelricco/Projects/ambar/HartAgency/app/mobile/src/app/(tabs)/events/[eventId]/offer.tsx`
-- `/Users/rafaelricco/Projects/ambar/HartAgency/app/mobile/src/app/(tabs)/events/index.tsx`
-- `/Users/rafaelricco/Projects/ambar/HartAgency/app/mobile/src/components/ui/event-card.tsx`
+- `/workspace/example-app/app/mobile/src/screens/events/offer.tsx`
+- `/workspace/example-app/app/mobile/src/screens/events/index.tsx`
+- `/workspace/example-app/app/mobile/src/components/ui/event-card.tsx`
 
 Follow `app/CONVENTIONS.md`, use `cn()` for conditionals, avoid inline styles, avoid inline prop types, and reduce prop drilling.
 
 ## Output Shape
 
 - State the context read.
+- State observed local conflicts with the references.
 - Identify whether a user-owned decision is needed.
 - If planning only, produce a scoped plan with target files, constraints, implementation steps, and verification.
 - If implementing, edit only the target and direct dependents, then run the owning package's typecheck/lint when feasible.
@@ -34,6 +35,7 @@ Constraints:
 - Keep `style={}` only for dynamic inset/layout values.
 - Preserve reducer behavior and event-flow store contract.
 - Avoid new dependencies or shared API changes.
+- Fix touched inline prop types when scope stays local; cite untouched examples as local debt.
 
 Deliverable:
 
