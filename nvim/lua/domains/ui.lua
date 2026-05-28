@@ -256,7 +256,18 @@ return {
         mappings = {
           -- Navigate to the parent directory
           [","] = "navigate_up",
+          -- Copy absolute path of the item under cursor to system clipboard
+          ["Y"] = "copy_full_path",
         },
+      },
+      -- Custom commands available inside Neo-tree
+      commands = {
+        copy_full_path = function(state)
+          local node = state.tree:get_node()
+          local path = node:get_id()
+          vim.fn.setreg("+", path)
+          vim.notify("Copiado: " .. path)
+        end,
       },
     },
     config = function(_, opts)
