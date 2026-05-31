@@ -32,8 +32,8 @@ return {
       { "<leader>gs", "<cmd>Neogit<cr>", desc = "Git Status (Neogit)" },
     },
     opts = {
-      -- Configure Neogit to open in a split window
-      kind = "split",
+      -- Open Neogit in a centered floating window (Telescope-style)
+      kind = "floating",
       
       -- Disable hints at the top for a cleaner interface
       disable_hint = false,

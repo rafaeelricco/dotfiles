@@ -28,7 +28,7 @@
 - [j-hui/fidget.nvim](https://github.com/j-hui/fidget.nvim): Provides useful status updates for LSP actions and progress.
 - [folke/trouble.nvim](https://github.com/folke/trouble.nvim): Better diagnostics, references, and quickfix list interface - provides VSCode-like "Problems" panel.
 
-### UI & UX (8 plugins)
+### UI & UX (9 plugins)
 - [folke/which-key.nvim](https://github.com/folke/which-key.nvim): Shows pending keybinds with descriptions to help you learn your mappings.
 - [nvim-telescope/telescope.nvim](https://github.com/nvim-telescope/telescope.nvim): A highly extensible fuzzy finder for files, LSP definitions, buffers, and more with custom keybindings.
 - [nvim-telescope/telescope-fzf-native.nvim](https://github.com/nvim-telescope/telescope-fzf-native.nvim): An extension for Telescope to improve performance using native `fzf`.
@@ -39,6 +39,7 @@
 
     - `mini.statusline`: A lightweight and customizable statusline with cursor location display.
 - [nvim-neo-tree/neo-tree.nvim](https://github.com/nvim-neo-tree/neo-tree.nvim): A modern file explorer that replaces the default `netrw` with toggle functionality.
+- [sphamba/smear-cursor.nvim](https://github.com/sphamba/smear-cursor.nvim): Animated cursor trail (smear effect) on cursor movement. Toggle with `<leader>ts` or `:SmearCursorToggle`.
 
 ### Plugin Manager (1 plugin)
 - [folke/lazy.nvim](https://github.com/folke/lazy.nvim): Modern plugin manager with lazy loading, custom UI icons, and organized domain-based plugin structure.

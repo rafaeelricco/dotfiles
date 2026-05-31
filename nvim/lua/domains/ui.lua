@@ -266,7 +266,7 @@ return {
           local node = state.tree:get_node()
           local path = node:get_id()
           vim.fn.setreg("+", path)
-          vim.notify("Copiado: " .. path)
+          vim.notify("Copied: " .. path)
         end,
       },
     },
@@ -329,5 +329,73 @@ return {
         end, { desc = "Smooth horizontal scroll" })
       end
     end,
+  },
+
+  -- Animated cursor trail (smear effect) on cursor movement
+  --
+  -- Alternative presets to try (swap into `opts` below). The first two come
+  -- straight from the plugin author's docs.
+  --
+  -- 1. Snappy / responsive (recommended alternative): short, fast trail. Good
+  --    for fast navigation/typing without distraction. Opposite of the current
+  --    smooth/long trail.
+  --      stiffness = 0.8,
+  --      trailing_stiffness = 0.6,
+  --      stiffness_insert_mode = 0.7,
+  --      trailing_stiffness_insert_mode = 0.7,
+  --      damping = 0.95,
+  --      damping_insert_mode = 0.95,
+  --      distance_stop_animating = 0.5,
+  --      time_interval = 7,  -- ~144fps, smoother animation
+  --
+  -- 2. Smooth cursor without trail: keeps the rectangular cursor and only eases
+  --    its movement (no smear). More subtle, like a gliding cursor.
+  --      stiffness = 0.5,
+  --      trailing_stiffness = 0.5,
+  --      matrix_pixel_threshold = 0.5,
+  --
+  -- 3. Plugin default: author's balance, midway between the current config and
+  --    the snappy preset.
+  --      stiffness = 0.6,
+  --      trailing_stiffness = 0.45,
+  --      damping = 0.85,
+  --
+  -- Parameter guide:
+  --   stiffness            cursor head: higher = reaches the target faster.
+  --   trailing_stiffness   tail: lower = longer/more visible trail; higher = shorter.
+  --   damping              higher = less overshoot/oscillation.
+  --   time_interval        ms between frames; lower = smoother, costs a bit of CPU
+  --                        (7 ~ 144fps, 17 ~ 60fps).
+  --   distance_stop_animating  cells before the animation stops; higher = cuts
+  --                            earlier, drier feel.
+  {
+    "sphamba/smear-cursor.nvim",
+    event = "VeryLazy", -- load shortly after startup so the smear is active without a trigger
+    opts = {
+      -- Snappy / responsive: short, fast trail. Good for fast navigation/typing
+      -- without distraction.
+      stiffness = 0.8,
+      trailing_stiffness = 0.6,
+      damping = 0.95,
+      distance_stop_animating = 0.5,
+      time_interval = 7, -- ~144fps, smoother animation
+
+      -- Insert mode: keep the smear, slightly snappier so typing stays legible
+      smear_insert_mode = false,
+      stiffness_insert_mode = 0.7,
+      trailing_stiffness_insert_mode = 0.7,
+      damping_insert_mode = 0.95,
+
+      -- Cover the common cases
+      smear_between_buffers = true,
+      smear_between_neighbor_lines = true,
+      scroll_buffer_space = true,
+
+      -- No particle effect
+      particles_enabled = false,
+    },
+    keys = {
+      { "<leader>ts", "<cmd>SmearCursorToggle<cr>", desc = "[T]oggle [S]mear cursor" },
+    },
   },
 }
