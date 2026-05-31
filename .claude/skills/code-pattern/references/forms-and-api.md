@@ -21,37 +21,54 @@ Forms and API Integration Audit:
 - Boundary decisions needed:
 ```
 
-## Shared Pattern
+## Canonical references (by role, not fixed path)
 
-- Use the package-local form abstraction: `useForm`, config classes, and `FormInput` when exported.
-- Keep `validate` keyed to `fields`; each field error is `string | null`.
-- Convert form strings and nullable selections at submit boundaries.
-- Model submit state with nearby async state patterns, usually `RemoteData`.
-- Use `fetchErrorToString` or the local equivalent for transport errors.
+- Endpoint map — the local `api` object and typed responses (e.g. `src/api/endpoints.ts`).
+- Request helper — `call` / `query` and the `Future` / `Query` types (e.g. `src/api/request.ts`).
+- Form helpers — `useForm`, field config classes, `FormInput` (e.g. `src/components/ui/forms.tsx`).
+- Projection-delay hook — when the package exposes one.
 
-## API Calls
+## Imports
 
-- Use local `api` and request helpers.
-- Use `call(api.someEndpoint, requestBody)` for domain commands and queries.
-- Handle `Future` with `.fork(onError, onSuccess)` at the execution boundary.
+- Import the endpoint object and only the response types you use, via the local alias:
+
+      import { api, type SomeResponse } from "@fe/api/endpoints"; // frontend
+      import { api, type SomeResponse } from "@/api/endpoints";   // mobile
+
+- Import the request helper from the same surface (`@fe/api/request` / `@/api/request`).
+- Import only the form pieces the form uses from the local `components/ui/forms`.
+
+## Calling the backend
+
+- Use the typed `api` entries; invoke commands with `call(api.someCommand, requestBody)`.
+- The result is a `Future`; handle outcomes with `.fork(onError, onSuccess)` at the execution boundary.
 - Use `.chain` for ordered writes and `Future.parallel` / `Future.concurrently` for independent writes.
-- Use the local multipart helper when one exists. Frontend exports `uploadMultipart`; mobile does not in the inspected code.
+- Use the local multipart helper when one exists (frontend exports `uploadMultipart`; mobile may not).
 
-## Read After Write
+## Forms (`useForm`)
 
-- Use the local read-after-write mechanism when success refetches, closes a parent that refetches, navigates to projected data, or displays projected data.
-- In web/frontend packages, use the local projection-delay helper, such as `useProjectionDelay`, and place read-model-dependent work inside the scheduler it returns.
+- Define fields with **config classes**: `new TextInput({ ... })`, `new TextareaInput({ ... })`, `new DateInput({ ... })` — pick types from the local `forms` module.
+- Pass `fields` and `validate` into `useForm`.
+- `validate` returns an object with the **same keys as `fields`**; each value is `string | null` (`null` = no error).
+- Wrap the submit handler with the returned `onSubmit`; render controlled pieces with `FormInput` when needed.
+- Convert form strings and nullable selections at submit boundaries.
+- Model submit state with nearby async state (usually `RemoteData`); use `fetchErrorToString` or the local equivalent for transport errors.
+
+## After successful writes (read models / projections)
+
+- Commands succeed when events commit; read-model projections may lag.
+- Use the local projection-delay helper (e.g. `useProjectionDelay`) and run deferred success work — reset loading, callbacks, refetch, close dialogs, navigation — inside the scheduler it returns (`schedule(() => { ... })`).
 - In mobile packages, do not import frontend-only hooks or invent a projection-delay helper without approval.
 
-## Surface Variants
+## Surface variants
 
-- Frontend packages may use aliases such as `@fe/*`, web form submit handlers, more field types, and `derive`.
-- Mobile packages may use aliases such as `@/*`, `Button.onPress`, bearer-token request behavior, and only mobile-exported field types.
+- Frontend: `@fe/*` aliases, web submit handlers, more field types, `derive`.
+- Mobile: `@/*` aliases, `Button.onPress`, bearer-token request behavior, mobile-exported field types only.
 
-## Smells
+## Do not
 
 - Raw `fetch` for normal backend commands or queries.
 - React Hook Form, Formik, Zod, or a new request dependency without local precedent.
-- Validation keys that do not match `fields`.
+- Validation keys that don't match `fields`.
 - `@fe/*` imports in mobile or `@/*` imports in frontend.
 - Immediate projected refetch without the local projection-delay pattern.

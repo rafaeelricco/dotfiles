@@ -52,7 +52,6 @@ Escalate to the full workflow immediately when the work touches:
 - exported/shared types;
 - API contracts, schemas, decoders, persistence, routes, or dependencies;
 - error-handling strategy, data-model decisions, or broad normalization;
-- any Component Boundary Audit trigger;
 - any Forms and API Integration Audit trigger;
 - unclear or conflicting local patterns;
 - behavior changes beyond the requested edit.
@@ -68,14 +67,6 @@ Escalate to the full workflow immediately when the work touches:
 1. Read the relevant convention reference section(s) — `references/typescript-conventions.md` for TS modeling; `references/react-conventions.md` for React/UI. Expand to the full reference when the change spans multiple domains or the relevant section is unclear.
 2. Find 2-3 nearby pattern files in the same module to ground style decisions — only ask the user if no obvious neighbours exist.
 3. Make only the approved or mechanically implied change. Keep diffs scoped.
-
-### Component Boundary Audit triggers
-Run the audit per `references/component-boundaries.md` before editing when the work touches any of:
-- a screen/page or complex component;
-- a component with `match()`/`switch` over UI state;
-- `Maybe`, `RemoteData`, `Just`, `Nothing`, or `.maybe()` in render logic;
-- dense conditional JSX (`&&`, nested ternaries, repeated conditional regions);
-- branches that return the same child component with different props.
 
 ### Forms and API Integration Audit triggers
 Run the audit per `references/forms-and-api.md` before editing when the work touches any of:
@@ -99,16 +90,13 @@ These references own the prescriptive rules. Read the one selected by triage:
 
 - **TypeScript modeling** (`Maybe`, `Result`, discriminated unions, decoders, schemas): `references/typescript-conventions.md`.
 - **React/UI structure** (styling, components, prop types, local state, boundaries, scope): `references/react-conventions.md`.
-- **Component boundary audit**: `references/component-boundaries.md`.
 - **Forms/API integration**: `references/forms-and-api.md`.
 
 ## References
 
 - `references/typescript-conventions.md` — TypeScript modeling conventions (types, absence, errors, async, collections, parsing).
 - `references/react-conventions.md` — React/UI conventions (styling, components, prop types, local state, boundaries, scope).
-- `references/component-boundaries.md` — Component Boundary Audit checklist + preferred patterns. Read when the audit applies.
 - `references/forms-and-api.md` — Frontend/mobile form, submit, API call, Future, RemoteData, and read-after-write integration patterns. Read when the audit applies.
-- `references/examples.md` — Plan-style output example. Read when asked for plan-only output.
 
 ## Verification
 
