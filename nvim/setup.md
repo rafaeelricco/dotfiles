@@ -19,4 +19,3 @@ ln -s /Users/rafaelricco/projects/r1cco/dotfiles/nvim/init.lua /Users/rafaelricc
 ln -s /Users/rafaelricco/projects/r1cco/dotfiles/nvim/lua /Users/rafaelricco/.config/nvim/lua
 ln -s /Users/rafaelricco/projects/r1cco/dotfiles/nvim/lazy-lock.json /Users/rafaelricco/.config/nvim/lazy-lock.json
 ```
-        

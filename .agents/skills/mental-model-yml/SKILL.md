@@ -22,41 +22,41 @@ Collect all required inputs before doing any work. Ask the user these questions 
 ### Required Inputs
 
 **1. Source Material**
-Ask: *"What source material should I use? Attach transcripts, briefs, specs, or any relevant documents."*
+Ask: _"What source material should I use? Attach transcripts, briefs, specs, or any relevant documents."_
 
 This is non-negotiable. Without source material, the skill cannot produce an evidence-based model. If the user tries to proceed without attaching anything, respond:
 
 > "I need at least one source document (transcript, brief, spec, etc.) to generate a mental model. The value of a mental model comes from being traceable to evidence — without sources, I'd be inventing content. Please attach the relevant documents."
 
 **2. Model Type**
-Ask: *"Is this a **business** model or a **UI/UX** model?"*
+Ask: _"Is this a **business** model or a **UI/UX** model?"_
 
-| Type        | Use when describing...                                              | Template                              |
-|-------------|----------------------------------------------------------------------|---------------------------------------|
-| Business    | How a business works, operational flows, strategy, market dynamics    | `references/business_model_template.yml` |
-| UI/UX       | Screens, features, interaction flows, user experiences               | `references/ui_model_template.yml`      |
+| Type     | Use when describing...                                             | Template                                 |
+| -------- | ------------------------------------------------------------------ | ---------------------------------------- |
+| Business | How a business works, operational flows, strategy, market dynamics | `references/business_model_template.yml` |
+| UI/UX    | Screens, features, interaction flows, user experiences             | `references/ui_model_template.yml`       |
 
-If the user is unsure, help them decide: "If your model is about *how something works in the real world* (business processes, revenue, teams), it's a business model. If it's about *how someone uses a screen or feature*, it's UI/UX."
+If the user is unsure, help them decide: "If your model is about _how something works in the real world_ (business processes, revenue, teams), it's a business model. If it's about _how someone uses a screen or feature_, it's UI/UX."
 
 **3. Title**
-Ask: *"What is the title of this mental model?"*
+Ask: _"What is the title of this mental model?"_
 
 Examples: `Business Environment`, `Login Workflow`, `Campaign & Event Lifecycle`, `Educator Mobile Experience`
 
 ### Optional Inputs
 
 **4. Guiding Questions**
-Ask: *"What questions should this model answer? (leave blank to let me infer from the source material)"*
+Ask: _"What questions should this model answer? (leave blank to let me infer from the source material)"_
 
 If provided, these questions shape the `core_content` sections. Each question becomes a section or is answered within one. If left blank, infer key questions from the source material and include them in the plan for user validation.
 
 **5. Model ID**
-Ask: *"What ID should this model have? (e.g., MM-003 or MM-UI-AUTH). Leave blank if unknown."*
+Ask: _"What ID should this model have? (e.g., MM-003 or MM-UI-AUTH). Leave blank if unknown."_
 
 Convention: business models use `MM-XX`, UI models use `MM-UI-XX`.
 
 **6. Language**
-Ask: *"Language? (default: en-us)"*
+Ask: _"Language? (default: en-us)"_
 
 ---
 
@@ -87,7 +87,7 @@ Format the plan like this:
 
 **File:** MM-003-campaign-event-lifecycle.yml
 
-**Scope:** How campaigns and events flow from client request through execution 
+**Scope:** How campaigns and events flow from client request through execution
 and reporting. Excludes educator management and financial settlement.
 
 **Sections:**
@@ -168,7 +168,7 @@ The user fills this in because only they know the full graph of mental models.
 1. Save the file to `/mnt/user-data/outputs/` with the naming convention: `MM-[ID]-[title-kebab-case].yml`
 2. Present the file to the user
 3. Summarize what was generated: number of sections, number of assumptions, number of gaps/open questions
-4. Ask: *"Want me to adjust any sections, or is this ready for review?"*
+4. Ask: _"Want me to adjust any sections, or is this ready for review?"_
 
 ---
 

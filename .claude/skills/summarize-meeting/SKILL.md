@@ -12,6 +12,7 @@ metadata:
   updated: 2026-03-04
   tech-stack: meeting-facilitation, action-tracking, decision-logging
 ---
+
 # Meeting Summary Expert
 
 ## Overview
@@ -31,13 +32,13 @@ Transform meeting notes, transcripts, or recordings into clear, actionable summa
 
 Record the essential context:
 
-| Field | Description |
-|-------|-------------|
-| **Date** | Meeting date (YYYY-MM-DD) |
-| **Time** | Start and end time with timezone |
+| Field            | Description                                        |
+| ---------------- | -------------------------------------------------- |
+| **Date**         | Meeting date (YYYY-MM-DD)                          |
+| **Time**         | Start and end time with timezone                   |
 | **Participants** | Names and roles (e.g., "Sarah Chen, Product Lead") |
-| **Topic** | One-line meeting purpose |
-| **Location** | Room name, video link, or "async" |
+| **Topic**        | One-line meeting purpose                           |
+| **Location**     | Room name, video link, or "async"                  |
 
 ### Step 2: Extract Key Discussion Points
 
@@ -58,9 +59,9 @@ Every action item must answer three questions:
 
 Format as a table:
 
-| Due Date | Owner | Action |
-|----------|-------|--------|
-| 2026-03-10 | Sarah Chen | Share revised wireframes with the design team |
+| Due Date   | Owner      | Action                                         |
+| ---------- | ---------- | ---------------------------------------------- |
+| 2026-03-10 | Sarah Chen | Share revised wireframes with the design team  |
 | 2026-03-07 | James Park | Schedule load test for the staging environment |
 
 **Action item quality checks:**
@@ -96,10 +97,12 @@ List unresolved questions that need follow-up. For each question, note who is ex
 **File naming convention:** `Meeting-Summary-[YYYY-MM-DD]-[topic-slug].md`
 
 Examples:
+
 - `Meeting-Summary-2026-03-04-sprint-planning.md`
 - `Meeting-Summary-2026-03-04-q2-roadmap-review.md`
 
 **Distribution:**
+
 - Share the summary within 24 hours of the meeting.
 - Send to all participants and relevant stakeholders who were not present.
 - Store in the team's shared documentation space (Confluence, Notion, shared drive).
@@ -111,12 +114,12 @@ Examples:
 
 ## Metadata
 
-| Field | Value |
-|-------|-------|
-| **Date** | [YYYY-MM-DD] |
-| **Time** | [HH:MM] - [HH:MM] [TZ] |
+| Field            | Value                           |
+| ---------------- | ------------------------------- |
+| **Date**         | [YYYY-MM-DD]                    |
+| **Time**         | [HH:MM] - [HH:MM] [TZ]          |
 | **Participants** | [Name, Role]; [Name, Role]; ... |
-| **Topic** | [One-line meeting purpose] |
+| **Topic**        | [One-line meeting purpose]      |
 
 ## Summary
 
@@ -126,8 +129,8 @@ Examples:
 
 ## Action Items
 
-| Due Date | Owner | Action |
-|----------|-------|--------|
+| Due Date     | Owner  | Action                        |
+| ------------ | ------ | ----------------------------- |
 | [YYYY-MM-DD] | [Name] | [Specific, verifiable action] |
 
 ## Decisions Made
@@ -168,15 +171,15 @@ When summarizing, deprioritize:
 
 ## Troubleshooting
 
-| Problem | Likely Cause | Resolution |
-|---------|-------------|------------|
-| Action items are assigned to teams instead of individuals | Culture avoids individual accountability; facilitator does not press for a single owner | Enforce the "one owner" rule during the meeting; if a team is named, ask "Who on that team is the single point of contact?" |
-| Summaries are too long and nobody reads them | Summarizer includes too much detail; tries to capture everything | Apply the "would someone who missed the meeting need this?" filter to every bullet point; target 1 page maximum for 1-hour meetings |
-| Decisions are not documented, leading to re-litigation in future meetings | Meeting moved quickly; facilitator focused on discussion, not decisions | Pause after each decision and state it aloud: "Let me confirm: we decided X because Y"; add decision capture as a facilitator checklist item |
-| Action items have vague due dates ("soon", "next sprint") | Facilitator does not push for specificity; team uncomfortable committing to dates | Require a calendar date for every action; if the team cannot commit, set a date to decide the date |
-| Summaries are distributed days after the meeting | Summarizer is overburdened or perfectionist | Set a 24-hour distribution rule; use a structured template to reduce writing effort; assign summary responsibility before the meeting |
-| Open questions from previous meetings are never resolved | No follow-up mechanism; questions captured but not tracked | Add "Previous Open Questions" as a standing agenda item; assign each question an owner and a resolution date |
-| Attendees disagree with the summary after distribution | Summary reflects summarizer's interpretation, not group consensus | Share key decisions and action items verbally at the meeting close; invite corrections within 24 hours of distribution |
+| Problem                                                                   | Likely Cause                                                                            | Resolution                                                                                                                                   |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Action items are assigned to teams instead of individuals                 | Culture avoids individual accountability; facilitator does not press for a single owner | Enforce the "one owner" rule during the meeting; if a team is named, ask "Who on that team is the single point of contact?"                  |
+| Summaries are too long and nobody reads them                              | Summarizer includes too much detail; tries to capture everything                        | Apply the "would someone who missed the meeting need this?" filter to every bullet point; target 1 page maximum for 1-hour meetings          |
+| Decisions are not documented, leading to re-litigation in future meetings | Meeting moved quickly; facilitator focused on discussion, not decisions                 | Pause after each decision and state it aloud: "Let me confirm: we decided X because Y"; add decision capture as a facilitator checklist item |
+| Action items have vague due dates ("soon", "next sprint")                 | Facilitator does not push for specificity; team uncomfortable committing to dates       | Require a calendar date for every action; if the team cannot commit, set a date to decide the date                                           |
+| Summaries are distributed days after the meeting                          | Summarizer is overburdened or perfectionist                                             | Set a 24-hour distribution rule; use a structured template to reduce writing effort; assign summary responsibility before the meeting        |
+| Open questions from previous meetings are never resolved                  | No follow-up mechanism; questions captured but not tracked                              | Add "Previous Open Questions" as a standing agenda item; assign each question an owner and a resolution date                                 |
+| Attendees disagree with the summary after distribution                    | Summary reflects summarizer's interpretation, not group consensus                       | Share key decisions and action items verbally at the meeting close; invite corrections within 24 hours of distribution                       |
 
 ## Success Criteria
 
@@ -198,11 +201,11 @@ When summarizing, deprioritize:
 
 ## Integration Points
 
-| Integration | Direction | What Flows |
-|-------------|-----------|------------|
-| `wwas/` | Meetings -> WWAS | Decisions and commitments from meetings become WWAS backlog items |
-| `job-stories/` | Meetings -> Stories | Discovery discussions surface situations and motivations for job stories |
-| `../jira-expert/` | Meetings -> Jira | Action items create Jira tickets; decisions update issue comments |
-| `../confluence-expert/` | Meetings -> Confluence | Summaries stored in Confluence using meeting notes template |
-| `../senior-pm/` | Meetings -> PM | Steering committee and stakeholder meeting summaries feed portfolio reporting |
-| `../delivery-manager/` | Meetings -> DM | Release planning and incident review meeting outcomes feed delivery tracking |
+| Integration             | Direction              | What Flows                                                                    |
+| ----------------------- | ---------------------- | ----------------------------------------------------------------------------- |
+| `wwas/`                 | Meetings -> WWAS       | Decisions and commitments from meetings become WWAS backlog items             |
+| `job-stories/`          | Meetings -> Stories    | Discovery discussions surface situations and motivations for job stories      |
+| `../jira-expert/`       | Meetings -> Jira       | Action items create Jira tickets; decisions update issue comments             |
+| `../confluence-expert/` | Meetings -> Confluence | Summaries stored in Confluence using meeting notes template                   |
+| `../senior-pm/`         | Meetings -> PM         | Steering committee and stakeholder meeting summaries feed portfolio reporting |
+| `../delivery-manager/`  | Meetings -> DM         | Release planning and incident review meeting outcomes feed delivery tracking  |

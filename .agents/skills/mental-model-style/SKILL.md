@@ -23,8 +23,8 @@ For each target file, identify sections with structural style issues against `re
 
 Build a findings table per file and present it before any rewrite.
 
-| Section | Violation | Proposed fix |
-|---|---|---|
+| Section                          | Violation                                           | Proposed fix                                           |
+| -------------------------------- | --------------------------------------------------- | ------------------------------------------------------ |
 | `core_content > Assignment Flow` | One bullet mixes trigger, UI state, and side effect | Split into separate bullets with one primary idea each |
 
 - One row per finding. Keep "proposed fix" to one line — describe the change, do not show the rewrite yet.

@@ -4,12 +4,13 @@ Use this template for the final response. Replace placeholders with facts from t
 and inspected files. Do not copy example nouns, component names, or constraints that are not supported
 by the current task or local code.
 
-~~~md
+```md
 Task: Plan [the requested mobile task] in `[target file]`. Do not implement yet — gather context first, then propose a plan for review.
 
 Goal: [One concise paragraph describing the desired final user-facing behavior, visual polish, data behavior, or prototype parity.]
 
 Step 1 — Read for context (in this order):
+
 1. Required conventions: `app/CONVENTIONS.md`
 2. Local package/app boundary: `[nearest package.json]` and relevant config/scripts
 3. Task source: `[TASKS.md path and line range, if provided]`
@@ -22,6 +23,7 @@ Step 1 — Read for context (in this order):
    - `[2-3 nearby files when useful]`
 
 Step 2 — Constraints to follow:
+
 - Layout: [prototype parity, target screen structure, or visual polish constraint].
 - Data: [existing source to use]. If fields are missing for parity, propose new fields in the plan only.
 - Spacing: use `gap-*` for flex/grid spacing; avoid margin-based spacing unless local code requires it.
@@ -34,5 +36,6 @@ Step 3 — Deliverable:
 A short plan covering: files to touch, new/changed data fields or types if any, concrete component/helper changes, spacing and animation conventions, verification commands, and any open questions before implementation approval.
 
 Open questions:
+
 - [List only questions that materially affect the plan.]
-~~~
+```

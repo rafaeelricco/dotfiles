@@ -47,8 +47,8 @@ function SuperAdminCooperatives({ session }: { session: SuperSession }) {
   React.useEffect(() => {
     setState(Loading());
     return fetchCooperatives().fork(
-      (e) => setState(Failed(e)),
-      (v) => setState(Ready(v))
+      e => setState(Failed(e)),
+      v => setState(Ready(v)),
     );
   }, []);
 
@@ -58,17 +58,15 @@ function SuperAdminCooperatives({ session }: { session: SuperSession }) {
       session={session}
       selected={Just(SuperSidebarItem.Cooperatives)}
     >
-      {state instanceof Ready ? (
+      {state instanceof Ready ?
         <Content state={state.value} />
-      ) : state instanceof Loading ? (
+      : state instanceof Loading ?
         <AlertLoading>Loading…</AlertLoading>
-      ) : state instanceof Failed ? (
+      : state instanceof Failed ?
         <AlertFailure>{fetchErrorToString(state.failure)}</AlertFailure>
-      ) : state instanceof NotAsked ? (
+      : state instanceof NotAsked ?
         <>Stuck?</>
-      ) : (
-        (state satisfies never)
-      )}
+      : (state satisfies never)}
     </SuperSidebarLayout>
   );
 }
@@ -121,7 +119,7 @@ function CooperativesTable({ data }: { data: CooperativeDetails[] }) {
       pagination={{ page, setPage, pageSize: 8 }}
       emptyMessage="No cooperatives or applications available"
       columnOrder={["name", "loans", "members", "tiers", "actions"]}
-      rows={data.map((cooperativeDetails) => ({
+      rows={data.map(cooperativeDetails => ({
         value: cooperativeDetails,
         className: "[&>td]:overflow-hidden [&>td]:text-ellipsis [&>td]:whitespace-nowrap rich-text",
         contents: {
@@ -147,32 +145,29 @@ function CooperativesTable({ data }: { data: CooperativeDetails[] }) {
 function fetchLoansByCooperativeId(
   cooperativeId: ListCooperativesResponse["cooperatives"][number]["cooperativeId"],
 ): Future<FetchErrorResponse, LoansByCooperativeResponse["loans"][number][]> {
-  return call(api.loansByCooperativeId, { cooperativeId }).map((result) => result.loans);
+  return call(api.loansByCooperativeId, { cooperativeId }).map(result => result.loans);
 }
 
 function fetchMembersByCooperativeId(
   cooperativeId: ListCooperativesResponse["cooperatives"][number]["cooperativeId"],
 ): Future<FetchErrorResponse, MembersByCooperativeResponse["members"][number][]> {
-  return call(api.membersByCooperativeId, { cooperativeId }).map((result) => result.members);
+  return call(api.membersByCooperativeId, { cooperativeId }).map(result => result.members);
 }
 
 function fetchTiersByCooperativeId(
   cooperativeId: ListCooperativesResponse["cooperatives"][number]["cooperativeId"],
 ): Future<FetchErrorResponse, TiersByCooperativeResponse["tiers"][number][]> {
-  return call(api.tiersByCooperativeId, { cooperativeId }).map((result) => result.tiers);
+  return call(api.tiersByCooperativeId, { cooperativeId }).map(result => result.tiers);
 }
 
 function fetchCooperatives(): Future<FetchErrorResponse, CooperativeDetails[]> {
-  return call(api.listCooperatives, {}).chain((result) =>
-    Future.mapConcurrently((cooperative) => fetchCooperativeDetails(cooperative), result.cooperatives)
+  return call(api.listCooperatives, {}).chain(result =>
+    Future.mapConcurrently(cooperative => fetchCooperativeDetails(cooperative), result.cooperatives),
   );
 }
 
 function calculateTotalLoans(loans: LoansByCooperativeResponse["loans"][number][]): Money {
-  return loans.reduce(
-    (total, loan) => total.add(loan.details.borrowed_amount),
-    new Money(0, "MYR")
-  );
+  return loans.reduce((total, loan) => total.add(loan.details.borrowed_amount), new Money(0, "MYR"));
 }
 
 function fetchCooperativeDetails(

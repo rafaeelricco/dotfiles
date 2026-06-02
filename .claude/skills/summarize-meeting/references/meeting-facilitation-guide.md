@@ -7,6 +7,7 @@
 **Purpose:** Make a specific decision with the right stakeholders in the room.
 
 **Best practices:**
+
 - State the decision to be made in the meeting invite.
 - Share pre-read materials at least 24 hours in advance.
 - Timebox discussion. If no decision after the allotted time, explicitly decide to defer and state what additional information is needed.
@@ -19,6 +20,7 @@
 **Purpose:** Align the team on progress, blockers, and next steps.
 
 **Best practices:**
+
 - Keep to 30 minutes or less.
 - Use a standing agenda (same structure each time).
 - Focus on exceptions -- what is off track, what needs help.
@@ -31,6 +33,7 @@
 **Purpose:** Generate ideas or solve a problem collaboratively.
 
 **Best practices:**
+
 - Define the problem statement before the meeting.
 - Separate idea generation from idea evaluation.
 - Use structured techniques (brainwriting, round-robin, dot voting).
@@ -43,6 +46,7 @@
 **Purpose:** Agree on scope, timeline, and assignments for upcoming work.
 
 **Best practices:**
+
 - Come with a draft plan, not a blank slate.
 - Walk through dependencies and risks.
 - Assign owners to every deliverable.
@@ -55,6 +59,7 @@
 **Purpose:** Reflect on what worked, what did not, and what to change.
 
 **Best practices:**
+
 - Create psychological safety -- no blame, focus on systems.
 - Use a structured format (Start-Stop-Continue, 4Ls, Mad-Sad-Glad).
 - Limit to 3 actionable improvements per retro.
@@ -97,13 +102,13 @@ For important meetings, use a shared document where multiple participants contri
 
 Every action item should be SMART:
 
-| Criterion | Question | Bad Example | Good Example |
-|-----------|----------|-------------|--------------|
-| **Specific** | What exactly needs to be done? | "Look into the performance issue" | "Profile the dashboard API endpoint and identify the top 3 bottlenecks" |
-| **Measurable** | How will we know it is done? | "Improve onboarding" | "Reduce onboarding flow from 8 steps to 5 steps" |
-| **Assignable** | Who is the single owner? | "The team will handle it" | "Maria will handle it" |
-| **Realistic** | Can it be done in the timeframe? | "Rewrite the entire backend by Friday" | "Draft the migration plan by Friday" |
-| **Time-bound** | What is the deadline? | "Do it soon" | "Complete by March 15" |
+| Criterion      | Question                         | Bad Example                            | Good Example                                                            |
+| -------------- | -------------------------------- | -------------------------------------- | ----------------------------------------------------------------------- |
+| **Specific**   | What exactly needs to be done?   | "Look into the performance issue"      | "Profile the dashboard API endpoint and identify the top 3 bottlenecks" |
+| **Measurable** | How will we know it is done?     | "Improve onboarding"                   | "Reduce onboarding flow from 8 steps to 5 steps"                        |
+| **Assignable** | Who is the single owner?         | "The team will handle it"              | "Maria will handle it"                                                  |
+| **Realistic**  | Can it be done in the timeframe? | "Rewrite the entire backend by Friday" | "Draft the migration plan by Friday"                                    |
+| **Time-bound** | What is the deadline?            | "Do it soon"                           | "Complete by March 15"                                                  |
 
 ## Follow-Up Processes
 

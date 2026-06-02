@@ -18,6 +18,7 @@ Keeps mental model documents faithful to what is implemented in a prototype, and
 when an entirely new mental model should be created.
 
 Grounding rule:
+
 - Never prefill questions, headings, findings, roles, sections, file paths, or domains from
   examples. Every concrete noun in user-facing output must come from the current request or
   from files you actually inspected. If a value is unknown, say it is missing or not yet
@@ -93,14 +94,14 @@ structure and conventions, prefer surgical edits over rewrites, and use
 
 Use these statuses exactly:
 
-| Status                | Meaning                                                    |
-|-----------------------|------------------------------------------------------------|
-| `ACCURATE`            | Mental model matches the implementation.                   |
-| `OUTDATED`            | Exists in both, but the mental model is inaccurate.        |
-| `MISSING`             | Exists in the prototype but not in the mental model.       |
-| `REMOVED`             | In the mental model but no longer in the prototype.        |
-| `NEEDS_CLARIFICATION` | Ambiguous, incomplete, or suspicious in the prototype.     |
-| `NEW_MODEL`           | A separate mental model should likely be created.          |
+| Status                | Meaning                                                |
+| --------------------- | ------------------------------------------------------ |
+| `ACCURATE`            | Mental model matches the implementation.               |
+| `OUTDATED`            | Exists in both, but the mental model is inaccurate.    |
+| `MISSING`             | Exists in the prototype but not in the mental model.   |
+| `REMOVED`             | In the mental model but no longer in the prototype.    |
+| `NEEDS_CLARIFICATION` | Ambiguous, incomplete, or suspicious in the prototype. |
+| `NEW_MODEL`           | A separate mental model should likely be created.      |
 
 Use confidence levels `high`, `medium`, or `low`.
 
@@ -126,7 +127,9 @@ section in an existing model.
 - YAML conventions when relevant: `~/.claude/skills/mental-model-yml`
 
 ## Example Triggers
+
 **Minimal trigger**
+
 ```
 User: "Update the mental models, the prototype changed a lot."
 Skill: inspects local files first, asks only for missing URL, credentials, or scope, then
@@ -134,6 +137,7 @@ returns the approval-ready audit plan.
 ```
 
 **Partial trigger**
+
 ```
 User: "Audit [model-file] against [prototype-url], focus on [section]."
 Skill: reads the referenced model, infers conventions, asks only for missing credentials or
@@ -141,6 +145,7 @@ scope details if needed, then returns the approval-ready audit plan.
 ```
 
 **Full trigger**
+
 ```
 User: "Audit [model-path] against [prototype-url].
 Credentials: [role-a] ([username] / [password]), [role-b] ([username] / [password]).

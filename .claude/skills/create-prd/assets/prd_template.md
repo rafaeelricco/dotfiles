@@ -15,12 +15,12 @@
 
 ## 2. Contacts
 
-| Name | Role | Responsibility |
-|------|------|----------------|
-| | Product Manager | |
-| | Engineering Lead | |
-| | Design Lead | |
-| | Stakeholder | |
+| Name | Role             | Responsibility |
+| ---- | ---------------- | -------------- |
+|      | Product Manager  |                |
+|      | Engineering Lead |                |
+|      | Design Lead      |                |
+|      | Stakeholder      |                |
 
 ---
 
@@ -55,10 +55,10 @@
 **Objective:** [Qualitative, inspirational statement]
 
 | Key Result | Current | Target | Deadline |
-|------------|---------|--------|----------|
-| KR1: | | | |
-| KR2: | | | |
-| KR3: | | | |
+| ---------- | ------- | ------ | -------- |
+| KR1:       |         |        |          |
+| KR2:       |         |        |          |
+| KR3:       |         |        |          |
 
 ---
 
@@ -94,10 +94,10 @@
 ### Value Curve
 
 | Factor | Alternative A | Alternative B | [Product Name] |
-|--------|--------------|--------------|----------------|
-| | | | |
-| | | | |
-| | | | |
+| ------ | ------------- | ------------- | -------------- |
+|        |               |               |                |
+|        |               |               |                |
+|        |               |               |                |
 
 ---
 
@@ -112,13 +112,13 @@
 
 ### Key Features
 
-| # | Feature | Priority | Description |
-|---|---------|----------|-------------|
-| 1 | | P0 | |
-| 2 | | P0 | |
-| 3 | | P1 | |
-| 4 | | P1 | |
-| 5 | | P2 | |
+| #   | Feature | Priority | Description |
+| --- | ------- | -------- | ----------- |
+| 1   |         | P0       |             |
+| 2   |         | P0       |             |
+| 3   |         | P1       |             |
+| 4   |         | P1       |             |
+| 5   |         | P2       |             |
 
 ### Technology (Optional)
 
@@ -128,11 +128,11 @@
 
 ### Assumptions
 
-| # | Assumption | Validation Plan | Status |
-|---|-----------|-----------------|--------|
-| 1 | | | Unvalidated |
-| 2 | | | Unvalidated |
-| 3 | | | Unvalidated |
+| #   | Assumption | Validation Plan | Status      |
+| --- | ---------- | --------------- | ----------- |
+| 1   |            |                 | Unvalidated |
+| 2   |            |                 | Unvalidated |
+| 3   |            |                 | Unvalidated |
 
 ---
 
@@ -140,11 +140,11 @@
 
 ### Timeline
 
-| Phase | Scope | Size | Target |
-|-------|-------|------|--------|
-| v1 (Now) | | | |
-| v1.1 (Next) | | | |
-| v2 (Later) | | | |
+| Phase       | Scope | Size | Target |
+| ----------- | ----- | ---- | ------ |
+| v1 (Now)    |       |      |        |
+| v1.1 (Next) |       |      |        |
+| v2 (Later)  |       |      |        |
 
 ### v1 Scope
 
@@ -157,6 +157,7 @@
 ### Success Criteria
 
 v1 is successful when:
+
 1. KR1 reaches [target]
 2. KR2 reaches [target]
 3. [Additional criteria]

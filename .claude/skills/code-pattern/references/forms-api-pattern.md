@@ -37,6 +37,7 @@ Report the audit briefly:
 
 ```md
 Forms and API Integration Audit:
+
 - Package surface:
 - Endpoints module (api object):
 - Request helper (call/query/uploadMultipart):
@@ -51,7 +52,7 @@ Forms and API Integration Audit:
 - **`@fe/api/endpoints`** — the `api` object; entries mirror `backend.command.*` / `backend.query.*`,
   plus response type re-exports (e.g. `type CreateCampaignResponse`).
 - **`@fe/api/request`** — `call(endpoint, body)`, `query(Query)`, `uploadMultipart(endpoint,
-  FormData)`, `stream(...)`. Each returns a `Future`.
+FormData)`, `stream(...)`. Each returns a `Future`.
 - **`@fe/components/ui/forms`** — `useForm`, `FormInput`, and config classes (`TextInput`,
   `TextareaInput`, `DateInput`, `TimeInput`, `CheckboxInput`, `ComboboxInput`, `SelectInput`,
   `TagsInput`).

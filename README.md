@@ -3,6 +3,7 @@
 Domain-driven Neovim and Windows Terminal configuration focused on reproducible workflows across macOS and Windows.
 
 ## Features
+
 - **Modular Neovim Architecture**: `lazy.nvim` loads plugins by domain (AI, completion, LSP, UI, Git) for predictable startup and maintenance.
 - **Smart Editing Defaults**: Custom keymaps, Treesitter, Conform formatting, and Blink completion tuned to coexist with GitHub Copilot.
 - **Custom Dark Theme**: Hand-crafted colorscheme with Nerd Font icons, mini.statusline, Neo-tree, and Telescope integrations.
@@ -12,6 +13,7 @@ Domain-driven Neovim and Windows Terminal configuration focused on reproducible 
 ## Quick Start
 
 ### Prerequisites
+
 - **Neovim 0.12+** with clipboard support and Git available in `PATH` (required by the rewritten `nvim-treesitter` on the `main` branch)
 - **`tree-sitter` CLI 0.26+** — required at runtime to compile parsers; `nvim-treesitter` no longer bundles it
 - **C compiler** on `PATH` (Xcode Command Line Tools on macOS: `xcode-select --install`; `build-essential` on Linux; MSVC Build Tools on Windows) — used by `tree-sitter` to build parsers
@@ -168,20 +170,20 @@ pwsh -Command "Import-Module .\powershell\in_testing_profile.ps1; tabs"
 
 ### Available Components
 
-| Component | Path | Description |
-|-----------|------|-------------|
-| Neovim Config | `nvim/` | Modular Lua configuration with custom theme, domain-based plugins, and Blink completion. |
-| PowerShell Profile | `powershell/in_testing_profile.ps1` | Full session automation: Oh My Posh prompt, PSReadLine tweaks, directory persistence. |
-| Recovery Profile | `powershell/recovery_last_session_profile.ps1` | Lightweight profile that prioritizes restoring the last working directory. |
-| Terminal Template | `powershell/required_config.json` | Windows Terminal settings with JetBrainsMono, acrylic, and custom keybindings. |
-| Windows Cleanup | `scripts/windows/system-cleanup.bat` | Elevated maintenance script: clears TEMP, empties Recycle Bin, and runs SFC + DISM repairs. |
-| Claude Skills Setup | `scripts/windows/setup-claude-skills.bat` | Self-elevating script that symlinks `.claude/skills/` and `.claude/CLAUDE.md` into `~/.claude/`. |
-| Codex Skills Setup | `scripts/windows/setup-codex-skills.bat` | Self-elevating script that links each skill in `.claude/skills/` plus `.codex/AGENTS.md` into `~/.codex/`, preserving `.system/`. |
-| Skills Check | `scripts/windows/check-skills.bat` | Read-only verifier (no elevation) that validates skill links, optional `.cursor/rules` files in the repo, and the two instruction-file links against the repo and flags orphans or missing entries. |
-| Cursor Rules | `.cursor/rules/` | Optional reference rules (for example `pr-workflow.mdc`). Install into a project or as a user rule in Cursor Settings when you want them. |
-| Claude / Codex Skills | `.claude/skills/` | Versioned skills shared between Claude Code (`~/.claude/skills`) and Codex CLI (`~/.codex/skills/<skill>`). |
-| Claude Instructions | `.claude/CLAUDE.md` | Global Claude Code instructions: quality mode + writing style. Symlinked into `~/.claude/CLAUDE.md`. |
-| Codex Instructions | `.codex/AGENTS.md` | Global Codex CLI instructions; identical content to `.claude/CLAUDE.md`. Symlinked into `~/.codex/AGENTS.md`. |
+| Component             | Path                                           | Description                                                                                                                                                                                         |
+| --------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Neovim Config         | `nvim/`                                        | Modular Lua configuration with custom theme, domain-based plugins, and Blink completion.                                                                                                            |
+| PowerShell Profile    | `powershell/in_testing_profile.ps1`            | Full session automation: Oh My Posh prompt, PSReadLine tweaks, directory persistence.                                                                                                               |
+| Recovery Profile      | `powershell/recovery_last_session_profile.ps1` | Lightweight profile that prioritizes restoring the last working directory.                                                                                                                          |
+| Terminal Template     | `powershell/required_config.json`              | Windows Terminal settings with JetBrainsMono, acrylic, and custom keybindings.                                                                                                                      |
+| Windows Cleanup       | `scripts/windows/system-cleanup.bat`           | Elevated maintenance script: clears TEMP, empties Recycle Bin, and runs SFC + DISM repairs.                                                                                                         |
+| Claude Skills Setup   | `scripts/windows/setup-claude-skills.bat`      | Self-elevating script that symlinks `.claude/skills/` and `.claude/CLAUDE.md` into `~/.claude/`.                                                                                                    |
+| Codex Skills Setup    | `scripts/windows/setup-codex-skills.bat`       | Self-elevating script that links each skill in `.claude/skills/` plus `.codex/AGENTS.md` into `~/.codex/`, preserving `.system/`.                                                                   |
+| Skills Check          | `scripts/windows/check-skills.bat`             | Read-only verifier (no elevation) that validates skill links, optional `.cursor/rules` files in the repo, and the two instruction-file links against the repo and flags orphans or missing entries. |
+| Cursor Rules          | `.cursor/rules/`                               | Optional reference rules (for example `pr-workflow.mdc`). Install into a project or as a user rule in Cursor Settings when you want them.                                                           |
+| Claude / Codex Skills | `.claude/skills/`                              | Versioned skills shared between Claude Code (`~/.claude/skills`) and Codex CLI (`~/.codex/skills/<skill>`).                                                                                         |
+| Claude Instructions   | `.claude/CLAUDE.md`                            | Global Claude Code instructions: quality mode + writing style. Symlinked into `~/.claude/CLAUDE.md`.                                                                                                |
+| Codex Instructions    | `.codex/AGENTS.md`                             | Global Codex CLI instructions; identical content to `.claude/CLAUDE.md`. Symlinked into `~/.codex/AGENTS.md`.                                                                                       |
 
 ### Type Checking
 
