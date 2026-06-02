@@ -6,6 +6,13 @@ alwaysApply: false
 
 Favour explicit data flow, pure functions, composition, and monadic error handling; model absence, failure, and async state as values you handle explicitly with exhaustive matching.
 
+## Table of contents
+
+- [Maybe - Representing Absence](#maybe--representing-absence)
+- [Result - Typed Error Handling](#result--typed-error-handling)
+- [RemoteData - UI State Machine](#remotedata--ui-state-machine)
+- [Future - Lazy Async Computation](#future--lazy-async-computation)
+
 ## Maybe — Representing Absence
 
 - Use `Maybe<T>` for optional computation, display helpers, and domain absence that should be handled explicitly. Construct with `Just(value)` or `Nothing()`.

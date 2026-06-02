@@ -11,6 +11,19 @@ Bundled reference (verbatim from a production codebase):
 - `../examples/tables/table.example.tsx` — headless primitives (`Table`, `TableHeader`, `TableRow`, `TableHead`, `TableCell`, …) with `cva` variants.
 - `../examples/tables/datatable.example.tsx` — the `DataTable<T, C>` abstraction (`DataTable`, `ColumnDef`, `ColumnsConfig`).
 
+## Table of contents
+
+- [Audit](#audit)
+- [Canonical references](#canonical-references-by-role-not-fixed-path)
+- [What DataTable gives you](#what-datatable-gives-you)
+- [End-to-end pattern](#end-to-end-pattern)
+- [Fetch and unwrap](#fetch-and-unwrap-top-component)
+- [Columns + DataTable](#columns--datatable-table-component)
+- [Row interaction](#row-interaction)
+- [Extending the abstraction](#extending-the-abstraction)
+- [Cross-references](#cross-references)
+- [Do not](#do-not)
+
 ## Audit
 
 - Inspect the nearest `package.json`.

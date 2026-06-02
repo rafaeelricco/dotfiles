@@ -16,6 +16,20 @@ Bundled reference:
 For rendering a collection as a sortable/paginated table, pair this with `./tables.md`;
 for building form inputs and submit handlers, see `./forms-api.md`.
 
+## Table of contents
+
+- [Audit](#audit)
+- [Canonical references](#canonical-references-by-role)
+- [Imports](#imports)
+- [1. Anatomy of a page](#1-anatomy-of-a-page)
+- [2. Fetch -> unwrap](#2-fetch--unwrap-the-remotedata-state-machine)
+- [3. The data layer](#3-the-data-layer-future)
+- [4. Container / presentational split](#4-container--presentational-split)
+- [5. Mutations use the same machine](#5-mutations-use-the-same-machine)
+- [Refactoring an existing page to this pattern](#refactoring-an-existing-page-to-this-pattern)
+- [Cross-references](#cross-references)
+- [Do / Do not](#do--do-not)
+
 ## Audit
 
 - Inspect the nearest `package.json`.
