@@ -1,69 +1,55 @@
-## Intelligence & quality mode
+## 1. Think Before Coding
 
-Optimize for correctness, maintainability, and evidence over speed, but scale investigation depth to the risk and complexity of the task.
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
 
-### Grounding
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
 
-- Do not guess repository behavior. Before making claims or code changes, inspect the relevant files, call sites, types, tests, configs, and existing patterns needed to justify the answer or change.
-- Prefer the repository’s installed versions, lockfiles, and existing usage patterns over generic examples from memory.
-- For libraries, frameworks, SDKs, or external APIs, use the Context7 MCP server when implementation depends on version-specific behavior, setup, configuration, unfamiliar APIs, or uncertain edge cases. Resolve the library first, then fetch docs for the specific API, version, pattern, or configuration being used.
-- Treat external docs as supporting evidence. Reconcile them with the repo’s installed versions and existing code.
+## 2. Simplicity First
 
-### Clarification and planning
+**Minimum code that solves the problem. Nothing speculative.**
 
-- For complex or ambiguous tasks, investigate first.
-- Ask targeted questions only when missing information would materially change product behavior, API contracts, data shape, UX decisions, state transitions, naming, or architectural direction.
-- If a safe assumption is reasonable, state it explicitly in the plan instead of blocking.
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
 
-### Change protocol
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
-- Before editing, produce a short implementation plan.
-- If the plan includes non-trivial or risky code changes, include detailed proposed diffs or file-by-file diff-style summaries before applying them.
-- Do not edit files until the human approves the plan and proposed diffs.
-- Prefer principled, general solutions over test-specific workarounds or hard-coded fixes.
+## 3. Surgical Changes
 
-### Completion bar
+**Touch only what you must. Clean up only your own mess.**
 
-- Before finishing, self-review the diff for regressions, missed call sites, unsafe assumptions, and missing validation.
-- Done means: the request is satisfied, relevant checks were run or explicitly skipped with reason, and the final answer summarizes what changed and how it was verified.
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
 
-### Pull requests
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
 
-Before creating or opening a pull request, use the `pr-generate-description` skill to produce the PR body and title options from the branch diff. If the agent will run `gh pr create`, use the skill first and pass the body via `--body` or `--body-file` (do not skip the skill and invent the description).
+The test: Every changed line should trace directly to the user's request.
 
-## Writing style
+## 4. Goal-Driven Execution
 
-These rules apply to every prose output: chat replies, commit messages, PR descriptions, GitHub issues, code comments, and docs.
+**Define success criteria. Loop until verified.**
 
-### Cut filler
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
 
-- No throat-clearing openers ("Here's the thing", "Here's what", "The truth is", "Let me be clear", "It turns out", "At the end of the day", "When it comes to").
-- No emphasis crutches ("Full stop", "Let that sink in", "Make no mistake", "This matters because").
-- No adverbs. Kill -ly words and "really", "just", "literally", "actually", "simply", "genuinely", "honestly", "fundamentally", "importantly", "crucially".
-- No business jargon ("navigate", "unpack", "deep dive", "lean into", "circle back", "moving forward", "game-changer", "double down").
-- No meta-commentary ("In this section we'll", "As we'll see", "Let me walk you through", "The rest of this explains"). The text should move, not announce its structure.
+For multi-step tasks, state a brief plan:
+```
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
 
-### Active voice, named actor
-
-- Every sentence needs a human subject doing something. No passive voice ("mistakes were made" → name who made them).
-- No false agency. Inanimate things don't perform human verbs. "The team shipped the fix" beats "the complaint becomes a fix". "Buyers paid more" beats "the market rewarded".
-- If no specific actor fits, use "you" to put the reader in the seat.
-
-### Be specific
-
-- No vague declaratives. "The reasons are structural" / "The implications are significant" — name the specific reason or implication, or cut the sentence.
-- No lazy extremes ("every", "always", "never", "everyone", "nobody") doing vague work. Use specifics.
-
-### Avoid formulaic structures
-
-- No binary contrasts: "Not X. Y." / "It isn't X, it's Y" / "The question isn't X, it's Y" / "stops being X and starts being Y". State Y directly.
-- No negative listing: "Not a X. Not a Y. A Z." State Z.
-- No dramatic fragmentation: "X. That's it. That's the thing."
-- No rhetorical setups: "What if...?", "Think about it:", "Here's what I mean:", "And that's okay."
-- No three-item lists when two work. No paragraphs that all end punchily.
-- No em-dashes. Use commas or periods.
-- No Wh-word sentence starters (What, When, Where, Why, How). Lead with the subject or verb.
-
-### Trust the reader
-
-State facts. Skip softening, justification, hand-holding. If a sentence reads like a pull-quote, rewrite it.
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
