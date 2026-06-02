@@ -24,6 +24,18 @@ Bundled references:
 - `../examples/forms-api/campaigns.example.tsx` — a presentational form component that owns its own
   `submit` `RemoteData` cell and form fields, nothing lifted to the parent.
 
+## Table of contents
+
+- [Canonical references](#canonical-references-by-role)
+- [Imports](#imports)
+- [1. Small, composed, colocated components](#1-small-composed-colocated-components)
+- [2. Named prop types](#2-named-prop-types)
+- [3. Colocated local state](#3-colocated-local-state)
+- [4. Parent/child boundaries](#4-parentchild-boundaries)
+- [5. Scope](#5-scope)
+- [Refactoring an existing component to this pattern](#refactoring-an-existing-component-to-this-pattern)
+- [Do / Do not](#do--do-not)
+
 ## Canonical references (by role)
 
 - **Component files (`*.tsx`)** — small, mostly pure, colocated with their consumer.

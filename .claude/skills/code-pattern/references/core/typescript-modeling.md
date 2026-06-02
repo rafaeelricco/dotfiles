@@ -6,6 +6,15 @@ alwaysApply: false
 
 Favour static types, exhaustive matching, strict generics, and branded values over raw primitives; make illegal states unrepresentable and normalize transport/DTO shapes into domain types at boundaries.
 
+## Table of contents
+
+- [Type Design](#type-design)
+- [Domain Modeling](#domain-modeling)
+- [Parsing & Validation](#parsing--validation)
+- [Decoders - Validating Incoming Data](#decoders--validating-incoming-data)
+- [Encoders - Formatting Output Data](#encoders--formatting-output-data)
+- [Schemas - Bidirectional Mapping](#schemas--bidirectional-mapping)
+
 ## Type Design
 
 - Use a **reusable `Id<T>` class** for entity IDs. Don't use `string & { __brand }` intersections — they allow name collisions, leak `__brand` into intellisense, and accept raw strings without constructors.

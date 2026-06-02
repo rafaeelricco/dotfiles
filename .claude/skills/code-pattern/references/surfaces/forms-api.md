@@ -25,6 +25,20 @@ Bundled reference (from a production codebase — `app/frontend`):
 For the page shell that hosts a form, see `./pages.md`; for rendering the data a write
 mutates, `./tables.md`.
 
+## Table of contents
+
+- [Audit](#audit)
+- [Canonical references](#canonical-references-by-role)
+- [Imports](#imports)
+- [1. Calling the backend](#1-calling-the-backend)
+- [2. The form](#2-the-form-useform)
+- [3. Submit state](#3-submit-state-remotedata)
+- [4. Read-after-write](#4-read-after-write-useprojectiondelay)
+- [5. Boundary conversions](#5-boundary-conversions)
+- [Surface variants](#surface-variants)
+- [Cross-references](#cross-references)
+- [Do / Do not](#do--do-not)
+
 ## Audit
 
 - Inspect the nearest `package.json` and the local aliases (`@fe/*` in frontend; `@/*` in mobile).
