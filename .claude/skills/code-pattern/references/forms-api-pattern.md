@@ -162,7 +162,7 @@ and treat empty combobox selections as `null`. Cross-field rules (e.g. end-after
 - `./page-pattern.md` — the page shell + `RemoteData` state machine hosting the form; `Future` vocab.
 - `./table-pattern.md` — rendering the collection a write mutates; refetch via the projection delay.
 - `./typescript-effects.md` — `RemoteData` / `Future` / `Maybe` modeling, `satisfies never`.
-- `./react-ui.md` — named prop types, small composed children, colocated state.
+- `./react-conventions.md` — named prop types, small composed children, colocated state.
 
 ## Do / Do not
 

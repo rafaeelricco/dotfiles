@@ -224,7 +224,7 @@ inputs themselves (`useForm`, `FormInput`) is covered by `./forms-api-pattern.md
 - `./table-pattern.md` — when the page renders a collection as a sortable/paginated table (hand the `Ready` value to a `DataTable`).
 - `./forms-api-pattern.md` — the form inputs / submit handlers for the write flows in §5 (`api` / `call` / `Future.fork`, read-after-write projection delay).
 - `./typescript-effects.md` — `RemoteData`, `Future`, `Maybe` modeling and the `satisfies never` exhaustiveness idiom.
-- `./react-ui.md` — named prop types, small composed children, colocated child state.
+- `./react-conventions.md` — named prop types, small composed children, colocated child state.
 
 ## Do / Do not
 
