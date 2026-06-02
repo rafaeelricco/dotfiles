@@ -123,14 +123,13 @@ in-flight request.
   helper).
 - Readiness guards are boolean **properties**: `items.isReady`, `items.isLoading`,
   `items.isFailed` — use them for derived flags; use `instanceof` for exhaustive render.
-- Combine independent cells with `.map(f)` (transform a `Ready` value) and `.then(f)` (bind,
+- Combine independent cells with `.map(f)` (transform a `Ready` value) and `.chain(f)` (bind,
   when `f` returns another cell):
 
-      const view = items.then((is) => categories.map((cs) => ({ items: is, categories: cs })));
+      const view = items.chain((is) => categories.map((cs) => ({ items: is, categories: cs })));
 
-- A cell has **no `.chain` and no `.withDefault`** — `.chain` is `Future`'s bind, and
-  `.withDefault` is a `Maybe` method (it operates on a `Maybe` field inside a cell, not the
-  cell itself).
+- A cell has **no `.withDefault`** — `.withDefault` is a `Maybe` method. Use `RemoteData.chain`
+  when the callback returns another `RemoteData`, and use `Future.chain` only in the async data layer.
 
 ## 3. The data layer (`Future`)
 
@@ -236,6 +235,6 @@ inputs themselves (`useForm`, `FormInput`) is covered by `./forms-api.md`.
 - Do: keep the page = shell + state machine; push presentation and its local state into a
   child. Build the data layer from small composable `Future`s and fetch only what you show.
 - Do not: render ad-hoc `<div>Loading...</div>` or bare error text — use `Alert*`.
-- Do not: call `.chain` or `.withDefault` on a `RemoteData` cell (those are `Future` /
-  `Maybe`); the bind on a cell is `.then`.
+- Do not: call `.withDefault` on a `RemoteData` cell; that is a `Maybe` method. Use
+  `RemoteData.chain` for cell-to-cell bind and `Future.chain` in the data layer.
 - Do not: drop the `satisfies never`, or fetch data the page never displays.
