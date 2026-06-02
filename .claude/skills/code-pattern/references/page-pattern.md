@@ -1,20 +1,20 @@
-# Frontend — pages (the page pattern)
+# Frontend Pages Pattern
 
 Every authenticated page follows one recipe: take the page's inputs (e.g. a `session`), wrap
 the screen in the **app layout shell**, fetch data into a **`RemoteData` cell** with a
 **`Future`**, match that cell **exhaustively**, and hand the `Ready` value to a
 **presentational child**. Keep the page component about *fetching + layout*; let children own
-*presentation*. Examples below use a neutral `Item` / `Category` domain and a `RequestError`
-transport type — substitute your own.
+*presentation*. Examples below use a neutral `Item` / `Category` domain and a
+`FetchErrorResponse` transport type, formatted with `fetchErrorToString` — substitute your own.
 
 Bundled reference:
 
-- `./cooperatives.example.tsx` — a real page end-to-end (layout shell → `RemoteData` match →
+- `./examples/cooperatives.example.tsx` — a real page end-to-end (layout shell → `RemoteData` match →
   composed `Future` data layer → presentational table), adapted from a production codebase.
   It imports `RemoteData` / `Future` / `Maybe` from their `@ambarltd/core/*` subpaths.
 
-For rendering a collection as a sortable/paginated table, pair this with `../tables/tables.md`;
-for building form inputs and submit handlers, see `../forms/forms-and-api.md`.
+For rendering a collection as a sortable/paginated table, pair this with `./table-pattern.md`;
+for building form inputs and submit handlers, see `./forms-api-pattern.md`.
 
 ## Audit
 
@@ -31,7 +31,7 @@ Pages Audit:
 - RemoteData/Future/Maybe source:
 - api endpoints module:
 - Layout shell:
-- Async-state UI (Alert*):
+- Async-state UI:
 - Nearby page followed:
 ```
 
@@ -41,7 +41,9 @@ Pages Audit:
   `Failed` / `Ready` (the async-state machine).
 - **`@ambarltd/core/future`** — `Future` (lazy, cancelable async) and its combinators.
 - **`@ambarltd/core/maybe`** — `Maybe` (`Just` / `Nothing`) for optional values.
-- **Your endpoints module** (the `api` object) — typed `api.*` entries that return `Future`s.
+- **`@fe/api/endpoints`** — the `api` object; typed endpoint descriptors (`PlainEndpoint<Req, Res>`).
+- **`@fe/api/request`** — `call(endpoint, body)` returns a lazy `Future`.
+- **`@fe/lib/request`** — `fetchErrorToString` (transport error → string).
 - **Your async-state UI** — `AlertLoading` / `AlertFailure` / `AlertSuccess` components.
 - **Your layout shell** — the page chrome (nav, title/breadcrumb, selected item, session).
 
@@ -54,7 +56,9 @@ project-specific (shown here with a neutral `@/` alias).
     import { RemoteData, NotAsked, Loading, Failed, Ready } from "@ambarltd/core/remote-data";
     import { Future } from "@ambarltd/core/future";
     import { Just } from "@ambarltd/core/maybe";
-    import { api } from "@/api/endpoints";
+    import { api } from "@fe/api/endpoints";
+    import { call } from "@fe/api/request";
+    import { fetchErrorToString, type FetchErrorResponse } from "@fe/lib/request";
     import { AlertLoading, AlertFailure } from "@/components/ui/alert";
     import { AppLayout, NavItem } from "@/components/layout";
 
@@ -95,11 +99,11 @@ Hold the request in a `RemoteData` cell. Set `Loading()` first, then fork the `F
 in-flight request.
 
     function Items({ session }: { session: Session }) {
-      const [items, setItems] = useState<RemoteData<RequestError, Item[]>>(NotAsked());
+      const [items, setItems] = useState<RemoteData<FetchErrorResponse, Item[]>>(NotAsked());
 
       useEffect(() => {
         setItems(Loading());
-        return api.listItems().fork(
+        return call(api.listItems, {}).fork(
           (e)   => setItems(Failed(e)),
           (res) => setItems(Ready(res.items)),
         );
@@ -107,7 +111,7 @@ in-flight request.
 
       return items instanceof Ready    ? <ItemList items={items.value} />
            : items instanceof Loading  ? <AlertLoading>Loading…</AlertLoading>
-           : items instanceof Failed   ? <AlertFailure>Couldn’t load items.</AlertFailure>
+           : items instanceof Failed   ? <AlertFailure>{fetchErrorToString(items.failure)}</AlertFailure>
            : items instanceof NotAsked ? <>Stuck?</>
            : items satisfies never;
     }
@@ -129,29 +133,29 @@ in-flight request.
 
 ## 3. The data layer (`Future`)
 
-Build the fetch from small, named, return-typed `Future` helpers that wrap `api.*` and `.map`
-out the field you need. Compose them, and `fork` **once**, at the effect boundary.
+Build the fetch from small, named, return-typed `Future` helpers that wrap `call(api.*, body)`
+and `.map` out the field you need. Compose them, and `fork` **once**, at the effect boundary.
 
 Single fetch:
 
-    function fetchItem(id: ItemId): Future<RequestError, Item> {
-      return api.getItem(id).map((res) => res.item);
+    function fetchItem(id: ItemId): Future<FetchErrorResponse, Item> {
+      return call(api.getItem, { id }).map((res) => res.item);
     }
 
 Dependent fetch — `.chain` sequences a call that needs the first result:
 
-    function fetchItemWithCategory(id: ItemId): Future<RequestError, ItemDetails> {
-      return api.getItem(id).chain((res) =>
-        api.getCategory(res.item.categoryId).map((c) => ({ item: res.item, category: c.category })),
+    function fetchItemWithCategory(id: ItemId): Future<FetchErrorResponse, ItemDetails> {
+      return call(api.getItem, { id }).chain((res) =>
+        call(api.getCategory, { categoryId: res.item.categoryId }).map((c) => ({ item: res.item, category: c.category })),
       );
     }
 
 Independent fetches — `Future.concurrently` runs them in parallel and collects a named object:
 
-    function fetchItemDetails(id: ItemId): Future<RequestError, ItemDetails> {
+    function fetchItemDetails(id: ItemId): Future<FetchErrorResponse, ItemDetails> {
       return Future.concurrently({
-        item: api.getItem(id).map((r) => r.item),
-        categories: api.listCategories().map((r) => r.categories),
+        item: call(api.getItem, { id }).map((r) => r.item),
+        categories: call(api.listCategories, {}).map((r) => r.categories),
       });
     }
 
@@ -169,8 +173,8 @@ Two consistent shapes for a multi-source page:
    `fork` once.
 2. **Independent cells → combine in render** with `.then` / `.map`.
 
-Each `api.*` entry returns a `Future`; nothing runs until you `fork`. Fetch only what the
-page renders.
+Each `api.*` entry is a typed endpoint descriptor; `call(api.*, body)` returns a lazy
+`Future` — nothing runs until you `fork`. Fetch only what the page renders.
 
 ## 4. Container / presentational split
 
@@ -181,7 +185,7 @@ the `Ready` value is presentational and owns its own local UI state — table `p
     function ItemList({ items }: { items: Item[] }) {
       const [page, setPage] = useState(0);
       const [query, setQuery] = useState("");
-      // ...filter + render the table (see ../tables/tables.md)
+      // ...filter + render the table (see ./table-pattern.md)
     }
 
 ## 5. Mutations use the same machine
@@ -189,23 +193,23 @@ the `Ready` value is presentational and owns its own local UI state — table `p
 A write is the same shape as a read: a `RemoteData` cell for the submit state, `Loading()`
 before the call, `.fork` after.
 
-    const [saved, setSaved] = useState<RemoteData<RequestError, Item>>(NotAsked());
+    const [saved, setSaved] = useState<RemoteData<FetchErrorResponse, Item>>(NotAsked());
 
     const save = (input: ItemInput) => {
       setSaved(Loading());
-      api.updateItem(input).fork(
+      call(api.updateItem, input).fork(
         (e)   => setSaved(Failed(e)),
         (res) => setSaved(Ready(res.item)),    // then show <AlertSuccess/>
       );
     };
 
 Render `AlertLoading` / `AlertFailure` / `AlertSuccess` off that cell. Building the form
-inputs themselves (`useForm`, `FormInput`) is covered by `../forms/forms-and-api.md`.
+inputs themselves (`useForm`, `FormInput`) is covered by `./forms-api-pattern.md`.
 
 ## Refactoring an existing page to this pattern
 
 1. Replace ad-hoc `useState` flags (`isLoading`, `error`, `data`) with a single
-   `RemoteData<RequestError, T>` cell.
+   `RemoteData<FetchErrorResponse, T>` cell.
 2. Move the request into a `useEffect` that sets `Loading()` first and **returns** the `fork`
    `Cancel`.
 3. Lift data assembly out of the component into small `Future` helpers (`.map` / `.chain` /
@@ -216,11 +220,10 @@ inputs themselves (`useForm`, `FormInput`) is covered by `../forms/forms-and-api
 
 ## Cross-references
 
-- `../tables/tables.md` — when the page renders a collection as a sortable/paginated table (hand the `Ready` value to a `DataTable`).
-- `../forms/forms-and-api.md` — the form inputs / submit handlers for the write flows in §5 (`api` / `call` / `Future.fork`, read-after-write projection delay).
-- `../component-boundaries.md` — the container/presentational split, exhaustive `instanceof … satisfies never` matching, pushing absence/variants into children.
-- `../typescript-conventions.md` — `RemoteData`, `Future`, `Maybe` modeling and the `satisfies never` exhaustiveness idiom.
-- `../react-conventions.md` — named prop types, small composed children, colocated child state.
+- `./table-pattern.md` — when the page renders a collection as a sortable/paginated table (hand the `Ready` value to a `DataTable`).
+- `./forms-api-pattern.md` — the form inputs / submit handlers for the write flows in §5 (`api` / `call` / `Future.fork`, read-after-write projection delay).
+- `./typescript-effects.md` — `RemoteData`, `Future`, `Maybe` modeling and the `satisfies never` exhaustiveness idiom.
+- `./react-ui.md` — named prop types, small composed children, colocated child state.
 
 ## Do / Do not
 

@@ -5,17 +5,11 @@ export {
 }
 
 import * as React from "react";
+
 import { Nullable } from "@ambarltd/core/nullable";
 import { ArrowUpDown, ArrowDownWideNarrow, ArrowDownNarrowWide } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
 type SortFun<T> = (x: T, y: T) => number
@@ -74,7 +68,6 @@ function getPage<T>({ page, pageSize, rows } : { page: number, pageSize: number,
   return rows.slice(start, start + pageSize);
 }
 
-// classes for ellipsis text overflow
 const ellipsis = "overflow-hidden text-ellipsis whitespace-nowrap";
 
 function DataTable<T, C extends ColumnsConfig<T>>({

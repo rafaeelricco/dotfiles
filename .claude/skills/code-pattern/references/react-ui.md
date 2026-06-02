@@ -81,7 +81,7 @@ Colocated state stays correlated with the UI that produces and consumes it; wide
 
 ## Boundaries
 
-Each layer's responsibility should match what only that layer can decide; misplaced branches grow into divergent code paths. See `component-boundaries.md` for the full audit checklist.
+Each layer's responsibility should match what only that layer can decide; misplaced branches grow into divergent code paths.
 
 - Keep parent components focused on **layout/composition**; let children own **presentation variants**.
 - Don't branch in the parent when every branch returns the same child component with different props — that's a boundary smell, push the branch into the child.

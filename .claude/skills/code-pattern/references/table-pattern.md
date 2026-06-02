@@ -8,16 +8,15 @@ one; the canonical implementation is bundled here to port when a package lacks o
 
 Bundled reference (verbatim from a production codebase):
 
-- `./table.tsx` — headless primitives (`Table`, `TableHeader`, `TableRow`, `TableHead`, `TableCell`, …) with `cva` variants.
-- `./datatable.tsx` — the `DataTable<T, C>` abstraction (`DataTable`, `ColumnDef`, `ColumnsConfig`).
-- `./applications.example.tsx` — a worked page (fetch → columns → `DataTable`); trimmed excerpt, full source path in its header.
+- `./examples/table.example.tsx` — headless primitives (`Table`, `TableHeader`, `TableRow`, `TableHead`, `TableCell`, …) with `cva` variants.
+- `./examples/datatable.example.tsx` — the `DataTable<T, C>` abstraction (`DataTable`, `ColumnDef`, `ColumnsConfig`).
 
 ## Audit
 
 - Inspect the nearest `package.json`.
 - Look for an existing table layer: `components/ui/datatable.tsx`, `components/ui/table.tsx`, or a data-grid dependency (`@tanstack/react-table`, etc.). Follow what exists.
 - Read one or two nearby table pages before editing.
-- Note how the data arrives (usually `RemoteData` from a `Future` — see `../forms/forms-and-api.md`).
+- Note how the data arrives (usually `RemoteData` from a `Future` — see `./forms-api-pattern.md`).
 
 Report the audit briefly:
 
@@ -33,13 +32,12 @@ Tables Audit:
 
 ## Canonical references (by role, not fixed path)
 
-- Headless primitives — the `Table`/`TableHeader`/`TableRow`/`TableCell` set (e.g. `components/ui/table.tsx`; bundled `./table.tsx`).
-- Table abstraction — `DataTable` + `ColumnDef` + `ColumnsConfig` (e.g. `components/ui/datatable.tsx`; bundled `./datatable.tsx`).
-- Worked page — a list page wiring fetch → columns → `DataTable` (bundled `./applications.example.tsx`).
+- Headless primitives — the `Table`/`TableHeader`/`TableRow`/`TableCell` set (e.g. `components/ui/table.tsx`; bundled `./examples/table.example.tsx`).
+- Table abstraction — `DataTable` + `ColumnDef` + `ColumnsConfig` (e.g. `components/ui/datatable.tsx`; bundled `./examples/datatable.example.tsx`).
 
 ## What `DataTable` gives you
 
-`DataTable<T, C>` (see `./datatable.tsx`):
+`DataTable<T, C>` (see `./examples/datatable.example.tsx`):
 
 - `columns: C` — a `ColumnsConfig<T>`: `{ [key]: new ColumnDef({ label, sortFun }) }`.
 - `columnOrder: (keyof C)[]` — which columns render, in order.
@@ -61,25 +59,26 @@ component hold page state, define `columns`, and map `data` to `rows`.
     type ApplicationDetails = { application: CooperativeApplication; applicant: AdministratorDetails };
 
     function SuperApplications({ session }: { session: SuperSession }) {
-      const [state, setState] = useState<api.Remote<ApplicationDetails[]>>(NotAsked());
+      const [state, setState] = useState<RemoteData<FetchErrorResponse, ApplicationDetails[]>>(NotAsked());
 
       useEffect(() => {
         setState(Loading());
-        return fetchCooperatives(session.session_token).fork(  // Future; the returned Cancel is the effect cleanup
+        return fetchCooperatives().fork(  // Future; the returned Cancel is the effect cleanup
           (e) => setState(Failed(e)),
           (v) => setState(Ready(v)),
         );
-      }, [session.session_token]);
+      }, []);
 
       return state instanceof Ready    ? <ApplicationsTable data={state.value} />
            : state instanceof Loading  ? <div>Loading...</div>
-           : state instanceof Failed   ? <div>{api.requestErrorToString(state.failure)}</div>
+           : state instanceof Failed   ? <div>{fetchErrorToString(state.failure)}</div>
            : state instanceof NotAsked ? <>Stuck?</>
            : state satisfies never;
     }
 
-`api.Remote<T>` is `RemoteData<RequestError, T>` — match the four classes with `instanceof`
-and close with `satisfies never` (see `../typescript-conventions.md`).
+`RemoteData<FetchErrorResponse, T>` — match the four classes with `instanceof` and close
+with `satisfies never` (see `./typescript-effects.md`); format `state.failure` with
+`fetchErrorToString` (see `./forms-api-pattern.md`).
 
 ### Columns + DataTable (table component)
 
@@ -129,7 +128,7 @@ and close with `satisfies never` (see `../typescript-conventions.md`).
 Rules:
 - `contents` keys must match `columns` / `columnOrder`.
 - Optional fields are `Maybe<T>`: use `value.map(fmt).withDefault(fallback)` in both the cell
-  and the `sortFun` (see `registered_at`; `../typescript-conventions.md` for `Maybe`).
+  and the `sortFun` (see `registered_at`; `./typescript-effects.md` for `Maybe`).
 - Build comparators inline (`localeCompare`, numeric subtraction) or with a `comparing` /
   `sortOn` helper; `sortFun: null` disables sorting on that column.
 
@@ -137,30 +136,30 @@ Rules:
 
 - **Side effect / drawer** — set `onClick` on the row. The worked example opens a detail
   drawer from a small `"Closed" | "Open" | "Closing"` discriminated union; keep that machine
-  in the child (see `../component-boundaries.md`).
+  in the child.
 - **Navigation** — render a `<Link>` inside a cell's `contents` (typed router) rather than
   `onClick`.
 
 ## Extending the abstraction
 
 - **New visual style** → add a key to the `cva` blocks (`tableVariants` / `tableHeaderVariants`)
-  in `./table.tsx`; keep `defaultVariants`. Compose through `cn()` / `cva()`, never inline
-  `style` (see `../react-conventions.md`).
+  in `./examples/table.example.tsx`; keep `defaultVariants`. Compose through `cn()` / `cva()`, never inline
+  `style` (see `./react-ui.md`).
 - **New column** → add a key to `ColumnsConfig` + `columnOrder` with matching `contents`;
   give it a `sortFun` or `null`.
 - **Per-row styling** → set `variant` / `className` on the row object.
 - **New behavior** (server-side pagination, multi-sort, selection) → extend `DataTableProps` /
-  `Pagination` / `SortState` in `./datatable.tsx`.
+  `Pagination` / `SortState` in `./examples/datatable.example.tsx`.
 - **Status / variant rendering** → push it into the smallest child cell and drive copy/tone
   from a typed presentation helper (e.g. `getStatusConfig(status) → { label, color }`), not
-  parent branches (see `../component-boundaries.md`).
+  parent branches.
 
 ## Cross-references
 
-- `../react-conventions.md` — `cn()` / `cva()` styling, named prop types, small composed cells, parent/child boundaries.
-- `../typescript-conventions.md` — `Maybe` (optional cells), `RemoteData` (fetch state), `Future` (the request), discriminated unions (row-interaction state machines).
-- `../forms/forms-and-api.md` — the data-fetching / write side feeding the table (`api` / `call` / `Future.fork`); after a write that mutates rows, refetch through the local projection-delay pattern.
-- `../component-boundaries.md` — own absence with `Maybe`, push variant rendering down to child cells, typed presentation helpers for dense status/copy decisions.
+- `./react-ui.md` — `cn()` / `cva()` styling, named prop types, small composed cells, parent/child boundaries.
+- `./typescript-effects.md` — `Maybe` (optional cells), `RemoteData` (fetch state), `Future` (the request).
+- `./typescript-modeling.md` — discriminated unions (row-interaction state machines).
+- `./forms-api-pattern.md` — the data-fetching / write side feeding the table (`api` / `call` / `Future.fork`); after a write that mutates rows, refetch through the local projection-delay pattern.
 
 ## Do not
 
@@ -168,4 +167,4 @@ Rules:
 - Re-implement sorting / pagination / empty-state per page instead of using the abstraction.
 - Hand-roll a raw `<table>` for plain tabular data, or hardcode classes instead of adding a `cva` variant.
 - Use `contents` keys that don't match `columnOrder`.
-- Refetch immediately after a row-mutating write without the local projection-delay pattern (`../forms/forms-and-api.md`).
+- Refetch immediately after a row-mutating write without the local projection-delay pattern (`./forms-api-pattern.md`).
