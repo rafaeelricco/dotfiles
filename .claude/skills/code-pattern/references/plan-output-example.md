@@ -1,6 +1,6 @@
 # Examples
 
-This file shows the *shape* of plan-style output the skill should produce when invoked in plan mode or asked for a plan only. The specific files below are illustrative — pick whatever 2-3 pattern files actually fit the change you're planning.
+This file shows the _shape_ of plan-style output the skill should produce when invoked in plan mode or asked for a plan only. The specific files below are illustrative — pick whatever 2-3 pattern files actually fit the change you're planning.
 
 ## Input
 

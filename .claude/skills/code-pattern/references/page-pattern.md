@@ -3,8 +3,8 @@
 Every authenticated page follows one recipe: take the page's inputs (e.g. a `session`), wrap
 the screen in the **app layout shell**, fetch data into a **`RemoteData` cell** with a
 **`Future`**, match that cell **exhaustively**, and hand the `Ready` value to a
-**presentational child**. Keep the page component about *fetching + layout*; let children own
-*presentation*. Examples below use a neutral `Item` / `Category` domain and a
+**presentational child**. Keep the page component about _fetching + layout_; let children own
+_presentation_. Examples below use a neutral `Item` / `Category` domain and a
 `FetchErrorResponse` transport type, formatted with `fetchErrorToString` — substitute your own.
 
 Bundled reference:
@@ -27,6 +27,7 @@ Report the audit briefly:
 
 ```md
 Pages Audit:
+
 - Package surface:
 - RemoteData/Future/Maybe source:
 - api endpoints module:

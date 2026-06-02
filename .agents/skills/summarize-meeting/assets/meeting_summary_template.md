@@ -2,13 +2,13 @@
 
 ## Metadata
 
-| Field | Value |
-|-------|-------|
-| **Date** | [YYYY-MM-DD] |
-| **Time** | [HH:MM] - [HH:MM] [TZ] |
+| Field            | Value                                    |
+| ---------------- | ---------------------------------------- |
+| **Date**         | [YYYY-MM-DD]                             |
+| **Time**         | [HH:MM] - [HH:MM] [TZ]                   |
 | **Participants** | [Name, Role]; [Name, Role]; [Name, Role] |
-| **Topic** | [One-line meeting purpose] |
-| **Location** | [Room / Video link / Async] |
+| **Topic**        | [One-line meeting purpose]               |
+| **Location**     | [Room / Video link / Async]              |
 
 ## Summary
 
@@ -19,8 +19,8 @@
 
 ## Action Items
 
-| Due Date | Owner | Action |
-|----------|-------|--------|
+| Due Date     | Owner               | Action                                         |
+| ------------ | ------------------- | ---------------------------------------------- |
 | [YYYY-MM-DD] | [Single owner name] | [Specific, verifiable action with active verb] |
 | [YYYY-MM-DD] | [Single owner name] | [Specific, verifiable action with active verb] |
 | [YYYY-MM-DD] | [Single owner name] | [Specific, verifiable action with active verb] |
@@ -66,6 +66,6 @@ Thanks,
 
 Use this format to maintain a running log of decisions across meetings.
 
-| Date | Meeting | Decision | Rationale | Decided By | Status |
-|------|---------|----------|-----------|------------|--------|
-| [YYYY-MM-DD] | [Meeting name] | [Decision] | [Why] | [Who] | Active / Superseded / Reversed |
+| Date         | Meeting        | Decision   | Rationale | Decided By | Status                         |
+| ------------ | -------------- | ---------- | --------- | ---------- | ------------------------------ |
+| [YYYY-MM-DD] | [Meeting name] | [Decision] | [Why]     | [Who]      | Active / Superseded / Reversed |

@@ -29,10 +29,12 @@ Use concise bullets. Include only what the user provided or what is directly imp
 - Do not restate validation steps here.
 
 Good:
+
 - `The customer list supports filtering by city.`
 - `Shared rules are defined in a single source of truth.`
 
 Bad:
+
 - `Add a city filter dropdown to the page.`
 - `Test the city filter manually.`
 
@@ -45,10 +47,12 @@ Bad:
 - For structural or documentation work, validate the resulting artifact directly.
 
 Good:
+
 - `When city = Sao Paulo, the list must show only customers from Sao Paulo.`
 - `When the shared model is referenced, duplicated password-policy text must no longer appear in portal-specific files.`
 
 Bad:
+
 - `Manual review completed.`
 - `QA tested it.`
 

@@ -14,6 +14,7 @@ metadata:
   updated: 2026-04-10
   tech-stack: story-mapping, user-stories, release-planning, jeff-patton
 ---
+
 # User Story Mapping Expert
 
 ## Overview
@@ -40,7 +41,7 @@ A story map has three layers arranged in a 2D grid:
 
 ```
                     USER JOURNEY (left to right) →
-                    
+
     ┌──────────────────────────────────────────────────┐
     │  Activities    Activity 1    Activity 2    Act 3  │  ← Backbone
     ├──────────────────────────────────────────────────┤
@@ -53,15 +54,15 @@ A story map has three layers arranged in a 2D grid:
     │  Tasks         Task C        Task F       Task H │  ← Body
     │  (Release 2)                                     │  ← Follow-up
     └──────────────────────────────────────────────────┘
-    
+
     PRIORITY (top to bottom) ↓
 ```
 
-| Layer | What It Contains | Granularity |
-|---|---|---|
-| **Activities** | High-level user goals (what are they trying to accomplish?) | Epic-level |
-| **Steps** | Sequential actions within each activity | Feature-level |
-| **Tasks** | Specific implementation items for each step | Story-level |
+| Layer          | What It Contains                                            | Granularity   |
+| -------------- | ----------------------------------------------------------- | ------------- |
+| **Activities** | High-level user goals (what are they trying to accomplish?) | Epic-level    |
+| **Steps**      | Sequential actions within each activity                     | Feature-level |
+| **Tasks**      | Specific implementation items for each step                 | Story-level   |
 
 ### Key Principle: Flow First, Then Priority
 
@@ -73,12 +74,12 @@ A story map has three layers arranged in a 2D grid:
 
 ### Step 1: Define Who and What
 
-| Element | Description |
-|---|---|
-| **Segment** | The target user segment for this map |
-| **Persona** | The specific persona experiencing this journey |
-| **Narrative/JTBD** | The job or goal the user is trying to accomplish |
-| **Decision** | What this map should inform (MVP scope, release plan, sequencing) |
+| Element            | Description                                                       |
+| ------------------ | ----------------------------------------------------------------- |
+| **Segment**        | The target user segment for this map                              |
+| **Persona**        | The specific persona experiencing this journey                    |
+| **Narrative/JTBD** | The job or goal the user is trying to accomplish                  |
+| **Decision**       | What this map should inform (MVP scope, release plan, sequencing) |
 
 ### Step 2: Map the Backbone (Activities)
 
@@ -86,6 +87,7 @@ Walk through the user's journey and identify 3-7 high-level activities:
 
 ```markdown
 #### Activities:
+
 1. [Discover the product]
 2. [Sign up and onboard]
 3. [Complete core task]
@@ -94,6 +96,7 @@ Walk through the user's journey and identify 3-7 high-level activities:
 ```
 
 **Tips:**
+
 - Use active verbs ("Discover," "Configure," "Review") not nouns.
 - Keep to 3-7 activities -- more means you need to zoom out.
 - Arrange left to right in the order users experience them.
@@ -104,6 +107,7 @@ For each activity, identify 3-5 sequential steps:
 
 ```markdown
 #### Steps for "Sign up and onboard":
+
 - Step 1: Create account
 - Step 2: Verify email
 - Step 3: Set up profile
@@ -117,6 +121,7 @@ For each step, list specific implementation tasks:
 
 ```markdown
 #### Tasks for "Create account":
+
 - Email/password registration
 - Social login (Google, GitHub)
 - SSO integration
@@ -164,6 +169,7 @@ Draw horizontal lines across the map to define releases:
 ## User Story Map
 
 ### Context
+
 - **Segment:** [Target segment]
 - **Persona:** [Persona name and key characteristics]
 - **Narrative:** [The job or goal being mapped]
@@ -172,6 +178,7 @@ Draw horizontal lines across the map to define releases:
 ### Backbone
 
 #### Activities:
+
 1. [Activity 1]
 2. [Activity 2]
 3. [Activity 3]
@@ -179,12 +186,15 @@ Draw horizontal lines across the map to define releases:
 5. [Activity 5]
 
 #### Steps:
+
 **[Activity 1]:**
+
 - Step 1: [Description]
 - Step 2: [Description]
 - Step 3: [Description]
 
 **[Activity 2]:**
+
 - Step 1: [Description]
 - Step 2: [Description]
 - Step 3: [Description]
@@ -192,7 +202,9 @@ Draw horizontal lines across the map to define releases:
 [Continue for each activity]
 
 #### Tasks:
+
 **[Activity 1, Step 1]:**
+
 - Task 1: [Description]
 - Task 2: [Description]
 - Task 3: [Description]
@@ -202,20 +214,25 @@ Draw horizontal lines across the map to define releases:
 ### Release Slices
 
 **Release 1 (MVP):**
+
 - [Task list -- minimum viable journey]
 
 **Release 2:**
+
 - [Task list -- improved experience]
 
 **Release 3:**
+
 - [Task list -- full vision]
 
 ### Assumptions to Validate
+
 - [Assumption 1]
 - [Assumption 2]
 - [Assumption 3]
 
 ### Risks and Dependencies
+
 - [Risk or dependency 1]
 - [Risk or dependency 2]
 ```
@@ -260,20 +277,21 @@ Release 4:  Scale          (performance, enterprise)
 
 ### Running a Story Mapping Workshop
 
-| Phase | Duration | Activity |
-|---|---|---|
-| **Setup** | 10 min | Define persona, narrative, and decision scope |
-| **Backbone** | 20 min | Map activities and steps (sticky notes on wall or Miro) |
-| **Body** | 30 min | Decompose into tasks (everyone contributes) |
-| **Prioritize** | 15 min | Arrange vertically by priority |
-| **Slice** | 15 min | Draw release lines; debate MVP scope |
-| **Review** | 10 min | Identify risks, dependencies, and assumptions |
+| Phase          | Duration | Activity                                                |
+| -------------- | -------- | ------------------------------------------------------- |
+| **Setup**      | 10 min   | Define persona, narrative, and decision scope           |
+| **Backbone**   | 20 min   | Map activities and steps (sticky notes on wall or Miro) |
+| **Body**       | 30 min   | Decompose into tasks (everyone contributes)             |
+| **Prioritize** | 15 min   | Arrange vertically by priority                          |
+| **Slice**      | 15 min   | Draw release lines; debate MVP scope                    |
+| **Review**     | 10 min   | Identify risks, dependencies, and assumptions           |
 
 **Total:** ~100 minutes for a focused session.
 
 **Materials:** Sticky notes (3 colors: activities, steps, tasks), markers, large wall or whiteboard, or Miro/FigJam for remote.
 
 **Key facilitation rules:**
+
 - Keep each sticky note to 4-8 words.
 - Activities and steps first; resist jumping to tasks.
 - Everyone writes, not just the PM.
@@ -289,14 +307,14 @@ Release 4:  Scale          (performance, enterprise)
 
 ## Troubleshooting
 
-| Problem | Likely Cause | Resolution |
-|---|---|---|
-| Map has 10+ activities | Scope too broad; multiple journeys mapped as one | Split into separate maps per persona or JTBD; each map should cover one narrative |
-| Tasks are too vague ("make it work") | Jumped to tasks without defining steps clearly | Revisit steps layer; ensure each step is a concrete user action |
-| MVP line includes everything | Team can't say no; fear of shipping incomplete | Apply the "walking skeleton" pattern -- what's the minimum journey that works? |
-| Map doesn't match backlog | Story map created once and never referenced | Post map in team space; reference it during sprint planning and refinement |
-| Remote workshop produces shallow map | Digital tools don't create the same energy as physical sticky notes | Use breakout rooms for parallel step decomposition; time-box strictly |
-| Activities are features, not user goals | Feature-first thinking; activities named after product features | Rewrite activities as user actions: "Configure dashboard" → "Understand my performance" |
+| Problem                                 | Likely Cause                                                        | Resolution                                                                              |
+| --------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Map has 10+ activities                  | Scope too broad; multiple journeys mapped as one                    | Split into separate maps per persona or JTBD; each map should cover one narrative       |
+| Tasks are too vague ("make it work")    | Jumped to tasks without defining steps clearly                      | Revisit steps layer; ensure each step is a concrete user action                         |
+| MVP line includes everything            | Team can't say no; fear of shipping incomplete                      | Apply the "walking skeleton" pattern -- what's the minimum journey that works?          |
+| Map doesn't match backlog               | Story map created once and never referenced                         | Post map in team space; reference it during sprint planning and refinement              |
+| Remote workshop produces shallow map    | Digital tools don't create the same energy as physical sticky notes | Use breakout rooms for parallel step decomposition; time-box strictly                   |
+| Activities are features, not user goals | Feature-first thinking; activities named after product features     | Rewrite activities as user actions: "Configure dashboard" → "Understand my performance" |
 
 ## Success Criteria
 
@@ -318,17 +336,17 @@ Release 4:  Scale          (performance, enterprise)
 
 ## Integration Points
 
-| Integration | Direction | What Flows |
-|---|---|---|
-| `job-stories/` | Receives from | JTBD discovery canvas defines the narrative for mapping |
-| `create-prd/` | Feeds into | Release 1 tasks inform PRD scope (Sections 7 and 8) |
-| `prioritization-frameworks/` | Complements | RICE scoring prioritizes within release slices |
-| `brainstorm-okrs/` | Complements | Release slices align with quarterly OKR targets |
-| `outcome-roadmap/` | Feeds into | Release slices map to Now/Next/Later roadmap horizons |
-| `wwas/` | Feeds into | Tasks become WWAS backlog items with strategic context |
+| Integration                  | Direction     | What Flows                                              |
+| ---------------------------- | ------------- | ------------------------------------------------------- |
+| `job-stories/`               | Receives from | JTBD discovery canvas defines the narrative for mapping |
+| `create-prd/`                | Feeds into    | Release 1 tasks inform PRD scope (Sections 7 and 8)     |
+| `prioritization-frameworks/` | Complements   | RICE scoring prioritizes within release slices          |
+| `brainstorm-okrs/`           | Complements   | Release slices align with quarterly OKR targets         |
+| `outcome-roadmap/`           | Feeds into    | Release slices map to Now/Next/Later roadmap horizons   |
+| `wwas/`                      | Feeds into    | Tasks become WWAS backlog items with strategic context  |
 
 ## References
 
-- Jeff Patton, *User Story Mapping* (2014)
+- Jeff Patton, _User Story Mapping_ (2014)
 - Jeff Patton, "The New User Story Backlog Is a Map" (2005)
 - Inspired by Productside story mapping workshops

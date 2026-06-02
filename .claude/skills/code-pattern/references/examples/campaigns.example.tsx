@@ -17,7 +17,7 @@
 import { useEffect, useState } from "react";
 import { FormInput, TextInput, TextareaInput, DateInput, ComboboxInput, useForm } from "@fe/components/ui/forms";
 import { AlertFailure } from "@fe/components/ui/alert";
-import { api, type CreateCampaignResponse, type ListOrgsResponse,} from "@fe/api/endpoints";
+import { api, type CreateCampaignResponse, type ListOrgsResponse } from "@fe/api/endpoints";
 import { call } from "@fe/api/request";
 import { fetchErrorToString } from "@fe/lib/request";
 import { useProjectionDelay } from "@fe/hooks/use-projection-delay";
@@ -45,7 +45,7 @@ function CreateCampaignForm({
 
   // Load the combobox items — same fork shape, into their own RemoteData cells.
   const [orgs, setOrgs] = useState<RemoteData<string, ListOrgsResponse>>(Loading());
-  
+
   useEffect(() => {
     call(api.listOrgs, { types: REFERENCEABLE_TYPES }).fork(
       err => setOrgs(Failed(fetchErrorToString(err))),
@@ -134,7 +134,13 @@ function CreateCampaignForm({
   }
 
   return (
-    <form onSubmit={e => { e.preventDefault(); void handleCreate(); }} className="space-y-4">
+    <form
+      onSubmit={e => {
+        e.preventDefault();
+        void handleCreate();
+      }}
+      className="space-y-4"
+    >
       <FormInput config={fields.name} disabled={submit.isLoading} />
       <FormInput config={fields.description} disabled={submit.isLoading} />
       <FormInput config={fields.supplierOrgId} disabled={submit.isLoading} />
@@ -143,7 +149,9 @@ function CreateCampaignForm({
       <FormInput config={fields.endDate} disabled={submit.isLoading} />
       {submit instanceof Failed && <AlertFailure>{submit.error}</AlertFailure>}
       <Button type="submit" disabled={submit.isLoading}>
-        {submit.isLoading ? <Spinner /> : "Create Campaign"}
+        {submit.isLoading ?
+          <Spinner />
+        : "Create Campaign"}
       </Button>
     </form>
   );

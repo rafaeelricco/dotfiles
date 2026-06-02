@@ -15,6 +15,7 @@ metadata:
   updated: 2026-03-31
   tags: [prompt-optimization, llm-evaluation, agents, prompt-engineering]
 ---
+
 # Senior Prompt Engineer
 
 Prompt engineering patterns, LLM evaluation frameworks, and agentic system design.
@@ -60,6 +61,7 @@ Analyzes prompts for token efficiency, clarity, and structure. Generates optimiz
 **Output:** Analysis report with optimization suggestions
 
 **Usage:**
+
 ```bash
 # Analyze a prompt file
 python scripts/prompt_optimizer.py prompt.txt --analyze
@@ -97,6 +99,7 @@ Evaluates Retrieval-Augmented Generation quality by measuring context relevance 
 **Output:** Evaluation metrics and quality report
 
 **Usage:**
+
 ```bash
 # Evaluate retrieval quality
 python scripts/rag_evaluator.py --contexts retrieved.json --questions eval_set.json
@@ -141,6 +144,7 @@ Parses agent definitions and visualizes execution flows. Validates tool configur
 **Output:** Workflow visualization, validation report
 
 **Usage:**
+
 ```bash
 # Validate agent configuration
 python scripts/agent_orchestrator.py agent.yaml --validate
@@ -213,12 +217,14 @@ python scripts/agent_orchestrator.py agent.yaml --visualize --format mermaid
 Use when improving an existing prompt's performance or reducing token costs.
 
 **Step 1: Baseline current prompt**
+
 ```bash
 python scripts/prompt_optimizer.py current_prompt.txt --analyze --output baseline.json
 ```
 
 **Step 2: Identify issues**
 Review the analysis report for:
+
 - Token waste (redundant instructions, verbose examples)
 - Ambiguous instructions (unclear output format, vague verbs)
 - Missing constraints (no length limits, no format specification)
@@ -232,11 +238,13 @@ Review the analysis report for:
 | Missing edge cases | Add constraint boundaries |
 
 **Step 4: Generate optimized version**
+
 ```bash
 python scripts/prompt_optimizer.py current_prompt.txt --optimize --output optimized.txt
 ```
 
 **Step 5: Compare results**
+
 ```bash
 python scripts/prompt_optimizer.py optimized.txt --analyze --compare baseline.json
 # Shows: token reduction, clarity improvement, issues resolved
@@ -252,6 +260,7 @@ Run both prompts against your evaluation set and compare outputs.
 Use when creating examples for in-context learning.
 
 **Step 1: Define the task clearly**
+
 ```
 Task: Extract product entities from customer reviews
 Input: Review text
@@ -267,6 +276,7 @@ Output: JSON with {product_name, sentiment, features_mentioned}
 | Negative case | What NOT to extract |
 
 **Step 3: Format consistently**
+
 ```
 Example 1:
 Input: "Love my new iPhone 15, the camera is amazing!"
@@ -278,6 +288,7 @@ Output: {"product_name": "laptop", "sentiment": "mixed", "features_mentioned": [
 ```
 
 **Step 4: Validate example quality**
+
 ```bash
 python scripts/prompt_optimizer.py prompt_with_examples.txt --validate-examples
 # Checks: consistency, coverage, format alignment
@@ -293,19 +304,21 @@ Ensure model generalizes beyond your examples.
 Use when you need reliable JSON/XML/structured responses.
 
 **Step 1: Define schema**
+
 ```json
 {
   "type": "object",
   "properties": {
-    "summary": {"type": "string", "maxLength": 200},
-    "sentiment": {"enum": ["positive", "negative", "neutral"]},
-    "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+    "summary": { "type": "string", "maxLength": 200 },
+    "sentiment": { "enum": ["positive", "negative", "neutral"] },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
   },
   "required": ["summary", "sentiment"]
 }
 ```
 
 **Step 2: Include schema in prompt**
+
 ```
 Respond with JSON matching this schema:
 - summary (string, max 200 chars): Brief summary of the content
@@ -314,12 +327,14 @@ Respond with JSON matching this schema:
 ```
 
 **Step 3: Add format enforcement**
+
 ```
 IMPORTANT: Respond ONLY with valid JSON. No markdown, no explanation.
 Start your response with { and end with }
 ```
 
 **Step 4: Validate outputs**
+
 ```bash
 python scripts/prompt_optimizer.py structured_prompt.txt --validate-schema schema.json
 ```
@@ -328,23 +343,23 @@ python scripts/prompt_optimizer.py structured_prompt.txt --validate-schema schem
 
 ## Reference Documentation
 
-| File | Contains | Load when user asks about |
-|------|----------|---------------------------|
-| `references/prompt_engineering_patterns.md` | 10 prompt patterns with input/output examples | "which pattern?", "few-shot", "chain-of-thought", "role prompting" |
-| `references/llm_evaluation_frameworks.md` | Evaluation metrics, scoring methods, A/B testing | "how to evaluate?", "measure quality", "compare prompts" |
-| `references/agentic_system_design.md` | Agent architectures (ReAct, Plan-Execute, Tool Use) | "build agent", "tool calling", "multi-agent" |
+| File                                        | Contains                                            | Load when user asks about                                          |
+| ------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------ |
+| `references/prompt_engineering_patterns.md` | 10 prompt patterns with input/output examples       | "which pattern?", "few-shot", "chain-of-thought", "role prompting" |
+| `references/llm_evaluation_frameworks.md`   | Evaluation metrics, scoring methods, A/B testing    | "how to evaluate?", "measure quality", "compare prompts"           |
+| `references/agentic_system_design.md`       | Agent architectures (ReAct, Plan-Execute, Tool Use) | "build agent", "tool calling", "multi-agent"                       |
 
 ---
 
 ## Common Patterns Quick Reference
 
-| Pattern | When to Use | Example |
-|---------|-------------|---------|
-| **Zero-shot** | Simple, well-defined tasks | "Classify this email as spam or not spam" |
-| **Few-shot** | Complex tasks, consistent format needed | Provide 3-5 examples before the task |
-| **Chain-of-Thought** | Reasoning, math, multi-step logic | "Think step by step..." |
-| **Role Prompting** | Expertise needed, specific perspective | "You are an expert tax accountant..." |
-| **Structured Output** | Need parseable JSON/XML | Include schema + format enforcement |
+| Pattern               | When to Use                             | Example                                   |
+| --------------------- | --------------------------------------- | ----------------------------------------- |
+| **Zero-shot**         | Simple, well-defined tasks              | "Classify this email as spam or not spam" |
+| **Few-shot**          | Complex tasks, consistent format needed | Provide 3-5 examples before the task      |
+| **Chain-of-Thought**  | Reasoning, math, multi-step logic       | "Think step by step..."                   |
+| **Role Prompting**    | Expertise needed, specific perspective  | "You are an expert tax accountant..."     |
+| **Structured Output** | Need parseable JSON/XML                 | Include schema + format enforcement       |
 
 ---
 
@@ -370,15 +385,15 @@ python scripts/agent_orchestrator.py agent.yaml --estimate-cost  # Token estimat
 
 ## Troubleshooting
 
-| Problem | Cause | Solution |
-|---------|-------|----------|
-| Token count seems inaccurate | Character-based estimation varies by language and special characters | Use `--model` flag matching your target model; Codex uses a 3.5 char/token ratio vs 4.0 for GPT models |
-| Clarity score is low despite clear prompt | Vague-pattern detector flags common words like "analyze" or "some" even in valid contexts | Review flagged lines individually; not every match is a true issue --- focus on genuinely ambiguous instructions |
-| Few-shot examples not detected | Examples do not follow the `Input:/Output:` or `Example N:` labeling convention | Format examples with explicit `Input:` and `Output:` prefixes so the extractor can parse them |
-| RAG evaluator shows 0.0 for all metrics | Input JSON schema mismatch --- missing `question`, `content`, or `question_id` keys | Verify JSON uses the expected keys (`question`/`query`, `content`/`text`, `question_id`/`query_id`) |
-| Agent YAML parsing fails | Built-in YAML parser is simplified and cannot handle advanced syntax (anchors, multi-line blocks) | Convert config to JSON, or restructure YAML to use only simple key-value pairs and dash-prefixed lists |
-| Optimization produces minimal changes | `--optimize` only performs whitespace normalization, not semantic rewriting | Use `--analyze` first to get suggestions, then manually apply structural improvements before re-running `--optimize` |
-| Mermaid diagram renders incorrectly | More than 6 tools overflow the generated subgraph | Reduce tool count in the config or manually edit the Mermaid output to split into sub-diagrams |
+| Problem                                   | Cause                                                                                             | Solution                                                                                                             |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Token count seems inaccurate              | Character-based estimation varies by language and special characters                              | Use `--model` flag matching your target model; Codex uses a 3.5 char/token ratio vs 4.0 for GPT models               |
+| Clarity score is low despite clear prompt | Vague-pattern detector flags common words like "analyze" or "some" even in valid contexts         | Review flagged lines individually; not every match is a true issue --- focus on genuinely ambiguous instructions     |
+| Few-shot examples not detected            | Examples do not follow the `Input:/Output:` or `Example N:` labeling convention                   | Format examples with explicit `Input:` and `Output:` prefixes so the extractor can parse them                        |
+| RAG evaluator shows 0.0 for all metrics   | Input JSON schema mismatch --- missing `question`, `content`, or `question_id` keys               | Verify JSON uses the expected keys (`question`/`query`, `content`/`text`, `question_id`/`query_id`)                  |
+| Agent YAML parsing fails                  | Built-in YAML parser is simplified and cannot handle advanced syntax (anchors, multi-line blocks) | Convert config to JSON, or restructure YAML to use only simple key-value pairs and dash-prefixed lists               |
+| Optimization produces minimal changes     | `--optimize` only performs whitespace normalization, not semantic rewriting                       | Use `--analyze` first to get suggestions, then manually apply structural improvements before re-running `--optimize` |
+| Mermaid diagram renders incorrectly       | More than 6 tools overflow the generated subgraph                                                 | Reduce tool count in the config or manually edit the Mermaid output to split into sub-diagrams                       |
 
 ---
 
@@ -397,12 +412,14 @@ python scripts/agent_orchestrator.py agent.yaml --estimate-cost  # Token estimat
 ## Scope & Limitations
 
 **This skill covers:**
+
 - Static prompt analysis: token counting, clarity scoring, structure detection, and optimization suggestions
 - RAG evaluation: context relevance, answer faithfulness, groundedness, and retrieval metrics (Precision@K, ROUGE-L, MRR, NDCG)
 - Agent workflow design: configuration validation, ASCII/Mermaid visualization, and token cost estimation
 - Few-shot example extraction and management from existing prompts
 
 **This skill does NOT cover:**
+
 - Live LLM calls or runtime prompt testing --- all analysis is static/deterministic (see `senior-ml-engineer` for LLM integration)
 - Vector database setup or embedding generation --- RAG evaluator scores pre-retrieved contexts only (see `senior-data-engineer` for pipeline orchestration)
 - Fine-tuning, RLHF, or model training workflows (see `senior-ml-engineer` for model deployment)
@@ -412,14 +429,14 @@ python scripts/agent_orchestrator.py agent.yaml --estimate-cost  # Token estimat
 
 ## Integration Points
 
-| Skill | Integration | Data Flow |
-|-------|-------------|-----------|
-| `senior-ml-engineer` | LLM integration and model deployment | Optimized prompts from this skill feed into `llm_integration_builder.py` prompt templates |
-| `senior-data-scientist` | A/B test design for prompt experiments | `experiment_designer.py` defines test parameters; this skill provides the prompt variants to compare |
-| `senior-data-engineer` | RAG pipeline orchestration | `pipeline_orchestrator.py` builds the retrieval pipeline; this skill evaluates its output quality |
-| `senior-fullstack` | End-to-end application scaffolding | Fullstack apps consume agent configs validated by `agent_orchestrator.py` |
-| `senior-security` | Prompt injection and adversarial input review | Security analysis covers the attack surface; this skill ensures prompts include defensive constraints |
-| `senior-qa` | Quality assurance for AI-powered features | QA test suites validate that optimized prompts produce consistent outputs in production |
+| Skill                   | Integration                                   | Data Flow                                                                                             |
+| ----------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `senior-ml-engineer`    | LLM integration and model deployment          | Optimized prompts from this skill feed into `llm_integration_builder.py` prompt templates             |
+| `senior-data-scientist` | A/B test design for prompt experiments        | `experiment_designer.py` defines test parameters; this skill provides the prompt variants to compare  |
+| `senior-data-engineer`  | RAG pipeline orchestration                    | `pipeline_orchestrator.py` builds the retrieval pipeline; this skill evaluates its output quality     |
+| `senior-fullstack`      | End-to-end application scaffolding            | Fullstack apps consume agent configs validated by `agent_orchestrator.py`                             |
+| `senior-security`       | Prompt injection and adversarial input review | Security analysis covers the attack surface; this skill ensures prompts include defensive constraints |
+| `senior-qa`             | Quality assurance for AI-powered features     | QA test suites validate that optimized prompts produce consistent outputs in production               |
 
 ---
 
@@ -430,30 +447,33 @@ python scripts/agent_orchestrator.py agent.yaml --estimate-cost  # Token estimat
 **Purpose:** Static analysis tool for prompt engineering. Estimates token counts, scores clarity and structure, detects ambiguous instructions and redundant content, extracts few-shot examples, and generates optimized prompt versions.
 
 **Usage:**
+
 ```bash
 python scripts/prompt_optimizer.py <prompt_file> [options]
 ```
 
 **Parameters:**
 
-| Flag | Short | Type | Default | Description |
-|------|-------|------|---------|-------------|
-| `prompt` | _(positional)_ | string | _(required)_ | Path to the prompt text file to analyze |
-| `--analyze` | `-a` | flag | off | Run full analysis (clarity, structure, issues, suggestions) |
-| `--tokens` | `-t` | flag | off | Count tokens and estimate cost only |
-| `--optimize` | `-O` | flag | off | Generate whitespace-optimized version of the prompt |
-| `--extract-examples` | `-e` | flag | off | Extract few-shot examples (Input/Output pairs) as JSON |
-| `--model` | `-m` | choice | `gpt-4` | Model for token/cost estimation. Choices: `gpt-4`, `gpt-4-turbo`, `gpt-3.5-turbo`, `Codex-3-opus`, `Codex-3-sonnet`, `Codex-3-haiku` |
-| `--output` | `-o` | string | _(none)_ | Write results to this file path |
-| `--json` | `-j` | flag | off | Output analysis as JSON instead of human-readable report |
-| `--compare` | `-c` | string | _(none)_ | Path to a baseline analysis JSON file for comparison |
+| Flag                 | Short          | Type   | Default      | Description                                                                                                                          |
+| -------------------- | -------------- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `prompt`             | _(positional)_ | string | _(required)_ | Path to the prompt text file to analyze                                                                                              |
+| `--analyze`          | `-a`           | flag   | off          | Run full analysis (clarity, structure, issues, suggestions)                                                                          |
+| `--tokens`           | `-t`           | flag   | off          | Count tokens and estimate cost only                                                                                                  |
+| `--optimize`         | `-O`           | flag   | off          | Generate whitespace-optimized version of the prompt                                                                                  |
+| `--extract-examples` | `-e`           | flag   | off          | Extract few-shot examples (Input/Output pairs) as JSON                                                                               |
+| `--model`            | `-m`           | choice | `gpt-4`      | Model for token/cost estimation. Choices: `gpt-4`, `gpt-4-turbo`, `gpt-3.5-turbo`, `Codex-3-opus`, `Codex-3-sonnet`, `Codex-3-haiku` |
+| `--output`           | `-o`           | string | _(none)_     | Write results to this file path                                                                                                      |
+| `--json`             | `-j`           | flag   | off          | Output analysis as JSON instead of human-readable report                                                                             |
+| `--compare`          | `-c`           | string | _(none)_     | Path to a baseline analysis JSON file for comparison                                                                                 |
 
 **Example:**
+
 ```bash
 python scripts/prompt_optimizer.py prompt.txt --analyze --model Codex-3-sonnet --json
 ```
 
 **Output Formats:**
+
 - **Default (text):** Human-readable report with metrics, scores, detected sections, issues, and suggestions
 - **JSON (`--json`):** Structured `PromptAnalysis` object with keys: `token_count`, `estimated_cost`, `model`, `clarity_score`, `structure_score`, `issues`, `suggestions`, `sections`, `has_examples`, `example_count`, `has_output_format`, `word_count`, `line_count`
 - **Token-only (`--tokens`):** Single-line token count and cost estimate
@@ -467,28 +487,31 @@ python scripts/prompt_optimizer.py prompt.txt --analyze --model Codex-3-sonnet -
 **Purpose:** Evaluates Retrieval-Augmented Generation quality by measuring context relevance (lexical overlap, term coverage), answer faithfulness (claim-level verification), groundedness (ROUGE-L), and retrieval metrics (Precision@K, MRR, NDCG).
 
 **Usage:**
+
 ```bash
 python scripts/rag_evaluator.py --contexts <contexts.json> --questions <questions.json> [options]
 ```
 
 **Parameters:**
 
-| Flag | Short | Type | Default | Description |
-|------|-------|------|---------|-------------|
-| `--contexts` | `-c` | string | _(required)_ | Path to JSON file with retrieved contexts. Expected keys per object: `question_id`/`query_id`, `content`/`text` |
-| `--questions` | `-q` | string | _(required)_ | Path to JSON file with questions and answers. Expected keys per object: `id`, `question`/`query`, `answer`/`response`, `expected`/`ground_truth` |
-| `--k` | | int | `5` | Number of top contexts to evaluate per question |
-| `--output` | `-o` | string | _(none)_ | Write detailed report to this JSON file |
-| `--json` | `-j` | flag | off | Output as JSON instead of human-readable text |
-| `--verbose` | `-v` | flag | off | Include per-question detail breakdowns in the report |
-| `--compare` | | string | _(none)_ | Path to a baseline report JSON for metric comparison |
+| Flag          | Short | Type   | Default      | Description                                                                                                                                      |
+| ------------- | ----- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--contexts`  | `-c`  | string | _(required)_ | Path to JSON file with retrieved contexts. Expected keys per object: `question_id`/`query_id`, `content`/`text`                                  |
+| `--questions` | `-q`  | string | _(required)_ | Path to JSON file with questions and answers. Expected keys per object: `id`, `question`/`query`, `answer`/`response`, `expected`/`ground_truth` |
+| `--k`         |       | int    | `5`          | Number of top contexts to evaluate per question                                                                                                  |
+| `--output`    | `-o`  | string | _(none)_     | Write detailed report to this JSON file                                                                                                          |
+| `--json`      | `-j`  | flag   | off          | Output as JSON instead of human-readable text                                                                                                    |
+| `--verbose`   | `-v`  | flag   | off          | Include per-question detail breakdowns in the report                                                                                             |
+| `--compare`   |       | string | _(none)_     | Path to a baseline report JSON for metric comparison                                                                                             |
 
 **Example:**
+
 ```bash
 python scripts/rag_evaluator.py --contexts retrieved.json --questions eval_set.json --k 10 --verbose --output report.json
 ```
 
 **Output Formats:**
+
 - **Default (text):** Human-readable report with summary, retrieval metrics (context relevance, Precision@K), generation metrics (faithfulness, groundedness), issues, and recommendations
 - **JSON (`--json`):** Structured `RAGEvaluationReport` object with keys: `total_questions`, `avg_context_relevance`, `avg_faithfulness`, `avg_groundedness`, `retrieval_metrics`, `coverage`, `issues`, `recommendations`, `question_details`
 - **Verbose (`--verbose`):** Adds per-question `question_details` array containing individual context scores and faithfulness breakdowns
@@ -500,29 +523,32 @@ python scripts/rag_evaluator.py --contexts retrieved.json --questions eval_set.j
 **Purpose:** Parses agent configurations (YAML or JSON), validates tool registrations and flow correctness, generates ASCII or Mermaid workflow diagrams, and estimates token costs per run and monthly spend.
 
 **Usage:**
+
 ```bash
 python scripts/agent_orchestrator.py <config_file> [options]
 ```
 
 **Parameters:**
 
-| Flag | Short | Type | Default | Description |
-|------|-------|------|---------|-------------|
-| `config` | _(positional)_ | string | _(required)_ | Path to agent configuration file (YAML or JSON) |
-| `--validate` | `-V` | flag | off | Validate agent configuration (errors, warnings, tool status). Runs by default if no other action is specified |
-| `--visualize` | `-v` | flag | off | Generate workflow diagram |
-| `--format` | `-f` | choice | `ascii` | Visualization format. Choices: `ascii`, `mermaid` |
-| `--estimate-cost` | `-e` | flag | off | Estimate token usage and costs |
-| `--runs` | `-r` | int | `100` | Daily run count for monthly cost projection |
-| `--output` | `-o` | string | _(none)_ | Write output to this file path |
-| `--json` | `-j` | flag | off | Output validation and cost results as JSON |
+| Flag              | Short          | Type   | Default      | Description                                                                                                   |
+| ----------------- | -------------- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------- |
+| `config`          | _(positional)_ | string | _(required)_ | Path to agent configuration file (YAML or JSON)                                                               |
+| `--validate`      | `-V`           | flag   | off          | Validate agent configuration (errors, warnings, tool status). Runs by default if no other action is specified |
+| `--visualize`     | `-v`           | flag   | off          | Generate workflow diagram                                                                                     |
+| `--format`        | `-f`           | choice | `ascii`      | Visualization format. Choices: `ascii`, `mermaid`                                                             |
+| `--estimate-cost` | `-e`           | flag   | off          | Estimate token usage and costs                                                                                |
+| `--runs`          | `-r`           | int    | `100`        | Daily run count for monthly cost projection                                                                   |
+| `--output`        | `-o`           | string | _(none)_     | Write output to this file path                                                                                |
+| `--json`          | `-j`           | flag   | off          | Output validation and cost results as JSON                                                                    |
 
 **Example:**
+
 ```bash
 python scripts/agent_orchestrator.py agent.yaml --validate --visualize --format mermaid --output workflow.md
 ```
 
 **Output Formats:**
+
 - **Validation (text):** Agent info, tool status with OK/WARN indicators, flow analysis (max iterations, token estimate, loop detection), errors, and warnings
 - **Validation (JSON, `--json`):** Structured `ValidationResult` object with keys: `is_valid`, `errors`, `warnings`, `tool_status`, `estimated_tokens_per_run`, `potential_infinite_loop`, `max_depth`
 - **Visualization (`--visualize`):** ASCII box-drawing diagram (default) or Mermaid flowchart (`--format mermaid`) showing the agent pattern flow and registered tools

@@ -22,6 +22,7 @@ Report the audit briefly:
 
 ```md
 Tables Audit:
+
 - Package surface:
 - Existing table abstraction:
 - Headless primitives:
@@ -126,6 +127,7 @@ with `satisfies never` (see `./typescript-effects.md`); format `state.failure` w
     }
 
 Rules:
+
 - `contents` keys must match `columns` / `columnOrder`.
 - Optional fields are `Maybe<T>`: use `value.map(fmt).withDefault(fallback)` in both the cell
   and the `sortFun` (see `registered_at`; `./typescript-effects.md` for `Maybe`).

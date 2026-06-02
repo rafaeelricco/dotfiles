@@ -2,7 +2,6 @@
 
 Style: Concise | Sections: What's New, Store Interface Table, Key Actions Table, Testing
 
-
 ## What's New
 
 **State Management Architecture**
@@ -29,26 +28,26 @@ Style: Concise | Sections: What's New, Store Interface Table, Key Actions Table,
 
 ## Store State Interface
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `session` | `Session` | Contains all conversations and metadata |
-| `conversationId` | `Maybe<ConversationId>` | Active conversation (Nothing = new chat) |
-| `userInput` | `string` | Current input field value |
-| `botResponse` | `RemoteData<Error, Message>` | Async response state |
-| `streamingContent` | `string` | Token accumulator during streaming |
-| `bookingState.drafts` | `TreeMap<DraftId, BookingDraft>` | Active and completed booking drafts |
+| Field                 | Type                             | Description                              |
+| --------------------- | -------------------------------- | ---------------------------------------- |
+| `session`             | `Session`                        | Contains all conversations and metadata  |
+| `conversationId`      | `Maybe<ConversationId>`          | Active conversation (Nothing = new chat) |
+| `userInput`           | `string`                         | Current input field value                |
+| `botResponse`         | `RemoteData<Error, Message>`     | Async response state                     |
+| `streamingContent`    | `string`                         | Token accumulator during streaming       |
+| `bookingState.drafts` | `TreeMap<DraftId, BookingDraft>` | Active and completed booking drafts      |
 
 ## Key Actions
 
-| Action | Purpose |
-| ------ | ------- |
-| `sendMessage` | Add user message, create conversation if needed, set Loading state |
-| `appendStreamToken` | Accumulate streaming response tokens |
-| `completeStreamingResponse` | Finalize stream as Message, reset state |
-| `startBooking` | Initialize booking flow with property data |
-| `updateBookingDraft` | Progress booking step, merge collected data |
-| `goBackToBookingStep` | Navigate backward in wizard (steps 1-3) |
-| `completeBooking` / `cancelBooking` | Finalize or abandon booking workflow |
+| Action                              | Purpose                                                            |
+| ----------------------------------- | ------------------------------------------------------------------ |
+| `sendMessage`                       | Add user message, create conversation if needed, set Loading state |
+| `appendStreamToken`                 | Accumulate streaming response tokens                               |
+| `completeStreamingResponse`         | Finalize stream as Message, reset state                            |
+| `startBooking`                      | Initialize booking flow with property data                         |
+| `updateBookingDraft`                | Progress booking step, merge collected data                        |
+| `goBackToBookingStep`               | Navigate backward in wizard (steps 1-3)                            |
+| `completeBooking` / `cancelBooking` | Finalize or abandon booking workflow                               |
 
 ## Testing & Feedback
 

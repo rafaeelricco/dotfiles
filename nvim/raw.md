@@ -1,7 +1,7 @@
 02-08-init.lua
 -- Set <space> as the leader key
 -- See :help mapleader
---  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
+-- NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
@@ -10,23 +10,23 @@ vim.o.autoread = true
 
 -- Debug function to show highlight groups under cursor
 -- local function show_highlight_groups()
--- 	local result = vim.treesitter.get_captures_at_cursor(0)
--- 	if #result == 0 then
--- 		print("No TreeSitter captures found")
--- 		return
--- 	end
+-- local result = vim.treesitter.get_captures_at_cursor(0)
+-- if #result == 0 then
+-- print("No TreeSitter captures found")
+-- return
+-- end
 
--- 	print("TreeSitter captures at cursor:")
--- 	for _, capture in ipairs(result) do
--- 		print("  @" .. capture)
--- 	end
+-- print("TreeSitter captures at cursor:")
+-- for \_, capture in ipairs(result) do
+-- print(" @" .. capture)
+-- end
 
--- 	-- Also show traditional syntax groups
--- 	local synID = vim.fn.synID(vim.fn.line('.'), vim.fn.col('.'), 1)
--- 	local synName = vim.fn.synIDattr(synID, 'name')
--- 	if synName ~= '' then
--- 		print("Syntax group: " .. synName)
--- 	end
+-- -- Also show traditional syntax groups
+-- local synID = vim.fn.synID(vim.fn.line('.'), vim.fn.col('.'), 1)
+-- local synName = vim.fn.synIDattr(synID, 'name')
+-- if synName ~= '' then
+-- print("Syntax group: " .. synName)
+-- end
 -- end
 
 -- Map this to a key for easy access
@@ -34,44 +34,44 @@ vim.o.autoread = true
 
 -- Additional function to show all applied highlight groups
 -- local function show_all_highlight_groups()
--- 	local line = vim.fn.line('.')
--- 	local col = vim.fn.col('.')
+-- local line = vim.fn.line('.')
+-- local col = vim.fn.col('.')
 
--- 	-- Get TreeSitter captures
--- 	local ts_captures = vim.treesitter.get_captures_at_cursor(0)
--- 	print("=== TreeSitter Captures ===")
--- 	if #ts_captures > 0 then
--- 		for _, capture in ipairs(ts_captures) do
--- 			print("  @" .. capture)
--- 		end
--- 	else
--- 		print("  None")
--- 	end
+-- -- Get TreeSitter captures
+-- local ts*captures = vim.treesitter.get_captures_at_cursor(0)
+-- print("=== TreeSitter Captures ===")
+-- if #ts_captures > 0 then
+-- for *, capture in ipairs(ts_captures) do
+-- print(" @" .. capture)
+-- end
+-- else
+-- print(" None")
+-- end
 
--- 	-- Get syntax groups
--- 	print("\n=== Syntax Groups ===")
--- 	local synID = vim.fn.synID(line, col, 1)
--- 	local synName = vim.fn.synIDattr(synID, 'name')
--- 	if synName ~= '' then
--- 		print("  " .. synName)
--- 		local transID = vim.fn.synIDtrans(synID)
--- 		local transName = vim.fn.synIDattr(transID, 'name')
--- 		if transName ~= synName then
--- 			print("  -> " .. transName .. " (translated)")
--- 		end
--- 	else
--- 		print("  None")
--- 	end
+-- -- Get syntax groups
+-- print("\n=== Syntax Groups ===")
+-- local synID = vim.fn.synID(line, col, 1)
+-- local synName = vim.fn.synIDattr(synID, 'name')
+-- if synName ~= '' then
+-- print(" " .. synName)
+-- local transID = vim.fn.synIDtrans(synID)
+-- local transName = vim.fn.synIDattr(transID, 'name')
+-- if transName ~= synName then
+-- print(" -> " .. transName .. " (translated)")
+-- end
+-- else
+-- print(" None")
+-- end
 
--- 	-- Get effective highlight group
--- 	print("\n=== Applied Highlight ===")
--- 	local hl_name = vim.fn.synIDattr(vim.fn.synIDtrans(synID), 'name')
--- 	if hl_name ~= '' then
--- 		local hl = vim.api.nvim_get_hl(0, { name = hl_name })
--- 		print("  Group: " .. hl_name)
--- 		if hl.fg then print("  fg: #" .. string.format("%06x", hl.fg)) end
--- 		if hl.bg then print("  bg: #" .. string.format("%06x", hl.bg)) end
--- 	end
+-- -- Get effective highlight group
+-- print("\n=== Applied Highlight ===")
+-- local hl_name = vim.fn.synIDattr(vim.fn.synIDtrans(synID), 'name')
+-- if hl_name ~= '' then
+-- local hl = vim.api.nvim_get_hl(0, { name = hl_name })
+-- print(" Group: " .. hl_name)
+-- if hl.fg then print(" fg: #" .. string.format("%06x", hl.fg)) end
+-- if hl.bg then print(" bg: #" .. string.format("%06x", hl.bg)) end
+-- end
 -- end
 
 -- vim.keymap.set('n', '<leader>Ha', show_all_highlight_groups, { desc = 'Show all highlight info under cursor' })
@@ -79,34 +79,34 @@ vim.o.autoread = true
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 -- Bufferline is a plugin that provides a way to show and manage buffers.
 -- {
--- 	"akinsho/bufferline.nvim",
--- 	version = "*",
--- 	dependencies = "nvim-tree/nvim-web-devicons",
--- 	opts = {
--- 		options = {
--- 			mode = "buffers",
--- 			diagnostics = "nvim_lsp",
--- 			offsets = {
--- 				{
--- 					filetype = "neo-tree",
--- 					text = "File Explorer",
--- 					separator = true,
--- 				},
--- 			},
--- 		},
--- 	},
+-- "akinsho/bufferline.nvim",
+-- version = "\*",
+-- dependencies = "nvim-tree/nvim-web-devicons",
+-- opts = {
+-- options = {
+-- mode = "buffers",
+-- diagnostics = "nvim_lsp",
+-- offsets = {
+-- {
+-- filetype = "neo-tree",
+-- text = "File Explorer",
+-- separator = true,
+-- },
+-- },
+-- },
+-- },
 -- },
 vim.g.have_nerd_font = true
 
--- [[ Setting options ]]
+-- [[Setting options]]
 -- See :help vim.o
 -- NOTE: You can change these options as you wish!
---  For more options, you can see :help option-list
+-- For more options, you can see :help option-list
 
 -- Make line numbers default
 vim.o.number = true
 -- You can also add relative line numbers, to help with jumping.
---  Experiment for yourself to see if you like it!
+-- Experiment for yourself to see if you like it!
 -- vim.o.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
@@ -116,9 +116,9 @@ vim.o.mouse = "a"
 vim.o.showmode = false
 
 -- Sync clipboard between OS and Neovim.
---  Schedule the setting after UiEnter because it can increase startup-time.
---  Remove this option if you want your OS clipboard to remain independent.
---  See :help 'clipboard'
+-- Schedule the setting after UiEnter because it can increase startup-time.
+-- Remove this option if you want your OS clipboard to remain independent.
+-- See :help 'clipboard'
 vim.schedule(function()
 vim.o.clipboard = "unnamedplus"
 end)
@@ -127,12 +127,12 @@ end)
 vim.o.breakindent = true
 
 -- Set tab width and indentation (2 spaces, like VSCode)
-vim.o.tabstop = 2        -- Number of spaces that a <Tab> in the file counts for
-vim.o.shiftwidth = 2     -- Number of spaces to use for each step of (auto)indent
-vim.o.softtabstop = 2    -- Number of spaces that a <Tab> counts for while editing
-vim.o.expandtab = true   -- Use spaces instead of tabs
+vim.o.tabstop = 2 -- Number of spaces that a <Tab> in the file counts for
+vim.o.shiftwidth = 2 -- Number of spaces to use for each step of (auto)indent
+vim.o.softtabstop = 2 -- Number of spaces that a <Tab> counts for while editing
+vim.o.expandtab = true -- Use spaces instead of tabs
 vim.o.smartindent = true -- Smart autoindenting when starting a new line
-vim.o.autoindent = true  -- Copy indent from current line when starting a new line
+vim.o.autoindent = true -- Copy indent from current line when starting a new line
 
 -- Save undo history
 vim.o.undofile = true
@@ -155,16 +155,16 @@ vim.o.splitright = true
 vim.o.splitbelow = true
 
 -- Sets how neovim will display certain whitespace characters in the editor.
---  See :help 'list'
---  and :help 'listchars'
---  Notice listchars is set using vim.opt instead of vim.o.
---  It is very similar to vim.o but offers an interface for conveniently interacting with tables.
---   See :help lua-options
---   and :help lua-options-guide
+-- See :help 'list'
+-- and :help 'listchars'
+-- Notice listchars is set using vim.opt instead of vim.o.
+-- It is very similar to vim.o but offers an interface for conveniently interacting with tables.
+-- See :help lua-options
+-- and :help lua-options-guide
 vim.o.list = true
 
 -- Previous vim.opt.listchars = { tab = "» ", trail = "·" }
-vim.opt.listchars = { tab = "  ", trail = " " }
+vim.opt.listchars = { tab = " ", trail = " " }
 
 -- Preview substitutions live, as you type!
 vim.o.inccommand = "split"
@@ -181,18 +181,18 @@ vim.o.scrolloff = 10
 vim.o.confirm = true
 
 -- Disable paste mode indicators and auto-formatting when pasting
-vim.o.paste = false                                         -- Disable paste mode (causes issues in modern terminals)
+vim.o.paste = false -- Disable paste mode (causes issues in modern terminals)
 vim.o.formatoptions = vim.o.formatoptions:gsub("[cro]", "") -- Remove auto-formatting options
 
 -- Disable line wrapping
 vim.o.wrap = false
 vim.o.textwidth = 0
 
--- [[ Basic Keymaps ]]
---  See :help vim.keymap.set()
+-- [[Basic Keymaps]]
+-- See :help vim.keymap.set()
 
 -- Clear highlights on search when pressing <Esc> in normal mode
---  See :help hlsearch
+-- See :help hlsearch
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
 -- Diagnostic keymaps
@@ -215,8 +215,8 @@ vim.keymap.set("t", "<S-CR>", "\<CR>", { desc = "Send line continuation in termi
 -- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
 -- Keybinds to make split navigation easier.
---  Use CTRL+<hjkl> to switch between windows
---  See :help wincmd for a list of all window commands
+-- Use CTRL+<hjkl> to switch between windows
+-- See :help wincmd for a list of all window commands
 vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left window" })
 vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
@@ -255,12 +255,12 @@ vim.keymap.set({ "n", "v", "i" }, "<D-S-z>", "<Esc><C-r>a", { desc = "Redo" })
 -- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
 -- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
 
--- [[ Basic Autocommands ]]
---  See :help lua-guide-autocommands
+-- [[Basic Autocommands]]
+-- See :help lua-guide-autocommands
 
 -- Highlight when yanking (copying) text
---  Try it with yap in normal mode
---  See :help vim.hl.on_yank()
+-- Try it with yap in normal mode
+-- See :help vim.hl.on_yank()
 vim.api.nvim_create_autocmd("TextYankPost", {
 desc = "Highlight when yanking (copying) text",
 group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
@@ -269,8 +269,8 @@ vim.hl.on_yank()
 end,
 })
 
--- [[ Install lazy.nvim plugin manager ]]
---    See :help lazy.nvim.txt or https://github.com/folke/lazy.nvim for more info
+-- [[Install lazy.nvim plugin manager]]
+-- See :help lazy.nvim.txt or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
 local lazyrepo = "https://github.com/folke/lazy.nvim.git"
@@ -284,12 +284,12 @@ end
 local rtp = vim.opt.rtp
 rtp:prepend(lazypath)
 
--- [[ Configure and install plugins ]]
---  To check the current status of your plugins, run
---    :Lazy
---  You can press ? in this menu for help. Use :q to close the window
---  To update plugins you can run
---    :Lazy update
+-- [[Configure and install plugins]]
+-- To check the current status of your plugins, run
+-- :Lazy
+-- You can press ? in this menu for help. Use :q to close the window
+-- To update plugins you can run
+-- :Lazy update
 -- NOTE: Here is where you install your plugins.
 require("lazy").setup({
 -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
@@ -308,14 +308,14 @@ cmd = { "TSPlaygroundToggle", "TSHighlightCapturesUnderCursor" },
 -- Use opts = {} to automatically pass options to a plugin's setup() function, forcing the plugin to be loaded.
 -- Alternatively, use config = function() ... end for full control over the configuration.
 -- If you prefer to call setup explicitly, use:
---    {
---        'lewis6991/gitsigns.nvim',
---        config = function()
---            require('gitsigns').setup({
---                -- Your gitsigns configuration here
---            })
---        end,
---    }
+-- {
+-- 'lewis6991/gitsigns.nvim',
+-- config = function()
+-- require('gitsigns').setup({
+-- -- Your gitsigns configuration here
+-- })
+-- end,
+-- }
 -- Here is a more advanced example where we pass configuration
 -- options to gitsigns.nvim.
 -- See :help gitsigns to understand what the configuration keys do
@@ -328,7 +328,7 @@ opts = {
 signs = {
 add = { text = "+" },
 change = { text = "" },
-delete = { text = "_" },
+delete = { text = "\_" },
 topdelete = { text = "‾" },
 changedelete = { text = "" },
 },
@@ -339,13 +339,13 @@ changedelete = { text = "" },
 -- This is often very useful to both group configuration, as well as handle
 -- lazy loading plugins that don't need to be loaded immediately at startup.
 -- For example, in the following configuration, we use:
---  event = 'VimEnter'
+-- event = 'VimEnter'
 -- which loads which-key before all the UI elements are loaded. Events can be
 -- normal autocommands events (:help autocmd-events).
 -- Then, because we use the opts key (recommended), the configuration runs
 -- after the plugin has been loaded as require(MODULE).setup(opts).
 
-{                   -- Useful plugin to show you pending keybinds.
+{ -- Useful plugin to show you pending keybinds.
 "folke/which-key.nvim",
 event = "VimEnter", -- Sets the loading event to 'VimEnter'
 opts = {
@@ -389,11 +389,11 @@ F12 = "<F12>",
 },
 },
 
-  -- Document existing key chains
-  spec = {
-    { "<leader>s", group = "[S]earch" },
-    { "<leader>t", group = "[T]oggle" },
-    { "<leader>h", group = "Git [H]unk",     mode = { "n", "v" } },
-    { "<leader>c", group = "[C]opilot Chat", mode = { "n", "v" } },
-  },
+-- Document existing key chains
+spec = {
+{ "<leader>s", group = "[S]earch" },
+{ "<leader>t", group = "[T]oggle" },
+{ "<leader>h", group = "Git [H]unk", mode = { "n", "v" } },
+{ "<leader>c", group = "[C]opilot Chat", mode = { "n", "v" } },
+},
 },

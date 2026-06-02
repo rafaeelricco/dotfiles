@@ -7,21 +7,28 @@ Every mental model follows this exact structure. **No sections may be added or r
 ```markdown
 # Mental Model: [Title]
 
-| Field   | Value              |
-|---------|--------------------|
-| ID      | [MM-XXX or TBD]   |
-| Version | 0.1 (draft)        |
-| Author  | [leave blank]      |
-| Date    | [today]            |
-| Status  | Draft              |
+| Field   | Value           |
+| ------- | --------------- |
+| ID      | [MM-XXX or TBD] |
+| Version | 0.1 (draft)     |
+| Author  | [leave blank]   |
+| Date    | [today]         |
+| Status  | Draft           |
 
 ## 1. Scope
+
 ## 2. Dependencies
+
 ## 3. Context
+
 ## 4. Key Concepts
+
 ## 5. Core Content
+
 ## 6. Assumptions
+
 ## 7. Open Questions
+
 ## 8. Implications
 ```
 
@@ -42,11 +49,11 @@ Every mental model follows this exact structure. **No sections may be added or r
 ```markdown
 ### Depends on
 
-- *[To be filled manually]*
+- _[To be filled manually]_
 
 ### Feeds into
 
-- *[To be filled manually]*
+- _[To be filled manually]_
 ```
 
 The user must fill this in manually because only the human knows the full graph of mental models and how they relate.
@@ -62,17 +69,19 @@ The user must fill this in manually because only the human knows the full graph 
 - Only include terms that appear 3+ times in the Core Content AND could be interpreted ambiguously by someone outside the project.
 - Format: `**Term:** Definition in the context of this project.`
 - Do NOT include obvious terms. Do NOT pad this section.
-- If there are no ambiguous terms, write: *No ambiguous terms identified for this model.*
+- If there are no ambiguous terms, write: _No ambiguous terms identified for this model._
 
 ### 5. Core Content
 
 This is the body. Structure depends on the model type:
 
 **For business/process models (Standard or Detailed style):**
+
 - Organize by aspect of the domain (e.g., 5.1 What the company does, 5.2 Who pays, 5.3 How the cycle works)
 - Each sub-section: factual description with `**Source:** [document name, speaker, timestamp if available]`
 
 **For UX/UI experience models (Concise style):**
+
 - Organize by screen or flow (e.g., 5.1 Navigation, 5.2 Dashboard, 5.3 Campaign Creation)
 - Each sub-section uses:
   - **Elements:** bullet list of what's on the screen
@@ -81,9 +90,10 @@ This is the body. Structure depends on the model type:
   - **Design principle:** one-line note on the design intent if relevant
 
 **Critical rules for all styles:**
+
 - Every factual claim must cite a source document, or be moved to Assumptions.
 - Do NOT invent information. If the source material doesn't cover something, put it in Open Questions.
-- Do NOT include aspirational statements in Core Content. If it's about what *should* happen rather than what *is* or what *the source material says*, it goes in Implications.
+- Do NOT include aspirational statements in Core Content. If it's about what _should_ happen rather than what _is_ or what _the source material says_, it goes in Implications.
 - If the user provided Guiding Questions, each question must be answered in the Core Content. If a question cannot be answered from the source material, move it to Open Questions with a note.
 
 ### 6. Assumptions
@@ -123,11 +133,11 @@ This is the body. Structure depends on the model type:
 
 ## Writing Style Reference
 
-| Style    | Core Content Format                                                          | When to use                            |
-|----------|------------------------------------------------------------------------------|----------------------------------------|
-| Concise  | Bullets, elements/functionality lists, minimal prose. Like a practical spec. | UX/UI models, technical models, specs  |
-| Standard | Short paragraphs (2-4 sentences) with source citations. Balanced.            | Business models, process models        |
-| Detailed | Full paragraphs with context, rationale, and extended source citations.       | Complex domains, onboarding documents  |
+| Style    | Core Content Format                                                          | When to use                           |
+| -------- | ---------------------------------------------------------------------------- | ------------------------------------- |
+| Concise  | Bullets, elements/functionality lists, minimal prose. Like a practical spec. | UX/UI models, technical models, specs |
+| Standard | Short paragraphs (2-4 sentences) with source citations. Balanced.            | Business models, process models       |
+| Detailed | Full paragraphs with context, rationale, and extended source citations.      | Complex domains, onboarding documents |
 
 ---
 

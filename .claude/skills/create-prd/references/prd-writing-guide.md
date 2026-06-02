@@ -54,10 +54,10 @@ The bad example uses jargon, makes vague claims, and does not tell you what the 
 
 ### Good Objectives vs Bad Objectives
 
-| Good | Bad |
-|------|-----|
-| Reduce customer onboarding time from 3 days to 4 hours | Improve onboarding |
-| Increase monthly active users from 10K to 25K | Grow our user base |
+| Good                                                        | Bad                     |
+| ----------------------------------------------------------- | ----------------------- |
+| Reduce customer onboarding time from 3 days to 4 hours      | Improve onboarding      |
+| Increase monthly active users from 10K to 25K               | Grow our user base      |
 | Reduce support tickets per user from 2.1/month to 0.8/month | Improve product quality |
 
 **Pattern:** Good objectives include a specific metric, current value, target value, and timeframe.
@@ -94,6 +94,7 @@ Define segments by shared problems or jobs-to-be-done, not demographics.
 ### Frameworks
 
 **Jobs-Gains-Pains:**
+
 - **Jobs:** Functional tasks, social goals, or emotional needs the user is trying to satisfy.
 - **Gains:** Outcomes the user wants. Benefits they expect, desire, or would be surprised by.
 - **Pains:** Risks, obstacles, and negative outcomes the user wants to avoid.
@@ -118,6 +119,7 @@ The value curve prevents "me too" products by forcing explicit tradeoff decision
 Every PRD contains assumptions. The dangerous ones are the ones you do not write down. List them explicitly with a plan to validate each one.
 
 Common assumption categories:
+
 - User behavior assumptions ("Users will adopt this workflow")
 - Technical assumptions ("The API can handle this load")
 - Market assumptions ("Competitors will not ship this first")
@@ -140,23 +142,27 @@ Common assumption categories:
 Use this before sharing the PRD with stakeholders:
 
 ### Clarity
+
 - [ ] Can someone outside the team understand the Summary in 10 seconds?
 - [ ] Is every acronym defined on first use?
 - [ ] Are there zero instances of jargon ("leverage," "synergy," "paradigm")?
 
 ### Completeness
+
 - [ ] All 8 sections are filled in (not just placeholder text)?
 - [ ] At least 2 Key Results with metrics, baselines, and targets?
 - [ ] At least 1 market segment defined by problem, not demographics?
 - [ ] At least 3 assumptions listed with validation plans?
 
 ### Specificity
+
 - [ ] Objective includes a measurable metric?
 - [ ] Features have priority labels (P0/P1/P2)?
 - [ ] v1 scope has a clear boundary (what is in and what is out)?
 - [ ] Success criteria reference specific Key Results?
 
 ### Consistency
+
 - [ ] Summary aligns with Objective aligns with Key Results?
 - [ ] Market segments match the value propositions?
 - [ ] Features map to at least one value proposition?

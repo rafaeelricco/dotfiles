@@ -15,6 +15,7 @@ description: >
 ## Core rule
 
 Ask the user before any decision that affects:
+
 - branch creation or branch name
 - files included in the PR
 - commit creation or commit message
@@ -35,6 +36,7 @@ Leave the PR unassigned by default. Use `--assignee @me` only when the user choo
 ## Requirements
 
 Require:
+
 - a local git repository
 - a GitHub remote
 - installed `gh`
@@ -70,6 +72,7 @@ gh pr view --json number,url,state
 ```
 
 Identify:
+
 - current branch
 - default branch
 - changed files
@@ -85,11 +88,13 @@ If the user runs `/create-pr` while on `main`, `master`, or the detected default
 Read the diff, summarize the change, and suggest 2 or 3 branch names based on the modified files and behavior. Use plain branch names with no automatic prefix.
 
 Ask the user to choose one path:
+
 1. Full flow: create branch, stage selected files, create one commit, push, generate PR description, open draft PR.
 2. Branch only: create the branch, then let the user handle commits.
 3. User-managed: stop after analysis so the user can create branch and commits.
 
 If the user chooses full flow:
+
 - ask which files belong in the PR when the worktree has mixed changes
 - ask for commit message approval
 - create the branch with the approved name
@@ -109,6 +114,7 @@ If the default branch already has local commits ahead of the base branch, ask be
 ### 3. Handle feature branch state
 
 If the user already sits on a non-default branch:
+
 - use existing commits ahead of base when no uncommitted changes exist
 - ask whether to include uncommitted changes when the worktree has changes
 - ask whether to create one new commit or let the user handle commits
@@ -156,12 +162,14 @@ Use that skill's questionnaire and generated Markdown body. Do not compose the P
 ### 7. Open the draft PR
 
 Confirm the PR metadata before creation:
+
 - base branch
 - PR title
 - draft or ready-for-review state
 - assignee choice
 
 Ask whether the user wants to assign the PR to themselves:
+
 1. Assign to me: add `--assignee @me`.
 2. Leave unassigned: omit the `--assignee` flag.
 
@@ -245,6 +253,7 @@ Do you want to assign this PR to yourself?
 ```
 
 After confirmation, continue:
+
 1. create the branch
 2. stage the confirmed files
 3. commit once
@@ -274,6 +283,7 @@ After confirmation, continue:
 ## Final response
 
 Report:
+
 - PR URL
 - branch name
 - commit hash
@@ -286,6 +296,7 @@ Report:
 ## Test prompts
 
 Use these prompts to check behavior:
+
 - `/create-pr`
 - `/create-pr` while on `main` with 3 modified files
 - `/create-pr` while on a feature branch with committed changes

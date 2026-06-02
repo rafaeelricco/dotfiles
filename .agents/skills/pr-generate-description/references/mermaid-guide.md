@@ -2,21 +2,21 @@
 
 Use Mermaid diagrams to visualize architecture flows, system interactions, and decision trees in PR descriptions.
 
-
 ## When to Include a Diagram
 
 Include a Mermaid diagram when the PR introduces:
+
 - A new multi-step flow (e.g., message processing pipeline)
 - Branching logic or decision trees (e.g., agent choosing between tools)
 - Component interactions across system boundaries (e.g., frontend → API → DB)
 - Event-driven architectures (e.g., command → event → reaction)
 
 Do NOT include a diagram for:
+
 - Simple CRUD changes
 - Style/formatting-only changes
 - Single-file refactors
 - Documentation updates
-
 
 ## Preferred Patterns
 
@@ -56,7 +56,6 @@ graph TD
     B --> A
 ```
 
-
 ## Style Rules
 
 1. **Node labels**: Use descriptive names — `[Load Conversation History]` not `[Load]`
@@ -73,10 +72,10 @@ graph TD
 6. **Database nodes**: Use `[(Brackets with parens)]` for cylinder shapes
 7. **Colors**: Use neutral grays (`#707070`, `#808080`, `#909090`) for highlighted nodes — avoid bright colors that clash with GitHub's dark/light themes
 
-
 ## Naming the Section
 
 Name the section based on what the diagram represents:
+
 - "Chatbot Message Flow"
 - "Authentication Pipeline"
 - "Property Ingestion Flow"

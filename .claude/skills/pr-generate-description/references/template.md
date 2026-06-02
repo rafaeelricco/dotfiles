@@ -2,7 +2,6 @@
 
 This is the canonical output structure. Include or exclude sections based on user choices from the questionnaire.
 
-
 ## Section Order (default)
 
 1. Motivation
@@ -17,19 +16,18 @@ The user may reorder sections in the questionnaire. Respect their chosen order.
 
 ## Template
 
-```markdown
+````markdown
 ## Motivation
 
 {{ USER_MOTIVATION }}
 
-
 <!-- OPTIONAL: Only if user opted in -->
+
 ## Demo Video
 
 Watch this video for a demonstration of {{ FEATURE_DESCRIPTION }}:
 
 {{ VIDEO_URL_OR_PLACEHOLDER }}
-
 
 ## What's New
 
@@ -45,23 +43,25 @@ Watch this video for a demonstration of {{ FEATURE_DESCRIPTION }}:
 
 <!-- Add more categories as needed -->
 
-
 <!-- OPTIONAL: Only if user opted in AND architecture changes detected -->
+
 ## {{ SYSTEM_NAME }} Flow
 
 ```mermaid
 {{ MERMAID_DIAGRAM }}
 ```
+````
 
 <!-- OPTIONAL: Only if user opted in -->
+
 ## Changed Files
 
-| File | Change Type | Summary |
-| ---- | ----------- | ------- |
+| File           | Change Type            | Summary           |
+| -------------- | ---------------------- | ----------------- |
 | `path/to/file` | Added/Modified/Deleted | Brief description |
 
-
 <!-- OPTIONAL: Only if new infrastructure dependencies detected -->
+
 ## Additional for Run Locally
 
 **{{ COMPONENT_NAME }}**
@@ -70,12 +70,12 @@ Watch this video for a demonstration of {{ FEATURE_DESCRIPTION }}:
 - Setup: {{ SETUP_INSTRUCTIONS }}
 - Notes: {{ GOTCHAS_OR_CONFIGS }}
 
-
 ## Testing & Feedback
 
 {{ TESTING_FOCUS_AREAS }}
 
 If you find any bugs or have recommendations for improvements, please open an issue and assign it to me.
+
 ```
 
 
@@ -90,3 +90,4 @@ If you find any bugs or have recommendations for improvements, please open an is
 | `{{ TECHNICAL_DETAIL }}` | Auto-generated from diff, follows `[What] + [Detail] + [Purpose]` pattern |
 | `{{ MERMAID_DIAGRAM }}` | Auto-generated from architecture analysis |
 | `{{ TESTING_FOCUS_AREAS }}` | Auto-generated, listing key areas to test |
+```

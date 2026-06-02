@@ -16,6 +16,7 @@ Goal: Ensure user profile updates validate the incoming payload consistently wit
 create-user flow, without changing the public route contract unless explicitly approved.
 
 Step 1 - Read for context (in this order):
+
 1. Root/local instructions: `AGENTS.md`
 2. Local package boundary: `packages/api/package.json`, test scripts, and relevant API config
 3. Task source: `TASKS.md:42`
@@ -29,6 +30,7 @@ Step 1 - Read for context (in this order):
    - nearest update-user test file
 
 Step 2 - Constraints to follow:
+
 - Scope: keep changes inside the API package unless a shared type change is required for compile correctness.
 - Behavior: align update validation with the inspected create flow.
 - Interfaces: preserve the public route shape; if payload fields must change, list that as an open question.
@@ -41,6 +43,7 @@ A short implementation plan listing files to touch, validation changes, tests to
 the exact verification command.
 
 Open questions:
+
 - Should invalid optional fields be stripped or rejected? The current task note does not specify
   this, and both behaviors are plausible from nearby code.
 ```
@@ -59,6 +62,7 @@ Goal: Bring the invoice table structure in line with the newer order table patte
 existing invoice data behavior and external component props.
 
 Step 1 - Read for context (in this order):
+
 1. Root/local instructions: `AGENTS.md` and `packages/web/CONVENTIONS.md`
 2. Local package boundary: `packages/web/package.json`, UI config, and test scripts
 3. Reference to follow: `packages/web/src/features/orders/OrderTable.tsx`
@@ -73,6 +77,7 @@ Step 1 - Read for context (in this order):
    - nearby billing components
 
 Step 2 - Constraints to follow:
+
 - Scope: refactor the invoice table and directly affected tests only.
 - Behavior: preserve sorting, empty states, loading states, and row action behavior confirmed in the current target.
 - Interfaces: do not change exported props, shared table primitives, API DTOs, or fixture shape without approval.
@@ -85,5 +90,6 @@ A short implementation plan covering the component split, prop/type preservation
 verification commands, and any contract risks.
 
 Open questions:
+
 - None identified from inspected context.
 ```

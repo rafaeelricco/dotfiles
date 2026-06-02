@@ -2,7 +2,6 @@
 
 Style: Concise | Sections: Motivation, What's New, Testing
 
-
 ## Motivation
 
 Refactor property ingestion to follow event sourcing principles by separating the vector embedding side effect from the command handler into a dedicated reaction. This improves testability, enables independent scaling of indexing operations, and ensures commands remain pure event emitters without blocking I/O operations.

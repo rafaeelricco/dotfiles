@@ -2,7 +2,6 @@
 
 Style: Concise | Sections: Demo Video, What's New, Architecture Flow, Local Setup, Testing
 
-
 ## Demo Video
 
 Watch this video for a demonstration of the LangChain agent-based chatbot with property search capabilities:
