@@ -1,0 +1,12 @@
+{
+  "printWidth": 120,
+  "proseWrap": "preserve",
+  "semi": true,
+  "singleQuote": false,
+  "trailingComma": "all",
+  "arrowParens": "avoid",
+  "tabWidth": 2,
+  "experimentalTernaries": true,
+  "experimentalOperatorPosition": "start",
+  "overrides": [{ "files": "*.mdc", "options": { "parser": "markdown" } }]
+}

@@ -1,0 +1,9 @@
+# Compiled / cache (not source)
+**/__pycache__/**
+**/*.pyc
+
+# Generated / lock files
+nvim/lazy-lock.json
+
+# OS artifacts
+.DS_Store
