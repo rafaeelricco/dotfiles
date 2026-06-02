@@ -29,7 +29,7 @@ Before using fast path, scan the target file for audit triggers: `match`, `switc
 
 Use the fast path only for local, mechanical changes:
 - copy/text tweaks;
-- className/layout tweaks;
+- className/layout tweaks, including applying React styling rules from `references/react-conventions.md`;
 - applying an existing pattern from `references/react-conventions.md` within a single file (Styling/Types swaps, etc.);
 - moving a small local JSX fragment without changing behavior.
 
