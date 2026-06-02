@@ -19,14 +19,36 @@ className composes uniformly through theme/`cn`/`cva`; inline `style` bypasses t
   const button = cva("rounded", { variants: { size: { sm: "px-2", lg: "px-4" } } });
   ```
 - Don't use **inline `style={}`** except for runtime-dynamic values that can't be expressed as classes (e.g. computed pixel offsets).
-- Don't use **arbitrary Tailwind values** for spacing, size, radius, or color (`px-[13px]`, `text-[0.6875rem]`, `bg-[#7D152D]`). Use the project's scale utilities and theme tokens; reserve `[...]` for genuinely one-off computed values with no token.
-- Use **theme tokens through utilities** (`bg-primary`, `text-muted-foreground`, `rounded-lg`) instead of raw hex in components, so color resolves through the theme layer.
+
+## Layout Spacing
+
+Sibling spacing belongs to the parent layout, not to each child. Margins create hidden coupling; `gap-*` keeps spacing visible at the composition layer.
+
+- Use **`flex` / `grid` with `gap-*`** for spacing between siblings.
   ```tsx
-  // Don't
-  <span className="bg-[#7D152D] text-[11px] rounded-[10px]" />
-  // Do
-  <span className="bg-primary text-xs rounded-md" />
+  <div className="flex flex-col gap-1">
+    <h2 className="text-lg font-semibold">Event Basics</h2>
+    <p className="text-muted-foreground text-sm">Define the foundational details.</p>
+  </div>
   ```
+- Use **parent wrappers** for lists, cards, headings, and copy groups.
+  ```tsx
+  <section className="flex flex-col gap-5">
+    <div className="flex flex-col gap-1">...</div>
+    <div className="grid gap-3 md:grid-cols-2">...</div>
+  </section>
+  ```
+- Replace **alignment margins** with layout structure: `justify-between`, `flex-1`, `items-*`, `self-*`, or a small wrapper.
+  ```tsx
+  <div className="flex items-start gap-2">
+    <span className="flex h-5 items-center">
+      <Info className="size-4" />
+    </span>
+    <p>Inherited from the selected campaign.</p>
+  </div>
+  ```
+- Don't use **margin utilities or `space-*`** for component rhythm/alignment: `mt-*`, `mb-*`, `ml-*`, `mr-*`, `mx-*`, `my-*`, negative margins, `ml-auto`, `space-x-*`, or `space-y-*`.
+- Keep **padding utilities** (`p-*`, `px-*`, `py-*`) for internal component padding.
 
 ## Components
 
@@ -44,11 +66,7 @@ Named prop types make the contract explicit and searchable across the codebase.
   type UserCardProps = { user: User; onSelect: (id: UserId) => void };
   function UserCard({ user, onSelect }: UserCardProps) { ... }
   ```
-- **Exception:** when a component takes only **1–2 props** whose types are **not reused elsewhere**, an inline type is fine — don't manufacture a one-use `XProps` alias.
-  ```tsx
-  function Avatar({ src, size }: { src: string; size: number }) { ... }
-  ```
-- Don't use **inline object prop types** for components with **3+ props**, or when the prop type is reused elsewhere.
+- Don't use **inline object prop types** (`function X({ a, b }: { a: string; b: number })`).
 
 ## State
 
@@ -63,7 +81,7 @@ Colocated state stays correlated with the UI that produces and consumes it; wide
 
 ## Boundaries
 
-Each layer's responsibility should match what only that layer can decide; misplaced branches grow into divergent code paths.
+Each layer's responsibility should match what only that layer can decide; misplaced branches grow into divergent code paths. See `component-boundaries.md` for the full audit checklist.
 
 - Keep parent components focused on **layout/composition**; let children own **presentation variants**.
 - Don't branch in the parent when every branch returns the same child component with different props — that's a boundary smell, push the branch into the child.

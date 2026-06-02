@@ -1,4 +1,0 @@
-interface:
-  display_name: "Code Pattern"
-  short_description: "Apply project code patterns to refactors and reviews"
-  default_prompt: "Use $code-pattern to refactor or review this code following project conventions and nearby patterns."
