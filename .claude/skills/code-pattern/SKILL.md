@@ -9,7 +9,10 @@ description: >
   type-safe style, `Maybe`, `Result`, `ts-pattern`, discriminated unions, prop
   drilling, inline prop types/styles, `cn()`/`cva()`, named prop types,
   component boundary smells, `useForm`, validation, submit flows, `FormInput`,
-  API calls through `api` / `call`, `Future.fork`, `RemoteData`,
+  tables and data grids (`DataTable`, `ColumnsConfig`/`ColumnDef`,
+  sorting/pagination), API calls through `api` / `call`, `Future.fork`,
+  `RemoteData`, page/screen data-fetching (the `RemoteData` state machine +
+  `Future` data layer + layout shell + container/presentational split),
   refetch/navigation/close-after-write flows, or read-after-write projection
   delays. Invoke this skill any time an AI coding agent touches TypeScript or
   React code in a project codebase that should preserve consistent patterns,
@@ -29,13 +32,15 @@ Before using fast path, scan the target file for audit triggers: `match`, `switc
 
 Use the fast path only for local, mechanical changes:
 - copy/text tweaks;
-- className/layout tweaks;
+- className/layout tweaks, including applying React styling rules from `references/react-conventions.md`;
 - applying an existing pattern from `references/react-conventions.md` within a single file (Styling/Types swaps, etc.);
 - moving a small local JSX fragment without changing behavior.
 
 For fast path:
 1. Read only the convention source selected by touched surface:
    - styling/components/local state/prop types: `references/react-conventions.md`;
+   - tables / data grids: `references/tables/tables.md`;
+   - pages / screens (data-fetching): `references/pages/pages.md`;
    - skip `references/typescript-conventions.md` unless touching types, absence, errors, async, collections, or parsing;
    - props/types/unions: Type Design;
    - entity/data modeling: Domain Modeling;
@@ -52,7 +57,10 @@ Escalate to the full workflow immediately when the work touches:
 - exported/shared types;
 - API contracts, schemas, decoders, persistence, routes, or dependencies;
 - error-handling strategy, data-model decisions, or broad normalization;
+- any Component Boundary Audit trigger;
 - any Forms and API Integration Audit trigger;
+- any Tables and data-display Audit trigger;
+- any Pages Audit trigger;
 - unclear or conflicting local patterns;
 - behavior changes beyond the requested edit.
 
@@ -68,12 +76,34 @@ Escalate to the full workflow immediately when the work touches:
 2. Find 2-3 nearby pattern files in the same module to ground style decisions — only ask the user if no obvious neighbours exist.
 3. Make only the approved or mechanically implied change. Keep diffs scoped.
 
+### Component Boundary Audit triggers
+Run the audit per `references/component-boundaries.md` before editing when the work touches any of:
+- a screen/page or complex component;
+- a component with `match()`/`switch` over UI state;
+- `Maybe`, `RemoteData`, `Just`, `Nothing`, or `.maybe()` in render logic;
+- dense conditional JSX (`&&`, nested ternaries, repeated conditional regions);
+- branches that return the same child component with different props.
+
 ### Forms and API Integration Audit triggers
-Run the audit per `references/forms-and-api.md` before editing when the work touches any of:
+Run the audit per `references/forms/forms-and-api.md` before editing when the work touches any of:
 - `useForm`, form config classes, `FormInput`, validation, default values, derived values, or controlled field state;
 - package request helpers, endpoint maps, `api` / `call`, multipart helpers, `Future.fork`, `Future.chain`, `Future.parallel` / `Future.concurrently`, `RemoteData`, or transport error display;
 - submit handlers, loading state, duplicate-submit guards, write success callbacks, refetch, navigation, dialog close, or parent callback behavior;
 - read-after-write consistency, projection delay, or any write flow whose success path reads projected data.
+
+### Tables and data-display Audit triggers
+Run the audit per `references/tables/tables.md` before editing when the work touches any of:
+- rendering a collection as a table/grid, a `DataTable`/data-grid component, or `table.tsx` primitives;
+- `ColumnsConfig`, `ColumnDef`, `columnOrder`, `rows`, or per-row `onClick`/variant wiring;
+- client-side sorting (`sortFun`), pagination, empty-state, or row selection;
+- extending the table abstraction (new `cva` variants, new column behavior, server-side pagination/sort).
+
+### Pages Audit triggers
+Run the audit per `references/pages/pages.md` before editing when the work touches any of:
+- adding or refactoring a page/screen component that fetches data and renders it;
+- a `RemoteData` cell fed by a `Future` `.fork` in a `useEffect`, or the loading/error/empty render ladder;
+- the layout-shell wrapper (nav/title/breadcrumb/session/selected) around page content;
+- assembling a page's data layer from composed `Future`s, or the container/presentational split.
 
 ### Stop and ask
 - **Review-only request:** don't edit. Return findings, risks, and actionable suggestions.
@@ -90,13 +120,20 @@ These references own the prescriptive rules. Read the one selected by triage:
 
 - **TypeScript modeling** (`Maybe`, `Result`, discriminated unions, decoders, schemas): `references/typescript-conventions.md`.
 - **React/UI structure** (styling, components, prop types, local state, boundaries, scope): `references/react-conventions.md`.
-- **Forms/API integration**: `references/forms-and-api.md`.
+- **Component boundary audit**: `references/component-boundaries.md`.
+- **Forms/API integration**: `references/forms/forms-and-api.md`.
+- **Tables / data display** (DataTable abstraction, columns/rows, sorting, pagination, extending primitives): `references/tables/tables.md`.
+- **Pages / screens** (RemoteData state machine, Future data layer, layout shell, container/presentational split): `references/pages/pages.md`.
 
 ## References
 
 - `references/typescript-conventions.md` — TypeScript modeling conventions (types, absence, errors, async, collections, parsing).
 - `references/react-conventions.md` — React/UI conventions (styling, components, prop types, local state, boundaries, scope).
-- `references/forms-and-api.md` — Frontend/mobile form, submit, API call, Future, RemoteData, and read-after-write integration patterns. Read when the audit applies.
+- `references/component-boundaries.md` — Component Boundary Audit checklist + preferred patterns. Read when the audit applies.
+- `references/forms/forms-and-api.md` — Frontend/mobile form, submit, API call, Future, RemoteData, and read-after-write integration patterns. Bundles reference copies (`forms.tsx`, `request.ts`, `use-projection-delay.ts`, `campaigns.example.tsx`). Read when the audit applies.
+- `references/tables/tables.md` — Table / data-display patterns: the `DataTable` abstraction over `table.tsx` primitives, the fetch→columns→rows flow, and how to extend. Bundles reference copies (`table.tsx`, `datatable.tsx`, `applications.example.tsx`). Read when the tables audit applies.
+- `references/pages/pages.md` — Page/screen pattern: a `RemoteData` state machine fed by a `Future` data layer, wrapped in the layout shell, with a container/presentational split. Bundles a worked example (`cooperatives.example.tsx`). Read when the pages audit applies.
+- `references/examples.md` — Plan-style output example. Read when asked for plan-only output.
 
 ## Verification
 

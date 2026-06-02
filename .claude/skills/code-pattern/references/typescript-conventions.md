@@ -227,6 +227,38 @@ Prefer `Future<E, T>` for app API calls, cancellable effects, and composed async
 
 ---
 
+## Collections
+
+### List — Singly Linked List
+
+- Use `List<T>` for O(1) prepend and immutable functional sequences. Import from `@ambarltd/core/list`:
+  ```ts
+  import { List } from "@ambarltd/core/list";
+  ```
+- Don't append onto linked lists — O(n²). Build with `List.cons(item, list)` + `.reverse()` at the end, or `List.from(arr)`.
+- `.head()` returns `Maybe<T>` — always handle `Nothing`.
+
+### TreeMap / TreeSet — Ordered Collections
+
+- Use `TreeMap`/`TreeSet` with explicit comparators for ordered, persistent collections. Reach for them instead of JS `Map`/`Set` when you want an ordering other than insertion order.
+  ```ts
+  const map = TreeMap.new<string, number>((x, y) =>
+    x > y ? 1
+    : x < y ? -1
+    : 0,
+  );
+  // Or use stringMap factory / Comparable interface
+  const map = stringMap<User>();
+  const map = TreeMap.new_<UserId, User>();
+  ```
+- `.get(key)` returns `Maybe<T>` — always handle `Nothing`.
+- Use `.unionWith(other, mergeFn)` for merging with conflict resolution.
+- Use `.difference(other)` and `.intersectionWith(other, fn)` for set operations.
+- Comparator must return `-1 | 0 | 1`. Boolean won't work.
+- `TreeMap` is sorted by comparator, not insertion order.
+- `TreeSet`: `.insert()`, `.remove()`, `.union()` mutate in place. Use `TreeSet.from()` to clone first.
+- Use `.has()` for O(log n) membership. Don't use `.values().includes()` — that's O(n).
+
 ### MVar & BoundedBuffer — Streaming Coordination
 
 - Use `MVar<T>` and `BoundedBuffer<T>` for streaming, backpressure, and callback-to-awaitable coordination. Do not introduce them for ordinary UI state or simple request state.
