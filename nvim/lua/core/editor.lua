@@ -57,8 +57,33 @@ vim.keymap.set("v", "<C-S-Down>", ":m '>+1<CR>gv=gv", { desc = "Move selected li
 -- Delete entire line using Command+Delete
 -- Normal mode: Uses 'dd' to delete current line
 -- Insert mode: Temporarily exits insert, deletes line, and returns to insert mode
-vim.keymap.set("n", "<D-Del>", "dd", { desc = "Delete entire line" })
-vim.keymap.set("i", "<D-Del>", "<Esc>ddi", { desc = "Delete entire line" })
+-- Uses the black hole register ("_) so deleting never overwrites the clipboard
+vim.keymap.set("n", "<D-Del>", "\"_dd", { desc = "Delete entire line" })
+vim.keymap.set("i", "<D-Del>", "<Esc>\"_ddi", { desc = "Delete entire line" })
+
+-- =============================================
+-- Delete Without Clobbering the Clipboard
+-- =============================================
+
+-- With clipboard=unnamedplus, the unnamed register is linked to the OS
+-- clipboard, so d/x/c/s would overwrite it on every delete. Route these
+-- operators to the black hole register ("_) to discard the removed text
+-- instead. Yanks (y) still sync to the clipboard as before.
+-- Use the explicit clipboard register ("+y) when you want to copy.
+for _, mode in ipairs({ "n", "x" }) do
+  vim.keymap.set(mode, "d", "\"_d", { desc = "Delete without yanking" })
+  vim.keymap.set(mode, "D", "\"_D", { desc = "Delete to end of line without yanking" })
+  vim.keymap.set(mode, "x", "\"_x", { desc = "Delete char without yanking" })
+  vim.keymap.set(mode, "X", "\"_X", { desc = "Delete char backward without yanking" })
+  vim.keymap.set(mode, "c", "\"_c", { desc = "Change without yanking" })
+  vim.keymap.set(mode, "C", "\"_C", { desc = "Change to end of line without yanking" })
+  vim.keymap.set(mode, "s", "\"_s", { desc = "Substitute without yanking" })
+  vim.keymap.set(mode, "S", "\"_S", { desc = "Substitute line without yanking" })
+end
+
+-- Paste over a visual selection without copying the replaced text to the
+-- clipboard (default visual `p` yanks the overwritten text into the register).
+vim.keymap.set("x", "p", "\"_dP", { desc = "Paste over selection without yanking" })
 
 -- Indent and unindent selected text blocks
 -- Uses 'gv' to re-select visual area after indentation for consecutive operations
