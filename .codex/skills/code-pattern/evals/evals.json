@@ -72,6 +72,20 @@
         "The implementation avoids app-level any.",
         "The implementation does not replace framework-required Promise contracts with Future."
       ]
+    },
+    {
+      "id": 6,
+      "prompt": "Refactor a React page layout to follow the code-pattern skill. Replace margin-based spacing and space-y utilities with the preferred local layout pattern while preserving behavior.",
+      "expected_output": "A React layout refactor that moves sibling spacing to parent flex/grid gap containers without changing behavior.",
+      "files": [],
+      "expectations": [
+        "Sibling spacing is expressed with parent flex or grid containers using gap-* classes.",
+        "The implementation removes component rhythm margins such as mt-*, mb-*, mx-*, ml-*, mr-*, negative margins, and ml-auto.",
+        "The implementation removes space-x-* and space-y-* utilities.",
+        "Internal padding utilities such as p-*, px-*, and py-* remain allowed.",
+        "Alignment formerly handled by margins is represented with justify-between, flex-1, items-*, self-*, wrappers, or equivalent parent layout.",
+        "Behavior, state, validation, and API calls remain unchanged."
+      ]
     }
   ]
 }

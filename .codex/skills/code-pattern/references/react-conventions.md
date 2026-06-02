@@ -20,6 +20,36 @@ className composes uniformly through theme/`cn`/`cva`; inline `style` bypasses t
   ```
 - Don't use **inline `style={}`** except for runtime-dynamic values that can't be expressed as classes (e.g. computed pixel offsets).
 
+## Layout Spacing
+
+Sibling spacing belongs to the parent layout, not to each child. Margins create hidden coupling; `gap-*` keeps spacing visible at the composition layer.
+
+- Use **`flex` / `grid` with `gap-*`** for spacing between siblings.
+  ```tsx
+  <div className="flex flex-col gap-1">
+    <h2 className="text-lg font-semibold">Event Basics</h2>
+    <p className="text-muted-foreground text-sm">Define the foundational details.</p>
+  </div>
+  ```
+- Use **parent wrappers** for lists, cards, headings, and copy groups.
+  ```tsx
+  <section className="flex flex-col gap-5">
+    <div className="flex flex-col gap-1">...</div>
+    <div className="grid gap-3 md:grid-cols-2">...</div>
+  </section>
+  ```
+- Replace **alignment margins** with layout structure: `justify-between`, `flex-1`, `items-*`, `self-*`, or a small wrapper.
+  ```tsx
+  <div className="flex items-start gap-2">
+    <span className="flex h-5 items-center">
+      <Info className="size-4" />
+    </span>
+    <p>Inherited from the selected campaign.</p>
+  </div>
+  ```
+- Don't use **margin utilities or `space-*`** for component rhythm/alignment: `mt-*`, `mb-*`, `ml-*`, `mr-*`, `mx-*`, `my-*`, negative margins, `ml-auto`, `space-x-*`, or `space-y-*`.
+- Keep **padding utilities** (`p-*`, `px-*`, `py-*`) for internal component padding.
+
 ## Components
 
 Small components are easier to test and refactor; premature reuse abstractions are harder to undo than to add.
