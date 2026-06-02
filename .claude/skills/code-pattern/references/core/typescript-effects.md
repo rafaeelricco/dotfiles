@@ -82,6 +82,7 @@ Prefer `RemoteData<E, T>` to model async UI state.
   ```
 - `.map(fn)` transforms only `Ready`; preserves `Loading`/`Failed`/`NotAsked`.
 - `.chain(fn)` for `RemoteData`-returning functions — avoids double wrapping.
+- Use `.chain(fn)`, not `.then(fn)`, when composing a `RemoteData` with a callback that returns another `RemoteData`.
 - `NotAsked` means "haven't asked yet". For "asked but empty", use `Ready([])`.
 - Use `instanceof` for exhaustive rendering. Use `isReady`, `isLoading`, and similar helpers for guards, derived flags, and compact branches when no variant narrowing is needed.
 
