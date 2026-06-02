@@ -5,7 +5,7 @@ Use this workflow when the change is not clearly local and mechanical, when an a
 ## Always
 
 1. Read the target file and nearest owning package's `package.json` before deciding whether a change is trivial.
-2. Use fast path only when `SKILL.md` triage criteria allow it.
+2. Follow the `SKILL.md` entry workflow and selected references before editing.
 3. Use full workflow when the work is not clearly local and mechanical.
 
 ## Full workflow
