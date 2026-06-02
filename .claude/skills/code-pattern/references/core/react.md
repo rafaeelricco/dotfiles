@@ -12,16 +12,16 @@ components, give each a **named prop type**, keep its UI state **colocated**, an
 that own how things render. Keep parents about _wiring_; let children own _presentation_.
 Examples below use a neutral domain — substitute your own.
 
-For the page-level data-fetch shell that wraps these components, see `./page-pattern.md`;
-for collections rendered as tables, `./table-pattern.md`; for form/submit components,
-`./forms-api-pattern.md`; for the types behind props, `./typescript-modeling.md` and
+For the page-level data-fetch shell that wraps these components, see `../surfaces/pages.md`;
+for collections rendered as tables, `../surfaces/tables.md`; for form/submit components,
+`../surfaces/forms-api.md`; for the types behind props, `./typescript-modeling.md` and
 `./typescript-effects.md`.
 
 Bundled references:
 
-- `./examples/cooperatives.example.tsx` — the container/presentational split end-to-end
+- `../examples/pages/cooperatives.example.tsx` — the container/presentational split end-to-end
   (`SuperAdminCooperatives` -> `Content` -> `CooperativesTable`), each layer one responsibility.
-- `./examples/campaigns.example.tsx` — a presentational form component that owns its own
+- `../examples/forms-api/campaigns.example.tsx` — a presentational form component that owns its own
   `submit` `RemoteData` cell and form fields, nothing lifted to the parent.
 
 ## Canonical references (by role)
@@ -48,7 +48,7 @@ Small components are easier to test and refactor; a premature reuse abstraction 
 to undo than to add.
 
     function SuperAdminCooperatives({ session }: { session: SuperSession }) {
-      // shell + the RemoteData state machine (see ./page-pattern.md), then:
+      // shell + the RemoteData state machine (see ../surfaces/pages.md), then:
       return <Content state={state.value} />;
     }
 
