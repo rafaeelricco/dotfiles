@@ -3,7 +3,7 @@
  *
  * Source: frontend/src/pages/super_admin/cooperatives.tsx (ambar/ashraf), copied near-verbatim
  * (the RemoteData match is reordered to the canonical Ready -> Loading -> Failed -> NotAsked
- * sequence from page-pattern.md, so the example doesn't contradict the guide).
+ * sequence from surfaces/pages.md, so the example doesn't contradict the guide).
  * Demonstrates: layout-shell wrapper -> a RemoteData cell fed by a Future.fork in useEffect
  * -> exhaustive `instanceof ... satisfies never` match -> container/presentational split
  * (SuperCooperatives -> Content -> CooperativesTable) -> a composed Future data layer

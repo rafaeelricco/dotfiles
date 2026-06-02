@@ -27,17 +27,22 @@ Apply project conventions when implementing, refactoring, or reviewing TypeScrip
 
 Read only the reference selected by the touched surface. Each reference owns the prescriptive rules for its surface; load the narrowest one that fits.
 
-| Touched surface                                                                                                       | Reference                           |
-| --------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| Types, unions, prop-as-types, entity/domain modeling, `Id<T>`, state machines, decoders/encoders/schemas, DTO parsing | `references/typescript-modeling.md` |
-| Absence (`Maybe`), errors (`Result`), async UI state (`RemoteData`), lazy async (`Future`)                            | `references/typescript-effects.md`  |
-| Styling, Tailwind utilities, `cn()`/`cva()`, layout spacing                                                           | `references/tailwind.md`            |
-| Components, prop types, local state, scope, parent/child boundaries                                                   | `references/react-conventions.md`   |
-| Forms / API / submit / `Future.fork` / read-after-write                                                               | `references/forms-api-pattern.md`   |
-| Tables / data grids / `DataTable` / columns / sorting                                                                 | `references/table-pattern.md`       |
-| Pages / screens / `RemoteData` state machine / layout shell                                                           | `references/page-pattern.md`        |
+| Touched surface                                                                                                       | Reference                                |
+| --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| Shared workflow, full-workflow rules, audits, stop/ask, verification                                                  | `references/workflow.md`                 |
+| Types, unions, prop-as-types, entity/domain modeling, `Id<T>`, state machines, decoders/encoders/schemas, DTO parsing | `references/core/typescript-modeling.md` |
+| Absence (`Maybe`), errors (`Result`), async UI state (`RemoteData`), lazy async (`Future`)                            | `references/core/typescript-effects.md`  |
+| Styling, Tailwind utilities, `cn()`/`cva()`, layout spacing                                                           | `references/core/tailwind.md`            |
+| Components, prop types, local state, scope, parent/child boundaries                                                   | `references/core/react.md`               |
+| Forms / API / submit / `Future.fork` / read-after-write                                                               | `references/surfaces/forms-api.md`       |
+| Tables / data grids / `DataTable` / columns / sorting                                                                 | `references/surfaces/tables.md`          |
+| Pages / screens / `RemoteData` state machine / layout shell                                                           | `references/surfaces/pages.md`           |
 
-Worked code examples live in `references/examples/`; the pattern guides above pull them in by name.
+Worked code examples live under `references/examples`, grouped by surface:
+
+- `pages`
+- `forms-api`
+- `tables`
 
 ## Triage
 
@@ -48,8 +53,8 @@ Before using fast path, scan the target file for audit triggers: `match`, `switc
 Use the fast path only for local, mechanical changes:
 
 - copy/text tweaks;
-- className/layout tweaks, including applying Tailwind styling rules from `references/tailwind.md`;
-- applying an existing pattern from `references/tailwind.md` or `references/react-conventions.md` within a single file (Styling/Types swaps, etc.);
+- className/layout tweaks, including applying Tailwind styling rules from `references/core/tailwind.md`;
+- applying an existing pattern from `references/core/tailwind.md` or `references/core/react.md` within a single file;
 - moving a small local JSX fragment without changing behavior.
 
 For fast path:
@@ -69,67 +74,4 @@ Escalate to the full workflow immediately when the work touches:
 - unclear or conflicting local patterns;
 - behavior changes beyond the requested edit.
 
-## Workflow
-
-### Always
-
-1. Read the target file and nearest owning package's `package.json` before deciding whether a change is trivial.
-2. Use fast path only when the triage criteria allow it.
-3. Use full workflow when the work is not clearly local and mechanical.
-
-### Full workflow
-
-1. Read the reference(s) selected by the routing table — the matching `references/typescript-*.md` for TS modeling/effects; `references/tailwind.md` for styling/spacing; `references/react-conventions.md` for React structure. Expand to a second reference when the change spans surfaces (e.g. a schema on a domain class touches both `typescript-modeling.md` and `typescript-effects.md`).
-2. Find 2-3 nearby pattern files in the same module to ground style decisions — only ask the user if no obvious neighbours exist.
-3. Make only the approved or mechanically implied change. Keep diffs scoped.
-
-### Forms and API Integration Audit triggers
-
-Run the audit per `references/forms-api-pattern.md` before editing when the work touches any of:
-
-- `useForm`, form config classes, `FormInput`, validation, default values, derived values, or controlled field state;
-- package request helpers, endpoint maps, `api` / `call`, multipart helpers, `Future.fork`, `Future.chain`, `Future.parallel` / `Future.concurrently`, `RemoteData`, or transport error display;
-- submit handlers, loading state, duplicate-submit guards, write success callbacks, refetch, navigation, dialog close, or parent callback behavior;
-- read-after-write consistency, projection delay, or any write flow whose success path reads projected data.
-
-### Tables and data-display Audit triggers
-
-Run the audit per `references/table-pattern.md` before editing when the work touches any of:
-
-- rendering a collection as a table/grid, a `DataTable`/data-grid component, or `table.tsx` primitives;
-- `ColumnsConfig`, `ColumnDef`, `columnOrder`, `rows`, or per-row `onClick`/variant wiring;
-- client-side sorting (`sortFun`), pagination, empty-state, or row selection;
-- extending the table abstraction (new `cva` variants, new column behavior, server-side pagination/sort).
-
-### Pages Audit triggers
-
-Run the audit per `references/page-pattern.md` before editing when the work touches any of:
-
-- adding or refactoring a page/screen component that fetches data and renders it;
-- a `RemoteData` cell fed by a `Future` `.fork` in a `useEffect`, or the loading/error/empty render ladder;
-- the layout-shell wrapper (nav/title/breadcrumb/session/selected) around page content;
-- assembling a page's data layer from composed `Future`s, or the container/presentational split.
-
-### Stop and ask
-
-- **Review-only request:** don't edit. Return findings, risks, and actionable suggestions.
-- **Plan-only request / plan mode:** don't edit. Return a concrete implementation plan.
-- **Decision needed** (product/API/dependency/naming/persistence/data-model/error-handling): ask the user before editing.
-- **Local pattern conflicts with CONVENTIONS:**
-  - isolated style/structure → follow nearest local pattern, scoped diff;
-  - shared contracts, types, data models, persistence, error handling, dependencies, routes, or broad normalization → flag the conflict and ask the user before editing.
-- **Local examples conflict with references:** improve the touched code when scope stays local, do not normalize unrelated files, and mention the mismatch in the plan or final response.
-
-## References
-
-- `references/typescript-modeling.md` — type-driven design, domain modeling / state machines, decoders/encoders/schemas.
-- `references/typescript-effects.md` — `Maybe`, `Result`, `RemoteData`, `Future` (absence, errors, async UI state).
-- `references/tailwind.md` — Tailwind styling and spacing (`cn()`/`cva()`, `gap-*` rhythm, theme tokens, on-demand docs lookup).
-- `references/react-conventions.md` — React structure (components, named prop types, local state, parent/child boundaries, scope).
-- `references/forms-api-pattern.md` — frontend/mobile form, submit, API call, `Future`, `RemoteData`, and read-after-write integration patterns. Pulls bundled code from `references/examples/` (`forms.example.tsx`, `api/endpoints.example.tsx`, `api/request.example.tsx`, `libs/use-projection-delay.example.tsx`, `campaigns.example.tsx`). Read when the audit applies.
-- `references/table-pattern.md` — the `DataTable` abstraction over `table.tsx` primitives, the fetch→columns→rows flow, and how to extend. Pulls bundled code from `references/examples/` (`table.example.tsx`, `datatable.example.tsx`). Read when the tables audit applies.
-- `references/page-pattern.md` — page/screen pattern: a `RemoteData` state machine fed by a `Future` data layer, wrapped in the layout shell, with a container/presentational split. Pulls a worked example from `references/examples/` (`cooperatives.example.tsx`). Read when the pages audit applies.
-
-## Verification
-
-Read the owning package's `package.json` scripts from the package directory. Choose the package manager from `packageManager` first; otherwise use the local lockfile (`pnpm-lock.yaml`, `yarn.lock`, `package-lock.json`, `bun.lockb`, or `bun.lock`); otherwise follow the evident workspace pattern. Run `typecheck` and `lint` only if those scripts exist. If either script is missing, state that it was unavailable and do not invent a substitute command.
+When full workflow applies, read `references/workflow.md` before editing.

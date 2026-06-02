@@ -10,20 +10,20 @@ read-model-dependent work through **`useProjectionDelay`'s `schedule()`**. Examp
 
 Bundled reference (from a production codebase — `app/frontend`):
 
-- `./examples/forms.example.tsx` — the form abstraction: `useForm`, `FormInput`, and the field config classes
+- `../examples/forms-api/forms.example.tsx` — the form abstraction: `useForm`, `FormInput`, and the field config classes
   (`TextInput`, `TextareaInput`, `DateInput`, `ComboboxInput`, …). **Trimmed** to the public API —
   the per-field render components and internal state plumbing are omitted (noted in its header).
-- `./examples/api/endpoints.example.tsx` — the endpoint registry: the `api` object mapping friendly names to typed
+- `../examples/forms-api/endpoints.example.tsx` — the endpoint registry: the `api` object mapping friendly names to typed
   `PlainEndpoint` descriptors, plus response-type re-exports. Adapted from `src/api/endpoints.ts`.
-- `./examples/api/request.example.tsx` — the HTTP layer: `call`, `query`, `uploadMultipart`, `stream` (each returns a
+- `../examples/forms-api/request.example.tsx` — the HTTP layer: `call`, `query`, `uploadMultipart`, `stream` (each returns a
   `Future<FetchErrorResponse, Res>`). Verbatim.
-- `./examples/libs/use-projection-delay.example.tsx` — `useProjectionDelay()` → `{ schedule, cancel }`, the read-after-write
+- `../examples/forms-api/use-projection-delay.example.tsx` — `useProjectionDelay()` → `{ schedule, cancel }`, the read-after-write
   delay. Verbatim.
-- `./examples/campaigns.example.tsx` — a worked write flow (create-campaign): `useForm` config + `validate` →
+- `../examples/forms-api/campaigns.example.tsx` — a worked write flow (create-campaign): `useForm` config + `validate` →
   `RemoteData` submit cell → `call(...).fork` → `schedule()` on success. Trimmed excerpt.
 
-For the page shell that hosts a form, see `./page-pattern.md`; for rendering the data a write
-mutates, `./table-pattern.md`.
+For the page shell that hosts a form, see `./pages.md`; for rendering the data a write
+mutates, `./tables.md`.
 
 ## Audit
 
@@ -82,7 +82,7 @@ lazy `Future` — nothing runs until `.fork`:
     );
 
 - `.chain` sequences dependent writes; `Future.parallel` / `Future.concurrently` run independent
-  ones. (`Future` vocabulary: `./page-pattern.md` §3.)
+  ones. (`Future` vocabulary: `./pages.md` §3.)
 - File uploads use `uploadMultipart(endpoint, formData)` — do **not** set `Content-Type` (the
   browser adds the multipart boundary). Read side uses `query(new Query({...}))`.
 
@@ -159,10 +159,10 @@ and treat empty combobox selections as `null`. Cross-field rules (e.g. end-after
 
 ## Cross-references
 
-- `./page-pattern.md` — the page shell + `RemoteData` state machine hosting the form; `Future` vocab.
-- `./table-pattern.md` — rendering the collection a write mutates; refetch via the projection delay.
-- `./typescript-effects.md` — `RemoteData` / `Future` / `Maybe` modeling, `satisfies never`.
-- `./react-conventions.md` — named prop types, small composed children, colocated state.
+- `./pages.md` — the page shell + `RemoteData` state machine hosting the form; `Future` vocab.
+- `./tables.md` — rendering the collection a write mutates; refetch via the projection delay.
+- `../core/typescript-effects.md` — `RemoteData` / `Future` / `Maybe` modeling, `satisfies never`.
+- `../core/react.md` — named prop types, small composed children, colocated state.
 
 ## Do / Do not
 

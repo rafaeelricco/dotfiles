@@ -8,15 +8,15 @@ one; the canonical implementation is bundled here to port when a package lacks o
 
 Bundled reference (verbatim from a production codebase):
 
-- `./examples/table.example.tsx` — headless primitives (`Table`, `TableHeader`, `TableRow`, `TableHead`, `TableCell`, …) with `cva` variants.
-- `./examples/datatable.example.tsx` — the `DataTable<T, C>` abstraction (`DataTable`, `ColumnDef`, `ColumnsConfig`).
+- `../examples/tables/table.example.tsx` — headless primitives (`Table`, `TableHeader`, `TableRow`, `TableHead`, `TableCell`, …) with `cva` variants.
+- `../examples/tables/datatable.example.tsx` — the `DataTable<T, C>` abstraction (`DataTable`, `ColumnDef`, `ColumnsConfig`).
 
 ## Audit
 
 - Inspect the nearest `package.json`.
 - Look for an existing table layer: `components/ui/datatable.tsx`, `components/ui/table.tsx`, or a data-grid dependency (`@tanstack/react-table`, etc.). Follow what exists.
 - Read one or two nearby table pages before editing.
-- Note how the data arrives (usually `RemoteData` from a `Future` — see `./forms-api-pattern.md`).
+- Note how the data arrives (usually `RemoteData` from a `Future` — see `./forms-api.md`).
 
 Report the audit briefly:
 
@@ -33,12 +33,12 @@ Tables Audit:
 
 ## Canonical references (by role, not fixed path)
 
-- Headless primitives — the `Table`/`TableHeader`/`TableRow`/`TableCell` set (e.g. `components/ui/table.tsx`; bundled `./examples/table.example.tsx`).
-- Table abstraction — `DataTable` + `ColumnDef` + `ColumnsConfig` (e.g. `components/ui/datatable.tsx`; bundled `./examples/datatable.example.tsx`).
+- Headless primitives — the `Table`/`TableHeader`/`TableRow`/`TableCell` set (e.g. `components/ui/table.tsx`; bundled `../examples/tables/table.example.tsx`).
+- Table abstraction — `DataTable` + `ColumnDef` + `ColumnsConfig` (e.g. `components/ui/datatable.tsx`; bundled `../examples/tables/datatable.example.tsx`).
 
 ## What `DataTable` gives you
 
-`DataTable<T, C>` (see `./examples/datatable.example.tsx`):
+`DataTable<T, C>` (see `../examples/tables/datatable.example.tsx`):
 
 - `columns: C` — a `ColumnsConfig<T>`: `{ [key]: new ColumnDef({ label, sortFun }) }`.
 - `columnOrder: (keyof C)[]` — which columns render, in order.
@@ -78,8 +78,8 @@ component hold page state, define `columns`, and map `data` to `rows`.
     }
 
 `RemoteData<FetchErrorResponse, T>` — match the four classes with `instanceof` and close
-with `satisfies never` (see `./typescript-effects.md`); format `state.failure` with
-`fetchErrorToString` (see `./forms-api-pattern.md`).
+with `satisfies never` (see `../core/typescript-effects.md`); format `state.failure` with
+`fetchErrorToString` (see `./forms-api.md`).
 
 ### Columns + DataTable (table component)
 
@@ -130,7 +130,7 @@ Rules:
 
 - `contents` keys must match `columns` / `columnOrder`.
 - Optional fields are `Maybe<T>`: use `value.map(fmt).withDefault(fallback)` in both the cell
-  and the `sortFun` (see `registered_at`; `./typescript-effects.md` for `Maybe`).
+  and the `sortFun` (see `registered_at`; `../core/typescript-effects.md` for `Maybe`).
 - Build comparators inline (`localeCompare`, numeric subtraction) or with a `comparing` /
   `sortOn` helper; `sortFun: null` disables sorting on that column.
 
@@ -145,24 +145,24 @@ Rules:
 ## Extending the abstraction
 
 - **New visual style** → add a key to the `cva` blocks (`tableVariants` / `tableHeaderVariants`)
-  in `./examples/table.example.tsx`; keep `defaultVariants`. Compose through `cn()` / `cva()`, never inline
-  `style` (see `./tailwind.md`).
+  in `../examples/tables/table.example.tsx`; keep `defaultVariants`. Compose through `cn()` / `cva()`, never inline
+  `style` (see `../core/tailwind.md`).
 - **New column** → add a key to `ColumnsConfig` + `columnOrder` with matching `contents`;
   give it a `sortFun` or `null`.
 - **Per-row styling** → set `variant` / `className` on the row object.
 - **New behavior** (server-side pagination, multi-sort, selection) → extend `DataTableProps` /
-  `Pagination` / `SortState` in `./examples/datatable.example.tsx`.
+  `Pagination` / `SortState` in `../examples/tables/datatable.example.tsx`.
 - **Status / variant rendering** → push it into the smallest child cell and drive copy/tone
   from a typed presentation helper (e.g. `getStatusConfig(status) → { label, color }`), not
   parent branches.
 
 ## Cross-references
 
-- `./tailwind.md` — `cn()` / `cva()` styling.
-- `./react-conventions.md` — named prop types, small composed cells, parent/child boundaries.
-- `./typescript-effects.md` — `Maybe` (optional cells), `RemoteData` (fetch state), `Future` (the request).
-- `./typescript-modeling.md` — discriminated unions (row-interaction state machines).
-- `./forms-api-pattern.md` — the data-fetching / write side feeding the table (`api` / `call` / `Future.fork`); after a write that mutates rows, refetch through the local projection-delay pattern.
+- `../core/tailwind.md` — `cn()` / `cva()` styling.
+- `../core/react.md` — named prop types, small composed cells, parent/child boundaries.
+- `../core/typescript-effects.md` — `Maybe` (optional cells), `RemoteData` (fetch state), `Future` (the request).
+- `../core/typescript-modeling.md` — discriminated unions (row-interaction state machines).
+- `./forms-api.md` — the data-fetching / write side feeding the table (`api` / `call` / `Future.fork`); after a write that mutates rows, refetch through the local projection-delay pattern.
 
 ## Do not
 
@@ -170,4 +170,4 @@ Rules:
 - Re-implement sorting / pagination / empty-state per page instead of using the abstraction.
 - Hand-roll a raw `<table>` for plain tabular data, or hardcode classes instead of adding a `cva` variant.
 - Use `contents` keys that don't match `columnOrder`.
-- Refetch immediately after a row-mutating write without the local projection-delay pattern (`./forms-api-pattern.md`).
+- Refetch immediately after a row-mutating write without the local projection-delay pattern (`./forms-api.md`).

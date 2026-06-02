@@ -9,12 +9,12 @@ _presentation_. Examples below use a neutral `Item` / `Category` domain and a
 
 Bundled reference:
 
-- `./examples/cooperatives.example.tsx` — a real page end-to-end (layout shell → `RemoteData` match →
+- `../examples/pages/cooperatives.example.tsx` — a real page end-to-end (layout shell → `RemoteData` match →
   composed `Future` data layer → presentational table), adapted from a production codebase.
   It imports `RemoteData` / `Future` / `Maybe` from their `@ambarltd/core/*` subpaths.
 
-For rendering a collection as a sortable/paginated table, pair this with `./table-pattern.md`;
-for building form inputs and submit handlers, see `./forms-api-pattern.md`.
+For rendering a collection as a sortable/paginated table, pair this with `./tables.md`;
+for building form inputs and submit handlers, see `./forms-api.md`.
 
 ## Audit
 
@@ -186,7 +186,7 @@ the `Ready` value is presentational and owns its own local UI state — table `p
     function ItemList({ items }: { items: Item[] }) {
       const [page, setPage] = useState(0);
       const [query, setQuery] = useState("");
-      // ...filter + render the table (see ./table-pattern.md)
+      // ...filter + render the table (see ./tables.md)
     }
 
 ## 5. Mutations use the same machine
@@ -205,7 +205,7 @@ before the call, `.fork` after.
     };
 
 Render `AlertLoading` / `AlertFailure` / `AlertSuccess` off that cell. Building the form
-inputs themselves (`useForm`, `FormInput`) is covered by `./forms-api-pattern.md`.
+inputs themselves (`useForm`, `FormInput`) is covered by `./forms-api.md`.
 
 ## Refactoring an existing page to this pattern
 
@@ -221,10 +221,10 @@ inputs themselves (`useForm`, `FormInput`) is covered by `./forms-api-pattern.md
 
 ## Cross-references
 
-- `./table-pattern.md` — when the page renders a collection as a sortable/paginated table (hand the `Ready` value to a `DataTable`).
-- `./forms-api-pattern.md` — the form inputs / submit handlers for the write flows in §5 (`api` / `call` / `Future.fork`, read-after-write projection delay).
-- `./typescript-effects.md` — `RemoteData`, `Future`, `Maybe` modeling and the `satisfies never` exhaustiveness idiom.
-- `./react-conventions.md` — named prop types, small composed children, colocated child state.
+- `./tables.md` — when the page renders a collection as a sortable/paginated table (hand the `Ready` value to a `DataTable`).
+- `./forms-api.md` — the form inputs / submit handlers for the write flows in §5 (`api` / `call` / `Future.fork`, read-after-write projection delay).
+- `../core/typescript-effects.md` — `RemoteData`, `Future`, `Maybe` modeling and the `satisfies never` exhaustiveness idiom.
+- `../core/react.md` — named prop types, small composed children, colocated child state.
 
 ## Do / Do not
 
