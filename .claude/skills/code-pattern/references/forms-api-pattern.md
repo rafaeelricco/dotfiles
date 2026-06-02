@@ -10,18 +10,20 @@ read-model-dependent work through **`useProjectionDelay`'s `schedule()`**. Examp
 
 Bundled reference (from a production codebase — `app/frontend`):
 
-- `./forms.tsx` — the form abstraction: `useForm`, `FormInput`, and the field config classes
+- `./examples/forms.example.tsx` — the form abstraction: `useForm`, `FormInput`, and the field config classes
   (`TextInput`, `TextareaInput`, `DateInput`, `ComboboxInput`, …). **Trimmed** to the public API —
   the per-field render components and internal state plumbing are omitted (noted in its header).
-- `./request.ts` — the HTTP layer: `call`, `query`, `uploadMultipart`, `stream` (each returns a
+- `./examples/api/endpoints.example.tsx` — the endpoint registry: the `api` object mapping friendly names to typed
+  `PlainEndpoint` descriptors, plus response-type re-exports. Adapted from `src/api/endpoints.ts`.
+- `./examples/api/request.example.tsx` — the HTTP layer: `call`, `query`, `uploadMultipart`, `stream` (each returns a
   `Future<FetchErrorResponse, Res>`). Verbatim.
-- `./use-projection-delay.ts` — `useProjectionDelay()` → `{ schedule, cancel }`, the read-after-write
+- `./examples/libs/use-projection-delay.example.tsx` — `useProjectionDelay()` → `{ schedule, cancel }`, the read-after-write
   delay. Verbatim.
-- `./campaigns.example.tsx` — a worked write flow (create-campaign): `useForm` config + `validate` →
+- `./examples/campaigns.example.tsx` — a worked write flow (create-campaign): `useForm` config + `validate` →
   `RemoteData` submit cell → `call(...).fork` → `schedule()` on success. Trimmed excerpt.
 
-For the page shell that hosts a form, see `../pages/pages.md`; for rendering the data a write
-mutates, `../tables/tables.md`.
+For the page shell that hosts a form, see `./page-pattern.md`; for rendering the data a write
+mutates, `./table-pattern.md`.
 
 ## Audit
 
@@ -79,7 +81,7 @@ lazy `Future` — nothing runs until `.fork`:
     );
 
 - `.chain` sequences dependent writes; `Future.parallel` / `Future.concurrently` run independent
-  ones. (`Future` vocabulary: `../pages/pages.md` §3.)
+  ones. (`Future` vocabulary: `./page-pattern.md` §3.)
 - File uploads use `uploadMultipart(endpoint, formData)` — do **not** set `Content-Type` (the
   browser adds the multipart boundary). Read side uses `query(new Query({...}))`.
 
@@ -113,17 +115,16 @@ handler with `onSubmit(cb)` — it validates first and only calls `cb(values)` w
 ## 3. Submit state (`RemoteData`)
 
 Model the write like any async state: a `RemoteData<string, T>` cell, `Loading()` before, `Failed` /
-`Ready` inside `.fork`. Guard against double-submit with a `ref`:
+`Ready` inside `.fork`. The `submit.isLoading` flag (mirrored by the disabled submit button) guards
+against double-submit:
 
     const [submit, setSubmit] = useState<RemoteData<string, Done>>(NotAsked());
-    const submittingRef = useRef(false);
 
     const handleCreate = onSubmit((values) => {
-      if (submittingRef.current || submit.isLoading) return;
-      submittingRef.current = true;
+      if (submit.isLoading) return;
       setSubmit(Loading());
       call(api.createCampaign, toRequest(values)).fork(
-        (err) => { submittingRef.current = false; setSubmit(Failed(fetchErrorToString(err))); },
+        (err) => setSubmit(Failed(fetchErrorToString(err))),
         (_res) => { schedule(() => setSubmit(Ready(done))); },   // see §4
       );
     });
@@ -157,17 +158,16 @@ and treat empty combobox selections as `null`. Cross-field rules (e.g. end-after
 
 ## Cross-references
 
-- `../pages/pages.md` — the page shell + `RemoteData` state machine hosting the form; `Future` vocab.
-- `../tables/tables.md` — rendering the collection a write mutates; refetch via the projection delay.
-- `../component-boundaries.md` — container/presentational split, exhaustive `instanceof` matching.
-- `../typescript-conventions.md` — `RemoteData` / `Future` / `Maybe` modeling, `satisfies never`.
-- `../react-conventions.md` — named prop types, small composed children, colocated state.
+- `./page-pattern.md` — the page shell + `RemoteData` state machine hosting the form; `Future` vocab.
+- `./table-pattern.md` — rendering the collection a write mutates; refetch via the projection delay.
+- `./typescript-effects.md` — `RemoteData` / `Future` / `Maybe` modeling, `satisfies never`.
+- `./react-ui.md` — named prop types, small composed children, colocated state.
 
 ## Do / Do not
 
 - Do: use `api.*` + `call` / `query` / `uploadMultipart`; handle the `Future` with `.fork` at the boundary.
 - Do: define `fields` with config classes; keep `validate` keyed to `fields` (`string | null`).
-- Do: model submit state with `RemoteData`; set `Loading()` first; guard double-submit with a ref.
+- Do: model submit state with `RemoteData`; set `Loading()` first; guard double-submit with the `submit.isLoading` flag and a disabled submit button.
 - Do: wrap success-path read-model work in `useProjectionDelay`'s `schedule(() => …)`.
 - Do not: raw `fetch` a domain command/query; add React Hook Form / Formik / Zod / a new request dep.
 - Do not: use `validate` keys that don't match `fields`; mix `@fe/*` into mobile or `@/*` into frontend.

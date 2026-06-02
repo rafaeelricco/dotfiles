@@ -14,13 +14,10 @@
  * linked-products picker, and the list/pagination view. Not wired to compile standalone.
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { FormInput, TextInput, TextareaInput, DateInput, ComboboxInput, useForm } from "@fe/components/ui/forms";
-import {
-  api,
-  type CreateCampaignResponse,
-  type ListOrgsResponse,
-} from "@fe/api/endpoints";
+import { AlertFailure } from "@fe/components/ui/alert";
+import { api, type CreateCampaignResponse, type ListOrgsResponse,} from "@fe/api/endpoints";
 import { call } from "@fe/api/request";
 import { fetchErrorToString } from "@fe/lib/request";
 import { useProjectionDelay } from "@fe/hooks/use-projection-delay";
@@ -44,23 +41,17 @@ function CreateCampaignForm({
   onCreated: () => void;
 }) {
   const [submit, setSubmit] = useState<RemoteData<string, CampaignSubmitDone>>(NotAsked());
-  const submittingRef = useRef(false);
   const { schedule } = useProjectionDelay();
 
   // Load the combobox items — same fork shape, into their own RemoteData cells.
   const [orgs, setOrgs] = useState<RemoteData<string, ListOrgsResponse>>(Loading());
+  
   useEffect(() => {
     call(api.listOrgs, { types: REFERENCEABLE_TYPES }).fork(
       err => setOrgs(Failed(fetchErrorToString(err))),
       r => setOrgs(Ready(r)),
     );
   }, []);
-
-  const supplierItems = useMemo(() => (orgs.isReady ? orgs.value.orgs.filter(o => o.type === "Supplier") : []), [orgs]);
-  const distributorItems = useMemo(
-    () => (orgs.isReady ? orgs.value.orgs.filter(o => o.type === "Distributor") : []),
-    [orgs],
-  );
 
   const { fields, onSubmit } = useForm({
     fields: {
@@ -78,7 +69,7 @@ function CreateCampaignForm({
       }),
       supplierOrgId: new ComboboxInput<ListOrgsResponse["orgs"][number]>({
         label: "Supplier",
-        items: supplierItems,
+        items: orgs.isReady ? orgs.value.orgs.filter(o => o.type === "Supplier") : [],
         defaultValue: null,
         getValue: o => o.orgId.value,
         getKey: o => o.orgId.value,
@@ -90,7 +81,7 @@ function CreateCampaignForm({
       }),
       distributorOrgId: new ComboboxInput<ListOrgsResponse["orgs"][number]>({
         label: "Distributor",
-        items: distributorItems,
+        items: orgs.isReady ? orgs.value.orgs.filter(o => o.type === "Distributor") : [],
         defaultValue: null,
         getValue: o => o.orgId.value,
         getKey: o => o.orgId.value,
@@ -113,13 +104,12 @@ function CreateCampaignForm({
       supplierOrgId: null,
       distributorOrgId: null,
       startDate: null,
-      endDate: validateEndAfterStart(values.startDate, values.endDate),
+      endDate: null,
     }),
   });
 
   const handleCreate = onSubmit(values => {
-    if (submittingRef.current || submit.isLoading) return;
-    submittingRef.current = true;
+    if (submit.isLoading) return;
     setSubmit(Loading());
     const description: RichText = { format: "Text", content: values.description };
     call(api.createCampaign, {
@@ -131,10 +121,7 @@ function CreateCampaignForm({
       supplierOrgId: values.supplierOrgId ? new Id<Org>(values.supplierOrgId) : null,
       distributorOrgId: values.distributorOrgId ? new Id<Org>(values.distributorOrgId) : null,
     }).fork(
-      err => {
-        submittingRef.current = false;
-        setSubmit(Failed(fetchErrorToString(err)));
-      },
+      err => setSubmit(Failed(fetchErrorToString(err))),
       // Success on commit; read models lag — defer the read-dependent state flip via schedule().
       (_r: CreateCampaignResponse) => {
         schedule(() => setSubmit(Ready({ name: values.name.trim() })));
@@ -152,20 +139,12 @@ function CreateCampaignForm({
       <FormInput config={fields.description} disabled={submit.isLoading} />
       <FormInput config={fields.supplierOrgId} disabled={submit.isLoading} />
       <FormInput config={fields.distributorOrgId} disabled={submit.isLoading} />
-      <div className="grid gap-4 sm:grid-cols-2">
-        <FormInput config={fields.startDate} disabled={submit.isLoading} />
-        <FormInput config={fields.endDate} disabled={submit.isLoading} />
-      </div>
-      {submit.isFailed && <p className="text-destructive text-sm">{submit.failure}</p>}
-      <button type="submit" disabled={submit.isLoading}>
-        {submit.isLoading ? "Creating…" : "Create Campaign"}
-      </button>
+      <FormInput config={fields.startDate} disabled={submit.isLoading} />
+      <FormInput config={fields.endDate} disabled={submit.isLoading} />
+      {submit instanceof Failed && <AlertFailure>{submit.error}</AlertFailure>}
+      <Button type="submit" disabled={submit.isLoading}>
+        {submit.isLoading ? <Spinner /> : "Create Campaign"}
+      </Button>
     </form>
   );
-}
-
-// Boundary helpers (verbatim from source) ----------------------------------
-function validateEndAfterStart(start: DateOnly | null, end: DateOnly | null): string | null {
-  if (!start || !end) return null;
-  return end.compare(start) < 0 ? "End date must be on or after start date." : null;
 }

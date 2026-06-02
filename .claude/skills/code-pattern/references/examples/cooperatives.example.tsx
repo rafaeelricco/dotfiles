@@ -3,7 +3,7 @@
  *
  * Source: frontend/src/pages/super_admin/cooperatives.tsx (ambar/ashraf), copied near-verbatim
  * (the RemoteData match is reordered to the canonical Ready -> Loading -> Failed -> NotAsked
- * sequence from pages.md, so the example doesn't contradict the guide).
+ * sequence from page-pattern.md, so the example doesn't contradict the guide).
  * Demonstrates: layout-shell wrapper -> a RemoteData cell fed by a Future.fork in useEffect
  * -> exhaustive `instanceof ... satisfies never` match -> container/presentational split
  * (SuperCooperatives -> Content -> CooperativesTable) -> a composed Future data layer
@@ -11,14 +11,22 @@
  * .chain for a dependent call, .map to project the field).
  */
 
-export default SuperCooperatives;
+export default SuperAdminCooperatives;
 
-import * as api from "@/ambar/api/endpoints";
 import * as React from "react";
 
-import { Cooperative, SuperSessionToken, IdCooperative, LoanInfo, Money, Member, Tier } from "@/ambar/api/types";
+import {
+  api,
+  type ListCooperativesResponse,
+  type LoansByCooperativeResponse,
+  type MembersByCooperativeResponse,
+  type TiersByCooperativeResponse,
+} from "@fe/api/endpoints";
+import { call } from "@fe/api/request";
+import { fetchErrorToString, type FetchErrorResponse } from "@fe/lib/request";
+import { Money } from "@be/lib/money";
 import { SuperSession } from "@/app/session";
-import { NotAsked, Failed, Ready, Loading } from "@ambarltd/core/remote-data";
+import { RemoteData, NotAsked, Failed, Ready, Loading } from "@ambarltd/core/remote-data";
 import { Future } from "@ambarltd/core/future";
 import { Just } from "@ambarltd/core/maybe";
 import { AlertFailure, AlertLoading } from "@/components/ui/alert";
@@ -26,16 +34,23 @@ import { SuperSidebarItem, SuperSidebarLayout } from "@/components/super_admin/s
 import { ColumnDef, ColumnsConfig, DataTable } from "@/components/ui/datatable";
 import { Link } from "@/routes";
 
-function SuperCooperatives({ session }: { session: SuperSession }) {
-  const [state, setState] = React.useState<api.Remote<CooperativeDetails[]>>(NotAsked());
+type CooperativeDetails = {
+  cooperative: ListCooperativesResponse["cooperatives"][number];
+  loans: Money;
+  members: MembersByCooperativeResponse["members"][number][];
+  tiers: TiersByCooperativeResponse["tiers"][number][];
+};
+
+function SuperAdminCooperatives({ session }: { session: SuperSession }) {
+  const [state, setState] = React.useState<RemoteData<FetchErrorResponse, CooperativeDetails[]>>(NotAsked());
 
   React.useEffect(() => {
     setState(Loading());
-    return fetchCooperatives(session.session_token).fork(
+    return fetchCooperatives().fork(
       (e) => setState(Failed(e)),
       (v) => setState(Ready(v))
     );
-  }, [session.session_token]);
+  }, []);
 
   return (
     <SuperSidebarLayout
@@ -48,7 +63,7 @@ function SuperCooperatives({ session }: { session: SuperSession }) {
       ) : state instanceof Loading ? (
         <AlertLoading>Loading…</AlertLoading>
       ) : state instanceof Failed ? (
-        <AlertFailure>{api.requestErrorToString(state.failure)}</AlertFailure>
+        <AlertFailure>{fetchErrorToString(state.failure)}</AlertFailure>
       ) : state instanceof NotAsked ? (
         <>Stuck?</>
       ) : (
@@ -118,7 +133,7 @@ function CooperativesTable({ data }: { data: CooperativeDetails[] }) {
             <Link
               to="/super/cooperatives/:cooperativeId"
               className="text-blue-600 hover:underline"
-              params={{ cooperativeId: cooperativeDetails.cooperative.cooperative_id }}
+              params={{ cooperativeId: cooperativeDetails.cooperative.cooperativeId.value }}
             >
               View
             </Link>
@@ -129,49 +144,31 @@ function CooperativesTable({ data }: { data: CooperativeDetails[] }) {
   );
 }
 
-type CooperativeDetails = {
-  cooperative: Cooperative;
-  loans: Money;
-  members: Member[];
-  tiers: Tier[];
-};
-
 function fetchLoansByCooperativeId(
-  session_token: SuperSessionToken,
-  cooperative_id: IdCooperative
-): Future<api.RequestError, LoanInfo[]> {
-  return api
-    .cooperative__loan__query__loans_by_cooperative_id({ session_token, cooperative_id })
-    .map((result) => result.loans);
+  cooperativeId: ListCooperativesResponse["cooperatives"][number]["cooperativeId"],
+): Future<FetchErrorResponse, LoansByCooperativeResponse["loans"][number][]> {
+  return call(api.loansByCooperativeId, { cooperativeId }).map((result) => result.loans);
 }
 
 function fetchMembersByCooperativeId(
-  session_token: SuperSessionToken,
-  cooperative_id: IdCooperative
-): Future<api.RequestError, Member[]> {
-  return api
-    .cooperative__member__query__members_by_cooperative_id({ session_token, cooperative_id })
-    .map((result) => result.members);
+  cooperativeId: ListCooperativesResponse["cooperatives"][number]["cooperativeId"],
+): Future<FetchErrorResponse, MembersByCooperativeResponse["members"][number][]> {
+  return call(api.membersByCooperativeId, { cooperativeId }).map((result) => result.members);
 }
 
 function fetchTiersByCooperativeId(
-  session_token: SuperSessionToken,
-  cooperative_id: IdCooperative
-): Future<api.RequestError, Tier[]> {
-  return api
-    .cooperative__tier__query__tiers_by_cooperative_id({ session_token, cooperative_id })
-    .map((result) => result.tiers);
+  cooperativeId: ListCooperativesResponse["cooperatives"][number]["cooperativeId"],
+): Future<FetchErrorResponse, TiersByCooperativeResponse["tiers"][number][]> {
+  return call(api.tiersByCooperativeId, { cooperativeId }).map((result) => result.tiers);
 }
 
-function fetchCooperatives(session_token: SuperSessionToken): Future<api.RequestError, CooperativeDetails[]> {
-  return api
-    .cooperative__cooperative__query__all({ session_token })
-    .chain((result) =>
-      Future.mapConcurrently((cooperative) => fetchCooperativeDetails(session_token, cooperative), result.cooperatives)
-    );
+function fetchCooperatives(): Future<FetchErrorResponse, CooperativeDetails[]> {
+  return call(api.listCooperatives, {}).chain((result) =>
+    Future.mapConcurrently((cooperative) => fetchCooperativeDetails(cooperative), result.cooperatives)
+  );
 }
 
-function calculateTotalLoans(loans: LoanInfo[]): Money {
+function calculateTotalLoans(loans: LoansByCooperativeResponse["loans"][number][]): Money {
   return loans.reduce(
     (total, loan) => total.add(loan.details.borrowed_amount),
     new Money(0, "MYR")
@@ -179,13 +176,19 @@ function calculateTotalLoans(loans: LoanInfo[]): Money {
 }
 
 function fetchCooperativeDetails(
-  session_token: SuperSessionToken,
-  cooperative: Cooperative
-): Future<api.RequestError, CooperativeDetails> {
-  return Future.concurrently<api.RequestError, { loans: LoanInfo[]; members: Member[]; tiers: Tier[] }>({
-    loans: fetchLoansByCooperativeId(session_token, cooperative.cooperative_id),
-    members: fetchMembersByCooperativeId(session_token, cooperative.cooperative_id),
-    tiers: fetchTiersByCooperativeId(session_token, cooperative.cooperative_id),
+  cooperative: ListCooperativesResponse["cooperatives"][number],
+): Future<FetchErrorResponse, CooperativeDetails> {
+  return Future.concurrently<
+    FetchErrorResponse,
+    {
+      loans: LoansByCooperativeResponse["loans"][number][];
+      members: MembersByCooperativeResponse["members"][number][];
+      tiers: TiersByCooperativeResponse["tiers"][number][];
+    }
+  >({
+    loans: fetchLoansByCooperativeId(cooperative.cooperativeId),
+    members: fetchMembersByCooperativeId(cooperative.cooperativeId),
+    tiers: fetchTiersByCooperativeId(cooperative.cooperativeId),
   }).map(({ loans, members, tiers }) => ({
     cooperative,
     loans: calculateTotalLoans(loans),
