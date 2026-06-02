@@ -31,11 +31,11 @@ Read only the reference selected by the touched surface. Each reference owns the
 | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
 | Types, unions, prop-as-types, entity/domain modeling, `Id<T>`, state machines, decoders/encoders/schemas, DTO parsing | `references/typescript-modeling.md` |
 | Absence (`Maybe`), errors (`Result`), async UI state (`RemoteData`), lazy async (`Future`)                            | `references/typescript-effects.md`  |
-| Styling, components, prop types, local state, layout spacing, scope, parent/child boundaries                          | `references/react-ui.md`            |
+| Styling, Tailwind utilities, `cn()`/`cva()`, layout spacing                                                           | `references/tailwind.md`            |
+| Components, prop types, local state, scope, parent/child boundaries                                                   | `references/react-conventions.md`   |
 | Forms / API / submit / `Future.fork` / read-after-write                                                               | `references/forms-api-pattern.md`   |
 | Tables / data grids / `DataTable` / columns / sorting                                                                 | `references/table-pattern.md`       |
 | Pages / screens / `RemoteData` state machine / layout shell                                                           | `references/page-pattern.md`        |
-| Plan-only output shape                                                                                                | `references/plan-output-example.md` |
 
 Worked code examples live in `references/examples/`; the pattern guides above pull them in by name.
 
@@ -48,8 +48,8 @@ Before using fast path, scan the target file for audit triggers: `match`, `switc
 Use the fast path only for local, mechanical changes:
 
 - copy/text tweaks;
-- className/layout tweaks, including applying React styling rules from `references/react-ui.md`;
-- applying an existing pattern from `references/react-ui.md` within a single file (Styling/Types swaps, etc.);
+- className/layout tweaks, including applying Tailwind styling rules from `references/tailwind.md`;
+- applying an existing pattern from `references/tailwind.md` or `references/react-conventions.md` within a single file (Styling/Types swaps, etc.);
 - moving a small local JSX fragment without changing behavior.
 
 For fast path:
@@ -79,7 +79,7 @@ Escalate to the full workflow immediately when the work touches:
 
 ### Full workflow
 
-1. Read the reference(s) selected by the routing table — the matching `references/typescript-*.md` for TS modeling/effects; `references/react-ui.md` for React/UI. Expand to a second reference when the change spans surfaces (e.g. a schema on a domain class touches both `typescript-modeling.md` and `typescript-effects.md`).
+1. Read the reference(s) selected by the routing table — the matching `references/typescript-*.md` for TS modeling/effects; `references/tailwind.md` for styling/spacing; `references/react-conventions.md` for React structure. Expand to a second reference when the change spans surfaces (e.g. a schema on a domain class touches both `typescript-modeling.md` and `typescript-effects.md`).
 2. Find 2-3 nearby pattern files in the same module to ground style decisions — only ask the user if no obvious neighbours exist.
 3. Make only the approved or mechanically implied change. Keep diffs scoped.
 
@@ -113,7 +113,7 @@ Run the audit per `references/page-pattern.md` before editing when the work touc
 ### Stop and ask
 
 - **Review-only request:** don't edit. Return findings, risks, and actionable suggestions.
-- **Plan-only request / plan mode:** don't edit. Return a concrete implementation plan (output shape in `references/plan-output-example.md`).
+- **Plan-only request / plan mode:** don't edit. Return a concrete implementation plan.
 - **Decision needed** (product/API/dependency/naming/persistence/data-model/error-handling): ask the user before editing.
 - **Local pattern conflicts with CONVENTIONS:**
   - isolated style/structure → follow nearest local pattern, scoped diff;
@@ -124,11 +124,11 @@ Run the audit per `references/page-pattern.md` before editing when the work touc
 
 - `references/typescript-modeling.md` — type-driven design, domain modeling / state machines, decoders/encoders/schemas.
 - `references/typescript-effects.md` — `Maybe`, `Result`, `RemoteData`, `Future` (absence, errors, async UI state).
-- `references/react-ui.md` — React/UI conventions (styling, layout spacing, components, prop types, local state, parent/child boundaries, scope).
+- `references/tailwind.md` — Tailwind styling and spacing (`cn()`/`cva()`, `gap-*` rhythm, theme tokens, on-demand docs lookup).
+- `references/react-conventions.md` — React structure (components, named prop types, local state, parent/child boundaries, scope).
 - `references/forms-api-pattern.md` — frontend/mobile form, submit, API call, `Future`, `RemoteData`, and read-after-write integration patterns. Pulls bundled code from `references/examples/` (`forms.example.tsx`, `api/endpoints.example.tsx`, `api/request.example.tsx`, `libs/use-projection-delay.example.tsx`, `campaigns.example.tsx`). Read when the audit applies.
 - `references/table-pattern.md` — the `DataTable` abstraction over `table.tsx` primitives, the fetch→columns→rows flow, and how to extend. Pulls bundled code from `references/examples/` (`table.example.tsx`, `datatable.example.tsx`). Read when the tables audit applies.
 - `references/page-pattern.md` — page/screen pattern: a `RemoteData` state machine fed by a `Future` data layer, wrapped in the layout shell, with a container/presentational split. Pulls a worked example from `references/examples/` (`cooperatives.example.tsx`). Read when the pages audit applies.
-- `references/plan-output-example.md` — Plan-style output example. Read when asked for plan-only output.
 
 ## Verification
 

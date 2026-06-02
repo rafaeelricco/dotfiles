@@ -146,7 +146,7 @@ Rules:
 
 - **New visual style** → add a key to the `cva` blocks (`tableVariants` / `tableHeaderVariants`)
   in `./examples/table.example.tsx`; keep `defaultVariants`. Compose through `cn()` / `cva()`, never inline
-  `style` (see `./react-ui.md`).
+  `style` (see `./tailwind.md`).
 - **New column** → add a key to `ColumnsConfig` + `columnOrder` with matching `contents`;
   give it a `sortFun` or `null`.
 - **Per-row styling** → set `variant` / `className` on the row object.
@@ -158,7 +158,8 @@ Rules:
 
 ## Cross-references
 
-- `./react-ui.md` — `cn()` / `cva()` styling, named prop types, small composed cells, parent/child boundaries.
+- `./tailwind.md` — `cn()` / `cva()` styling.
+- `./react-conventions.md` — named prop types, small composed cells, parent/child boundaries.
 - `./typescript-effects.md` — `Maybe` (optional cells), `RemoteData` (fetch state), `Future` (the request).
 - `./typescript-modeling.md` — discriminated unions (row-interaction state machines).
 - `./forms-api-pattern.md` — the data-fetching / write side feeding the table (`api` / `call` / `Future.fork`); after a write that mutates rows, refetch through the local projection-delay pattern.
