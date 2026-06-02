@@ -2,6 +2,8 @@
 
 Use this workflow when the change is not clearly local and mechanical, when an audit trigger applies, or when more than one reference surface is involved.
 
+This file owns the complete audit trigger lists. `SKILL.md` should route here from broad workflow signals instead of duplicating trigger details.
+
 ## Always
 
 1. Read the target file and nearest owning package's `package.json` before deciding whether a change is trivial.
