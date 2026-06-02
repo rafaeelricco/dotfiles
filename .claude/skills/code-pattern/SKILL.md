@@ -25,23 +25,12 @@ Before loading references, editing code, or writing review findings:
 2. Classify the task intent: implementation, refactor, polish, or review.
 3. Classify the touched surface before loading broad references.
 4. Scan the target file for audit triggers: `match`, `switch`, `.maybe`, `RemoteData`, `return null`, inline prop types, repeated child branches, `useForm`, request helpers, and post-write refetch.
-5. Decide whether fast path is allowed or full workflow applies.
+5. Decide whether the shared full workflow applies.
 6. Load only the narrowest reference(s) selected by the routing table.
 
-Use the fast path only for local, mechanical changes:
+For local, single-surface changes, read the selected reference and 1-3 nearby pattern files when local style or ownership is not already clear from the target file. Keep the diff scoped to the requested change.
 
-- copy/text tweaks;
-- className/layout tweaks, including applying Tailwind styling rules from `references/core/tailwind.md`;
-- applying an existing pattern from `references/core/tailwind.md` or `references/core/react.md` within a single file;
-- moving a small local JSX fragment without changing behavior.
-
-For fast path:
-
-1. Read only the reference selected by the routing table above. Skip the `typescript-*.md` files unless touching types/modeling or absence/errors/async; then load only the matching one.
-2. Read 1 nearby pattern file if the local pattern is obvious; read 2-3 if style is unclear.
-3. Keep the diff local and mechanical.
-
-Escalate to the full workflow immediately when the work touches:
+Read `references/workflow.md` before editing when the work touches:
 
 - exported/shared types;
 - API contracts, schemas, decoders, persistence, routes, or dependencies;
