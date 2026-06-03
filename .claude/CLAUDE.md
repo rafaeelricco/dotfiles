@@ -58,3 +58,7 @@ For multi-step tasks, state a brief plan:
 ```
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+## 5. Apply Local Code Conventions
+
+When implementing, refactoring, polishing, or reviewing TypeScript/React code in a project that uses these local abstractions — `Maybe`/`Result`/`RemoteData`/`Future`, `useForm`/`FormInput`, or a `DataTable` abstraction (the product frontend/mobile packages) — consult the `code-pattern` skill and ground the change in its references **before editing**. Routine edits are exactly when conventions slip, so don't skip this just because the task looks small.
