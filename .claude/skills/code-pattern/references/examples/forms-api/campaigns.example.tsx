@@ -111,11 +111,10 @@ function CreateCampaignForm({
   const handleCreate = onSubmit(values => {
     if (submit.isLoading) return;
     setSubmit(Loading());
-    const description: RichText = { format: "Text", content: values.description };
     call(api.createCampaign, {
       orgId,
       name: values.name.trim(),
-      description,
+      description: { format: "Text", content: values.description },
       startDate: values.startDate == null ? null : POSIX.fromLocalDateAndTime(values.startDate, UTC_MIDNIGHT, "UTC"),
       endDate: values.endDate == null ? null : POSIX.fromLocalDateAndTime(values.endDate, UTC_MIDNIGHT, "UTC"),
       supplierOrgId: values.supplierOrgId ? new Id<Org>(values.supplierOrgId) : null,
