@@ -148,6 +148,43 @@ Rules:
 - Build comparators inline (`localeCompare`, numeric subtraction) or with a `comparing` /
   `sortOn` helper; `sortFun: null` disables sorting on that column.
 
+### Cell content styling
+
+`DataTable` renders through the package's `Table` layer, so the table owns base row typography. In row `contents`, don't repeat `text-sm` / `text-xs` on plain cell wrappers just to match the table size.
+
+Good:
+
+```tsx
+<span className="text-foreground font-medium">{row.name}</span>
+<span className="text-muted-foreground tabular-nums">{row.count}</span>
+```
+
+Avoid:
+
+```tsx
+<span className="text-foreground text-sm font-medium">{row.name}</span>
+<span className="text-muted-foreground text-xs">{row.slug}</span>
+```
+
+Keep semantic/layout classes such as `text-foreground`, `text-muted-foreground`, `font-medium`, `font-mono`, `italic`, `tabular-nums`, `truncate`, `line-clamp-*`, `inline-flex`, spacing, and icon sizing.
+
+Keep explicit text sizing only when it belongs to a self-contained badge, chip, button, select trigger, or other control whose visual density is intentionally different from the row text.
+
+Compose dynamic row classes with `cn()`, not template strings.
+
+Good:
+
+```tsx
+<span className={cn("size-1.5 rounded-full", status.dotClass)} />
+<span className={cn(status.labelClass)}>{status.label}</span>
+```
+
+Avoid:
+
+```tsx
+<span className={`size-1.5 rounded-full ${status.dotClass}`} />
+```
+
 ## Row interaction
 
 - **Side effect / drawer** — set `onClick` on the row. The worked example opens a detail
@@ -184,4 +221,6 @@ Rules:
 - Re-implement sorting / pagination / empty-state per page instead of using the abstraction.
 - Hand-roll a raw `<table>` for plain tabular data, or hardcode classes instead of adding a `cva` variant.
 - Use `contents` keys that don't match `columnOrder`.
+- Add `text-sm` / `text-xs` to plain `DataTable` row `contents` when the shared table already owns base typography.
+- Compose dynamic status/style classes with template strings instead of `cn()`.
 - Refetch immediately after a row-mutating write without the local projection-delay pattern (`./forms-api.md`).
