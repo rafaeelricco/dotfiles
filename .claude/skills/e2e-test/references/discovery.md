@@ -16,19 +16,19 @@ real preconditions.
 ## Question checklist (adapt to the app — skip what's irrelevant)
 
 - **Routing / entry point** — what URL or navigation actually reaches the feature?
-  Is it a page, a modal, a step in a wizard?
+  Is it a page, a modal, a step in a wizard, or a nested tab?
 - **Auth & roles/permissions** — how do you become the role the flow needs? Is there
   an in-app switcher (a role/org widget), or does it require seeded data or a
   different login? This is the most common wrong assumption.
 - **Preconditions & data** — what must exist first (an org, a parent record, a
-  feature flag, a seed)? How is it normally created?
+  feature flag, a seed, a prior setup flow)? How is it normally created?
 - **The feature's real behavior** — read the feature's own code: the actual fields,
-  steps, validations, and success/empty states. What does "it worked" look like
-  on screen?
-- **Exact controls** — the real labels, button text, and field names to act on, so
-  the walkthrough targets what's actually rendered.
-- **Gotchas** — async/projection delays, confirmation dialogs, redirects — anything
-  that trips up a naive click-through.
+  steps, validations, loading states, and success/empty states. What does "it
+  worked" look like on screen?
+- **Exact controls** — the real labels, button text, field names, menu items, and
+  links to act on, so the walkthrough targets what's actually rendered.
+- **Gotchas** — async/projection delays, confirmation dialogs, redirects, disabled
+  states, background jobs — anything that trips up a naive click-through.
 
 ## Sub-agent prompt template
 

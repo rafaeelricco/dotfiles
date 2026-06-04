@@ -1,32 +1,34 @@
 # Output Template
 
-Always return a suggested title before the Markdown body:
+Always return a separate title before the Markdown body. Use the title to name
+the GitHub issue; do not include it inside the body.
+
+The fenced block below shows the shape only. In the final answer, return plain
+Markdown and do not wrap the whole output or body in a code fence.
 
 ```md
-Suggested title: [short, action-oriented GitHub issue title]
+Title: [short, action-oriented GitHub issue title]
 
-## Problem
+Body:
 
-[Describe the current problem objectively.]
+## Situation
 
-## Context
+[Describe what exists today and what is not working well enough.]
 
-- Origin:
-- Evidence:
-- Impact:
-- Affected scope:
+## Direction
+
+[Describe how to think about the fix and what the desired shape should look like.
+Include a small snippet only if it reduces ambiguity.]
 
 ## Acceptance Criteria
 
 - [ ] [Final-state condition 1]
 - [ ] [Final-state condition 2]
-- [ ] [Final-state condition 3]
 
 ## Validation
 
 - [ ] [Verification scenario 1]
 - [ ] [Verification scenario 2]
-- [ ] [Verification scenario 3]
 
 ## References
 

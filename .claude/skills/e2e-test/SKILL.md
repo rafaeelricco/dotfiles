@@ -79,8 +79,11 @@ If an action you need isn't in the cheat-sheet, find the tool with `ToolSearch`
 Open the URL, authenticate, then drive toward the goal in small steps. Per step:
 
 1. Snapshot the DOM/a11y tree to find real elements (don't guess selectors).
-2. Perform one action (click, fill, submit).
-3. Observe: screenshot the result, check the console and network for errors.
+2. Perform one action: click, fill, submit, navigate, or wait for the expected
+   state.
+3. Observe with the cheapest useful signal: screenshot for visual state, DOM for
+   locators, console logs for runtime errors, and network requests for 4xx/5xx
+   failures.
 4. Decide pass/fail before moving on.
 
 A flow that "looks" right but logs a 500 or a console error has failed. If a step
