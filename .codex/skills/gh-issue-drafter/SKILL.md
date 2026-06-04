@@ -30,18 +30,12 @@ completion criteria objectively testable.
 ## Operating Rules
 
 - Do not invent references, links, file paths, reviewers, or source material.
-- Return the issue title separately from the issue body.
-- Make the body start at `## Situation`.
+- Return `Title:` metadata followed by `Body:` using `references/template.md`.
+- Make the issue body start at `## Situation`.
 - Do not wrap the final output or issue body in a code fence unless the user
   explicitly asks for a fenced snippet.
-- Use `Direction` for reasoning, desired shape, and short snippets when they
-  reduce ambiguity.
 - Treat `Acceptance Criteria` as final-state truths.
 - Treat `Validation` as explicit test scenarios that prove those truths.
-- Avoid generic validation items such as "manual review completed" or "tests
-  executed".
-- Prefer validation lines in the form "When X, the system must Y" or "On action
-  X, result Y must happen".
 - Do not add extra output sections such as `Suggested Approach`, `Target Shape`,
   `Preview`, or `Tradeoffs`.
 - If the user already supplied enough detail, do not ask follow-up questions.
@@ -76,14 +70,7 @@ Always return:
 1. `Title: ...` as issue metadata.
 2. `Body:` followed by the Markdown issue body using `references/template.md`.
 
-Section expectations:
-
-- `Situation`: current state and what is not working well enough.
-- `Direction`: how to think about the fix and the desired shape.
-- `Acceptance Criteria`: checklist of conditions that must be true when the work
-  is done.
-- `Validation`: checklist of concrete verification scenarios.
-- `References`: include in the body only when the user supplied references.
+Include `References` in the body only when the user supplied references.
 
 ## Quality Bar
 
@@ -91,17 +78,6 @@ Section expectations:
 - Keep the issue specific enough that another engineer can understand what done
   looks like.
 - Do not smuggle implementation decisions into `Acceptance Criteria`.
-- Keep snippets short and only include them in `Direction`; code fences are for
-  those snippets, not for the whole issue body.
 - If the request is conceptual or structural, keep validation objective by
   checking the resulting state of the artifact, not by prescribing
   implementation steps.
-
-## Example Triggers
-
-```text
-Turn this review comment into a GitHub issue.
-I need acceptance criteria and validation for this feature.
-Structure these notes into an issue with situation, direction, and testing.
-Rewrite this issue so validation is objective.
-```
