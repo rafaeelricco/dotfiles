@@ -32,12 +32,25 @@ remains.
 ## Workflow
 1. Resolve the PR from the user-provided URL/number or current branch.
 2. Snapshot blockers: worktree state, mergeability, review feedback, and checks.
-3. Route review feedback to `$gh-address-comments` and Actions failures to
-   `$gh-fix-ci` when available.
+3. Route review feedback to `$gh-address-comments` with the Review Fix Plan
+   contract below, and Actions failures to `$gh-fix-ci` when available.
 4. Fix only validated, in-scope blockers.
 5. With approval, stage scoped files, commit, push, and re-check.
 6. Repeat until merge-ready, waiting on remote checks, or blocked by a human
    decision.
+
+## Review Fix Plan
+Before editing actionable review feedback:
+- Present a numbered entry for each actionable comment/thread or coherent
+  cluster.
+- Include the comment/problem mentioned, file/line or thread URL when
+  available, proposed solution, and planned verification.
+- Show the proposed solution as a focused diff preview or hunk-level patch
+  sketch so it is clear which change solves which comment.
+- If `$gh-address-comments` returns only summaries, expand them into this format
+  before editing.
+- If one proposed diff fixes multiple comments, list each comment it addresses
+  and why the grouped fix is coherent.
 
 ## Merge Conflicts
 If the PR is conflicted or behind base:
@@ -58,8 +71,7 @@ Use this only when `$gh-address-comments` is unavailable.
   comments, and explanation-only comments.
 - Validate each actionable thread before editing. Ask when intended behavior is
   ambiguous.
-- After an approved commit fixes a thread, reply with the 7-character commit
-  hash and resolve the thread if GitHub writes were approved.
+- Use the Review Fix Plan format before editing.
 
 ## CI Fallback
 Use this only when `$gh-fix-ci` is unavailable.
@@ -78,11 +90,17 @@ Use this only when `$gh-fix-ci` is unavailable.
 - Commit with a concise message tied to the blocker.
 - Push only after approval.
 - Re-check PR status, unresolved review threads, and CI.
+- After an approved commit and push fixes review feedback, reply to each
+  addressed comment/thread with the 7-character commit hash and the specific
+  solution. Resolve the thread only when GitHub writes were approved.
+- If one commit fixes multiple comments, reply to each with the same hash plus
+  its comment-specific solution.
 - Repeat the loop until the PR is mergeable, green, and review feedback is
   triaged, or until a blocker requires human input.
 - Emit Codex final directives only after successful staging, commits, pushes,
   or GitHub-side writes.
 
 ## Final Report
-End with PR readiness, addressed conflicts/comments/checks, skipped items,
-verification run, and any human or external blockers.
+End with PR readiness plus a compact comment-to-fix table covering
+comment/problem, solution, commit hash or reply status, verification, and any
+skipped items or blockers.
