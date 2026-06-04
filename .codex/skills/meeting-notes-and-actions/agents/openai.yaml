@@ -1,4 +1,4 @@
 interface:
   display_name: "Meeting Notes & Actions"
   short_description: "Turn meeting transcripts into notes"
-  default_prompt: "Use $meeting-notes-and-actions to turn this transcript into concise notes and action items."
+  default_prompt: "Use $meeting-notes-and-actions to turn this transcript into concise notes, action items, or a build-guide style recap."
