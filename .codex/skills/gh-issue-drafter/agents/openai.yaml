@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub Issue Drafter"
+  short_description: "Draft structured GitHub issue bodies"
+  default_prompt: "Use $gh-issue-drafter to turn these notes into a structured GitHub issue."
