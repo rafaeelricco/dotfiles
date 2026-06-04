@@ -3,19 +3,20 @@
 ## Example 1: Add city filter
 
 ```md
-Suggested title: Add city filter to the customer list
+Title: Add city filter to the customer list
 
-## Problem
+Body:
+
+## Situation
 
 The customer list does not support filtering by city, which makes it harder to locate customers
 from a specific location quickly.
 
-## Context
+## Direction
 
-- Origin: feature gap identified while using the customer list.
-- Evidence: the page currently supports filtering by name and status, but not by city.
-- Impact: users must scan large result sets manually to find customers from a given city.
-- Affected scope: customer list screen and the search/filter behavior behind it.
+Add city as a first-class filter that behaves consistently with the existing name and status
+filters. It should combine with existing filters, clear independently, and use the current empty
+state when no customers match.
 
 ## Acceptance Criteria
 
@@ -34,20 +35,43 @@ from a specific location quickly.
 
 ## Example 2: Standardize duplicated model content
 
-```md
-Suggested title: Consolidate shared authentication and account-management model rules
+````md
+Title: Consolidate shared authentication and account-management model rules
 
-## Problem
+Body:
+
+## Situation
 
 Authentication and account-management rules are duplicated across multiple portal models, which
 creates inconsistencies and makes universal user needs appear role-specific.
 
-## Context
+## Direction
 
-- Origin: review comment raised on a portal-specific account-management model.
-- Evidence: password rules and profile-management behavior are repeated independently across multiple models.
-- Impact: duplicated documentation increases drift risk and weakens the shared source of truth.
-- Affected scope: shared auth/account-management concepts and portal-specific mental models that currently restate them.
+Move shared rules into one canonical model and leave only portal-specific deviations in each
+portal model.
+
+Current shape:
+
+```md
+Customer portal auth model
+- Password rules
+- Profile management
+
+Operator portal auth model
+- Password rules
+- Profile management
+```
+
+Desired shape:
+
+```md
+Shared auth model
+- Password rules
+- Profile management
+
+Portal models
+- Role- or platform-specific deviations only
+```
 
 ## Acceptance Criteria
 
@@ -62,15 +86,4 @@ creates inconsistencies and makes universal user needs appear role-specific.
 - [ ] Portal-specific models must reference the shared source for common auth and account-management behavior.
 - [ ] Portal-specific models must preserve only deviations that are unique to that portal or platform.
 - [ ] Terminology for profile and password-management behavior must remain consistent across all affected models.
-```
-
-## Example 3: Rewrite a partial issue
-
-If the user sends a mixed draft where `Problem`, `Acceptance Criteria`, and `Validation` are blended
-together, separate them by asking:
-
-- what is the current problem
-- what must be true when the work is done
-- how someone will verify that outcome
-
-Then rewrite the issue without adding unsupported details.
+````
