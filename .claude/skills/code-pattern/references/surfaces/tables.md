@@ -10,6 +10,7 @@ Bundled reference (verbatim from a production codebase):
 
 - `../examples/tables/table.example.tsx` — headless primitives (`Table`, `TableHeader`, `TableRow`, `TableHead`, `TableCell`, …) with `cva` variants.
 - `../examples/tables/datatable.example.tsx` — the `DataTable<T, C>` abstraction (`DataTable`, `ColumnDef`, `ColumnsConfig`).
+- `../examples/tables/datatable-usage.example.tsx` — worked usage patterns: basic rows, rich cells, actions, selection, default sort/fixed layout, and conditional columns.
 
 ## Table of contents
 
@@ -19,6 +20,7 @@ Bundled reference (verbatim from a production codebase):
 - [End-to-end pattern](#end-to-end-pattern)
 - [Fetch and unwrap](#fetch-and-unwrap-top-component)
 - [Columns + DataTable](#columns--datatable-table-component)
+- [Common DataTable patterns](#common-datatable-patterns)
 - [Row interaction](#row-interaction)
 - [Extending the abstraction](#extending-the-abstraction)
 - [Cross-references](#cross-references)
@@ -185,6 +187,21 @@ Avoid:
 <span className={`size-1.5 rounded-full ${status.dotClass}`} />
 ```
 
+### Common DataTable patterns
+
+Use `../examples/tables/datatable-usage.example.tsx` when a table needs more than plain text cells.
+
+Patterns covered:
+
+- **Basic** — sortable and non-sortable `ColumnDef`s, pagination, `emptyMessage`, and row `onClick`.
+- **Rich cells** — JSX `contents`, icons, status dot + label composed with `cn()`, and semantic cell classes without row-level `text-sm` / `text-xs`.
+- **Actions** — buttons or links inside clickable rows must call `event.stopPropagation()` so the row click does not also fire.
+- **Selection** — for simple local selection, keep `selectedId` in the table component and set `row.className` with `cn()`.
+- **Default sort + fixed layout** — use `defaultSort`, `isTableFixed`, stable date/numeric comparators, and `title` on long truncated content when useful.
+- **Conditional columns** — define all possible columns in `columns`, then derive `columnOrder` from local state.
+
+Prefer these patterns before extending `DataTable`. Extend the abstraction only when the behavior must be shared across multiple real call sites.
+
 ## Row interaction
 
 - **Side effect / drawer** — set `onClick` on the row. The worked example opens a detail
@@ -192,6 +209,11 @@ Avoid:
   in the child.
 - **Navigation** — render a `<Link>` inside a cell's `contents` (typed router) rather than
   `onClick`.
+- **Actions inside clickable rows** — buttons, links, menus, and other nested controls must call
+  `event.stopPropagation()` in their own handlers so the row's `onClick` does not also run.
+- **Selection highlight** — for simple single-row selection, keep selected id in local state and
+  use `row.className: cn(selected && "...")`; do not add selection API surface unless multiple
+  tables need the same behavior.
 
 ## Extending the abstraction
 
