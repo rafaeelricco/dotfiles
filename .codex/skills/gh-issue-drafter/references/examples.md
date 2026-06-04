@@ -54,10 +54,12 @@ Current shape:
 
 ```md
 Customer portal auth model
+
 - Password rules
 - Profile management
 
 Operator portal auth model
+
 - Password rules
 - Profile management
 ```
@@ -66,10 +68,12 @@ Desired shape:
 
 ```md
 Shared auth model
+
 - Password rules
 - Profile management
 
 Portal models
+
 - Role- or platform-specific deviations only
 ```
 

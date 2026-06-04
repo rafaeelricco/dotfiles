@@ -14,6 +14,7 @@ Keep a PR merge-ready by fixing only in-scope blockers and reporting what
 remains.
 
 ## Core Rules
+
 - Work from a concrete PR: user URL/number or current branch via local
   `git`/`gh`.
 - Keep changes tied to PR scope. Do not fix unrelated code, change CI workflows
@@ -30,6 +31,7 @@ remains.
   protected branch settings unless explicitly asked.
 
 ## Workflow
+
 1. Resolve the PR from the user-provided URL/number or current branch.
 2. Snapshot blockers: worktree state, mergeability, review feedback, and checks.
 3. Route review feedback to `$gh-address-comments` with the Review Fix Plan
@@ -40,7 +42,9 @@ remains.
    decision.
 
 ## Review Fix Plan
+
 Before editing actionable review feedback:
+
 - Present a numbered entry for each actionable comment/thread or coherent
   cluster.
 - Include the comment/problem mentioned, file/line or thread URL when
@@ -53,7 +57,9 @@ Before editing actionable review feedback:
   and why the grouped fix is coherent.
 
 ## Merge Conflicts
+
 If the PR is conflicted or behind base:
+
 - Prefer the repository's normal update path when obvious; otherwise ask whether
   to merge the latest base into the PR branch.
 - Resolve conflicts only when both branch and base intent are clear.
@@ -63,7 +69,9 @@ If the PR is conflicted or behind base:
   approves that exact operation.
 
 ## Review Fallback
+
 Use this only when `$gh-address-comments` is unavailable.
+
 - Inspect unresolved, non-outdated review threads first.
 - Read only the comment body plus the minimum file, line, and URL context needed
   to act.
@@ -74,7 +82,9 @@ Use this only when `$gh-address-comments` is unavailable.
 - Use the Review Fix Plan format before editing.
 
 ## CI Fallback
+
 Use this only when `$gh-fix-ci` is unavailable.
+
 - Inspect failing checks and logs before proposing code changes.
 - Treat non-GitHub Actions providers as report-only unless the user explicitly
   asks to investigate them.
@@ -86,6 +96,7 @@ Use this only when `$gh-fix-ci` is unavailable.
   re-check remote status after pushing.
 
 ## Write Loop
+
 - Stage only files that belong to the current fix.
 - Commit with a concise message tied to the blocker.
 - Push only after approval.
@@ -101,6 +112,7 @@ Use this only when `$gh-fix-ci` is unavailable.
   or GitHub-side writes.
 
 ## Final Report
+
 End with PR readiness plus a compact comment-to-fix table covering
 comment/problem, solution, commit hash or reply status, verification, and any
 skipped items or blockers.
