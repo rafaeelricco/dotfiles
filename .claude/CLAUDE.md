@@ -62,3 +62,15 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ## 5. Apply Local Code Conventions
 
 When implementing, refactoring, polishing, or reviewing TypeScript/React code in a project that uses these local abstractions — `Maybe`/`Result`/`RemoteData`/`Future`, `useForm`/`FormInput`, or a `DataTable` abstraction (the product frontend/mobile packages) — consult the `code-pattern` skill and ground the change in its references **before editing**. Routine edits are exactly when conventions slip, so don't skip this just because the task looks small.
+
+## 6. Plan Mode: Show the Code
+
+**Every plan must let me review real code, not just prose.**
+
+When in plan mode, before calling ExitPlanMode, the plan file must include:
+
+- Detailed, file-by-file diffs of the proposed changes — use ```diff fenced blocks with `-`/`+` lines.
+- A concrete code preview of new or changed functions/blocks, not just a description of them.
+- The exact files and locations touched, referenced as `path:line`.
+
+Do this every time — even for small or "obvious" changes. I want to read the actual code I'm approving.

@@ -1,236 +1,170 @@
 ---
 name: pr-generate-description
 description: >
-  Generates structured pull request descriptions from git diffs via an interactive questionnaire.
-  Use this skill REQUIRED before opening or creating any GitHub pull request — including when
-  the user or agent will run gh pr create, gh pr edit --body, or says create/open/submit a PR,
-  open a pull request, ready for review, ship this branch, merge request, or compare branches
-  for review — even if they never say "PR description". Also trigger for describe my changes,
-  write the PR, PR body, PR summary, PR template, generate PR, document changes for code review,
-  or refresh an existing PR description after substantive commits. Prefer this skill over
-  improvising PR bodies from scratch. Interactive: asks motivation and formatting preferences first.
+  Generate structured pull request descriptions from git diffs through an
+  interactive questionnaire. Use this skill before opening, creating, or
+  updating any GitHub pull request body, including when the user or agent will
+  run gh pr create, gh pr edit --body, create/open/submit a PR, open a pull
+  request, mark ready for review, ship this branch, compare branches for review,
+  describe changes, write the PR body, refresh an existing PR description, or
+  document changes for code review. Always ask the user for motivation first.
 ---
 
 # PR Description Generator
 
-## When to use (mandatory)
+Generate comprehensive pull request descriptions by analyzing code changes and
+asking the user for the motivation. The diff can explain what changed; the user
+must provide why it matters.
 
-Load and follow this skill before any of these unless the user explicitly opts out:
+## Mandatory Use
 
-- Creating or opening a pull request (`gh pr create`, GitHub UI, or equivalent)
-- Writing or updating PR description/body text
-- User asks to "create PR", "open PR", "submit for review", or similar
+Load and follow this skill before any of these unless the user explicitly opts
+out:
 
-Do not draft PR descriptions from memory alone when the above applies.
+- Creating or opening a pull request through the GitHub UI or `gh pr create`.
+- Writing or updating PR description/body text.
+- Handling prompts like "create PR", "open PR", "submit for review", "ship this
+  branch", "describe my changes", or "write the PR body".
 
-Generate comprehensive, well-structured Pull Request descriptions by analyzing code changes and collaborating with the user through an interactive questionnaire.
+Do not draft PR descriptions from memory alone when this skill applies.
 
-## Core Philosophy
+## Workflow
 
-> "The LLM can say the **what**. But the **why** is with us."
+1. Detect git context: branch, base branch, diff, and PR state.
+2. Analyze all changes into grouped categories.
+3. Ask the mandatory motivation question.
+4. Ask the structured formatting questions with `AskUserQuestion`.
+5. Generate the PR description from `references/template.md`.
+6. Deliver the body according to whether a PR exists or will be created now, then
+   suggest title options.
 
-The motivation section is always requested from the user — never auto-generated. The tool analyzes code to describe _what_ changed and _how_, but the human provides the _why_.
+## 1. Detect Git Context
 
-## Workflow Overview
-
-```
-1. Detect git context (branch, base branch, diff)
-2. Analyze all changes
-3. Ask the user the interactive questionnaire
-4. Generate the PR description following the template
-5. Deliver description (save pr-description.markdown only if no PR exists and PR is not being created now), then suggest title options
-```
-
-## Step 1: Detect Git Context
-
-Run these commands to understand the repository state:
+Run:
 
 ```bash
-# Current branch
 git rev-parse --abbrev-ref HEAD
-
-# Detect base branch (main or master)
 git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main"
-
-# Commits unique to this branch
-git log --oneline <base_branch>..HEAD
-
-# Full diff (stat + patch)
-git diff <base_branch>...HEAD --stat
-git diff <base_branch>...HEAD
+git log --oneline BASE_BRANCH..HEAD
+git diff BASE_BRANCH...HEAD --stat
+git diff BASE_BRANCH...HEAD
 ```
 
-If no git repo is found or the diff is empty, inform the user and ask them to provide context manually.
+If no git repo is found or the diff is empty, inform the user and ask them to
+provide context manually.
 
-### PR state (required before Step 5)
-
-Determine whether a PR already exists for the current branch:
+Determine whether a PR already exists for the current branch before delivery:
 
 ```bash
-# Prefer GitHub CLI when available
 gh pr view --json number,url,state 2>/dev/null
-# Fallback if view fails
 gh pr list --head "$(git rev-parse --abbrev-ref HEAD)" --state all --json number,url,state
 ```
 
-- If a PR is found → treat as **PR exists** (do not save a draft file by default).
-- If `gh` is unavailable or commands fail → assume **no PR** unless the user says one is already open.
-- Record whether the user or current task intends to **create the PR in this session** (e.g. "create PR", "open pull request", or agent is running `gh pr create` next).
+- If a PR exists, do not save a draft file by default.
+- If `gh` is unavailable or fails, assume no PR exists unless the user says one
+  is already open.
+- Record whether the current task intends to create the PR in this session.
 
-## Step 2: Analyze Changes
+## 2. Analyze Changes
 
 From the diff, extract:
 
-1. **Files changed** — group by directory/module
-2. **Categories** — cluster related changes into logical groups (see `references/categories.md`)
-3. **Technical details** — for each category, list specific implementation details following the pattern: `[What] + [Technical detail] + [Purpose/Constraint]`
-4. **Architecture changes** — identify any new patterns, tools, libraries, or flow changes that benefit from a Mermaid diagram
+1. Files changed, grouped by directory or module.
+2. Categories, using `references/categories.md`.
+3. Technical details for each category in the pattern: what changed, technical
+   detail, and purpose or constraint.
+4. Architecture or flow changes that would benefit from a Mermaid diagram.
 
-Keep this analysis internal — do not dump raw analysis to the user. Use it to power the questionnaire and final output.
+Keep this analysis internal. Use it to power the questionnaire and final output.
 
-## Step 3: Interactive Questionnaire
+For very large diffs, focus on `--stat` and file-level summaries, warn the user,
+and offer to focus on specific directories.
 
-**CRITICAL**: Use the `ask_user_input_v0` tool for structured questions. Ask all questions in a single interaction when possible to avoid excessive back-and-forth.
+## 3. Ask the Questionnaire
 
-Present the following questions to the user:
+Ask the motivation first in prose and wait for the user:
 
-### Required Questions
-
-**Q1 — Motivation (always open-ended, always first)**
-Ask in prose (not via the widget since this requires a free-text answer):
-
-> "What is the motivation or the **why** behind this PR? Briefly describe the problem it solves or the goal it achieves."
-
-Wait for the user's free-text response. This is **mandatory** and must never be auto-generated.
-
-### Structured Questions (via `ask_user_input_v0`)
-
-After receiving the motivation, present these via the interactive widget:
-
-**Q2 — Demo Video**
-
-- "No video"
-- "Add placeholder `[video_url]`"
-- "I'll provide the URL now"
-
-**Q3 — Mermaid Diagram** (only ask if architecture changes were detected in Step 2)
-
-- "Yes, generate diagram"
-- "No"
-
-**Q4 — Changed Files Table**
-
-- "Off (default)"
-- "On"
-
-**Q5 — Writing Style**
-
-- "Concise (default)"
-- "Standard"
-- "Verbose"
-
-**Q6 — Desired Sections** (multi-select, pre-select based on what's relevant)
-
-- "Motivation"
-- "Demo Video"
-- "What's New"
-- "Architecture Flow (Mermaid)"
-- "Changed Files Table"
-- "Additional Setup for Run Locally"
-- "Testing & Feedback"
-
-If the user selected "I'll provide the URL now" for Q2, ask them to paste the URL.
-
-## Step 4: Generate the PR Description
-
-Read `references/template.md` for the output structure. Then compose the PR description following these rules:
-
-### Writing Style Modes
-
-- **Concise** (default): Bullet points are terse, technical, no filler. Each bullet is 1 line. Minimal prose.
-- **Standard**: Bullet points are 1-2 sentences. Brief context on _why_ for non-obvious items.
-- **Verbose**: Detailed explanations, 2-3 sentences per bullet. Include rationale and trade-offs.
-
-### Section Rules
-
-1. **Motivation**: Use the user's exact words. You may lightly clean up grammar/formatting but never rewrite the intent. Always the first section.
-
-2. **Demo Video**: Include only if user opted in. Use their URL or the placeholder `[video_url]`.
-
-3. **What's New**: Group changes into categories. Read `references/categories.md` for grouping guidance. Follow the pattern from the examples in `examples/`. Each category is a bold heading with bullet points underneath. Use inline code formatting for function names, file names, types, and technical terms.
-
-4. **Architecture Flow (Mermaid)**: Only include if the user opted in AND meaningful architecture/flow changes exist. Use `graph TD` for top-down flows. Follow Mermaid best practices from `references/mermaid-guide.md`. Keep depth ≤ 12 nodes. Use descriptive labels and highlight key nodes with `style` directives.
-
-5. **Changed Files Table**: Only if user opted in. Format:
-
-   ```markdown
-   | File              | Change Type | Summary           |
-   | ----------------- | ----------- | ----------------- |
-   | `path/to/file.ts` | Added       | Brief description |
-   ```
-
-6. **Additional Setup for Run Locally**: Only include if the diff introduces new infrastructure dependencies (databases, services, env vars, etc.) that require local setup.
-
-7. **Testing & Feedback**: Always include. List specific areas reviewers should focus on. End with: "If you find any bugs or have recommendations for improvements, please open an issue and assign it to me."
-
-### Formatting Rules
-
-- Use `##` for top-level sections
-- Use `**Bold Text**` for category names within "What's New"
-- Use inline backticks for code references: functions, files, types, variables
-- Use tables only for structured data (store interfaces, action lists, file lists)
-- Do not use Markdown horizontal rules (`---`) as section dividers in generated PR descriptions
-- No watermarks, no "Generated by" footers, no emojis
-- Language: Match the language of the codebase/PR. If the repo is in English, write in English. If ambiguous, default to English.
-
-## Step 5: Deliver, Save (if needed), and Suggest Title
-
-1. **Decide how to deliver** (use PR state from Step 1):
-
-   **A — PR will be created in this session** (user asked, or next step is `gh pr create`):
-   - Do **not** write `pr-description.markdown`.
-   - Pass the description to GitHub via `gh pr create --title "..." --body "..."` or `--body-file` (stdin/temp file is fine; delete temp file after).
-   - If the user only wanted a description for an automated create, present a one-line confirmation with the title used.
-
-   **B — PR already exists** for this branch:
-   - Do **not** write `pr-description.markdown` by default.
-   - Present the full description in the response.
-   - Offer to update the open PR with `gh pr edit --body "..."` only if the user asks.
-
-   **C — No PR yet, and not creating one now** (default draft path):
-   - Write the description to `pr-description.markdown` in the repository root.
-   - Tell the user the path and that they can paste it when opening the PR.
-
-2. **Present output**: In all cases, show the description (or confirm file path / PR URL). Never leave the user without the text in chat when a file was skipped.
-
-3. Suggest a plain, descriptive PR title (no conventional-commit prefix):
-   - Format: short imperative or descriptive phrase (e.g. `Add LangChain agent with streaming and property search`)
-   - Do **not** use `type(scope):` prefixes such as `feat(frontend):`, `fix:`, or `chore:`
-   - Keep under 72 characters
-   - Provide 2-3 title options for the user to choose from
-   - Use conventional-commit style (`type(scope): description`) only if the user explicitly requests it or repo contributing docs require it
-
-Example suggestions:
-
+```text
+What is the motivation or the why behind this PR? Briefly describe the problem it solves or the goal it achieves.
 ```
-1. Add LangChain agent with streaming and property search
-2. Integrate LangChain agent architecture with SSE streaming
-3. Implement AI chatbot with vector search and real-time streaming
-```
+
+This is mandatory and must never be auto-generated.
+
+After receiving motivation, ask these formatting decisions with `AskUserQuestion`:
+
+- Demo Video: no video, add placeholder `[video_url]`, or user will provide URL.
+- Mermaid Diagram: ask only if architecture changes were detected.
+- Changed Files Table: off by default or on.
+- Writing Style: concise by default, standard, or verbose.
+- Desired Sections: Motivation, Demo Video, What's New, Architecture Flow,
+  Changed Files Table, Additional Setup for Run Locally, Testing & Feedback.
+
+If the user chooses to provide a video URL, ask them to paste it.
+
+## 4. Generate the PR Description
+
+Read `references/template.md` first, then consult:
+
+- `references/categories.md` for grouping guidance.
+- `references/mermaid-guide.md` when generating a Mermaid diagram.
+- `examples/` when a nearby style example would help.
+
+Writing style:
+
+- Concise: terse technical bullets, one line each, minimal prose.
+- Standard: one or two sentences per bullet with brief context when useful.
+- Verbose: two or three sentences per bullet with rationale and tradeoffs.
+
+Section rules:
+
+- Motivation: use the user's words. Light grammar cleanup is allowed; do not
+  rewrite the intent.
+- Demo Video: include only if the user opted in.
+- What's New: group changes into category headings with bullets underneath.
+- Architecture Flow: include only if the user opted in and meaningful flow
+  changes exist. Use Mermaid `graph TD` and keep diagrams small.
+- Changed Files Table: include only if the user opted in.
+- Additional Setup for Run Locally: include only if the diff introduces new
+  infrastructure dependencies, services, env vars, or local setup.
+- Testing & Feedback: always include concrete reviewer focus areas and end with:
+  "If you find any bugs or have recommendations for improvements, please open an
+  issue and assign it to me."
+
+Formatting:
+
+- Use `##` for top-level sections.
+- Use bold category names within What's New.
+- Use inline backticks for code references.
+- Use tables only for structured data.
+- Do not use horizontal rules as section dividers.
+- Do not include watermarks, generated-by footers, or emojis.
+- Write in the language of the codebase or PR. Default to English when unclear.
+
+## 5. Deliver and Suggest Title
+
+Choose delivery based on PR state:
+
+- PR will be created in this session: do not write `pr-description.markdown`.
+  Pass the description to `gh pr create` via `--body-file`.
+- PR already exists: do not write `pr-description.markdown` by default. Present
+  the full description in chat and update with `gh pr edit --body` only if the
+  user asks.
+- No PR exists and the user only asked for a draft description: write
+  `pr-description.markdown` in the repository root, then also show the
+  description in chat.
+
+Suggest 2 or 3 plain PR titles:
+
+- No conventional-commit prefix unless the user or repo requires it.
+- Keep each title under 72 characters.
+- Use short imperative or descriptive wording.
 
 ## Error Handling
 
-- **No git repo**: "I couldn't detect a git repository. Could you tell me which directory your project is in, or describe the changes you'd like documented?"
-- **Empty diff**: "The diff between your branch and the base branch is empty. Are you on the right branch? You can also paste a diff or describe changes manually."
-- **No base branch**: Try `main`, then `master`, then ask the user.
-- **Very large diff (>5000 lines)**: Focus on the `--stat` summary and file-level analysis. Warn the user that the diff is large and the description may miss fine details. Offer to focus on specific directories.
-- **gh unavailable**: Skip PR detection; default to path C (save `pr-description.markdown`) unless the user states a PR is already open or will be created automatically.
-
-## Reference Files
-
-- `references/template.md` — The output template structure
-- `references/categories.md` — How to categorize and group changes
-- `references/mermaid-guide.md` — Mermaid diagram best practices
-- `examples/` — Real PR description examples for style reference
-
-When generating, always read `references/template.md` first, then consult other references as needed.
+- No git repo: ask for the project directory or manual change context.
+- Empty diff: ask whether the user is on the right branch or wants to provide
+  context manually.
+- No base branch: try `main`, then `master`, then ask the user.
+- Very large diff: use stat and file-level analysis; offer focus areas.
+- `gh` unavailable: skip PR detection and use the no-PR draft path unless the
+  user states otherwise.
