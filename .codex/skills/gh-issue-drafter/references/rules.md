@@ -1,25 +1,29 @@
 # Section Rules
 
-## Suggested title
+## Title
 
 - Keep it short and GitHub-friendly.
 - Prefer a direct verb or outcome.
 - Avoid implementation detail in the title unless the user already framed it that way.
+- Return it as separate metadata before `Body:`.
+- Do not include it in the Markdown issue body.
+- Do not wrap the final output or issue body in a code fence.
 
-## Problem
+## Situation
 
 - State the current issue, gap, inconsistency, or missing behavior.
 - Keep it observable and objective.
 - Do not include proposed solutions.
+- Include only context needed to understand the current state.
 
-## Context
+## Direction
 
-Use concise bullets. Include only what the user provided or what is directly implied by the request.
-
-- `Origin`: where this came from, such as a review comment, user pain, bug report, or request.
-- `Evidence`: current behavior, examples, or artifacts that show the problem exists.
-- `Impact`: why this matters operationally, conceptually, or for users.
-- `Affected scope`: screens, workflows, models, systems, or files involved.
+- Explain how to think about the fix or what shape the outcome should have.
+- Include small before/after snippets, pseudo-diffs, or API shapes only when they reduce ambiguity.
+- Keep snippets short; do not turn this section into a full implementation.
+- Use code fences only for snippets inside `Direction`, not for the whole body.
+- Mention tradeoffs only when they are essential to prevent a wrong implementation.
+- Do not create separate `Target Shape`, `Preview`, `Tradeoffs`, or `Suggested Approach` sections.
 
 ## Acceptance Criteria
 
@@ -60,3 +64,4 @@ Bad:
 
 - Include only real references from the user or inspected materials.
 - Do not fabricate links, paths, PRs, or issue IDs.
+- Omit the entire section when no references were supplied.
