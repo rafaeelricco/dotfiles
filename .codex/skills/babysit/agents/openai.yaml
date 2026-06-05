@@ -1,4 +1,0 @@
-interface:
-  display_name: "Babysit PR"
-  short_description: "Keep pull requests merge-ready"
-  default_prompt: "Use $babysit to keep the current pull request merge-ready by resolving actionable feedback and CI issues."
