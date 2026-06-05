@@ -1,4 +1,0 @@
-interface:
-  display_name: "PR Description"
-  short_description: "Draft structured pull request descriptions"
-  default_prompt: "Use $pr-generate-description to write a pull request description from my current git diff."

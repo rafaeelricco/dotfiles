@@ -1,4 +1,0 @@
-interface:
-  display_name: "Create PR"
-  short_description: "Publish local changes as a GitHub PR"
-  default_prompt: "Use $create-pr to publish my current branch as a draft pull request."
