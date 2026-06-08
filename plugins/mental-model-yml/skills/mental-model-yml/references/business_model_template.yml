@@ -1,0 +1,59 @@
+# =============================================================================
+# BUSINESS MENTAL MODEL TEMPLATE
+# =============================================================================
+# This template is used to describe core business concepts, operational
+# workflows, and strategic foundations. It is optimized to be the "Source of Truth"
+# for both humans and AI models working on the project.
+# =============================================================================
+
+id: "MM-XX" # Unique identifier following the pattern MM-Number
+title: "Business Concept or Operational Flow Name"
+status: "draft" # draft | in-review | approved
+
+dependencies:
+  depends_on: [] # Models this concept builds upon (e.g., ["MM1"])
+  feeds_into: [] # Models that require this concept to make sense (e.g., ["MM3", "MM-UI-AUTH"])
+
+context: |
+  THE WHY: Explains the high-level business motivation, market reality, or 
+  fundamental problem this model addresses.
+  Example: "External factors beyond Hart's control that shape how it operates — 
+  the US beverage alcohol supply chain, regulatory landscape, and labor market."
+
+scope:
+  in_scope:
+    - "Specific boundaries of what this model covers"
+    - "Example: The three-tier distribution system and its impact on marketing."
+    - "Example: The definition of 'Educator' within the gig economy."
+  out_of_scope:
+    - "What is explicitly excluded to prevent overlap with other models."
+    - "Example: Hart's internal workflows."
+    - "Example: SaaS Platform UI specifics."
+
+key_concepts:
+  - term: "Domain-Specific Term"
+    definition: "Clear, unambiguous definition of the term within this business context."
+  - term: "Three-tier system"
+    definition: "Legally mandated US alcohol distribution: Supplier → Distributor → Retailer. Hart operates adjacent to this, not within it."
+
+core_content:
+  - section_title: "Thematic Area (e.g., Economic Factors, Workflow Steps)"
+    points:
+      - "Factual statement or business rule."
+      - "Another related point."
+      - "Example: Hart sits between marketing budgets and retail execution, charging clients by the hour."
+
+  - section_title: "Another Thematic Area"
+    points:
+      - "Points should be concise and declarative."
+      - "Avoid UI decisions here; focus on how the business operates."
+
+assumptions:
+  - "Premises believed to be true that underpin this model."
+  - "Example: The three-tier system will remain legally mandated for the foreseeable future."
+  - "Example: Educators remain classified as W-2 employees."
+
+implications:
+  - "THE 'SO WHAT?': Actionable consequences this business reality has on product or technical architecture."
+  - "Example: The platform's compliance layer must be state-scoped, not global."
+  - "Example: Offline-first data capture is a non-negotiable architectural constraint due to retail 'dead zones'."

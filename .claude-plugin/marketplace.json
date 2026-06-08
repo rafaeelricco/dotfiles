@@ -1,0 +1,217 @@
+{
+  "name": "r1cco-skills",
+  "owner": {
+    "name": "Rafael Ricco"
+  },
+  "description": "Rafael Ricco's Claude Code skills packaged for individual installation.",
+  "plugins": [
+    {
+      "name": "babysit",
+      "source": "./plugins/babysit",
+      "description": "Keep a GitHub pull request merge-ready by triaging merge conflicts, unresolved review feedback, actionable PR comments, and CI failures in a loop. Use when the user asks to babysit this PR, keep this PR merge-ready, triage PR comments and CI, resolve actionable review feedback, watch CI until mergeable, or get a PR ready to merge.",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": [
+        "skill"
+      ]
+    },
+    {
+      "name": "caveman",
+      "source": "./plugins/caveman",
+      "description": "Ultra-compressed communication mode. Cuts token usage ~75% by dropping filler, articles, and pleasantries while keeping full technical accuracy. Use when user says \"caveman mode\", \"talk like caveman\", \"use caveman\", \"less tokens\", \"be brief\", or invokes /caveman.",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": [
+        "skill"
+      ]
+    },
+    {
+      "name": "code-pattern",
+      "source": "./plugins/code-pattern",
+      "description": "Apply this project's TypeScript and React conventions whenever implementing, refactoring, polishing, or reviewing any component, hook, page, form, table, store, service, or data flow — consult it BEFORE writing or editing such code, even when the task looks routine and the user never says \"conventions\" or \"patterns\". It owns the local standards for typing, domain modeling, async and UI state, forms and API calls, tables, styling, and component structure, and how to turn them into review findings. Reinforcing signals: Maybe, Result, RemoteData, Future, ts-pattern, discriminated unions, decoders/schemas, useForm, FormInput, DataTable, ColumnDef, cn()/cva(), named prop types, container/presentational split, and read-after-write projection delays.",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": [
+        "skill"
+      ]
+    },
+    {
+      "name": "create-pr",
+      "source": "./plugins/create-pr",
+      "description": "Create and open GitHub pull requests from local repository changes. Use this skill when the user asks to create PR, open PR, abrir PR, criar pull request, ship this branch, ready for review, publish local changes as a pull request, or invokes /create-pr. The skill inspects branch state and diffs, asks before branch, staging, commit, push, base branch, assignee, or ready/draft decisions, requires pr-generate-description before PR creation, pushes with git, and creates the PR with gh.",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": [
+        "skill"
+      ]
+    },
+    {
+      "name": "e2e-test",
+      "source": "./plugins/e2e-test",
+      "description": "Run a guided end-to-end test of a running web app after a feature is finished or any time you need to validate real behavior in a browser. Use whenever the user finishes building or changing a feature, or asks to test the app E2E, smoke-test it, click through the UI, verify a flow works end-to-end, check the happy path, or confirm a change works in a real browser — even if they don't say \"E2E\". The skill first discovers how the app actually works from its codebase and the conversation, then interviews for where the app is running, whether to drive it with Claude Preview or Claude in Chrome, and the login credentials, then walks the app toward the goal and reports pass/fail with screenshots, console errors, and failed network calls.",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": [
+        "skill"
+      ]
+    },
+    {
+      "name": "gh-issue-drafter",
+      "source": "./plugins/gh-issue-drafter",
+      "description": "Draft structured GitHub issues from loose notes, review comments, or partially written issue text. Use when you need to create, rewrite, or standardize a GitHub issue with a separate title and a concise body using Situation, Direction, Acceptance Criteria, Validation, and optional References. Trigger this skill for requests such as create an issue, structure this issue, turn notes into an issue, write acceptance criteria, write validation steps, or make an issue body clearer and objectively verifiable.",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": [
+        "skill"
+      ]
+    },
+    {
+      "name": "grill-me",
+      "source": "./plugins/grill-me",
+      "description": "Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Use when user wants to stress-test a plan, get grilled on their design, or mentions \"grill me\".",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": [
+        "skill"
+      ]
+    },
+    {
+      "name": "meeting-notes-and-actions",
+      "source": "./plugins/meeting-notes-and-actions",
+      "description": "Turn raw meeting transcripts, call notes, long meeting chats, product demo notes, or client implementation discussions into quick share-ready notes, build-guide style recaps, decisions, risks, and owner-tagged action items. Use for transcript cleanup, Slack/email-ready recaps, actionable build guides, priority briefs, and concise follow-up lists; use summarize-meeting for formal meeting records, templates, scoring, tracking scripts, or fuller meeting operations.",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": [
+        "skill"
+      ]
+    },
+    {
+      "name": "mental-model-auditor",
+      "source": "./plugins/mental-model-auditor",
+      "description": "Audit, update, and create mental model documents by comparing them against a live prototype or its source code. Use this skill whenever the user asks to sync, audit, update, review, or validate a mental model (YAML, Markdown, or any structured doc that describes how a system works) against a running prototype or staging environment. Also trigger when the user says things like \"the prototype changed, update the model\", \"check if the mental model matches what we built\", \"diff the spec against the app\", or \"we need a new model for this feature\". This skill inspects local context first, asks only for missing inputs, and always produces an approval-ready audit plan before doing the deeper audit work.",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": [
+        "skill"
+      ]
+    },
+    {
+      "name": "mental-model-doc",
+      "source": "./plugins/mental-model-doc",
+      "description": "Generates structured mental model documents from source material (transcripts, briefs, specs, etc.). Produces concise, evidence-based documents following a fixed 8-section structure. Use when the user asks to create a mental model, generate a MM document, or says \"mental model\".",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": [
+        "skill"
+      ]
+    },
+    {
+      "name": "mental-model-style",
+      "source": "./plugins/mental-model-style",
+      "description": "Enforces consistent writing structure across mental model YAML files by rewriting them to match a user-supplied reference set. Use when the user wants to apply, standardize, or enforce a writing style across models, or says things like \"apply style\", \"same style as\", \"standardize this model\", \"clean up the writing\", \"enforce writing style\", or flags a model as too verbose, too dense, uneven, hard to scan, or inconsistent with the rest of the models.",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": [
+        "skill"
+      ]
+    },
+    {
+      "name": "mental-model-yml",
+      "source": "./plugins/mental-model-yml",
+      "description": "Converts source documents (transcripts, briefs, specs, flow descriptions) into structured YAML mental model files. Use this skill whenever the user wants to create a mental model, convert a document into a .yml mental model, generate a business or UX/UI model from source material, or mentions 'mental model', 'yml model', 'YAML model', or asks to structure project knowledge into models. Also trigger when the user provides a transcript or brief and asks to 'extract a model', 'structure this', or 'turn this into a mental model'. Covers both business-domain models (how a business works, operational flows, strategy) and UI/UX models (screens, features, interaction flows).",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": [
+        "skill"
+      ]
+    },
+    {
+      "name": "pr-generate-description",
+      "source": "./plugins/pr-generate-description",
+      "description": "Generate structured pull request descriptions from git diffs through an interactive questionnaire. Use this skill before opening, creating, or updating any GitHub pull request body, including when the user or agent will run gh pr create, gh pr edit --body, create/open/submit a PR, open a pull request, mark ready for review, ship this branch, compare branches for review, describe changes, write the PR body, refresh an existing PR description, or document changes for code review. Always ask the user for motivation first.",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": [
+        "skill"
+      ]
+    },
+    {
+      "name": "prompt-master",
+      "source": "./plugins/prompt-master",
+      "description": "Generates optimized prompts for AI tools. Activates only when the user explicitly asks to write, fix, improve, or adapt a prompt for a specific AI tool (LLM, Cursor, Midjourney, image AI, video AI, coding agents, etc.). Does not activate for general conversation, coding tasks, document writing, or other non-prompt-engineering work.",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": [
+        "skill"
+      ]
+    },
+    {
+      "name": "stop-slop",
+      "source": "./plugins/stop-slop",
+      "description": "Remove AI writing patterns from prose. Use when drafting, editing, or reviewing text to eliminate predictable AI tells.",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": [
+        "skill"
+      ]
+    },
+    {
+      "name": "story-mapping",
+      "source": "./plugins/story-mapping",
+      "description": "Jeff Patton-style user story mapping for visualizing user journeys and translating product strategy into prioritized, deliverable work. Use for release planning, MVP definition, backlog sequencing, and cross-team alignment on what to build and in what order.",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": [
+        "skill"
+      ]
+    }
+  ]
+}

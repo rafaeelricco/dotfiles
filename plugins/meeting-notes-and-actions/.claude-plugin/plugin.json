@@ -1,0 +1,9 @@
+{
+  "name": "meeting-notes-and-actions",
+  "displayName": "Meeting Notes And Actions Skill",
+  "description": "Turn raw meeting transcripts, call notes, long meeting chats, product demo notes, or client implementation discussions into quick share-ready notes, build-guide style recaps, decisions, risks, and owner-tagged action items. Use for transcript cleanup, Slack/email-ready recaps, actionable build guides, priority briefs, and concise follow-up lists; use summarize-meeting for formal meeting records, templates, scoring, tracking scripts, or fuller meeting operations.",
+  "author": {
+    "name": "Rafael Ricco"
+  },
+  "repository": "https://github.com/rafaeelricco/dotfiles"
+}

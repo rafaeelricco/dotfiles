@@ -1,0 +1,9 @@
+{
+  "name": "story-mapping",
+  "displayName": "Story Mapping Skill",
+  "description": "Jeff Patton-style user story mapping for visualizing user journeys and translating product strategy into prioritized, deliverable work. Use for release planning, MVP definition, backlog sequencing, and cross-team alignment on what to build and in what order.",
+  "author": {
+    "name": "Rafael Ricco"
+  },
+  "repository": "https://github.com/rafaeelricco/dotfiles"
+}

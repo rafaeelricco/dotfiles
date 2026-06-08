@@ -1,0 +1,9 @@
+{
+  "name": "pr-generate-description",
+  "displayName": "PR Generate Description Skill",
+  "description": "Generate structured pull request descriptions from git diffs through an interactive questionnaire. Use this skill before opening, creating, or updating any GitHub pull request body, including when the user or agent will run gh pr create, gh pr edit --body, create/open/submit a PR, open a pull request, mark ready for review, ship this branch, compare branches for review, describe changes, write the PR body, refresh an existing PR description, or document changes for code review. Always ask the user for motivation first.",
+  "author": {
+    "name": "Rafael Ricco"
+  },
+  "repository": "https://github.com/rafaeelricco/dotfiles"
+}

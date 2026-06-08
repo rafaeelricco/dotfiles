@@ -17,7 +17,8 @@ PLUGINS_DIR = ROOT / "plugins"
 
 MARKETPLACE_NAME = "r1cco-skills"
 OWNER_NAME = "Rafael Ricco"
-REPOSITORY = "https://github.com/r1cco/dotfiles"
+GITHUB_REPO = "rafaeelricco/dotfiles"
+REPOSITORY = f"https://github.com/{GITHUB_REPO}"
 
 
 def unquote(value: str) -> str:
