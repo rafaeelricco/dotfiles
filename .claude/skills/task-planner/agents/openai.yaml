@@ -1,4 +1,0 @@
-interface:
-  display_name: "Task Planner"
-  short_description: "Plan code tasks from repo context"
-  default_prompt: "Use $task-planner to turn this code task into a structured implementation plan before editing."

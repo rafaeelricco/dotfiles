@@ -1,7 +1,0 @@
-interface:
-  display_name: "Implementation Planner"
-  short_description: "Plan code changes with review first"
-  default_prompt: "Use $implementation-planner to plan this implementation before editing."
-
-policy:
-  allow_implicit_invocation: false
