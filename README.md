@@ -67,6 +67,58 @@ ln -s "$(pwd)/.claude/skills" "$HOME/.claude/skills"
 
 On Windows, double-click [`scripts/windows/setup-claude-skills.bat`](scripts/windows/setup-claude-skills.bat) (or right-click → "Run as administrator"). It self-elevates via UAC and creates the symlink. If `~/.claude/skills` already exists as a non-empty real directory, the script aborts so you can move its contents into `./.claude/skills/` first.
 
+#### Claude Code Skill Marketplace
+
+The repo also publishes each `.claude/skills/<skill>` as an individual Claude Code plugin. Add the marketplace once:
+
+```bash
+claude plugin marketplace add rafaeelricco/dotfiles
+```
+
+Then install only the skills you want:
+
+```bash
+claude plugin install create-pr@r1cco-skills
+claude plugin install code-pattern@r1cco-skills
+claude plugin install prompt-master@r1cco-skills
+```
+
+To install several skills, run one install command per skill. After pulling marketplace updates, refresh the catalog:
+
+```bash
+claude plugin marketplace update r1cco-skills
+```
+
+Marketplace plugin files under `plugins/` are generated from `.claude/skills/`. Regenerate them after editing skills:
+
+```bash
+python3 scripts/sync-claude-plugin-marketplace.py
+```
+
+After editing a skill:
+
+1. Edit `.claude/skills/<skill>/...`
+2. Run `python3 scripts/sync-claude-plugin-marketplace.py`
+3. Commit and push `.claude/skills/`, `plugins/`, and `.claude-plugin/`
+4. Ask teammates to refresh and update:
+
+```bash
+claude plugin marketplace update r1cco-skills
+claude plugin update <skill>@r1cco-skills
+```
+
+Claude Code plugins do not load `CLAUDE.md` as global context. To install the global Claude instructions by command, copy them to `~/.claude/CLAUDE.md` with an automatic backup:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/scripts/install-claude-md.py | python3
+```
+
+From a local clone, run:
+
+```bash
+python3 scripts/install-claude-md.py
+```
+
 #### Codex Skills
 
 Reuse the same `.claude/skills/` directory in the Codex CLI. Codex stores user skills under `~/.codex/skills/`, but its bundled skills live in `~/.codex/skills/.system/`, so we link **per skill** instead of the whole directory:
@@ -105,7 +157,7 @@ ln -sfn "$(pwd)/.codex/AGENTS.md"  "$HOME/.codex/AGENTS.md"
 
 On Windows, the updated [`setup-claude-skills.bat`](scripts/windows/setup-claude-skills.bat) and [`setup-codex-skills.bat`](scripts/windows/setup-codex-skills.bat) handle these links alongside the skills. Re-run them after pulling.
 
-> **Note:** `.claude/CLAUDE.md` and `.codex/AGENTS.md` carry identical content. Edit both files together when changing instructions.
+> **Note:** `.claude/CLAUDE.md` is the source. `.codex/AGENTS.md` mirrors it through a symlink.
 
 To verify all setups at any time, run [`scripts/windows/check-skills.bat`](scripts/windows/check-skills.bat) (no elevation needed) — it inspects `~/.claude/skills`, `~/.codex/skills/`, optional rule files under `./.cursor/rules`, the two instruction files, validates link targets against the repo, and reports any orphan or missing entries.
 

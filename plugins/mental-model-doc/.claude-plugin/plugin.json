@@ -1,0 +1,9 @@
+{
+  "name": "mental-model-doc",
+  "displayName": "Mental Model Doc Skill",
+  "description": "Generates structured mental model documents from source material (transcripts, briefs, specs, etc.). Produces concise, evidence-based documents following a fixed 8-section structure. Use when the user asks to create a mental model, generate a MM document, or says \"mental model\".",
+  "author": {
+    "name": "Rafael Ricco"
+  },
+  "repository": "https://github.com/rafaeelricco/dotfiles"
+}
