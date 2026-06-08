@@ -15,7 +15,7 @@ MARKETPLACE_DIR = ROOT / ".claude-plugin"
 MARKETPLACE_FILE = MARKETPLACE_DIR / "marketplace.json"
 PLUGINS_DIR = ROOT / "plugins"
 
-MARKETPLACE_NAME = "r1cco-skills"
+MARKETPLACE_NAME = "ricco-skills"
 OWNER_NAME = "Rafael Ricco"
 GITHUB_REPO = "rafaeelricco/dotfiles"
 REPOSITORY = f"https://github.com/{GITHUB_REPO}"

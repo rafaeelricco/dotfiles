@@ -40,7 +40,7 @@ Verify with `tree-sitter --version` — `nvim`'s `:checkhealth nvim-treesitter` 
 ### Installation
 
 ```bash
-git clone git@github.com:r1cco/dotfiles.git
+git clone git@github.com:rafaeelricco/dotfiles.git
 cd dotfiles
 ```
 
@@ -78,15 +78,16 @@ claude plugin marketplace add rafaeelricco/dotfiles
 Then install only the skills you want:
 
 ```bash
-claude plugin install create-pr@r1cco-skills
-claude plugin install code-pattern@r1cco-skills
-claude plugin install prompt-master@r1cco-skills
+claude plugin install create-pr@ricco-skills
+claude plugin install code-pattern@ricco-skills
+claude plugin install prompt-master@ricco-skills
+claude plugin install gh-issue-drafter@ricco-skills
 ```
 
 To install several skills, run one install command per skill. After pulling marketplace updates, refresh the catalog:
 
 ```bash
-claude plugin marketplace update r1cco-skills
+claude plugin marketplace update ricco-skills
 ```
 
 Marketplace plugin files under `plugins/` are generated from `.claude/skills/`. Regenerate them after editing skills:
@@ -103,8 +104,8 @@ After editing a skill:
 4. Ask teammates to refresh and update:
 
 ```bash
-claude plugin marketplace update r1cco-skills
-claude plugin update <skill>@r1cco-skills
+claude plugin marketplace update ricco-skills
+claude plugin update <skill>@ricco-skills
 ```
 
 Claude Code plugins do not load `CLAUDE.md` as global context. To install the global Claude instructions by command, copy them to `~/.claude/CLAUDE.md` with an automatic backup:
