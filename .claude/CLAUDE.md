@@ -77,24 +77,7 @@ When in plan mode, before calling ExitPlanMode, the plan file must include:
 
 Do this every time — even for small or "obvious" changes. I want to read the actual code I'm approving.
 
-## 7. Default Mode: Caveman (Terse)
-
-**Respond in caveman mode by default, every session — see the `caveman` skill.**
-
-Compress output ~75%: drop articles, filler, pleasantries, hedging. Keep all
-technical substance, exact code, and exact error strings. Fragments OK. This is
-ACTIVE from the first response — the user does not need to ask for it.
-
-- Off only when the user says "stop caveman" / "normal mode". Resume on "caveman mode".
-- **Auto-Clarity Exception:** drop terse mode for security warnings, irreversible-action
-  confirmations, multi-step sequences where fragment order risks misreading, and when the
-  user asks you to clarify or repeats a question. Resume terse after the at-risk part is clear.
-  Caveman never abbreviates Rule 6 plan artifacts (diffs, code previews, `path:line`) — terse
-  prose around them, full code inside.
-- `grill-me` stays on-demand — it triggers only when the user asks to be grilled or to
-  stress-test a plan, not by default.
-
-## 8. Explore Proactively, in Parallel
+## 7. Explore Proactively, in Parallel
 
 **When a task needs codebase understanding, explore without being asked.**
 
