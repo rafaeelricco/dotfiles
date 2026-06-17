@@ -22,8 +22,9 @@ remains.
 - Use `gh` for all PR/review metadata, patch context, current-branch PR
   discovery, thread state, Actions logs, commits, pushes, replies, and thread
   resolution.
-- Ask before GitHub writes, commits, pushes, or merging unless the user
-  explicitly requested a full babysit loop.
+- Ask before GitHub writes, commits, or pushes unless the user explicitly
+  requested a full babysit loop. A full babysit loop authorizes scoped
+  non-merge writes needed for validated blockers, but never authorizes merging.
 - Never add AI attribution. Never include `Co-authored-by:` trailers or credit
   lines for Claude, Codex, Cursor, or similar tools in commit messages. Never
   merge, force-push, rewrite history, or modify protected branch settings unless
@@ -36,7 +37,8 @@ remains.
 3. Triage review feedback with the Review Fix Plan contract below, and inspect
    failing Actions checks.
 4. Fix only validated, in-scope blockers.
-5. With approval, stage scoped files, commit, push, and re-check.
+5. With approval or full-loop authorization, stage scoped files, commit, push,
+   and re-check.
 6. Repeat until merge-ready, waiting on remote checks, or blocked by a human
    decision.
 
@@ -48,10 +50,67 @@ Before editing actionable review feedback:
   cluster.
 - Include the comment/problem mentioned, file/line or thread URL when
   available, proposed solution, and planned verification.
-- Show the proposed solution as a focused diff preview or hunk-level patch
-  sketch so it is clear which change solves which comment.
-- If one proposed diff fixes multiple comments, list each comment it addresses
+- Start with a `Summary` section describing the commit/reply strategy and any
+  scope decisions.
+- Shape the plan as one `Commit N: <title>` section per actionable comment or
+  coherent fix cluster.
+- For each commit section, include: comment(s), files touched with line refs
+  when available, focused `diff` blocks for planned changes, a commit message
+  in the Commit Message Format below, planned reply text, and verification.
+- Include only focused diffs or hunk-level patch sketches that explain the
+  proposed change. Do not include a separate code preview section or unrelated
+  large diffs.
+- If one planned commit fixes multiple comments, list each comment it addresses
   and why the grouped fix is coherent.
+- Put non-code comments in a `Reply-Only Threads` section with planned reply
+  text and no commit.
+
+## Commit Message Format
+
+Each fix commit becomes one line of the squashed PR merge body, so write every
+commit as a self-contained subject plus body. Keep one logical change per
+commit, mapped to a single review comment, coherent fix cluster, or CI failure.
+
+Subject (first line): short imperative phrase, capitalized, no trailing period,
+no type prefix. Bug and chore commits may use a scoped conventional prefix —
+`fix(scope):`, `chore(scope):`.
+
+Body: pick one of two modes by change type.
+
+- Mode A — bullet list (in-scope feature, refactor, or restructure work). One
+  `-` bullet per discrete change, each a complete imperative sentence ending
+  with a period. Put code symbols, paths, and types in backticks
+  (`resolveReviewThread`, `src/middleware/rateLimit.ts`). Describe what + where,
+  often the mechanism. When behavior changed, the final bullet covers tests
+  ("Cover the new flow with unit tests for ...").
+- Mode B — prose paragraphs (bug, security, and most review-feedback or CI
+  fixes; the common case here). Lead with the problem and the risk it posed,
+  then the fix and why this approach, then a closing sentence on what the tests
+  now assert.
+
+Decision rules:
+
+1. In-scope feature / refactor / chore → Mode A bullets.
+2. Bug / security / review-feedback fix → Mode B prose.
+3. One logical change per commit; one discrete edit per bullet.
+4. Version bumps, formatting-only changes, and renames each get their own commit
+   (renames stated literally as old → new, noting imports were updated).
+5. Subjects never end with a period; Mode A bullets always do.
+6. No emojis, no `Co-Authored-By`, no AI attribution.
+
+Commit with a quoted heredoc so backticks stay literal:
+
+```bash
+git commit -F - <<'MSG'
+fix(scope): imperative subject
+
+What was wrong and the risk it posed.
+
+The fix and why this approach was chosen.
+
+Tests assert the corrected behavior.
+MSG
+```
 
 ## Merge Conflicts
 
@@ -94,17 +153,23 @@ If the PR is conflicted or behind base:
 
 ## Write Loop
 
-- Stage only files that belong to the current fix.
-- Commit with a concise message tied to the blocker.
-- Push only after approval.
+- For review feedback fixes, make one commit per actionable comment or coherent
+  fix cluster from the Review Fix Plan.
+- Stage only files that belong to the current comment or fix cluster.
+- Commit with the exact message planned for that comment or fix cluster,
+  formatted per Commit Message Format.
+- Push only after approval or full-loop authorization.
 - Re-check PR status, unresolved review threads, and CI.
 - After an approved commit and push fixes review feedback, reply to each
   addressed comment/thread with the 7-character commit hash (e.g. `60c6fea`) and
   the specific solution. Resolve the thread via the GitHub API using `gh`
   (GraphQL `resolveReviewThread` for inline review threads, or the matching REST
-  endpoint for the comment type) only when GitHub writes were approved.
+  endpoint for the comment type) only when GitHub writes were approved or the
+  full babysit loop authorized them.
 - If one commit fixes multiple comments, reply to each with the same hash plus
   its comment-specific solution.
+- If a thread is reply-only, reply without creating a commit and track it as
+  reply-only in the final report.
 - Repeat the loop until the PR is mergeable, green, and review feedback is
   triaged, or until a blocker requires human input.
 
