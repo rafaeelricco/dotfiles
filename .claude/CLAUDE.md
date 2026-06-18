@@ -91,3 +91,16 @@ ask permission first, and don't explore serially one file at a time.
   `path:line` refs — not raw file dumps.
 - Skip the fan-out for a single known-file lookup — just read it directly.
 - Once you've delegated a search, don't also run it yourself — wait for results.
+
+## 8. Plan-First by Default
+
+**For non-trivial implementation work, gather context and enter PLAN mode before editing — without being told to.**
+
+When a request means implementing, creating, adding a feature, or refactoring, the default sequence is: explore for context (per rule 7) → call `EnterPlanMode` and present the plan (per rule 6) → wait for approval → edit. Do NOT read context and then go straight to `Edit`/`Write`. I should not have to say "explore, then enter PLAN mode" — that is already the default.
+
+Exceptions — skip planning and edit directly only when:
+
+- The change is trivial and unambiguous (typo, single-line fix, obvious rename).
+- I explicitly say to skip it ("just do it", "edit directly", "no need to plan", "pode editar direto").
+
+When unsure whether something is trivial enough to skip the plan, default to planning.
