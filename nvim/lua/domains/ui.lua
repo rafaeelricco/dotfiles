@@ -378,7 +378,7 @@ return {
       trailing_stiffness = 0.6,
       damping = 0.95,
       distance_stop_animating = 0.5,
-      time_interval = 7, -- ~144fps, smoother animation
+      time_interval = 8, -- ~120fps (8ms; nearest integer ms to 1000/120 ≈ 8.33)
 
       -- Insert mode: keep the smear, slightly snappier so typing stays legible
       smear_insert_mode = false,

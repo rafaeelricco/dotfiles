@@ -280,8 +280,12 @@ return {
       snippets = { preset = "default" },
 
       -- Fuzzy matching implementation; see :h blink-cmp-config-fuzzy
+      -- Use the compiled, SIMD-optimized Rust matcher (blink's fast path).
+      -- 'prefer_rust_with_warning' auto-downloads the prebuilt binary on the
+      -- first run and falls back to Lua with a warning if it can't — so it uses
+      -- Rust on this machine without ever hard-breaking completion.
       fuzzy = {
-        implementation = "lua",
+        implementation = "prefer_rust_with_warning",
       },
 
       -- Signature help window (parameter hints)

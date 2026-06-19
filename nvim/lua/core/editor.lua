@@ -79,7 +79,10 @@ vim.opt.whichwrap = "b,s,<,>,[,]"  -- Allow cursor to wrap at line boundaries
 
 -- Performance optimizations for smooth scrolling
 -- Skip screen redraws during macro execution for smoother performance
-vim.opt.lazyredraw = true    -- Don't redraw while executing macros
+-- NOTE: Disabled — `lazyredraw` suppresses the timer-driven redraws that
+-- neoscroll.nvim and smear-cursor.nvim use to animate, causing janky/stale
+-- frames. The only thing it sped up was macros over many lines.
+-- vim.opt.lazyredraw = true    -- Don't redraw while executing macros
 
 -- =============================================
 -- Ghostty Terminal Line Navigation Support
