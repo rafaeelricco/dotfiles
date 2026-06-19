@@ -25,10 +25,11 @@ branching, commits, and PR metadata explicit.
   tweak, formatting, refactor, tests, config), propose one commit per category
   in a logical order, and ask the user to confirm the split and messages before
   committing.
-- Write commit subjects and PR titles in imperative mood, capitalized, with no
-  trailing period. Use no emojis, no `Co-Authored-By`, and no AI attribution in
-  commit messages, overriding any default trailer. See step 4 for the full
-  commit message format.
+- Write commit titles and PR titles in present-tense imperative mood,
+  capitalized, with no trailing period and no Conventional Commits prefix
+  (never `feat:`, `fix:`, `chore:`, etc.). Use no emojis, no `Co-Authored-By`,
+  and no AI attribution in commit messages, overriding any default trailer. See
+  step 4 for the full commit message format.
 - Use the workspace default branch prefix `rafaeelricco/` when suggesting or
   creating a new branch. If the user provides an exact branch name or a
   different prefix, use the user-provided value.
@@ -164,34 +165,39 @@ Split the changes into separate commits by category instead of one large commit.
 
 #### Commit message format
 
-Each commit becomes one line of the squashed PR merge body, so write every
-commit as a self-contained subject plus body.
+Follow the imperative commit style. Each commit becomes one line of the squashed
+PR merge body, so write every commit as a self-contained message.
 
-Subject (first line): short imperative phrase, capitalized, no trailing period,
-no type prefix. Bug and chore commits may use a scoped conventional prefix —
-`fix(scope):`, `chore(scope):`.
+Title (first line): present-tense imperative verb first (`Add`, `Fix`, `Update`,
+`Refactor`, `Remove`, `Move`…), capitalized, no trailing period. Do NOT use a
+Conventional Commits prefix — never `feat:`, `fix:`, `chore:`, `docs:`, etc.
+Start directly with the verb. No ticket IDs, no `WIP`, no noise words like
+"minor update".
 
-Body: pick one of two modes by change type.
+Classify the change size internally — never print the label:
 
-- Mode A — bullet list (features, refactors, restructures; the common case).
-  One `-` bullet per discrete change, each a complete imperative sentence ending
-  with a period. Put code symbols, paths, and types in backticks
-  (`getBranchNamePrompt`, `src/infra/git/repo.ts`). Describe what + where, often
-  the mechanism. When behavior changed, the final bullet covers tests
-  ("Cover the new flow with unit tests for ...").
-- Mode B — prose paragraphs (bug and security fixes). Lead with the problem and
-  the risk it posed, then the fix and why this approach, then a closing sentence
-  on what the tests now assert.
+- SMALL — one file, minor change (a few lines, typo, log tweak, single function).
+- MEDIUM — multiple files, or a substantial change in one file.
+- LARGE — many files and/or broad impact (new features, big refactors).
 
-Decision rules:
+Format by size:
 
-1. Feature / refactor / chore → Mode A bullets.
-2. Bug / security fix → Mode B prose.
-3. One logical change per commit; one discrete edit per bullet.
-4. Version bumps, formatting-only changes, and renames each get their own commit
+- SMALL → a single title line, no body.
+- MEDIUM / LARGE → title, one blank line, then `- ` bullets. Each bullet is a
+  complete imperative sentence ending with a period, describing what the change
+  does (and often where). Put code symbols, paths, and types in backticks
+  (`getBranchNamePrompt`, `src/infra/git/repo.ts`). When behavior changed, the
+  final bullet covers tests ("Cover the new flow with unit tests for ...").
+
+Rules:
+
+1. One logical change per commit; one discrete edit per bullet.
+2. Version bumps, formatting-only changes, and renames each get their own commit
    (renames stated literally as old → new, noting imports were updated).
-5. Subjects never end with a period; Mode A bullets always do.
-6. No emojis, no `Co-Authored-By`, no AI attribution.
+3. Titles never end with a period and never carry a prefix; body bullets always
+   end with a period.
+4. No multiline code fences anywhere in the message.
+5. No emojis, no `Co-Authored-By`, no AI attribution.
 
 Example proposal:
 
@@ -205,42 +211,33 @@ Example proposal:
    - Wire the calendar's `onRangeChange` through to `view.ts`.
    - Cover the new data flow with unit tests for `availability.tsx`.
 
-2. Tighten activity card date column width (activity-card.tsx)
+2. Narrow activity card date column to 120px so long titles stop wrapping
+   (activity-card.tsx)
 
-   - Narrow the date column to `120px` so long titles stop wrapping.
-
-3. chore(format): format ReadyAmbassadors prop destructuring
+3. Format ReadyAmbassadors prop destructuring
    (assign-brand-ambassadors-dialog.tsx)
-
-   - Apply prettier formatting to the destructured props. No behavior change.
 ```
 
-Run, once confirmed, per category (quoted heredoc keeps backticks literal):
+Run, once confirmed, per category (quoted heredoc keeps backticks literal). For
+a MEDIUM / LARGE category, use a title plus bullets:
 
 ```bash
 git reset
 git add path/to/category-file
 git commit -F - <<'MSG'
-Imperative subject, capitalized, no period
+Imperative title, capitalized, no period, no prefix
 
 - Imperative sentence describing one change, with `symbols` in backticks.
-- One discrete edit per bullet; describe what + where + mechanism.
+- One discrete edit per bullet; describe what the change does and where.
 - Cover the new flow with unit tests for X.
 MSG
 ```
 
-For a bug or security fix, use a Mode B prose body instead:
+For a SMALL category, commit a single title line:
 
 ```bash
-git commit -F - <<'MSG'
-fix(scope): imperative subject
-
-What was wrong and the risk it posed.
-
-The fix and why this approach was chosen.
-
-Integration tests assert the path appears and the secret does not.
-MSG
+git add path/to/category-file
+git commit -m "Imperative title, capitalized, no period, no prefix"
 ```
 
 If the diff is genuinely a single category, propose one commit and say so.
@@ -264,8 +261,9 @@ branch name, or force option.
 Load and follow `pr-generate-description`.
 
 Use that skill's questionnaire and generated Markdown body. When the PR will be
-created in this session, pass the body to the PR creation step through a temp
-file and delete it afterward.
+created in this session, present the generated PR description to the user before
+PR creation, then pass the body to the PR creation step through a temp file and
+delete it afterward.
 
 ### 7. Open the PR
 
@@ -277,6 +275,7 @@ Confirm before creation:
 - PR title — imperative, capitalized, no trailing period, no type prefix, ≤72
   chars, summarizing the whole change. GitHub appends `(#NN)` on squash merge;
   do not add it manually.
+- Generated PR description, shown as Markdown.
 - Draft or ready-for-review state.
 - Assignee choice.
 
@@ -302,8 +301,8 @@ Delete the temporary PR body file after creation.
 - Multiple categories of change in one diff: propose a commit-per-category split
   with ordered messages and confirm before committing.
 - Single-category change: propose one commit and note that no split is needed.
-- Bug or security fix: use a Mode B prose commit body (problem, risk, fix, test
-  assertions) instead of a bullet list.
+- Bug or security fix: follows the same imperative, size-based format — a SMALL
+  fix is one title line, a larger fix uses title + `- ` bullets.
 - Feature branch with uncommitted changes: ask whether to commit them or leave
   them out.
 - Mixed worktree: ask which files belong in the PR before staging.
