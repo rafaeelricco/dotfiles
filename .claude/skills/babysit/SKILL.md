@@ -67,49 +67,57 @@ Before editing actionable review feedback:
 
 ## Commit Message Format
 
-Each fix commit becomes one line of the squashed PR merge body, so write every
-commit as a self-contained subject plus body. Keep one logical change per
-commit, mapped to a single review comment, coherent fix cluster, or CI failure.
+Follow the imperative commit style. Each fix commit becomes one line of the
+squashed PR merge body, so write every commit as a self-contained message. Keep
+one logical change per commit, mapped to a single review comment, coherent fix
+cluster, or CI failure.
 
-Subject (first line): short imperative phrase, capitalized, no trailing period,
-no type prefix. Bug and chore commits may use a scoped conventional prefix —
-`fix(scope):`, `chore(scope):`.
+Title (first line): present-tense imperative verb first (`Add`, `Fix`, `Update`,
+`Refactor`, `Remove`…), capitalized, no trailing period. Do NOT use a
+Conventional Commits prefix — never `feat:`, `fix:`, `chore:`, `docs:`, etc.
+Start directly with the verb. No ticket IDs, no `WIP`, no noise words.
 
-Body: pick one of two modes by change type.
+Classify the change size internally — never print the label:
 
-- Mode A — bullet list (in-scope feature, refactor, or restructure work). One
-  `-` bullet per discrete change, each a complete imperative sentence ending
-  with a period. Put code symbols, paths, and types in backticks
-  (`resolveReviewThread`, `src/middleware/rateLimit.ts`). Describe what + where,
-  often the mechanism. When behavior changed, the final bullet covers tests
-  ("Cover the new flow with unit tests for ...").
-- Mode B — prose paragraphs (bug, security, and most review-feedback or CI
-  fixes; the common case here). Lead with the problem and the risk it posed,
-  then the fix and why this approach, then a closing sentence on what the tests
-  now assert.
+- SMALL — one file, minor change (a few lines, typo, log tweak, single function).
+- MEDIUM — multiple files, or a substantial change in one file.
+- LARGE — many files and/or broad impact.
 
-Decision rules:
+Format by size:
 
-1. In-scope feature / refactor / chore → Mode A bullets.
-2. Bug / security / review-feedback fix → Mode B prose.
-3. One logical change per commit; one discrete edit per bullet.
-4. Version bumps, formatting-only changes, and renames each get their own commit
+- SMALL → a single title line, no body.
+- MEDIUM / LARGE → title, one blank line, then `- ` bullets. Each bullet is a
+  complete imperative sentence ending with a period, describing what the change
+  does (and often where). Put code symbols, paths, and types in backticks
+  (`resolveReviewThread`, `src/middleware/rateLimit.ts`). When behavior changed,
+  the final bullet covers tests ("Cover the new flow with unit tests for ...").
+
+Rules:
+
+1. One logical change per commit; one discrete edit per bullet.
+2. Version bumps, formatting-only changes, and renames each get their own commit
    (renames stated literally as old → new, noting imports were updated).
-5. Subjects never end with a period; Mode A bullets always do.
-6. No emojis, no `Co-Authored-By`, no AI attribution.
+3. Titles never end with a period and never carry a prefix; body bullets always
+   end with a period.
+4. No multiline code fences anywhere in the message.
+5. No emojis, no `Co-Authored-By`, no AI attribution.
 
-Commit with a quoted heredoc so backticks stay literal:
+Commit with a quoted heredoc so backticks stay literal (MEDIUM / LARGE):
 
 ```bash
 git commit -F - <<'MSG'
-fix(scope): imperative subject
+Imperative title, capitalized, no period, no prefix
 
-What was wrong and the risk it posed.
-
-The fix and why this approach was chosen.
-
-Tests assert the corrected behavior.
+- Imperative sentence describing one change, with `symbols` in backticks.
+- One discrete edit per bullet; describe what the change does and where.
+- Tests assert the corrected behavior.
 MSG
+```
+
+For a SMALL fix, commit a single title line:
+
+```bash
+git commit -m "Imperative title, capitalized, no period, no prefix"
 ```
 
 ## Merge Conflicts
