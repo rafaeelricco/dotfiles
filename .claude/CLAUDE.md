@@ -65,16 +65,15 @@ When implementing, refactoring, polishing, or reviewing TypeScript/React code in
 
 **before editing**. Routine edits are exactly when conventions slip, so don't skip this just because the task looks small.
 
-## 6. Plan Mode: Show the Code
+## 6. Plan Mode: Make Changes Reviewable
 
-**Every plan must let me review real code, not just prose.**
+**Every plan must make the intended change concrete, not just prose.**
 
 When in plan mode, before calling ExitPlanMode, the plan file must include:
 
-- Detailed, file-by-file diffs of the proposed changes — use ```diff fenced blocks with `-`/`+` lines.
 - The exact files and locations touched, referenced as `path:line`.
 
-Do this every time — even for small or "obvious" changes. I want to read the actual code I'm approving.
+Do this every time — even for small or "obvious" changes. I want to understand exactly what I'm approving.
 
 ## 7. Explore Proactively, in Parallel
 
