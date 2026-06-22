@@ -72,7 +72,6 @@ When implementing, refactoring, polishing, or reviewing TypeScript/React code in
 When in plan mode, before calling ExitPlanMode, the plan file must include:
 
 - Detailed, file-by-file diffs of the proposed changes — use ```diff fenced blocks with `-`/`+` lines.
-- A concrete code preview of new or changed functions/blocks, not just a description of them.
 - The exact files and locations touched, referenced as `path:line`.
 
 Do this every time — even for small or "obvious" changes. I want to read the actual code I'm approving.
