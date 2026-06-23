@@ -8,6 +8,7 @@ Before implementing:
 - If multiple interpretations exist, present them - don't pick silently.
 - If a simpler approach exists, say so. Push back when warranted.
 - If something is unclear, stop. Name what's confusing. Ask.
+- Avoid over-literal interpretation; consider the context, mode, and intent of the question or request before acting.
 
 ## 2. Simplicity First
 
@@ -58,18 +59,3 @@ For multi-step tasks, state a brief plan:
 ```
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
-
-## 5. Explore Proactively, in Parallel
-
-**When a task needs codebase understanding, explore without being asked.**
-
-If answering or planning means reading across multiple files, directories, or
-naming conventions, default to spawning `Explore` subagents in parallel — don't
-ask permission first, and don't explore serially one file at a time.
-
-- Scale to scope: ~2–3 agents for a small/familiar area, up to ~20 for a large or
-  unfamiliar one. Match the count to the open questions; don't spawn 20 by default.
-- One distinct question per agent. They run read-only and return conclusions with
-  `path:line` refs — not raw file dumps.
-- Skip the fan-out for a single known-file lookup — just read it directly.
-- Once you've delegated a search, don't also run it yourself — wait for results.
