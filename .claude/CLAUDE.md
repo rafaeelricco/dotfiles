@@ -59,23 +59,7 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 5. Apply Local Code Conventions
-
-When implementing, refactoring, polishing, or reviewing TypeScript/React code in a project that uses these local abstractions — `Maybe`/`Result`/`RemoteData`/`Future` abstraction — consult the `code-pattern` skill and ground the change in its references
-
-**before editing**. Routine edits are exactly when conventions slip, so don't skip this just because the task looks small.
-
-## 6. Plan Mode: Make Changes Reviewable
-
-**Every plan must make the intended change concrete, not just prose.**
-
-When in plan mode, before calling ExitPlanMode, the plan file must include:
-
-- The exact files and locations touched, referenced as `path:line`.
-
-Do this every time — even for small or "obvious" changes. I want to understand exactly what I'm approving.
-
-## 7. Explore Proactively, in Parallel
+## 5. Explore Proactively, in Parallel
 
 **When a task needs codebase understanding, explore without being asked.**
 
@@ -90,11 +74,11 @@ ask permission first, and don't explore serially one file at a time.
 - Skip the fan-out for a single known-file lookup — just read it directly.
 - Once you've delegated a search, don't also run it yourself — wait for results.
 
-## 8. Plan-First by Default
+## 6. Plan-First by Default
 
 **For non-trivial implementation work, gather context and enter PLAN mode before editing — without being told to.**
 
-When a request means implementing, creating, adding a feature, or refactoring, the default sequence is: explore for context (per rule 7) → call `EnterPlanMode` and present the plan (per rule 6) → wait for approval → edit. Do NOT read context and then go straight to `Edit`/`Write`. I should not have to say "explore, then enter PLAN mode" — that is already the default.
+When a request means implementing, creating, adding a feature, or refactoring, the default sequence is: explore for context (per rule 5) → call `EnterPlanMode` and present the plan → wait for approval → edit. Do NOT read context and then go straight to `Edit`/`Write`. I should not have to say "explore, then enter PLAN mode" — that is already the default.
 
 Exceptions — skip planning and edit directly only when:
 
