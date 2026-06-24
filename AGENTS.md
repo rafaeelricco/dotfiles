@@ -8,6 +8,7 @@ Before implementing:
 - If multiple interpretations exist, present them - don't pick silently.
 - If a simpler approach exists, say so. Push back when warranted.
 - If something is unclear, stop. Name what's confusing. Ask.
+- Avoid over-literal interpretation; consider the context, mode, and intent of the question or request before acting.
 
 ## 2. Simplicity First
 
@@ -59,13 +60,7 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 5. Apply Local Code Conventions
-
-When implementing, refactoring, polishing, or reviewing TypeScript/React code in a project that uses these local abstractions — `Maybe`/`Result`/`RemoteData`/`Future` abstraction — consult the `code-pattern` skill and ground the change in its references
-
-**before editing**. Routine edits are exactly when conventions slip, so don't skip this just because the task looks small.
-
-## 6. Plan Mode: Make Changes Reviewable
+## 5. Plan Mode: Make Changes Reviewable
 
 **Every plan must make the intended change concrete, not just prose.**
 
@@ -75,7 +70,7 @@ When in plan mode, before calling ExitPlanMode, the plan file must include:
 
 Do this every time — even for small or "obvious" changes. I want to understand exactly what I'm approving.
 
-## 7. Explore Proactively, in Parallel
+## 6. Explore Proactively, in Parallel
 
 **When a task needs codebase understanding, explore without being asked.**
 
@@ -90,7 +85,7 @@ ask permission first, and don't explore serially one file at a time.
 - Skip the fan-out for a single known-file lookup — just read it directly.
 - Once you've delegated a search, don't also run it yourself — wait for results.
 
-## 8. Plan-First by Default
+## 7. Plan-First by Default
 
 **For non-trivial implementation work, gather context and enter PLAN mode before editing — without being told to.**
 

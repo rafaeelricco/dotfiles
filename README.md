@@ -79,7 +79,6 @@ Then install only the skills you want:
 
 ```bash
 claude plugin install create-pr@ricco-skills
-claude plugin install code-pattern@ricco-skills
 claude plugin install prompt-master@ricco-skills
 claude plugin install gh-issue-drafter@ricco-skills
 claude plugin install e2e-test@ricco-skills

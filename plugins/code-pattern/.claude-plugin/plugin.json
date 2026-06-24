@@ -1,9 +1,0 @@
-{
-  "name": "code-pattern",
-  "displayName": "Code Pattern Skill",
-  "description": "Apply this project's TypeScript and React conventions whenever implementing, refactoring, polishing, or reviewing any component, hook, page, form, table, store, service, or data flow — consult it BEFORE writing or editing such code, even when the task looks routine and the user never says \"conventions\" or \"patterns\". It owns the local standards for typing, domain modeling, async and UI state, forms and API calls, tables, styling, and component structure, and how to turn them into review findings. Reinforcing signals: Maybe, Result, RemoteData, Future, ts-pattern, discriminated unions, decoders/schemas, useForm, FormInput, DataTable, ColumnDef, cn()/cva(), named prop types, container/presentational split, and read-after-write projection delays.",
-  "author": {
-    "name": "Rafael Ricco"
-  },
-  "repository": "https://github.com/rafaeelricco/dotfiles"
-}
