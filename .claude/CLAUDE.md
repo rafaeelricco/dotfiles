@@ -65,3 +65,11 @@ For multi-step tasks, state a brief plan:
 ```
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+## 5. Plan Mode: Make Changes Reviewable
+
+**Plans show the change as a diff, not prose. I'm approving diffs.**
+
+When you enter plan mode or begin planning a code change, invoke the `/plan-format` skill and
+follow it for the plan document — it defines the required shape (before/after diffs, tiering,
+net-new snippets). A prose-only plan is blocked at `ExitPlanMode`.
