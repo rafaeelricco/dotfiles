@@ -4,11 +4,34 @@
 -- - Non‑conflicting with Copilot: <Tab> accepts Copilot, snippets live on Ctrl+j/k
 -- - Clear menu/docs/selection behavior with predictable triggers
 
+local color_item_cache = setmetatable({}, { __mode = "k" })
+
+local function get_lsp_color_item(ctx)
+  if ctx.item.source_name ~= "LSP" then
+    return nil
+  end
+
+  local cached = color_item_cache[ctx.item]
+  if cached ~= nil then
+    return cached ~= false and cached or nil
+  end
+
+  local ok, highlight_colors = pcall(require, "nvim-highlight-colors")
+  if not ok then
+    color_item_cache[ctx.item] = false
+    return nil
+  end
+
+  local color_item = highlight_colors.format(ctx.item.documentation, { kind = ctx.kind })
+  color_item_cache[ctx.item] = color_item or false
+  return color_item
+end
+
 return {
   -- blink.cmp completion engine and sources (LSP/snippets/path/buffer)
   {
     "saghen/blink.cmp",
-    event = "VimEnter",
+    event = { "InsertEnter", "CmdlineEnter" },
     version = "1.*",
     dependencies = {},
     opts = {
@@ -99,27 +122,17 @@ return {
               kind_icon = {
                 text = function(ctx)
                   local icon = ctx.kind_icon
-                  if ctx.item.source_name == "LSP" then
-                    local color_item = require("nvim-highlight-colors").format(
-                      ctx.item.documentation,
-                      { kind = ctx.kind }
-                    )
-                    if color_item and color_item.abbr ~= "" then
-                      icon = color_item.abbr
-                    end
+                  local color_item = get_lsp_color_item(ctx)
+                  if color_item and color_item.abbr ~= "" then
+                    icon = color_item.abbr
                   end
                   return icon .. ctx.icon_gap
                 end,
                 highlight = function(ctx)
                   local highlight = "BlinkCmpKind" .. ctx.kind
-                  if ctx.item.source_name == "LSP" then
-                    local color_item = require("nvim-highlight-colors").format(
-                      ctx.item.documentation,
-                      { kind = ctx.kind }
-                    )
-                    if color_item and color_item.abbr_hl_group then
-                      highlight = color_item.abbr_hl_group
-                    end
+                  local color_item = get_lsp_color_item(ctx)
+                  if color_item and color_item.abbr_hl_group then
+                    highlight = color_item.abbr_hl_group
                   end
                   return highlight
                 end,
@@ -185,8 +198,8 @@ return {
             score_offset = 100,
             -- No fallback to buffer; keep lists clean on manual show
             fallbacks = {},
-            -- Wait for LSP response; avoids flashing non-LSP items first
-            async = false,
+            -- Do not block the menu while waiting for LSP responses
+            async = true,
             timeout_ms = 500,
             -- On manual show (Ctrl+Space) allow 0-char prefix; otherwise require 3
             min_keyword_length = function(ctx)

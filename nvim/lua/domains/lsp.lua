@@ -9,6 +9,7 @@ return {
     -- Configures `nvim-lspconfig`, the core plugin for managing Language Servers.
     -- It provides a unified interface for configuring and interacting with LSPs.
     "neovim/nvim-lspconfig",
+    event = { "BufReadPre", "BufNewFile" },
     dependencies = {
       -- Automatically install LSPs and related tools to stdpath for Neovim
       -- Useful status updates for LSP.
@@ -63,7 +64,7 @@ return {
       -- Allows extra capabilities provided by nvim-cmp
       "saghen/blink.cmp",
 
-      -- Better inline diagnostics with real-time updates in insert mode
+      -- Better inline diagnostics without updating on the insert hot path
       {
         "rachartier/tiny-inline-diagnostic.nvim",
         event = "VeryLazy",
@@ -74,8 +75,8 @@ return {
             preset = "minimal",
 
             options = {
-              -- Show errors while typing in insert mode
-              enable_on_insert = true,
+              -- Keep diagnostics off the insert hot path
+              enable_on_insert = false,
 
               -- Show diagnostic source (e.g., "pyright", "ts_ls")
               show_source = { enabled = true, if_many = true },
@@ -96,7 +97,7 @@ return {
               overflow = { mode = "wrap" },
 
               -- Throttle updates (lower = more responsive, higher = better performance)
-              throttle = 20,
+              throttle = 100,
             },
           })
 

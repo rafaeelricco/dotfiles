@@ -7,7 +7,15 @@ return {
     "rafaeelricco/claude-code.nvim",
     name = "claude",
     dependencies = { "folke/snacks.nvim" },
-    lazy = false,
+    cmd = {
+      "ClaudeCode",
+      "ClaudeCodeFocus",
+      "ClaudeCodeAdd",
+      "ClaudeCodeSend",
+      "ClaudeCodeTreeAdd",
+      "ClaudeCodeDiffAccept",
+      "ClaudeCodeDiffDeny",
+    },
     config = true,
     keys = {
       { "<leader>a",  nil,                              desc = "AI/Claude Code" },
