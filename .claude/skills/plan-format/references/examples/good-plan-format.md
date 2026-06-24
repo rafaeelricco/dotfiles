@@ -2,20 +2,15 @@
 
 ## Context
 
-The venue-capture screen records video with a **tap-to-start / tap-to-stop** button (added in
-IMP-1342). Press-and-hold — hold to record, release to stop — is the more common, expected gesture.
-This swaps the video-mode record button to press-and-hold and hardens the start/stop race so a
-quick tap or an early release can't leave an orphaned recording running to the 60s cap.
+Video mode changes tap-toggle to press-and-hold. The plan shows async intent state,
+gesture wiring, and verification as approval-ready diffs.
 
 Single file: `app/mobile/src/app/(tabs)/activities/[activityId]/venue-intelligence.tsx`. No new
 deps, no native change, no backend.
 
 ## Change 1 — handlers: hold-safe start/stop
 
-The button will fire `onStartRecording` on touch-down and `onStopRecording` on release. Because
-`startRecording` is async (it may await the mic-permission prompt before `recordAsync` actually
-begins), a fast release can call `stopRecording` _before_ recording starts — orphaning the clip.
-A `recordIntentRef` tracks whether the finger is still down so start can bail/stop immediately.
+A `recordIntentRef` prevents early release from orphaning async camera recording.
 
 ```diff
 # venue-intelligence.tsx:244 (SurveyCaptureView)
@@ -77,9 +72,7 @@ A `recordIntentRef` tracks whether the finger is still down so start can bail/st
 
 ## Change 3 — hint text (discoverability)
 
-Press-and-hold is invisible without a cue. Add a one-line hint in video mode (uses the `captureMode`
-
-- `recording` props `CaptureControls` already receives), placed between the button row and the Done button.
+Add a small video-mode cue using existing `captureMode` and `recording` props.
 
 ```diff
 # venue-intelligence.tsx:472 (CaptureControls, after the button row's closing </View>)
@@ -95,7 +88,7 @@ Press-and-hold is invisible without a cue. Add a one-line hint in video mode (us
 ## Verification
 
 - `cd app/mobile && npm run typecheck && npm run lint` (changed file clean).
-- On-device (Argent, camera-enabled): video mode → **hold** the shutter → records (red square shows); **release** → clip lands in the grid. Verify: a quick **tap** leaves no recording running; holding past 60s auto-stops; switching to Photo mode still taps to shoot.
+- Device: hold records; release stops; quick tap leaves no orphan; Photo mode still taps.
 
 ## Risks / notes
 
