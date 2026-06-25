@@ -15,7 +15,13 @@ Before implementing:
 - If a simpler approach exists, say so. Push back when warranted.
 - If something is unclear, stop. Name what's confusing. Ask.
 
-## 2. Simplicity First
+## 2. Coding Standards
+
+**Prefer functional, type-safe implementation.**
+
+Before planning, editing, refactoring, debugging, or reviewing code: invoke the `/coding-standards` skill and follow it for implementation style.
+
+## 3. Simplicity First
 
 **Minimum code that solves the problem. Nothing speculative.**
 
@@ -27,7 +33,7 @@ Before implementing:
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
-## 3. Surgical Changes
+## 4. Surgical Changes
 
 **Touch only what you must. Clean up only your own mess.**
 
@@ -45,7 +51,7 @@ When your changes create orphans:
 
 The test: Every changed line should trace directly to the user's request.
 
-## 4. Goal-Driven Execution
+## 5. Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
 
@@ -65,7 +71,7 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 5. Plan Mode: Make Changes Reviewable
+## 6. Plan Mode: Make Changes Reviewable
 
 **Plans show the change as a diff, not prose. I'm approving diffs.**
 
