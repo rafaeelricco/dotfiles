@@ -14,7 +14,6 @@ Before implementing:
 - If multiple interpretations exist, present them - don't pick silently.
 - If a simpler approach exists, say so. Push back when warranted.
 - If something is unclear, stop. Name what's confusing. Ask.
-- Avoid over-literal interpretation; consider the context, mode, and intent of the question or request before acting.
 
 ## 2. Simplicity First
 
