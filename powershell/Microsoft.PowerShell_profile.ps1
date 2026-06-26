@@ -98,6 +98,8 @@ if (-not (Get-Module -Name PSReadLine)) {
     }
 }
 
+Set-PSReadLineOption -EditMode Emacs
+
 Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 Set-PSReadLineKeyHandler -Key Tab -Function Complete
 Set-PSReadLineKeyHandler -Key Alt+Delete -Function KillWord
@@ -108,7 +110,7 @@ Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
 Set-PSReadLineOption -ShowToolTips
 try { Set-PSReadLineOption -PredictionSource History -ErrorAction Stop } catch {}
 try { Set-PSReadLineOption -PredictionViewStyle ListView -ErrorAction Stop } catch {}
-Set-PSReadLineOption -EditMode Emacs
+Set-PSReadLineKeyHandler -Chord 'Ctrl+v' -Function Paste
 
 $baseColors = @{
     Command   = 'DarkYellow'
