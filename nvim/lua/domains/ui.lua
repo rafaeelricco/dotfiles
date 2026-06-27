@@ -286,6 +286,7 @@ return {
   },
 
   -- Smooth scrolling plugin for both horizontal and vertical movement
+  --[[
   {
     "karb94/neoscroll.nvim",
     config = function()
@@ -330,6 +331,7 @@ return {
       end
     end,
   },
+  ]]
 
   -- Animated cursor trail (smear effect) on cursor movement
   --

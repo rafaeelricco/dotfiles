@@ -38,8 +38,8 @@ return {
       { "<leader>ar", "<cmd>ClaudeCode --resume<cr>",   desc = "Resume Claude" },
       { "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude" },
       { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>",       desc = "Add current buffer" },
-      { "<leader>as", "<cmd>ClaudeCodeSend<cr>",        mode = "v", desc = "Send to Claude" },
-      { "<leader>as", "<cmd>ClaudeCodeTreeAdd<cr>",     desc = "Add file", ft = { "NvimTree", "neo-tree", "oil" } },
+      { "<leader>as", "<cmd>ClaudeCodeSend<cr>",        mode = "v",                 desc = "Send to Claude" },
+      { "<leader>as", "<cmd>ClaudeCodeTreeAdd<cr>",     desc = "Add file",          ft = { "NvimTree", "neo-tree", "oil" } },
       { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>",  desc = "Accept diff" },
       { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>",    desc = "Deny diff" },
     },
@@ -63,11 +63,14 @@ return {
 
       -- Recommended/example keymaps.
       -- vim.keymap.set({ "n", "x" }, "<C-s>", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask opencode…" })
-      vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end,                          { desc = "Execute opencode action…" })
-      vim.keymap.set({ "n", "t" }, "<C-.>", function() require("opencode").toggle() end,                          { desc = "Toggle opencode" })
+      vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end,
+        { desc = "Execute opencode action…" })
+      vim.keymap.set({ "n", "t" }, "<C-.>", function() require("opencode").toggle() end, { desc = "Toggle opencode" })
 
-      vim.keymap.set({ "n", "x" }, "go",  function() return require("opencode").operator("@this ") end, { desc = "Add range to opencode", expr = true })
-      vim.keymap.set("n", "goo", function() return require("opencode").operator("@this ") .. "_" end, { desc = "Add line to opencode", expr = true })
+      vim.keymap.set({ "n", "x" }, "go", function() return require("opencode").operator("@this ") end,
+        { desc = "Add range to opencode", expr = true })
+      vim.keymap.set("n", "goo", function() return require("opencode").operator("@this ") .. "_" end,
+        { desc = "Add line to opencode", expr = true })
 
       -- You may want these if you stick with the opinionated "<C-a>" and "<C-x>" above — otherwise consider "<leader>o…".
       vim.keymap.set("n", "+", "<C-a>", { desc = "Increment under cursor", noremap = true })
@@ -76,9 +79,12 @@ return {
   },
   {
     "github/copilot.vim",
-    event = "InsertEnter",
-    config = function()
-      -- Prevents Copilot from overriding the default <Tab> behavior.
+    -- Load Copilot together with nvim instead of deferring to the first
+    -- InsertEnter, so the agent connects and `:Copilot` is ready at startup.
+    lazy = false,
+    init = function()
+      -- These globals must be set BEFORE copilot.vim loads.
+      -- Prevents Copilot from mapping <Tab> itself (we map it in config below).
       vim.g.copilot_no_tab_map = true
       vim.g.copilot_assume_mapped = true
 
@@ -93,7 +99,8 @@ return {
       -- Defines which filetypes Copilot should be active in, disabling it for
       -- specific buffers like git commits, help pages, and file explorers.
       vim.g.copilot_filetypes = { ["*"] = true }
-
+    end,
+    config = function()
       -- <Tab> accepts the Copilot suggestion when one is shown; otherwise inserts a
       -- real <Tab>. Explicit check avoids the literal "<Tab>" fallback bug and the
       -- "nothing happens" case. replace_keycodes=false keeps the suggestion text
