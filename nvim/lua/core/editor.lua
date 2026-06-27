@@ -35,7 +35,7 @@ vim.keymap.set("t", "<S-CR>", "\\<CR>", { desc = "Send line continuation in term
 -- Navigate between window splits using Ctrl + hjkl keys
 -- Reference: `:help wincmd` for comprehensive window commands
 vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left window" })
-vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
+-- vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
 
@@ -67,8 +67,8 @@ vim.keymap.set("v", "<S-Tab>", "<gv", { desc = "Unindent selected block" })
 
 -- Indent and unindent current line in normal mode
 -- Uses '>>' and '<<' commands which respect shiftwidth settings
-vim.keymap.set("n", "<Tab>", ">>", { desc = "Indent current line" })
-vim.keymap.set("n", "<S-Tab>", "<<", { desc = "Unindent current line" })
+-- vim.keymap.set("n", "<Tab>", ">>", { desc = "Indent current line" })
+-- vim.keymap.set("n", "<S-Tab>", "<<", { desc = "Unindent current line" })
 
 -- Configure horizontal scrolling to only occur when lines exceed window width
 vim.opt.sidescroll = 1      -- Smooth horizontal scrolling when needed
@@ -90,16 +90,16 @@ vim.opt.whichwrap = "b,s,<,>,[,]"  -- Allow cursor to wrap at line boundaries
 
 -- Navigate to start and end of line using Command+Arrow keys (sent as Ctrl-A/Ctrl-E by terminal)
 -- Note: Ghostty translates Command+Left to Ctrl-A and Command+Right to Ctrl-E
-vim.keymap.set("n", "<C-A>", "^", { desc = "Move to start of line" })
-vim.keymap.set("n", "<C-E>", "$", { desc = "Move to end of line" })
+-- vim.keymap.set("n", "<C-A>", "^", { desc = "Move to start of line" })
+-- vim.keymap.set("n", "<C-E>", "$", { desc = "Move to end of line" })
 
 -- Insert mode: temporarily exit insert mode, navigate, return to insert mode
-vim.keymap.set("i", "<C-A>", "<Esc>^i", { desc = "Move to start of line" })
-vim.keymap.set("i", "<C-E>", "<Esc>$a", { desc = "Move to end of line" })
+-- vim.keymap.set("i", "<C-A>", "<Esc>^i", { desc = "Move to start of line" })
+-- vim.keymap.set("i", "<C-E>", "<Esc>$a", { desc = "Move to end of line" })
 
 -- Visual mode: extend selection to line boundaries
-vim.keymap.set("v", "<C-A>", "^", { desc = "Extend selection to start of line" })
-vim.keymap.set("v", "<C-E>", "$", { desc = "Extend selection to end of line" })
+-- vim.keymap.set("v", "<C-A>", "^", { desc = "Extend selection to start of line" })
+-- vim.keymap.set("v", "<C-E>", "$", { desc = "Extend selection to end of line" })
 
 -- Delete word backward using Option+Backspace
 vim.keymap.set("i", "<M-BS>", "<C-w>", { desc = "Delete word backward" })

@@ -1,9 +1,0 @@
-{
-  "name": "mental-model-auditor",
-  "displayName": "Mental Model Auditor Skill",
-  "description": "Audit, update, and create mental model documents by comparing them against a live prototype or its source code. Use this skill whenever the user asks to sync, audit, update, review, or validate a mental model (YAML, Markdown, or any structured doc that describes how a system works) against a running prototype or staging environment. Also trigger when the user says things like \"the prototype changed, update the model\", \"check if the mental model matches what we built\", \"diff the spec against the app\", or \"we need a new model for this feature\". This skill inspects local context first, asks only for missing inputs, and always produces an approval-ready audit plan before doing the deeper audit work.",
-  "author": {
-    "name": "Rafael Ricco"
-  },
-  "repository": "https://github.com/rafaeelricco/dotfiles"
-}

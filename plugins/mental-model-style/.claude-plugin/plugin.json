@@ -1,9 +1,0 @@
-{
-  "name": "mental-model-style",
-  "displayName": "Mental Model Style Skill",
-  "description": "Enforces consistent writing structure across mental model YAML files by rewriting them to match a user-supplied reference set. Use when the user wants to apply, standardize, or enforce a writing style across models, or says things like \"apply style\", \"same style as\", \"standardize this model\", \"clean up the writing\", \"enforce writing style\", or flags a model as too verbose, too dense, uneven, hard to scan, or inconsistent with the rest of the models.",
-  "author": {
-    "name": "Rafael Ricco"
-  },
-  "repository": "https://github.com/rafaeelricco/dotfiles"
-}

@@ -1,9 +1,0 @@
-{
-  "name": "mental-model-yml",
-  "displayName": "Mental Model YML Skill",
-  "description": "Converts source documents (transcripts, briefs, specs, flow descriptions) into structured YAML mental model files. Use this skill whenever the user wants to create a mental model, convert a document into a .yml mental model, generate a business or UX/UI model from source material, or mentions 'mental model', 'yml model', 'YAML model', or asks to structure project knowledge into models. Also trigger when the user provides a transcript or brief and asks to 'extract a model', 'structure this', or 'turn this into a mental model'. Covers both business-domain models (how a business works, operational flows, strategy) and UI/UX models (screens, features, interaction flows).",
-  "author": {
-    "name": "Rafael Ricco"
-  },
-  "repository": "https://github.com/rafaeelricco/dotfiles"
-}

@@ -1,9 +1,0 @@
-{
-  "name": "stop-slop",
-  "displayName": "Stop Slop Skill",
-  "description": "Remove AI writing patterns from prose. Use when drafting, editing, or reviewing text to eliminate predictable AI tells.",
-  "author": {
-    "name": "Rafael Ricco"
-  },
-  "repository": "https://github.com/rafaeelricco/dotfiles"
-}
