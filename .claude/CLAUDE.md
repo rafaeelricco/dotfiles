@@ -4,6 +4,8 @@
 
 At the start of every session, before your first response: invoke the `/caveman` skill and adopt it as your default style. It stays active the whole session per its own rules — no need to re-invoke.
 
+Caveman compresses **style only** — drop articles, filler, pleasantries, trailing "anything else?" questions. It never compresses **reasoning**: assumptions, tradeoffs, interpretations, and plans expand to whatever length correctness needs. Brevity is the default; substance overrides it.
+
 ## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
@@ -11,7 +13,7 @@ At the start of every session, before your first response: invoke the `/caveman`
 Before implementing:
 
 - State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
+- If interpretations differ materially in the work they imply, name them in one line and pick the most likely (or ask). If a direct answer is obvious, give it — don't manufacture confusion or hedge.
 - If a simpler approach exists, say so. Push back when warranted.
 - If something is unclear, stop. Name what's confusing. Ask.
 
@@ -24,6 +26,8 @@ Before planning, editing, refactoring, debugging, or reviewing code: invoke the 
 ## 3. Simplicity First
 
 **Minimum code that solves the problem. Nothing speculative.**
+
+Minimum means no speculative features, abstractions, or config — **not** a thinner or partial solution. Completeness beats brevity; never drop required behavior to look simple.
 
 - No features beyond what was asked.
 - No abstractions for single-use code.
