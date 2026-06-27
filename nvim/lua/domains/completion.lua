@@ -180,8 +180,8 @@ return {
             end,
           },
         },
-        -- Inline preview of the selected item
-        ghost_text = { enabled = true },
+        -- Inline preview disabled: Copilot owns inline ghost text (avoids overlap).
+        ghost_text = { enabled = false },
       },
 
       sources = {

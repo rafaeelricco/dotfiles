@@ -368,6 +368,9 @@ return {
   --                        (7 ~ 144fps, 17 ~ 60fps).
   --   distance_stop_animating  cells before the animation stops; higher = cuts
   --                            earlier, drier feel.
+  -- smear-cursor disabled: its per-frame floating-window redraws (~120fps) made
+  -- Neogit/diffview commit views laggy. Re-enable by uncommenting this block.
+  --[[
   {
     "sphamba/smear-cursor.nvim",
     event = "VeryLazy", -- load shortly after startup so the smear is active without a trigger
@@ -398,4 +401,5 @@ return {
       { "<leader>ts", "<cmd>SmearCursorToggle<cr>", desc = "[T]oggle [S]mear cursor" },
     },
   },
+  --]]
 }

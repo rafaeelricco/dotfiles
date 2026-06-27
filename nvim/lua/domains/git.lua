@@ -32,54 +32,8 @@ return {
       { "<leader>gs", "<cmd>Neogit<cr>", desc = "Git Status (Neogit)" },
     },
     opts = {
-      -- Open Neogit in a centered floating window (Telescope-style)
-      kind = "floating",
-      
-      -- Disable hints at the top for a cleaner interface
-      disable_hint = false,
-      
-      -- Enable context highlighting for better visual feedback
-      disable_context_highlighting = false,
-      
-      -- Keep signs enabled for visual indicators
-      disable_signs = false,
-      
-      -- Configure signs for sections, items, and hunks
-      signs = {
-        -- { CLOSED, OPENED }
-        section = { "", "" },
-        item = { "", "" },
-        hunk = { "", "" },
-      },
-      
-      -- Integration with other plugins
-      integrations = {
-        diffview = true, -- Enable diffview integration if available
-        telescope = true, -- Enable telescope integration if available
-      },
-      
-      -- Use default keymaps for consistency
-      use_default_keymaps = true,
-      
-      -- Auto-refresh the status buffer
-      auto_refresh = true,
-      
-      -- Remember settings across sessions
-      remember_settings = true,
-      use_per_project_settings = true,
-      
-      -- Configure commit editor
-      commit_editor = {
-        kind = "tab",
-        show_staged_diff = true,
-        staged_diff_split_kind = "split",
-      },
-      
-      -- Status buffer configuration
-      status = {
-        recent_commit_count = 10,
-        HEAD_folded = false,
-      },
+      -- Use Neogit defaults (kind = "tab"); avoids the floating window
+      -- overlapping commit/diff views when reviewing past commits.
     },
   },
 }
