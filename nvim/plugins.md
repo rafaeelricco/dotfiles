@@ -1,12 +1,12 @@
 # Neovim Plugin Configuration
 
-## Currently Installed Plugins (24 total)
+## Currently Installed Plugins (24 plugins in total)
 
 ### AI (1 plugin)
 
 - [github/copilot.vim](https://github.com/github/copilot.vim): GitHub Copilot AI pair programmer with custom keybindings for accepting suggestions and navigating completions.
 
-_Note: `claude-code.nvim` is commented out in the AI domain configuration but remains available for future use._
+_Note: `claude-code.nvim` is installed from [rafaeelricco/claude-code.nvim](https://github.com/rafaeelricco/claude-code.nvim) in the AI domain configuration._
 
 ### Completion (1 plugin)
 

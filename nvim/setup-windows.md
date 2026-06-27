@@ -42,17 +42,17 @@ setx CC gcc
 setx CXX g++
 ```
 
-> Without `CC`/`CXX`, parser builds fail with *"Failed to execute the C
-> compiler — program not found"*. scoop already adds gcc's `bin` to `PATH`.
+> Without `CC`/`CXX`, parser builds fail with _"Failed to execute the C
+> compiler — program not found"_. scoop already adds gcc's `bin` to `PATH`.
 
-| Dep            | Why it's needed                                                              |
-| -------------- | ---------------------------------------------------------------------------- |
-| `tree-sitter`  | `nvim-treesitter` (branch `main`) compiles its parsers via the CLI           |
-| `gcc`          | C compiler used by tree-sitter **and** by `make` for `telescope-fzf-native`  |
-| `make`         | `telescope-fzf-native.nvim` builds with `make`                               |
-| `ripgrep`      | Telescope `live_grep` / snacks grep                                          |
-| `fd`           | Telescope / snacks file finding                                              |
-| `lazygit`      | optional — `snacks.lazygit`                                                  |
+| Dep           | Why it's needed                                                             |
+| ------------- | --------------------------------------------------------------------------- |
+| `tree-sitter` | `nvim-treesitter` (branch `main`) compiles its parsers via the CLI          |
+| `gcc`         | C compiler used by tree-sitter **and** by `make` for `telescope-fzf-native` |
+| `make`        | `telescope-fzf-native.nvim` builds with `make`                              |
+| `ripgrep`     | Telescope `live_grep` / snacks grep                                         |
+| `fd`          | Telescope / snacks file finding                                             |
+| `lazygit`     | optional — `snacks.lazygit`                                                 |
 
 Also required at runtime (not via scoop):
 
