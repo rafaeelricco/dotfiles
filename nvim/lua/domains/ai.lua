@@ -20,7 +20,11 @@ return {
   {
     "rafaeelricco/claude-code.nvim",
     name = "claude",
+    dir = "/Users/rafaelricco/Projects/r1cco/claude-code.nvim",
     dependencies = { "folke/snacks.nvim" },
+    -- Load at startup so the plugin (and its commands) are ready immediately,
+    -- instead of deferring to the first ClaudeCode command or keymap.
+    lazy = false,
     cmd = {
       "ClaudeCode",
       "ClaudeCodeFocus",
@@ -44,39 +48,39 @@ return {
       { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>",    desc = "Deny diff" },
     },
   },
-  {
-    "NickvanDyke/opencode.nvim",
-    dependencies = {
-      -- Recommended for `ask()` and `select()`.
-      -- Configured eagerly in the standalone snacks spec above.
-      ---@module 'snacks' <- Loads `snacks.nvim` types for configuration intellisense.
-      "folke/snacks.nvim",
-    },
-    config = function()
-      ---@type opencode.Opts
-      vim.g.opencode_opts = {
-        -- Your configuration, if any — see `lua/opencode/config.lua`, or "goto definition" on the type or field.
-      }
-
-      -- Required for `opts.events.reload`.
-      vim.o.autoread = true
-
-      -- Recommended/example keymaps.
-      -- vim.keymap.set({ "n", "x" }, "<C-s>", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask opencode…" })
-      vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end,
-        { desc = "Execute opencode action…" })
-      vim.keymap.set({ "n", "t" }, "<C-.>", function() require("opencode").toggle() end, { desc = "Toggle opencode" })
-
-      vim.keymap.set({ "n", "x" }, "go", function() return require("opencode").operator("@this ") end,
-        { desc = "Add range to opencode", expr = true })
-      vim.keymap.set("n", "goo", function() return require("opencode").operator("@this ") .. "_" end,
-        { desc = "Add line to opencode", expr = true })
-
-      -- You may want these if you stick with the opinionated "<C-a>" and "<C-x>" above — otherwise consider "<leader>o…".
-      vim.keymap.set("n", "+", "<C-a>", { desc = "Increment under cursor", noremap = true })
-      vim.keymap.set("n", "-", "<C-x>", { desc = "Decrement under cursor", noremap = true })
-    end,
-  },
+  -- {
+  --   "NickvanDyke/opencode.nvim",
+  --   dependencies = {
+  --     -- Recommended for `ask()` and `select()`.
+  --     -- Configured eagerly in the standalone snacks spec above.
+  --     ---@module 'snacks' <- Loads `snacks.nvim` types for configuration intellisense.
+  --     "folke/snacks.nvim",
+  --   },
+  --   config = function()
+  --     ---@type opencode.Opts
+  --     vim.g.opencode_opts = {
+  --       -- Your configuration, if any — see `lua/opencode/config.lua`, or "goto definition" on the type or field.
+  --     }
+  --
+  --     -- Required for `opts.events.reload`.
+  --     vim.o.autoread = true
+  --
+  --     -- Recommended/example keymaps.
+  --     -- vim.keymap.set({ "n", "x" }, "<C-s>", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask opencode…" })
+  --     vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end,
+  --       { desc = "Execute opencode action…" })
+  --     vim.keymap.set({ "n", "t" }, "<C-.>", function() require("opencode").toggle() end, { desc = "Toggle opencode" })
+  --
+  --     vim.keymap.set({ "n", "x" }, "go", function() return require("opencode").operator("@this ") end,
+  --       { desc = "Add range to opencode", expr = true })
+  --     vim.keymap.set("n", "goo", function() return require("opencode").operator("@this ") .. "_" end,
+  --       { desc = "Add line to opencode", expr = true })
+  --
+  --     -- You may want these if you stick with the opinionated "<C-a>" and "<C-x>" above — otherwise consider "<leader>o…".
+  --     vim.keymap.set("n", "+", "<C-a>", { desc = "Increment under cursor", noremap = true })
+  --     vim.keymap.set("n", "-", "<C-x>", { desc = "Decrement under cursor", noremap = true })
+  --   end,
+  -- },
   {
     "github/copilot.vim",
     -- Load Copilot together with nvim instead of deferring to the first

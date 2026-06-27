@@ -153,3 +153,18 @@ vim.keymap.set("n", "<leader>yd", function()
   vim.fn.setreg("+", table.concat(messages, "\n"))
   vim.notify(string.format("Copied %d diagnostic(s) to clipboard", #diagnostics), vim.log.levels.INFO)
 end, { desc = "[Y]ank line [D]iagnostics to clipboard" })
+
+-- =============================================
+-- Config Reload
+-- =============================================
+
+-- Reload the colorscheme module live without restarting Neovim.
+-- Clears the Lua `require` cache for `core.profiles` so the file re-executes
+-- and re-applies highlights on the next `require`. Handy when iterating on theme
+-- colors in `lua/core/profiles.lua`.
+-- NOTE: capital <Leader>R avoids the timeout clash with <Leader>r (replace word).
+vim.keymap.set("n", "<leader>Rc", function()
+  package.loaded["core.profiles"] = nil
+  require("core.profiles")
+  vim.notify("Colorscheme reloaded", vim.log.levels.INFO)
+end, { desc = "[R]eload [C]olorscheme" })

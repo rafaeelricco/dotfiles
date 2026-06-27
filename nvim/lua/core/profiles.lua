@@ -19,39 +19,44 @@ vim.opt.termguicolors = true
 local function palette()
   local light = vim.o.background == "light"
   return {
-    -- ===== Accent tier (shared across light/dark) =====
-    -- Syntax (from the VS Code token colors)
-    comment = "#6A9955",
-    keyword = "#C586C0",
-    storage = "#569CD6",
-    string = "#CE9178",
-    number = "#B5CEA8",
-    boolean = "#569CD6",
-    function_name = "#DCDCAA",
-    type = "#4EC9B0",
-    variable = "#9CDCFE",
-    constant = "#4FC1FF",
-    operator = "#D4D4D4",
-    punctuation = "#D4D4D4",
-    property = "#9CDCFE",
-    regex = "#D16969",
-    escape = "#D7BA7D",
-    preproc = "#569CD6",
-    tag = "#569CD6",
-    attribute = "#9CDCFE",
+    -- ===== Accent tier (light vs dark) =====
+    -- Syntax: dark = VS Code Dark+, light = VS Code Light+ (higher contrast on #f3f3f3)
+    comment       = light and "#008000" or "#6A9955",
+    keyword       = light and "#AF00DB" or "#C586C0",
+    storage       = light and "#0000FF" or "#569CD6",
+    string        = light and "#A31515" or "#CE9178",
+    number        = light and "#098658" or "#B5CEA8",
+    boolean       = light and "#0000FF" or "#569CD6",
+    function_name = light and "#795E26" or "#DCDCAA",
+    type          = light and "#267F99" or "#4EC9B0",
+    variable      = light and "#001080" or "#9CDCFE",
+    constant      = light and "#0070C1" or "#4FC1FF",
+    operator      = light and "#2e2e2e" or "#D4D4D4",
+    punctuation   = light and "#2e2e2e" or "#D4D4D4",
+    property      = light and "#001080" or "#9CDCFE",
+    regex         = light and "#811F3F" or "#D16969",
+    escape        = light and "#B5650D" or "#D7BA7D",
+    preproc       = light and "#0000FF" or "#569CD6",
+    tag           = light and "#800000" or "#569CD6",
+    attribute     = light and "#001080" or "#9CDCFE",
+
+    -- TSX rainbow brackets (decorative)
+    bracket_round  = light and "#B8860B" or "#FFD700", -- ()
+    bracket_curly  = light and "#0070C1" or "#179FFF", -- {}
+    bracket_square = light and "#A626A4" or "#D76ED3", -- []
 
     -- Diagnostics
-    error = "#F44747",
-    warning = "#CD9731",
-    info = "#6796E6",
-    hint = "#B267E6",
+    error   = light and "#E51400" or "#F44747",
+    warning = light and "#BF8803" or "#CD9731",
+    info    = light and "#1A85FF" or "#6796E6",
+    hint    = light and "#8250DF" or "#B267E6",
 
     -- Git / diff
-    git_add = "#2ea043",
+    git_add = light and "#1A7F37" or "#2ea043",
     git_change = "#0078d4",
-    git_delete = "#f85149",
-    diff_add = "#2d4a2b",
-    diff_delete = "#4a2d2d",
+    git_delete = light and "#CF222E" or "#f85149",
+    diff_add = light and "#cdeacf" or "#2d4a2b",      -- bg tint (pale green on light)
+    diff_delete = light and "#f6d8d8" or "#4a2d2d",   -- bg tint (pale red on light)
     diff_change = "#569CD6",
 
     -- Blue accents and search (legible on both modes)
@@ -85,7 +90,7 @@ local function palette()
     widget_bg = light and "#f3f3f3" or "#181818",
     sidebar_bg = light and "#f3f3f3" or "#181818",
     notification_bg = light and "#f3f3f3" or "#1f1f1f",
-    surface_menu = light and "#eaeaea" or "#1e1e1e", -- Blink completion menu
+    surface_menu = light and "#cacaca" or "#2f2f2f", -- floats + Blink completion menu (matches cursor_line)
     surface_doc = light and "#e4e4e4" or "#252526", -- Blink docs / signature
     input_bg = light and "#e0e0e0" or "#313131",
     dropdown_bg = light and "#e0e0e0" or "#313131",
@@ -93,7 +98,7 @@ local function palette()
     tab_border = light and "#c8c8c8" or "#2b2b2b",
     panel_border = light and "#c8c8c8" or "#2b2b2b",
     notification_border = light and "#c8c8c8" or "#2b2b2b",
-    cursor_line = light and "#e8e8e8" or "#222222",
+    cursor_line = light and "#cacaca" or "#2f2f2f",
     selection = light and "#cfe0f5" or "#264f78",
     visual = light and "#d4d4d4" or "#3a3d41",
     line_nr = light and "#b3b3b3" or "#2e3038",
@@ -123,7 +128,7 @@ local function apply()
   local highlights = {
     -- === EDITOR CORE ===
     Normal = { fg = colors.fg }, -- bg from terminal (transparent)
-    NormalFloat = { fg = colors.fg, bg = colors.menu_bg },
+    NormalFloat = { fg = colors.fg, bg = colors.surface_menu }, -- subtle lift over bg
     NormalNC = { fg = colors.fg }, -- bg from terminal (transparent)
 
     -- === LINE NUMBERS ===
@@ -311,60 +316,60 @@ local function apply()
 
     -- === LANGUAGE-SPECIFIC HIGHLIGHTS ===
     -- TypeScript/TSX specific highlights
-    ["@variable.tsx"] = { fg = "#9CDCFE" },
-    ["@type.tsx"] = { fg = "#9CDCFE" },
-    ["@constant.tsx"] = { fg = "#9CDCFE" },
-    ["@keyword.tsx"] = { fg = "#569CD6" },
+    ["@variable.tsx"] = { fg = colors.variable },
+    ["@type.tsx"] = { fg = colors.variable },
+    ["@constant.tsx"] = { fg = colors.variable },
+    ["@keyword.tsx"] = { fg = colors.storage },
 
-    ["@operator.tsx"] = { fg = "#569CD6" },
-    ["@character.special.tsx"] = { fg = "#569CD6" },
+    ["@operator.tsx"] = { fg = colors.storage },
+    ["@character.special.tsx"] = { fg = colors.storage },
 
-    ["@_jsx_element.tsx"] = { fg = "#179FFF" },
-    ["@_jsx_attribute.tsx"] = { fg = "#179FFF" },
+    ["@_jsx_element.tsx"] = { fg = colors.constant },
+    ["@_jsx_attribute.tsx"] = { fg = colors.constant },
     -- Remove the general bracket highlight to let specific ones take precedence
-    ["@tag.builtin.tsx"] = { fg = "#4EC9B0" },
-    ["@tag.tsx"] = { fg = "#4EC9B0" },
-    ["@variable.member.tsx"] = { fg = "#9CDCFE" },
+    ["@tag.builtin.tsx"] = { fg = colors.type },
+    ["@tag.tsx"] = { fg = colors.type },
+    ["@variable.member.tsx"] = { fg = colors.property },
 
     -- LSP Semantic Tokens for TypeScript/TSX
-    ["@lsp.type.variable.typescriptreact"] = { fg = "#4FC1FF" },
-    ["@lsp.type.property.typescriptreact"] = { fg = "#9CDCFE" },
-    ["@lsp.mod.declaration.typescriptreact"] = { fg = "#9CDCFE" },
-    ["@lsp.mod.local.typescriptreact"] = { fg = "#4FC1FF" },
-    ["@lsp.mod.readonly.typescriptreact"] = { fg = "#4FC1FF" },
-    ["@lsp.typemod.variable.declaration.typescriptreact"] = { fg = "#4FC1FF" },
-    ["@lsp.typemod.variable.local.typescriptreact"] = { fg = "#4FC1FF" },
-    ["@lsp.typemod.variable.readonly.typescriptreact"] = { fg = "#4FC1FF" },
-    ["@lsp.typemod.property.declaration.typescriptreact"] = { fg = "#9CDCFE" },
+    ["@lsp.type.variable.typescriptreact"] = { fg = colors.constant },
+    ["@lsp.type.property.typescriptreact"] = { fg = colors.property },
+    ["@lsp.mod.declaration.typescriptreact"] = { fg = colors.variable },
+    ["@lsp.mod.local.typescriptreact"] = { fg = colors.constant },
+    ["@lsp.mod.readonly.typescriptreact"] = { fg = colors.constant },
+    ["@lsp.typemod.variable.declaration.typescriptreact"] = { fg = colors.constant },
+    ["@lsp.typemod.variable.local.typescriptreact"] = { fg = colors.constant },
+    ["@lsp.typemod.variable.readonly.typescriptreact"] = { fg = colors.constant },
+    ["@lsp.typemod.property.declaration.typescriptreact"] = { fg = colors.property },
 
     -- Function semantic tokens for TypeScript/TSX
-    ["@lsp.type.function.typescriptreact"] = { fg = "#DCDCAA" },
-    ["@lsp.typemod.function.declaration.typescriptreact"] = { fg = "#DCDCAA" },
-    ["@lsp.typemod.function.local.typescriptreact"] = { fg = "#DCDCAA" },
-    ["@lsp.typemod.function.readonly.typescriptreact"] = { fg = "#DCDCAA" },
+    ["@lsp.type.function.typescriptreact"] = { fg = colors.function_name },
+    ["@lsp.typemod.function.declaration.typescriptreact"] = { fg = colors.function_name },
+    ["@lsp.typemod.function.local.typescriptreact"] = { fg = colors.function_name },
+    ["@lsp.typemod.function.readonly.typescriptreact"] = { fg = colors.function_name },
 
     -- Also add for TypeScript files (not just TSX)
-    ["@variable.typescript"] = { fg = "#9CDCFE" },
-    ["@type.typescript"] = { fg = "#9CDCFE" },
-    ["@constant.typescript"] = { fg = "#9CDCFE" },
-    ["@keyword.typescript"] = { fg = "#569CD6" },
-    ["@operator.typescript"] = { fg = "#569CD6" },
-    ["@character.special.typescript"] = { fg = "#569CD6" },
+    ["@variable.typescript"] = { fg = colors.variable },
+    ["@type.typescript"] = { fg = colors.variable },
+    ["@constant.typescript"] = { fg = colors.variable },
+    ["@keyword.typescript"] = { fg = colors.storage },
+    ["@operator.typescript"] = { fg = colors.storage },
+    ["@character.special.typescript"] = { fg = colors.storage },
 
     -- LSP Semantic Tokens for TypeScript
-    ["@lsp.type.variable.typescript"] = { fg = "#4FC1FF" },
-    ["@lsp.mod.declaration.typescript"] = { fg = "#4FC1FF" },
-    ["@lsp.mod.local.typescript"] = { fg = "#4FC1FF" },
-    ["@lsp.mod.readonly.typescript"] = { fg = "#4FC1FF" },
-    ["@lsp.typemod.variable.declaration.typescript"] = { fg = "#4FC1FF" },
-    ["@lsp.typemod.variable.local.typescript"] = { fg = "#4FC1FF" },
-    ["@lsp.typemod.variable.readonly.typescript"] = { fg = "#4FC1FF" },
+    ["@lsp.type.variable.typescript"] = { fg = colors.constant },
+    ["@lsp.mod.declaration.typescript"] = { fg = colors.constant },
+    ["@lsp.mod.local.typescript"] = { fg = colors.constant },
+    ["@lsp.mod.readonly.typescript"] = { fg = colors.constant },
+    ["@lsp.typemod.variable.declaration.typescript"] = { fg = colors.constant },
+    ["@lsp.typemod.variable.local.typescript"] = { fg = colors.constant },
+    ["@lsp.typemod.variable.readonly.typescript"] = { fg = colors.constant },
 
     -- Function semantic tokens for TypeScript
-    ["@lsp.type.function.typescript"] = { fg = "#DCDCAA" },
-    ["@lsp.typemod.function.declaration.typescript"] = { fg = "#DCDCAA" },
-    ["@lsp.typemod.function.local.typescript"] = { fg = "#DCDCAA" },
-    ["@lsp.typemod.function.readonly.typescript"] = { fg = "#DCDCAA" },
+    ["@lsp.type.function.typescript"] = { fg = colors.function_name },
+    ["@lsp.typemod.function.declaration.typescript"] = { fg = colors.function_name },
+    ["@lsp.typemod.function.local.typescript"] = { fg = colors.function_name },
+    ["@lsp.typemod.function.readonly.typescript"] = { fg = colors.function_name },
 
     -- === DIAGNOSTICS ===
     DiagnosticError = { fg = colors.error },
@@ -416,15 +421,15 @@ local function apply()
 
     -- === NEOVIM SPECIFIC ===
     -- FloatBorder for floating windows
-    FloatBorder = { fg = colors.border, bg = colors.menu_bg },
-    FloatTitle = { fg = colors.fg, bg = colors.menu_bg, bold = true },
+    FloatBorder = { fg = colors.border, bg = colors.surface_menu },
+    FloatTitle = { fg = colors.fg, bg = colors.surface_menu, bold = true },
 
     -- WhichKey
     WhichKey = { fg = colors.keyword },
     WhichKeyGroup = { fg = colors.type },
     WhichKeyDesc = { fg = colors.fg },
     WhichKeySeperator = { fg = colors.comment },
-    WhichKeyFloat = { bg = colors.menu_bg },
+    WhichKeyFloat = { bg = colors.surface_menu },
     WhichKeyBorder = { fg = colors.border },
 
     -- Telescope (if using)
@@ -468,7 +473,7 @@ local function apply()
     NeoTreeGitConflict = { fg = colors.error },
     NeoTreeGitDeleted = { fg = colors.git_delete },
     NeoTreeGitModified = { fg = colors.git_change },
-    NeoTreeGitUntracked = { fg = "#73c991" },
+    NeoTreeGitUntracked = { fg = colors.git_add },
     NeoTreeIndentMarker = { fg = colors.indent_guide },
     NeoTreeExpander = { fg = colors.indent_guide },
     NeoTreeFloatBorder = { fg = colors.border },
@@ -554,9 +559,9 @@ local function apply()
     TroubleFoldIconOpen = { fg = colors.description_fg },
 
     -- === TSX BRACKET PAIRS (override general bracket color) ===
-    ["@punctuation.bracket.round.tsx"] = { fg = "#FFD700" }, -- parentheses ()
-    ["@punctuation.bracket.curly.tsx"] = { fg = "#179FFF" }, -- curly braces {}
-    ["@punctuation.bracket.square.tsx"] = { fg = "#D76ED3" }, -- square brackets []
+    ["@punctuation.bracket.round.tsx"] = { fg = colors.bracket_round }, -- ()
+    ["@punctuation.bracket.curly.tsx"] = { fg = colors.bracket_curly }, -- {}
+    ["@punctuation.bracket.square.tsx"] = { fg = colors.bracket_square }, -- []
 
     -- === BLINK.CMP (completion menu / docs) ===
     BlinkCmpMenu = { bg = colors.surface_menu, fg = colors.fg },
@@ -564,7 +569,7 @@ local function apply()
     BlinkCmpMenuSelection = { bg = colors.selection, fg = colors.fg },
     BlinkCmpLabel = { fg = colors.fg },
     BlinkCmpLabelDescription = { fg = colors.variable, italic = true },
-    BlinkCmpSource = { fg = "#608b4e", bold = true },
+    BlinkCmpSource = { fg = colors.comment, bold = true },
     BlinkCmpDoc = { bg = colors.surface_doc, fg = colors.fg },
     BlinkCmpDocBorder = { bg = colors.surface_doc, fg = colors.border },
     BlinkCmpSignatureHelp = { bg = colors.surface_menu, fg = colors.fg },
