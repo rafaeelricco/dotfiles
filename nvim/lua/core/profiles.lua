@@ -70,43 +70,43 @@ local function palette()
     selection_highlight = "#add6ff",
 
     -- Neutral mid-greys that read on both
-    inactive_fg = "#868686",
-    description_fg = "#9d9d9d",
-    tab_inactive_fg = "#9d9d9d",
+    inactive_fg = light and "#868686" or "#9a9a9a",
+    description_fg = light and "#9d9d9d" or "#b0b0b0",
+    tab_inactive_fg = light and "#9d9d9d" or "#666666",
     badge_bg = "#616161",
     badge_fg = "#f8f8f8",
     editor_group_border = "#ffffff17",
     terminal_fg = "#cccccc",
 
     -- ===== Neutral tier (light vs dark) =====
-    fg = light and "#1f1f1f" or "#e6e6e6",
-    sidebar_fg = light and "#1f1f1f" or "#e6e6e6",
-    dropdown_fg = light and "#1f1f1f" or "#e6e6e6",
-    notification_fg = light and "#1f1f1f" or "#e6e6e6",
+    fg = light and "#1f1f1f" or "#f0f0f0",
+    sidebar_fg = light and "#1f1f1f" or "#b8b8b8",
+    dropdown_fg = light and "#1f1f1f" or "#f0f0f0",
+    notification_fg = light and "#1f1f1f" or "#f0f0f0",
     bg = light and "#f3f3f3" or "#181818", -- fg-contrast (Cursor/Search/Ignore/TermCursor) + remaining bgs
-    status_bg = light and "#f3f3f3" or "#181818",
-    panel_bg = light and "#f3f3f3" or "#181818",
-    menu_bg = light and "#f3f3f3" or "#181818",
-    widget_bg = light and "#f3f3f3" or "#181818",
-    sidebar_bg = light and "#f3f3f3" or "#181818",
-    notification_bg = light and "#f3f3f3" or "#1f1f1f",
-    surface_menu = light and "#cacaca" or "#2f2f2f", -- floats + Blink completion menu (matches cursor_line)
-    surface_doc = light and "#e4e4e4" or "#252526", -- Blink docs / signature
-    input_bg = light and "#e0e0e0" or "#313131",
-    dropdown_bg = light and "#e0e0e0" or "#313131",
-    border = light and "#c8c8c8" or "#2b2b2b",
-    tab_border = light and "#c8c8c8" or "#2b2b2b",
-    panel_border = light and "#c8c8c8" or "#2b2b2b",
-    notification_border = light and "#c8c8c8" or "#2b2b2b",
-    cursor_line = light and "#cacaca" or "#2f2f2f",
-    selection = light and "#cfe0f5" or "#264f78",
-    visual = light and "#d4d4d4" or "#3a3d41",
-    line_nr = light and "#9a9a9a" or "#565869",
-    line_nr_active = light and "#1f1f1f" or "#f8f8f2",
-    activity_fg = light and "#3a3a3a" or "#d7d7d7",
-    tab_active_fg = light and "#1f1f1f" or "#ffffff",
-    indent_guide = light and "#d0d0d0" or "#404040",
-    indent_guide_active = light and "#a8a8a8" or "#707070",
+    status_bg = light and "#f3f3f3" or "#141414",
+    panel_bg = light and "#f3f3f3" or "#141414",
+    menu_bg = light and "#f3f3f3" or "#141414",
+    widget_bg = light and "#f3f3f3" or "#141414",
+    sidebar_bg = light and "#f3f3f3" or "#141414",
+    notification_bg = light and "#f3f3f3" or "#141414",
+    surface_menu = light and "#cacaca" or "#141414", -- floats + Blink completion menu
+    surface_doc = light and "#e4e4e4" or "#141414", -- Blink docs / signature
+    input_bg = light and "#e0e0e0" or "#202020",
+    dropdown_bg = light and "#e0e0e0" or "#181818",
+    border = light and "#c8c8c8" or "#282828",
+    tab_border = light and "#c8c8c8" or "#282828",
+    panel_border = light and "#c8c8c8" or "#282828",
+    notification_border = light and "#c8c8c8" or "#282828",
+    cursor_line = light and "#cacaca" or "#262626",
+    selection = light and "#cfe0f5" or "#303030",
+    visual = light and "#d4d4d4" or "#2b2b2b",
+    line_nr = light and "#9a9a9a" or "#666666",
+    line_nr_active = light and "#1f1f1f" or "#f0f0f0",
+    activity_fg = light and "#3a3a3a" or "#b8b8b8",
+    tab_active_fg = light and "#1f1f1f" or "#f0f0f0",
+    indent_guide = light and "#d0d0d0" or "#282828",
+    indent_guide_active = light and "#a8a8a8" or "#414141",
   }
 end
 
@@ -429,8 +429,9 @@ local function apply()
     WhichKeyGroup = { fg = colors.type },
     WhichKeyDesc = { fg = colors.fg },
     WhichKeySeperator = { fg = colors.comment },
-    WhichKeyFloat = { bg = colors.surface_menu },
-    WhichKeyBorder = { fg = colors.border },
+    WhichKeyNormal = { fg = colors.fg, bg = "NONE" }, -- v3 popup bg: transparent = match editor
+    WhichKeyFloat = { bg = "NONE" }, -- v2 fallback (ignored by which-key v3)
+    WhichKeyBorder = { fg = colors.border, bg = "NONE" },
 
     -- Telescope (if using)
     TelescopeNormal = { fg = colors.fg }, -- transparent (matches Normal)
