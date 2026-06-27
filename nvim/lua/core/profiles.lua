@@ -21,40 +21,40 @@ local function palette()
   return {
     -- ===== Accent tier (light vs dark) =====
     -- Syntax: dark = VS Code Dark+, light = VS Code Light+ (higher contrast on #f3f3f3)
-    comment       = light and "#008000" or "#6A9955",
-    keyword       = light and "#AF00DB" or "#C586C0",
-    storage       = light and "#0000FF" or "#569CD6",
-    string        = light and "#A31515" or "#CE9178",
-    number        = light and "#098658" or "#B5CEA8",
-    boolean       = light and "#0000FF" or "#569CD6",
-    function_name = light and "#795E26" or "#DCDCAA",
-    type          = light and "#267F99" or "#4EC9B0",
-    variable      = light and "#001080" or "#9CDCFE",
-    constant      = light and "#0070C1" or "#4FC1FF",
-    operator      = light and "#2e2e2e" or "#D4D4D4",
-    punctuation   = light and "#2e2e2e" or "#D4D4D4",
-    property      = light and "#001080" or "#9CDCFE",
-    regex         = light and "#811F3F" or "#D16969",
-    escape        = light and "#B5650D" or "#D7BA7D",
-    preproc       = light and "#0000FF" or "#569CD6",
-    tag           = light and "#800000" or "#569CD6",
-    attribute     = light and "#001080" or "#9CDCFE",
+    comment       = light and "#6D6D6D" or "#6A9955",
+    keyword       = light and "#B3003F" or "#C586C0",
+    storage       = light and "#B3003F" or "#569CD6",
+    string        = light and "#9E94D5" or "#CE9178",
+    number        = light and "#B8448B" or "#B5CEA8",
+    boolean       = light and "#206595" or "#569CD6",
+    function_name = light and "#DB704B" or "#DCDCAA",
+    type          = light and "#206595" or "#4EC9B0",
+    variable      = light and "#206595" or "#9CDCFE",
+    constant      = light and "#206595" or "#4FC1FF",
+    operator      = light and "#141414" or "#D4D4D4",
+    punctuation   = light and "#141414" or "#D4D4D4",
+    property      = light and "#6049B3" or "#9CDCFE",
+    regex         = light and "#3C7CAB" or "#D16969",
+    escape        = light and "#4E4E4E" or "#D7BA7D",
+    preproc       = light and "#1F8A65" or "#569CD6",
+    tag           = light and "#1F8A65" or "#569CD6",
+    attribute     = light and "#6049B3" or "#9CDCFE",
 
     -- TSX rainbow brackets (decorative)
-    bracket_round  = light and "#B8860B" or "#FFD700", -- ()
-    bracket_curly  = light and "#0070C1" or "#179FFF", -- {}
-    bracket_square = light and "#A626A4" or "#D76ED3", -- []
+    bracket_round  = light and "#055180" or "#FFD700", -- ()
+    bracket_curly  = light and "#3C7CAB" or "#179FFF", -- {}
+    bracket_square = light and "#6299C3" or "#D76ED3", -- []
 
     -- Diagnostics
-    error   = light and "#E51400" or "#F44747",
-    warning = light and "#BF8803" or "#CD9731",
-    info    = light and "#1A85FF" or "#6796E6",
+    error   = light and "#cf2d56" or "#F44747",
+    warning = light and "#db704b" or "#CD9731",
+    info    = light and "#206595" or "#6796E6",
     hint    = light and "#8250DF" or "#B267E6",
 
     -- Git / diff
-    git_add = light and "#1A7F37" or "#2ea043",
-    git_change = "#0078d4",
-    git_delete = light and "#CF222E" or "#f85149",
+    git_add = light and "#1f8a65" or "#2ea043",
+    git_change = light and "#c08532" or "#0078d4",
+    git_delete = light and "#cf2d56" or "#f85149",
     diff_add = light and "#cdeacf" or "#2d4a2b",      -- bg tint (pale green on light)
     diff_delete = light and "#f6d8d8" or "#4a2d2d",   -- bg tint (pale red on light)
     diff_change = "#569CD6",
@@ -79,10 +79,10 @@ local function palette()
     terminal_fg = "#cccccc",
 
     -- ===== Neutral tier (light vs dark) =====
-    fg = light and "#2e2e2e" or "#cccccc",
-    sidebar_fg = light and "#2e2e2e" or "#cccccc",
-    dropdown_fg = light and "#2e2e2e" or "#cccccc",
-    notification_fg = light and "#2e2e2e" or "#cccccc",
+    fg = light and "#1f1f1f" or "#e6e6e6",
+    sidebar_fg = light and "#1f1f1f" or "#e6e6e6",
+    dropdown_fg = light and "#1f1f1f" or "#e6e6e6",
+    notification_fg = light and "#1f1f1f" or "#e6e6e6",
     bg = light and "#f3f3f3" or "#181818", -- fg-contrast (Cursor/Search/Ignore/TermCursor) + remaining bgs
     status_bg = light and "#f3f3f3" or "#181818",
     panel_bg = light and "#f3f3f3" or "#181818",
@@ -101,7 +101,7 @@ local function palette()
     cursor_line = light and "#cacaca" or "#2f2f2f",
     selection = light and "#cfe0f5" or "#264f78",
     visual = light and "#d4d4d4" or "#3a3d41",
-    line_nr = light and "#b3b3b3" or "#2e3038",
+    line_nr = light and "#9a9a9a" or "#565869",
     line_nr_active = light and "#1f1f1f" or "#f8f8f2",
     activity_fg = light and "#3a3a3a" or "#d7d7d7",
     tab_active_fg = light and "#1f1f1f" or "#ffffff",
