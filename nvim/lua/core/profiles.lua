@@ -428,23 +428,23 @@ local function apply()
     WhichKeyBorder = { fg = colors.border },
 
     -- Telescope (if using)
-    TelescopeNormal = { fg = colors.fg, bg = colors.menu_bg },
-    TelescopeBorder = { fg = colors.border, bg = colors.menu_bg },
-    TelescopePromptBorder = { fg = colors.focus_border, bg = colors.menu_bg },
-    TelescopeResultsBorder = { fg = colors.border, bg = colors.menu_bg },
-    TelescopePreviewBorder = { fg = colors.border, bg = colors.menu_bg },
+    TelescopeNormal = { fg = colors.fg }, -- transparent (matches Normal)
+    TelescopeBorder = { fg = colors.border },
+    TelescopePromptBorder = { fg = colors.focus_border },
+    TelescopeResultsBorder = { fg = colors.border },
+    TelescopePreviewBorder = { fg = colors.border },
     TelescopeSelection = { fg = colors.fg, bg = colors.selection },
     TelescopePromptPrefix = { fg = colors.focus_border },
     TelescopeMatching = { fg = colors.search, bold = true },
 
     -- Additional Telescope highlights for better text visibility
-    TelescopeTitle = { fg = colors.fg, bg = colors.menu_bg, bold = true },
-    TelescopePromptTitle = { fg = colors.focus_border, bg = colors.menu_bg, bold = false },
-    TelescopeResultsTitle = { fg = colors.fg, bg = colors.menu_bg, bold = true },
-    TelescopePreviewTitle = { fg = colors.fg, bg = colors.menu_bg, bold = true },
-    TelescopePromptNormal = { fg = colors.fg, bg = colors.menu_bg },
-    TelescopeResultsNormal = { fg = colors.fg, bg = colors.menu_bg },
-    TelescopePreviewNormal = { fg = colors.fg, bg = colors.menu_bg },
+    TelescopeTitle = { fg = colors.fg, bold = true },
+    TelescopePromptTitle = { fg = colors.focus_border, bold = false },
+    TelescopeResultsTitle = { fg = colors.fg, bold = true },
+    TelescopePreviewTitle = { fg = colors.fg, bold = true },
+    TelescopePromptNormal = { fg = colors.fg },
+    TelescopeResultsNormal = { fg = colors.fg },
+    TelescopePreviewNormal = { fg = colors.fg },
     TelescopePromptCounter = { fg = colors.description_fg },
     TelescopeMultiSelection = { fg = colors.warning, bold = true },
 
