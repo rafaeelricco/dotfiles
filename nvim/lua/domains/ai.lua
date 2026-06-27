@@ -3,8 +3,24 @@
 -- Currently configured with Augment Code for context-aware code suggestions.
 
 return {
+  -- snacks.nvim loaded eagerly so its autocmds + vim.ui.input handler install at
+  -- startup (snacks docs require lazy=false/priority=1000). Used by opencode and
+  -- claude-code for input/picker/terminal. ui_select=false leaves vim.ui.select
+  -- to telescope-ui-select (see domains/ui.lua).
   {
-    "rafaeelricco/claude-code.nvim",
+    "folke/snacks.nvim",
+    lazy = false,
+    priority = 1000,
+    opts = {
+      input = {},
+      picker = { ui_select = false },
+      terminal = {},
+    },
+  },
+  {
+    -- GitHub source, re-enable later:
+    -- "rafaeelricco/claude-code.nvim",
+    dir = "/Users/rafaelricco/Projects/r1cco/claude-code.nvim",
     name = "claude",
     dependencies = { "folke/snacks.nvim" },
     cmd = {
@@ -34,9 +50,9 @@ return {
     "NickvanDyke/opencode.nvim",
     dependencies = {
       -- Recommended for `ask()` and `select()`.
-      -- Required for `snacks` provider.
+      -- Configured eagerly in the standalone snacks spec above.
       ---@module 'snacks' <- Loads `snacks.nvim` types for configuration intellisense.
-      { "folke/snacks.nvim", opts = { input = {}, picker = {}, terminal = {} } },
+      "folke/snacks.nvim",
     },
     config = function()
       ---@type opencode.Opts
@@ -80,13 +96,21 @@ return {
       -- specific buffers like git commits, help pages, and file explorers.
       vim.g.copilot_filetypes = { ["*"] = true }
 
-      -- Sets a custom keymap for accepting Copilot suggestions with <Tab>. Snippet
-      -- navigation is kept on other keys to let Copilot take priority.
-      vim.keymap.set("i", "<Tab>", 'copilot#Accept("<Tab>")', {
+      -- <Tab> accepts the Copilot suggestion when one is shown; otherwise inserts a
+      -- real <Tab>. Explicit check avoids the literal "<Tab>" fallback bug and the
+      -- "nothing happens" case. replace_keycodes=false keeps the suggestion text
+      -- verbatim; the fallback is termcode-expanded manually.
+      vim.keymap.set("i", "<Tab>", function()
+        local suggestion = vim.fn["copilot#Accept"]("")
+        if suggestion ~= "" then
+          return suggestion
+        end
+        return vim.api.nvim_replace_termcodes("<Tab>", true, true, true)
+      end, {
         expr = true,
         silent = true,
         replace_keycodes = false,
-        desc = "Accept Copilot suggestion",
+        desc = "Accept Copilot suggestion or indent",
       })
 
       -- Defines extra keymaps for more granular control over Copilot, such as
