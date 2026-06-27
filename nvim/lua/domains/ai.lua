@@ -18,9 +18,7 @@ return {
     },
   },
   {
-    -- GitHub source, re-enable later:
-    -- "rafaeelricco/claude-code.nvim",
-    dir = "/Users/rafaelricco/Projects/r1cco/claude-code.nvim",
+    "rafaeelricco/claude-code.nvim",
     name = "claude",
     dependencies = { "folke/snacks.nvim" },
     cmd = {
