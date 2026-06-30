@@ -27,7 +27,7 @@ return {
       "sindrets/diffview.nvim", -- Optional: enhanced diff viewing
       "nvim-telescope/telescope.nvim", -- Optional: telescope integration
     },
-    cmd = "Neogit", -- Lazy load on command
+    lazy = false, -- Load at startup for instant `:Neogit` open
     keys = {
       { "<leader>gs", "<cmd>Neogit<cr>", desc = "Git Status (Neogit)" },
     },
