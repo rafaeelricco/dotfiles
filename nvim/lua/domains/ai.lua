@@ -20,7 +20,6 @@ return {
   {
     "rafaeelricco/claude-code.nvim",
     name = "claude",
-    dir = "/Users/rafaelricco/Projects/r1cco/claude-code.nvim",
     dependencies = { "folke/snacks.nvim" },
     -- Load at startup so the plugin (and its commands) are ready immediately,
     -- instead of deferring to the first ClaudeCode command or keymap.
