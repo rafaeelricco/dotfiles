@@ -90,11 +90,11 @@ local function palette()
     widget_bg = light and "#f3f3f3" or "#141414",
     sidebar_bg = light and "#f3f3f3" or "#141414",
     notification_bg = light and "#f3f3f3" or "#141414",
-    surface_menu = light and "#cacaca" or "#141414", -- floats + Blink completion menu
-    surface_doc = light and "#e4e4e4" or "#141414", -- Blink docs / signature
-    input_bg = light and "#e0e0e0" or "#202020",
-    dropdown_bg = light and "#e0e0e0" or "#181818",
-    border = light and "#c8c8c8" or "#282828",
+    surface_menu = light and "#cacaca" or "#1f1f1f", -- floats + Blink completion menu (lift above editor)
+    surface_doc = light and "#e4e4e4" or "#252525", -- Blink docs / signature (lift further)
+    input_bg = light and "#e0e0e0" or "#1f1f1f", -- NOTE: unused key; value kept consistent with lifted surfaces
+    dropdown_bg = light and "#e0e0e0" or "#1f1f1f", -- NOTE: unused key
+    border = light and "#c8c8c8" or "#303030",
     tab_border = light and "#c8c8c8" or "#282828",
     panel_border = light and "#c8c8c8" or "#282828",
     notification_border = light and "#c8c8c8" or "#282828",
@@ -106,7 +106,7 @@ local function palette()
     activity_fg = light and "#3a3a3a" or "#b8b8b8",
     tab_active_fg = light and "#1f1f1f" or "#f0f0f0",
     indent_guide = light and "#d0d0d0" or "#282828",
-    indent_guide_active = light and "#a8a8a8" or "#414141",
+    indent_guide_active = light and "#a8a8a8" or "#4a4a4a",
   }
 end
 
