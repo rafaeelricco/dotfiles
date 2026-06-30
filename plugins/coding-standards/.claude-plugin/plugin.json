@@ -1,0 +1,9 @@
+{
+  "name": "coding-standards",
+  "displayName": "Coding Standards Skill",
+  "description": "Prefer functional, type-safe implementation style for code creation, refactors, debugging fixes, and code review. Use for any code change where implementation style matters, especially TypeScript, JavaScript, React, Node, domain logic, API handlers, and tests.",
+  "author": {
+    "name": "Rafael Ricco"
+  },
+  "repository": "https://github.com/rafaeelricco/dotfiles"
+}
