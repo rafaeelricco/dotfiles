@@ -14,7 +14,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "caveman",
@@ -25,7 +27,22 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
+    },
+    {
+      "name": "coding-standards",
+      "source": "./plugins/coding-standards",
+      "description": "Prefer functional, type-safe implementation style for code creation, refactors, debugging fixes, and code review. Use for any code change where implementation style matters, especially TypeScript, JavaScript, React, Node, domain logic, API handlers, and tests.",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "create-pr",
@@ -36,7 +53,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "e2e-test",
@@ -47,7 +66,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "gh-issue-drafter",
@@ -58,7 +79,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "grill-me",
@@ -69,7 +92,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "meeting-notes-and-actions",
@@ -80,51 +105,22 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
-      "name": "mental-model-auditor",
-      "source": "./plugins/mental-model-auditor",
-      "description": "Audit, update, and create mental model documents by comparing them against a live prototype or its source code. Use this skill whenever the user asks to sync, audit, update, review, or validate a mental model (YAML, Markdown, or any structured doc that describes how a system works) against a running prototype or staging environment. Also trigger when the user says things like \"the prototype changed, update the model\", \"check if the mental model matches what we built\", \"diff the spec against the app\", or \"we need a new model for this feature\". This skill inspects local context first, asks only for missing inputs, and always produces an approval-ready audit plan before doing the deeper audit work.",
+      "name": "plan-format",
+      "source": "./plugins/plan-format",
+      "description": "The shape of a plan document — show every change as a real before/after diff, not prose. Use when entering plan mode, starting to plan a code change, writing or editing a plan file, or before calling ExitPlanMode.",
       "author": {
         "name": "Rafael Ricco"
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
-    },
-    {
-      "name": "mental-model-doc",
-      "source": "./plugins/mental-model-doc",
-      "description": "Generates structured mental model documents from source material (transcripts, briefs, specs, etc.). Produces concise, evidence-based documents following a fixed 8-section structure. Use when the user asks to create a mental model, generate a MM document, or says \"mental model\".",
-      "author": {
-        "name": "Rafael Ricco"
-      },
-      "repository": "https://github.com/rafaeelricco/dotfiles",
-      "category": "skills",
-      "tags": ["skill"]
-    },
-    {
-      "name": "mental-model-style",
-      "source": "./plugins/mental-model-style",
-      "description": "Enforces consistent writing structure across mental model YAML files by rewriting them to match a user-supplied reference set. Use when the user wants to apply, standardize, or enforce a writing style across models, or says things like \"apply style\", \"same style as\", \"standardize this model\", \"clean up the writing\", \"enforce writing style\", or flags a model as too verbose, too dense, uneven, hard to scan, or inconsistent with the rest of the models.",
-      "author": {
-        "name": "Rafael Ricco"
-      },
-      "repository": "https://github.com/rafaeelricco/dotfiles",
-      "category": "skills",
-      "tags": ["skill"]
-    },
-    {
-      "name": "mental-model-yml",
-      "source": "./plugins/mental-model-yml",
-      "description": "Converts source documents (transcripts, briefs, specs, flow descriptions) into structured YAML mental model files. Use this skill whenever the user wants to create a mental model, convert a document into a .yml mental model, generate a business or UX/UI model from source material, or mentions 'mental model', 'yml model', 'YAML model', or asks to structure project knowledge into models. Also trigger when the user provides a transcript or brief and asks to 'extract a model', 'structure this', or 'turn this into a mental model'. Covers both business-domain models (how a business works, operational flows, strategy) and UI/UX models (screens, features, interaction flows).",
-      "author": {
-        "name": "Rafael Ricco"
-      },
-      "repository": "https://github.com/rafaeelricco/dotfiles",
-      "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "pr-generate-description",
@@ -135,7 +131,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "prompt-master",
@@ -146,7 +144,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "stop-slop",
@@ -157,7 +157,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "story-mapping",
@@ -168,7 +170,22 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
+    },
+    {
+      "name": "visual-review",
+      "source": "./plugins/visual-review",
+      "description": "Produce an interactive, self-contained HTML code review from a git diff. Use when the user asks to visual-review, /visual-review, review this diff/branch/PR as a visual report, make an interactive code review, or wants review findings as a browsable HTML dashboard instead of inline text. Grounds itself in the repo's own conventions first, then runs a multi-lens parallel review with adversarial verification, and writes an annotatable .html dashboard that auto-opens. Read-only on source — only writes the .html artifact.",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": [
+        "skill"
+      ]
     }
   ]
 }
