@@ -1,0 +1,9 @@
+{
+  "name": "visual-review",
+  "displayName": "Visual Review Skill",
+  "description": "Produce an interactive, self-contained HTML code review from a git diff. Use when the user asks to visual-review, /visual-review, review this diff/branch/PR as a visual report, make an interactive code review, or wants review findings as a browsable HTML dashboard instead of inline text. Grounds itself in the repo's own conventions first, then runs a multi-lens parallel review with adversarial verification, and writes an annotatable .html dashboard that auto-opens. Read-only on source — only writes the .html artifact.",
+  "author": {
+    "name": "Rafael Ricco"
+  },
+  "repository": "https://github.com/rafaeelricco/dotfiles"
+}
