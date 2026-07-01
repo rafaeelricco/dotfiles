@@ -55,6 +55,34 @@ ln -s "$(pwd)/nvim/lua" "$HOME/.config/nvim/lua"
 # ln -s "$(pwd)/nvim/lazy-lock.json" "$HOME/.config/nvim/lazy-lock.json"
 ```
 
+#### One-line install (Claude Code + optional Codex)
+
+Clones this repo to `~/.dotfiles` (override with `--dir` / `$DOTFILES_DIR`) and symlinks
+`CLAUDE.md` + `skills` into `~/.claude` — and, if Codex is present, `AGENTS.md` + per-skill
+links into `~/.codex`. Existing real files are backed up to `<name>.backup-<timestamp>` first;
+re-running is a safe no-op.
+
+```bash
+# macOS / Linux
+curl -fsSL https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/scripts/install.sh | bash
+# flags: ... | bash -s -- --skip-codex   (also --yes, --dir PATH)
+```
+
+```powershell
+# Windows (PowerShell 7+; needs Developer Mode or an elevated shell for symlinks)
+irm https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/install.ps1 | iex
+```
+
+Update later (pull + re-link + refresh the skill marketplace if skills changed):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/scripts/update.sh | bash
+```
+
+```powershell
+irm https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/update.ps1 | iex
+```
+
 #### Claude Code Skills
 
 Link the versioned skills directory so Claude Code resolves it via `~/.claude/skills`:
@@ -234,6 +262,8 @@ pwsh -Command "Import-Module .\powershell\in_testing_profile.ps1; tabs"
 | Claude Skills Setup   | `scripts/windows/setup-claude-skills.bat`      | Self-elevating script that symlinks `.claude/skills/` and `.claude/CLAUDE.md` into `~/.claude/`.                                                                                                    |
 | Codex Skills Setup    | `scripts/windows/setup-codex-skills.bat`       | Self-elevating script that links each skill in `.claude/skills/` plus `.codex/AGENTS.md` into `~/.codex/`, preserving `.system/`.                                                                   |
 | Skills Check          | `scripts/windows/check-skills.bat`             | Read-only verifier (no elevation) that validates skill links, optional `.cursor/rules` files in the repo, and the two instruction-file links against the repo and flags orphans or missing entries. |
+| Bootstrap Installer   | `scripts/install.sh` / `install.ps1`           | Clone to `~/.dotfiles`, then symlink `CLAUDE.md` / `skills` / Codex links into `$HOME` with timestamped backups; idempotent.                                                                        |
+| Bootstrap Updater     | `scripts/update.sh` / `update.ps1`             | `git pull --ff-only`, re-link, and regenerate the skill marketplace when `.claude/skills` changed.                                                                                                  |
 | Cursor Rules          | `.cursor/rules/`                               | Optional reference rules (for example `pr-workflow.mdc`). Install into a project or as a user rule in Cursor Settings when you want them.                                                           |
 | Claude / Codex Skills | `.claude/skills/`                              | Versioned skills shared between Claude Code (`~/.claude/skills`) and Codex CLI (`~/.codex/skills/<skill>`).                                                                                         |
 | Claude Instructions   | `.claude/CLAUDE.md`                            | Global Claude Code instructions: quality mode + writing style. Symlinked into `~/.claude/CLAUDE.md`.                                                                                                |
