@@ -10,8 +10,9 @@ description: >-
 
 # Babysit PR
 
-Keep a PR merge-ready by fixing only in-scope blockers and reporting what
-remains.
+Keep a PR merge-ready. Always gather context first, validate every unresolved
+review comment in parallel, then enter plan mode and ask what to resolve and how
+before fixing any in-scope blocker. Report what remains.
 
 ## Core Rules
 
@@ -22,9 +23,13 @@ remains.
 - Use `gh` for all PR/review metadata, patch context, current-branch PR
   discovery, thread state, Actions logs, commits, pushes, replies, and thread
   resolution.
-- Ask before GitHub writes, commits, or pushes unless the user explicitly
-  requested a full babysit loop. A full babysit loop authorizes scoped
-  non-merge writes needed for validated blockers, but never authorizes merging.
+- Gather context and validate before proposing any fix; never edit, commit,
+  push, reply, or resolve threads during the context phase.
+- Always pass through the Plan Gate before any GitHub write, commit, or push:
+  present context and let the user pick what to resolve and how. A full babysit
+  loop does not skip this gate — it only authorizes the scoped non-merge writes
+  for the scope the user confirms there, and never authorizes merging. Absent a
+  full-loop request, also ask for explicit approval before each write.
 - Never add AI attribution. Never include `Co-authored-by:` trailers or credit
   lines for Claude, Codex, Cursor, or similar tools in commit messages. Never
   merge, force-push, rewrite history, or modify protected branch settings unless
@@ -32,15 +37,49 @@ remains.
 
 ## Workflow
 
-1. Resolve the PR from the user-provided URL/number or current branch.
-2. Snapshot blockers: worktree state, mergeability, review feedback, and checks.
-3. Triage review feedback with the Review Fix Plan contract below, and inspect
-   failing Actions checks.
-4. Fix only validated, in-scope blockers.
-5. With approval or full-loop authorization, stage scoped files, commit, push,
+1. Context Gathering (always first): resolve the PR, then read review comments,
+   CI/CD checks, mergeability, and worktree state. Spawn one sub-agent per
+   unresolved comment to validate in parallel. Take no writes here.
+2. Plan Gate: once context is enough, enter plan mode, present the findings, and
+   ask the user what they want to resolve and how. Build the Review Fix Plan for
+   the chosen scope. Do not fix before the user confirms.
+3. Fix only the validated, in-scope blockers the user chose.
+4. With approval or full-loop authorization, stage scoped files, commit, push,
    and re-check.
-6. Repeat until merge-ready, waiting on remote checks, or blocked by a human
-   decision.
+5. Repeat from Context Gathering until merge-ready, waiting on remote checks, or
+   blocked by a human decision.
+
+## Context Gathering
+
+Run this first on every invocation, before any fix or write:
+
+- Resolve the PR from the user-provided URL/number or current branch via local
+  `git`/`gh`.
+- Snapshot state: mergeability, worktree, conflicts, and whether the PR is
+  behind base.
+- Read unresolved, non-outdated review comments/threads — body plus minimum
+  file/line/URL context. Read CI/CD checks and the logs of failing GitHub
+  Actions runs.
+- Decide whether there is actionable context (comments, failures, conflicts). If
+  there is none, say so at the Plan Gate instead of inventing work.
+- If there are review comments, spawn one sub-agent per comment to validate in
+  parallel per the Review Workflow criteria. Run them concurrently so
+  independent comments do not block each other. These sub-agents are
+  validation-only: they read and assess, and must not edit, commit, push, reply,
+  or resolve anything.
+- Do not edit, commit, push, reply, or resolve threads during this phase.
+
+## Plan Gate
+
+After context gathering, before fixing anything:
+
+- Enter plan mode.
+- Present the gathered context: validated comments with verdicts, CI failures,
+  and any conflicts or behind-base state.
+- Ask the user what they want to resolve and how. Wait for their choice — do not
+  assume scope, even under a full babysit loop.
+- For the chosen scope, build the Review Fix Plan below and exit plan mode for
+  approval before editing.
 
 ## Review Fix Plan
 
@@ -139,12 +178,11 @@ If the PR is conflicted or behind base:
   the entire JSON payload.
 - Separate actionable requests from approvals, bot noise, duplicates, stale
   comments, and explanation-only comments.
-- Validate each unresolved comment in parallel: spawn one sub-agent per comment
-  to check whether the report is real, applies to this PR, and is worth fixing.
-  Run the validations concurrently so independent comments do not block each
-  other.
-- Act only on validated comments. If a sub-agent is unsure whether the reported
-  behavior is a bug or intended, stop and ask the human before acting.
+- Validation criteria for the per-comment sub-agents spawned during Context
+  Gathering: check whether each report is real, applies to this PR, and is worth
+  fixing. If a sub-agent is unsure whether the reported behavior is a bug or
+  intended, flag it at the Plan Gate for the human to decide.
+- Act only on comments the user chose to resolve at the Plan Gate.
 - Use the Review Fix Plan format before editing.
 
 ## CI Workflow
