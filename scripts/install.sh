@@ -241,7 +241,10 @@ prune_codex_skills() {
     [ -L "${entry}" ] || continue      # only ever remove symlinks
     name="$(basename "${entry}")"
     [ "${name}" = ".system" ] && continue
-    if [ ! -d "${SKILLS_SRC}/${name}" ]; then
+    # Prune only links THIS installer created (pointing into our skills dir)
+    # whose source skill is gone. Leave unrelated user symlinks untouched.
+    if [ "$(readlink "${entry}")" = "${SKILLS_SRC}/${name}" ] \
+       && [ ! -d "${SKILLS_SRC}/${name}" ]; then
       rm -f "${entry}"
       echo "pruned stale Codex skill link: ${entry}"
       record_skip "${entry} (pruned stale link)"
