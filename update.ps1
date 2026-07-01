@@ -69,11 +69,6 @@ function Invoke-DotfilesUpdate {
         throw "$resolvedDir origin '$origin' is not $($script:RepoSlug). Refusing to update an unrelated checkout."
     }
 
-    $installScript = Join-Path $resolvedDir 'install.ps1'
-    if (-not (Test-Path -LiteralPath $installScript)) {
-        throw "install.ps1 not found in $resolvedDir. The clone may be incomplete."
-    }
-
     $before = & git -C $resolvedDir rev-parse HEAD 2>$null
 
     Write-Host "Pulling latest changes in $resolvedDir"
@@ -86,6 +81,13 @@ function Invoke-DotfilesUpdate {
     if ($before -and $after -and ($before -ne $after)) {
         $changed = & git -C $resolvedDir diff --name-only "$before" "$after" -- '.claude/skills'
         if ($changed) { $skillsChanged = $true }
+    }
+
+    # Guard after the pull so an older clone that predates install.ps1 can fetch
+    # it via this updater instead of aborting first.
+    $installScript = Join-Path $resolvedDir 'install.ps1'
+    if (-not (Test-Path -LiteralPath $installScript)) {
+        throw "install.ps1 not found in $resolvedDir after pull. The clone may be incomplete."
     }
 
     # Re-link using the freshly pulled install.ps1 so link logic lives in one place.
