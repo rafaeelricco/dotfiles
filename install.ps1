@@ -162,6 +162,23 @@ function New-SymbolicLinkChecked {
     }
 }
 
+function Test-SymlinkCapability {
+    # Probe symlink creation BEFORE any real file is backed up, so a privilege
+    # failure cannot strand a moved-aside file while Show-PrivilegeGuidance still
+    # claims "no real files were modified".
+    $base   = [System.IO.Path]::GetTempPath()
+    $target = Join-Path $base ("dotfiles-symprobe-t-" + [System.Guid]::NewGuid().ToString('N'))
+    $link   = Join-Path $base ("dotfiles-symprobe-l-" + [System.Guid]::NewGuid().ToString('N'))
+    New-Item -ItemType File -Path $target -Force | Out-Null
+    try {
+        New-SymbolicLinkChecked -LinkPath $link -TargetPath $target
+    }
+    finally {
+        Remove-Item -LiteralPath $link   -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $target -Force -ErrorAction SilentlyContinue
+    }
+}
+
 function Install-Link {
     param(
         [Parameter(Mandatory)][string]$LinkPath,
@@ -258,6 +275,9 @@ function Invoke-DotfilesInstall {
 
     Assert-Git
     Sync-Repo -Dir $resolvedDir -UpdateOnly:$Update.IsPresent
+
+    # Fail fast (before backing up real files) if symlinks can't be created.
+    Test-SymlinkCapability
 
     Write-Host "== Claude =="
     Install-Link -LinkPath (Join-Parts $HOME @('.claude', 'CLAUDE.md')) -TargetPath (Join-Parts $resolvedDir @('.claude', 'CLAUDE.md')) -Yes $optYes
