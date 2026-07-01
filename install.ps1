@@ -292,7 +292,9 @@ function Invoke-DotfilesInstall {
     else {
         Write-Host "== Codex =="
         $codexHome = Join-Path $HOME '.codex'
-        Install-Link -LinkPath (Join-Path $codexHome 'AGENTS.md') -TargetPath (Join-Parts $resolvedDir @('.codex', 'AGENTS.md')) -Yes $optYes
+        # .codex/AGENTS.md is a git symlink to ../.claude/CLAUDE.md; on Windows with
+        # core.symlinks=false it checks out as a stub, so link to the real file.
+        Install-Link -LinkPath (Join-Path $codexHome 'AGENTS.md') -TargetPath (Join-Parts $resolvedDir @('.claude', 'CLAUDE.md')) -Yes $optYes
         Sync-CodexSkills -SkillsSrc (Join-Parts $resolvedDir @('.claude', 'skills')) -CodexSkillsDir (Join-Path $codexHome 'skills') -Yes $optYes
     }
 
