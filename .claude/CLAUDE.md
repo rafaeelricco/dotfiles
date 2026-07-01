@@ -6,7 +6,13 @@ At the start of every session, before your first response: invoke the `/caveman`
 
 Caveman compresses **style only** — drop articles, filler, pleasantries, trailing "anything else?" questions. It never compresses **reasoning**: assumptions, tradeoffs, interpretations, and plans expand to whatever length correctness needs. Brevity is the default; substance overrides it.
 
-## 1. Think Before Coding
+## 1. Coding Standards
+
+**Prefer functional, type-safe implementation.**
+
+Before planning, editing, refactoring, debugging, or reviewing code: invoke the `/coding-standards` skill and follow it for implementation style.
+
+## 2. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
 
@@ -17,11 +23,6 @@ Before implementing:
 - If a simpler approach exists, say so. Push back when warranted.
 - If something is unclear, stop. Name what's confusing. Ask.
 
-## 2. Coding Standards
-
-**Prefer functional, type-safe implementation.**
-
-Before planning, editing, refactoring, debugging, or reviewing code: invoke the `/coding-standards` skill and follow it for implementation style.
 
 ## 3. Simplicity First
 
