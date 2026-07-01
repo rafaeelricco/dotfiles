@@ -260,6 +260,16 @@ link_codex() {
     echo "warning: ${agents_src} not found; skipping Codex AGENTS.md." >&2
   fi
 
+  # A symlinked skills root makes per-skill dst paths resolve back into the repo
+  # (dst == src), which handle_real would back up and self-link, corrupting the
+  # clone. Refuse to descend through it.
+  if [ -L "${codex_skills}" ]; then
+    echo "error: ${codex_skills} is a symlink; skipping Codex skill links." >&2
+    echo "       Remove or replace it with a real directory, then re-run." >&2
+    record_skip "${codex_skills} (symlink root; Codex skills skipped)"
+    return 0
+  fi
+
   # Per-skill links (NOT a whole-dir symlink) so ~/.codex/skills/.system survives.
   mkdir -p "${codex_skills}"
   for skill in "${SKILLS_SRC}"/*/; do
