@@ -285,6 +285,20 @@ return {
     end,
   },
 
+  -- Configures `oil.nvim`, a file explorer that edits a directory like a normal text buffer.
+  -- Kept alongside neo-tree: neo-tree still owns directory-open (`default_file_explorer = false`),
+  -- oil is opened explicitly via `-` or `:Oil` for bulk rename/move/copy work.
+  {
+    "stevearc/oil.nvim",
+    dependencies = { "DaikyXendo/nvim-material-icon" },
+    keys = {
+      { "-", "<cmd>Oil<cr>", desc = "Open parent directory (Oil)" },
+    },
+    opts = {
+      default_file_explorer = false,
+    },
+  },
+
   -- Smooth scrolling plugin for both horizontal and vertical movement
   --[[
   {
