@@ -14,7 +14,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "caveman",
@@ -25,7 +27,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "coding-standards",
@@ -36,7 +40,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "create-pr",
@@ -47,7 +53,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "e2e-test",
@@ -58,7 +66,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "gh-issue-drafter",
@@ -69,7 +79,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "grill-me",
@@ -80,7 +92,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "meeting-notes-and-actions",
@@ -91,7 +105,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "plan-format",
@@ -102,7 +118,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "pr-generate-description",
@@ -113,7 +131,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "prompt-master",
@@ -124,7 +144,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "stop-slop",
@@ -135,7 +157,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     },
     {
       "name": "story-mapping",
@@ -146,7 +170,9 @@
       },
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
-      "tags": ["skill"]
+      "tags": [
+        "skill"
+      ]
     }
   ]
 }
