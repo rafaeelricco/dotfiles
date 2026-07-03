@@ -1,8 +1,8 @@
 -- [[ Adaptive Colorscheme ]]
--- A custom colorscheme inspired by modern code editors. The accent/syntax colors
--- are shared across light and dark; the neutral surface/text colors switch on
--- `vim.o.background` so the UI stays muted and readable on both light and dark
--- terminals. The mode follows the terminal automatically when it reports its
+-- A custom colorscheme matching Cursor's light/dark themes. Both the accent/syntax
+-- colors and the neutral surface/text colors switch on `vim.o.background` so the
+-- UI stays muted and readable on both light and dark terminals. The mode follows
+-- the terminal automatically when it reports its
 -- background (OSC 11); a persistent `<leader>tb` toggle covers terminals that don't.
 -- Resets all existing highlight groups to their default values to ensure a clean slate.
 vim.cmd("highlight clear")
@@ -20,93 +20,105 @@ local function palette()
   local light = vim.o.background == "light"
   return {
     -- ===== Accent tier (light vs dark) =====
-    -- Syntax: dark = VS Code Dark+, light = VS Code Light+ (higher contrast on #f3f3f3)
-    comment       = light and "#6D6D6D" or "#6A9955",
-    keyword       = light and "#B3003F" or "#C586C0",
-    storage       = light and "#B3003F" or "#569CD6",
-    string        = light and "#9E94D5" or "#CE9178",
-    number        = light and "#B8448B" or "#B5CEA8",
-    boolean       = light and "#206595" or "#569CD6",
-    function_name = light and "#DB704B" or "#DCDCAA",
-    type          = light and "#206595" or "#4EC9B0",
-    variable      = light and "#206595" or "#9CDCFE",
-    constant      = light and "#206595" or "#4FC1FF",
-    operator      = light and "#141414" or "#D4D4D4",
-    punctuation   = light and "#141414" or "#D4D4D4",
-    property      = light and "#6049B3" or "#9CDCFE",
-    regex         = light and "#3C7CAB" or "#D16969",
-    escape        = light and "#4E4E4E" or "#D7BA7D",
-    preproc       = light and "#1F8A65" or "#569CD6",
-    tag           = light and "#1F8A65" or "#569CD6",
-    attribute     = light and "#6049B3" or "#9CDCFE",
+    -- Syntax: Cursor light / Cursor dark token colors (alpha values flattened)
+    comment          = light and "#717171" or "#9A9A9A", -- #14141499 / #F0F0F099
+    keyword          = light and "#B3003F" or "#82D2CE",
+    storage          = light and "#B3003F" or "#82D2CE",
+    string           = light and "#9E94D5" or "#E394DC",
+    number           = light and "#B8448B" or "#EBC88D",
+    boolean          = light and "#206595" or "#82D2CE",
+    function_name    = light and "#DB704B" or "#EFB080",
+    type             = light and "#206595" or "#EFB080",
+    type_builtin     = light and "#B3003F" or "#82D2CE", -- support.type.primitive
+    variable         = light and "#206595" or "#D6D6DD",
+    variable_builtin = light and "#CF2D56" or "#CC7C8A", -- variable.language (this/self)
+    constant         = light and "#206595" or "#AAA0FA",
+    operator         = light and "#141414" or "#D6D6DD",
+    punctuation      = light and "#141414" or "#D6D6DD",
+    property         = light and "#6049B3" or "#AAA0FA",
+    regex            = light and "#3C7CAB" or "#D6D6DD",
+    escape           = light and "#505050" or "#D6D6DD", -- light: #141414BD flattened
+    preproc          = light and "#1F8A65" or "#A8CC7C",
+    tag              = light and "#1F8A65" or "#87C3FF",
+    attribute        = light and "#6049B3" or "#AAA0FA",
 
     -- TSX rainbow brackets (decorative)
     bracket_round  = light and "#055180" or "#FFD700", -- ()
-    bracket_curly  = light and "#3C7CAB" or "#179FFF", -- {}
-    bracket_square = light and "#6299C3" or "#D76ED3", -- []
+    bracket_curly  = light and "#3C7CAB" or "#DA70D6", -- {}  (Cursor bracket 2)
+    bracket_square = light and "#6299C3" or "#179FFF", -- []  (Cursor bracket 3)
 
     -- Diagnostics
-    error   = light and "#cf2d56" or "#F44747",
-    warning = light and "#db704b" or "#CD9731",
-    info    = light and "#206595" or "#6796E6",
-    hint    = light and "#8250DF" or "#B267E6",
+    error   = light and "#CF2D56" or "#E34671",
+    warning = light and "#DB704B" or "#F1B467",
+    info    = light and "#206595" or "#88C0D0",
+    hint    = light and "#8250DF" or "#B48EAD", -- Cursor has no hint color; dark = ansiMagenta
 
     -- Git / diff
-    git_add = light and "#1f8a65" or "#2ea043",
-    git_change = light and "#c08532" or "#0078d4",
-    git_delete = light and "#cf2d56" or "#f85149",
-    diff_add = light and "#cdeacf" or "#2d4a2b",      -- bg tint (pale green on light)
-    diff_delete = light and "#f6d8d8" or "#4a2d2d",   -- bg tint (pale red on light)
-    diff_change = "#569CD6",
+    git_add = light and "#1F8A65" or "#3FA266",
+    git_change = light and "#C08532" or "#D2943E",
+    git_delete = light and "#CF2D56" or "#E34671",
+    diff_add = light and "#E1EEEA" or "#203428",    -- insertedLineBackground flattened
+    diff_delete = light and "#F8ECEF" or "#381322", -- removedLineBackground flattened
+    diff_change = light and "#C08532" or "#D2943E", -- NOTE: unused key; kept in family
 
-    -- Blue accents and search (legible on both modes)
-    button_bg = "#0078d4",
-    focus_border = "#0078d4",
-    menu_selection = "#0078d4",
-    activity_border = "#0078d4",
-    tab_active_border_top = "#0078d4",
-    search = "#9e6a03",
-    search_highlight = "#ea5c00",
-    selection_highlight = "#add6ff",
+    -- Blue accents and search (Cursor button/link blue; find-match tints flattened)
+    button_bg = light and "#3C7CAB" or "#81A1C1",
+    focus_border = light and "#3C7CAB" or "#81A1C1",
+    menu_selection = light and "#E4E4E4" or "#343434", -- suggest-widget selected row
+    activity_border = light and "#3C7CAB" or "#81A1C1",
+    tab_active_border_top = light and "#3C7CAB" or "#81A1C1",
+    search = light and "#C9D9DD" or "#455B62",           -- findMatchBackground (current match)
+    search_highlight = light and "#E3EBEC" or "#364549", -- findMatchHighlightBackground (others)
+    search_fg = light and "#055180" or "#88C0D0",        -- match emphasis fg (MatchParen, Telescope)
+    selection_highlight = light and "#EDEDED" or "#383838",
 
-    -- Neutral mid-greys that read on both
-    inactive_fg = light and "#868686" or "#9a9a9a",
-    description_fg = light and "#9d9d9d" or "#b0b0b0",
-    tab_inactive_fg = light and "#9d9d9d" or "#666666",
-    badge_bg = "#616161",
-    badge_fg = "#f8f8f8",
+    -- Neutral mid-greys (Cursor secondary foregrounds, flattened)
+    inactive_fg = light and "#6D6D6D" or "#989898",
+    description_fg = light and "#505050" or "#AEAEAE", -- #141414BD / #F0F0F0B3 flattened
+    tab_inactive_fg = light and "#4E4E4E" or "#666666",
+    badge_bg = light and "#206595" or "#88C0D0",
+    badge_fg = light and "#F3F3F3" or "#141414",
     editor_group_border = "#ffffff17",
-    terminal_fg = "#cccccc",
+    terminal_fg = light and "#141414" or "#F0F0F0",
 
     -- ===== Neutral tier (light vs dark) =====
-    fg = light and "#1f1f1f" or "#f0f0f0",
-    sidebar_fg = light and "#1f1f1f" or "#b8b8b8",
-    dropdown_fg = light and "#1f1f1f" or "#f0f0f0",
-    notification_fg = light and "#1f1f1f" or "#f0f0f0",
-    bg = light and "#f3f3f3" or "#181818", -- fg-contrast (Cursor/Search/Ignore/TermCursor) + remaining bgs
+    fg = light and "#141414" or "#f0f0f0",
+    sidebar_fg = light and "#4E4E4E" or "#b8b8b8", -- light: sideBar.foreground #141414BD flattened
+    dropdown_fg = light and "#141414" or "#f0f0f0",
+    notification_fg = light and "#141414" or "#f0f0f0",
+    bg = light and "#FCFCFC" or "#181818", -- Cursor editor bg; fg-contrast + virtual-text bg
     status_bg = light and "#f3f3f3" or "#141414",
     panel_bg = light and "#f3f3f3" or "#141414",
     menu_bg = light and "#f3f3f3" or "#141414",
     widget_bg = light and "#f3f3f3" or "#141414",
     sidebar_bg = light and "#f3f3f3" or "#141414",
     notification_bg = light and "#f3f3f3" or "#141414",
-    surface_menu = light and "#cacaca" or "#1f1f1f", -- floats + Blink completion menu (lift above editor)
-    surface_doc = light and "#e4e4e4" or "#252525", -- Blink docs / signature (lift further)
+    surface_menu = light and "#F3F3F3" or "#141414", -- floats + Blink menu (Cursor widget bg)
+    surface_doc = light and "#EDEDED" or "#1F1F1F", -- Blink docs / signature (lift further)
     input_bg = light and "#e0e0e0" or "#1f1f1f", -- NOTE: unused key; value kept consistent with lifted surfaces
     dropdown_bg = light and "#e0e0e0" or "#1f1f1f", -- NOTE: unused key
     border = light and "#c8c8c8" or "#303030",
     tab_border = light and "#c8c8c8" or "#282828",
     panel_border = light and "#c8c8c8" or "#282828",
     notification_border = light and "#c8c8c8" or "#282828",
-    cursor_line = light and "#cacaca" or "#262626",
-    selection = light and "#cfe0f5" or "#303030",
+    cursor_line = light and "#EDEDED" or "#262626", -- Cursor lineHighlightBackground
+    selection = light and "#E1E1E1" or "#303030",   -- editor.selectionBackground flattened
     visual = light and "#d4d4d4" or "#2b2b2b",
-    line_nr = light and "#9a9a9a" or "#666666",
-    line_nr_active = light and "#1f1f1f" or "#f0f0f0",
+    line_nr = light and "#A8A8A8" or "#666666",     -- editorLineNumber.foreground flattened
+    line_nr_active = light and "#141414" or "#f0f0f0",
     activity_fg = light and "#3a3a3a" or "#b8b8b8",
-    tab_active_fg = light and "#1f1f1f" or "#f0f0f0",
+    tab_active_fg = light and "#141414" or "#f0f0f0",
     indent_guide = light and "#d0d0d0" or "#282828",
     indent_guide_active = light and "#a8a8a8" or "#4a4a4a",
+
+    -- Terminal ANSI (Cursor terminal.ansi*; [1-8] normal, [9-16] bright)
+    ansi = light and {
+      "#141414", "#CF2D56", "#1F8A65", "#A16900", "#3C7CAB", "#B8448B", "#4C7F8C", "#FCFCFC",
+      "#4E4E4E", "#E75E78", "#55A583", "#C08532", "#6299C3", "#D06BA6", "#6F9BA6", "#FFFFFF",
+    } or {
+      "#242424", "#FC6B83", "#3FA266", "#D2943E", "#81A1C1", "#B48EAD", "#88C0D0", "#F0F0F0",
+      "#989898", "#FC6B83", "#70B489", "#F1B467", "#87A6C4", "#B48EAD", "#88C0D0", "#FFFFFF",
+    },
   }
 end
 
@@ -146,9 +158,9 @@ local function apply()
     VisualNOS = { bg = colors.visual },
 
     -- === SEARCH ===
-    Search = { bg = colors.search, fg = colors.bg },
-    IncSearch = { bg = colors.search, fg = colors.bg },
-    CurSearch = { bg = colors.search, fg = colors.bg },
+    Search = { bg = colors.search_highlight, fg = colors.fg },
+    IncSearch = { bg = colors.search, fg = colors.fg },
+    CurSearch = { bg = colors.search, fg = colors.fg },
 
     -- === SPLITS AND WINDOWS ===
     VertSplit = { fg = colors.border },
@@ -165,13 +177,13 @@ local function apply()
 
     -- === POPUP MENUS ===
     Pmenu = { fg = colors.fg, bg = colors.menu_bg },
-    PmenuSel = { fg = colors.fg, bg = colors.button_bg },
+    PmenuSel = { fg = colors.fg, bg = colors.menu_selection },
     PmenuSbar = { bg = colors.border },
     PmenuThumb = { bg = colors.fg },
     PmenuKind = { fg = colors.type },
-    PmenuKindSel = { fg = colors.fg, bg = colors.button_bg },
+    PmenuKindSel = { fg = colors.fg, bg = colors.menu_selection },
     PmenuExtra = { fg = colors.description_fg },
-    PmenuExtraSel = { fg = colors.fg, bg = colors.button_bg },
+    PmenuExtraSel = { fg = colors.fg, bg = colors.menu_selection },
 
     -- === FOLDING ===
     Folded = { fg = colors.description_fg, bg = colors.cursor_line },
@@ -181,7 +193,7 @@ local function apply()
     SignColumn = {}, -- transparent
 
     -- === MATCHING ===
-    MatchParen = { fg = colors.search, bold = true, underline = true },
+    MatchParen = { fg = colors.search_fg, bold = true, underline = true },
 
     -- === MESSAGES ===
     ErrorMsg = { fg = colors.error },
@@ -286,13 +298,13 @@ local function apply()
 
     -- Variables
     ["@variable"] = { fg = colors.variable },
-    ["@variable.builtin"] = { fg = colors.storage },
+    ["@variable.builtin"] = { fg = colors.variable_builtin },
     ["@variable.parameter"] = { fg = colors.variable },
     ["@variable.member"] = { fg = colors.property },
 
     -- Types
     ["@type"] = { fg = colors.type },
-    ["@type.builtin"] = { fg = colors.type },
+    ["@type.builtin"] = { fg = colors.type_builtin },
     ["@type.definition"] = { fg = colors.type },
     ["@type.qualifier"] = { fg = colors.storage },
 
@@ -441,7 +453,7 @@ local function apply()
     TelescopePreviewBorder = { fg = colors.border },
     TelescopeSelection = { fg = colors.fg, bg = colors.selection },
     TelescopePromptPrefix = { fg = colors.focus_border },
-    TelescopeMatching = { fg = colors.search, bold = true },
+    TelescopeMatching = { fg = colors.search_fg, bold = true },
 
     -- Additional Telescope highlights for better text visibility
     TelescopeTitle = { fg = colors.fg, bold = true },
@@ -597,6 +609,11 @@ local function apply()
   for group, settings in pairs(highlights) do
     set(group, settings)
   end
+
+  -- Terminal ANSI colors follow the palette so they re-theme with background.
+  for i, c in ipairs(colors.ansi) do
+    vim.g["terminal_color_" .. (i - 1)] = c
+  end
 end
 
 -- ===================================================================
@@ -647,21 +664,3 @@ vim.api.nvim_create_autocmd("VimEnter", {
 })
 
 vim.keymap.set("n", "<leader>tb", toggle_background, { desc = "[T]oggle [B]ackground (light/dark)" })
-
--- Terminal colors (16 ANSI colors) - mapped from your VS Code theme
-vim.g.terminal_color_0 = "#000000"  -- Black
-vim.g.terminal_color_1 = "#cd3131"  -- Red
-vim.g.terminal_color_2 = "#0dbc79"  -- Green
-vim.g.terminal_color_3 = "#e5e510"  -- Yellow
-vim.g.terminal_color_4 = "#2472c8"  -- Blue
-vim.g.terminal_color_5 = "#bc3fbc"  -- Magenta
-vim.g.terminal_color_6 = "#11a8cd"  -- Cyan
-vim.g.terminal_color_7 = "#e5e5e5"  -- White
-vim.g.terminal_color_8 = "#666666"  -- Bright Black
-vim.g.terminal_color_9 = "#f14c4c"  -- Bright Red
-vim.g.terminal_color_10 = "#23d18b" -- Bright Green
-vim.g.terminal_color_11 = "#f5f543" -- Bright Yellow
-vim.g.terminal_color_12 = "#3b8eea" -- Bright Blue
-vim.g.terminal_color_13 = "#d670d6" -- Bright Magenta
-vim.g.terminal_color_14 = "#29b8db" -- Bright Cyan
-vim.g.terminal_color_15 = "#e5e5e5" -- Bright White
