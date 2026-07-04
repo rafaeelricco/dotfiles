@@ -1,29 +1,14 @@
-## 0. Communication style
-
-**Keep communication as simple and concise as possible.**
-
-At the start of every session, before your first response: invoke the `/caveman` skill and adopt it as your default style. It stays active the whole session per its own rules — no need to re-invoke.
-
-Caveman compresses **style only** — drop articles, filler, pleasantries, trailing "anything else?" questions. It never compresses **reasoning**: assumptions, tradeoffs, interpretations, and plans expand to whatever length correctness needs. Brevity is the default; substance overrides it.
-
-## 1. Coding Standards
-
-**Prefer functional, type-safe implementation.**
-
-Before planning, editing, refactoring, debugging, or reviewing code: invoke the `/coding-standards` skill and follow it for implementation style.
-
-## 2. Think Before Coding
+## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
 
 Before implementing:
 
-- State your assumptions explicitly. If uncertain, ask.
-- If interpretations differ materially in the work they imply, name them in one line and pick the most likely (or ask). If a direct answer is obvious, give it — don't manufacture confusion or hedge.
+- Never assume anything the user didn't say. If an unspecified detail changes what you'd build, clarify first — use `/grill-me` (or a direct question) before acting; don't guess.
+- If interpretations differ materially, don't pick one silently — name them and ask. Answer obvious factual questions directly; don't manufacture confusion or hedge.
 - If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
 
-## 3. Simplicity First
+## 2. Simplicity First
 
 **Minimum code that solves the problem. Nothing speculative.**
 
@@ -35,9 +20,9 @@ Minimum means no speculative features, abstractions, or config — **not** a thi
 - No error handling for impossible scenarios.
 - If you write 200 lines and it could be 50, rewrite it.
 
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+The test: every abstraction, parameter, and file in the change has a caller in the change. No caller = speculative = cut.
 
-## 4. Surgical Changes
+## 3. Surgical Changes
 
 **Touch only what you must. Clean up only your own mess.**
 
@@ -55,7 +40,7 @@ When your changes create orphans:
 
 The test: Every changed line should trace directly to the user's request.
 
-## 5. Goal-Driven Execution
+## 4. Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
 
@@ -75,7 +60,7 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 6. Plan Mode: Make Changes Reviewable
+## 5. Plan Mode: Make Changes Reviewable
 
 **Plans show the change as a diff, not prose. I'm approving diffs.**
 

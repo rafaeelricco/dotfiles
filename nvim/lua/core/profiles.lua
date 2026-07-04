@@ -132,7 +132,16 @@ end
 
 -- Paints every highlight group from the current palette. Re-run whenever
 -- `background` changes so the whole UI re-themes.
-local function apply()
+local last_applied_background
+
+local function apply(opts)
+  opts = opts or {}
+  local background = vim.o.background
+  if not opts.force and last_applied_background == background then
+    return
+  end
+  last_applied_background = background
+
   local colors = palette()
 
   -- Maps the palette to specific Neovim UI elements and syntax tokens.
@@ -643,12 +652,20 @@ end
 
 -- Re-theme whenever the mode changes — from a manual toggle or from Neovim's own
 -- OSC 11 terminal-background detection (both surface as a `background` OptionSet).
+local profiles_group = vim.api.nvim_create_augroup("CoreProfiles", { clear = true })
+
 vim.api.nvim_create_autocmd("OptionSet", {
+  group = profiles_group,
   pattern = "background",
   callback = apply,
 })
 -- Re-assert our groups if another colorscheme is ever loaded over this one.
-vim.api.nvim_create_autocmd("ColorScheme", { callback = apply })
+vim.api.nvim_create_autocmd("ColorScheme", {
+  group = profiles_group,
+  callback = function()
+    apply({ force = true })
+  end,
+})
 
 load_pref() -- saved choice wins at startup
 apply() -- initial paint (also covers the no-saved-pref case)
@@ -657,6 +674,7 @@ apply() -- initial paint (also covers the no-saved-pref case)
 -- OptionSet is suppressed. Re-assert the saved preference and repaint once after
 -- startup so both auto-detected and pinned modes land correctly.
 vim.api.nvim_create_autocmd("VimEnter", {
+  group = profiles_group,
   callback = function()
     load_pref()
     apply()

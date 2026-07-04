@@ -168,44 +168,4 @@ return {
       exclude_buftypes = {},
     },
   },
-
-  -- VSCode-style multicursor. Ctrl-N selects the word under the cursor and,
-  -- when repeated, adds cursors on the next occurrences (like Cmd-D in VSCode).
-  --
-  -- Cheat sheet (VM has its OWN leader = "\", separate from <Space>):
-  --   Start (normal):  Ctrl-N          word under cursor; repeat = next match
-  --                    Ctrl-Down/Up    add cursor on line below/above (column)
-  --                    \A              select ALL occurrences in the file
-  --                    \/              start cursors from a regex search
-  --                    Ctrl/Cmd+click  add a cursor with the mouse
-  --   Start (visual):  Ctrl-N          turn the selection into the first cursor
-  --   In VM mode:      n / N           add next / previous occurrence
-  --                    q               skip this occurrence, go to next
-  --                    Q               remove the cursor under the caret
-  --                    [ / ]           jump to previous / next cursor
-  --                    Tab             toggle cursor <-> extend (visual) mode
-  --                    c / i / a       change / insert / append at ALL cursors
-  --                    Esc             leave multicursor mode
-  -- {
-  --   "mg979/vim-visual-multi",
-  --   branch = "master",
-  --   -- Load on opening a real buffer so the global mappings (Ctrl-N, etc.) are
-  --   -- ready, without paying a startup cost. Same load strategy used by
-  --   -- nvim-highlight-colors in this file.
-  --   event = { "BufReadPost", "BufNewFile" },
-  --   init = function()
-  --     -- Keep the plugin's default mappings (Ctrl-N, Ctrl-Up/Down,
-  --     -- Shift-Left/Right, \A to select all occurrences, \/ regex). Note the "\"
-  --     -- here is VM's own leader (g:VM_leader), not the global <Space> leader.
-  --     vim.g.VM_default_mappings = 1
-  --     -- Enable multicursor via mouse click (Ctrl/Cmd + click).
-  --     vim.g.VM_mouse_mappings = 1
-  --     -- Less noise when leaving multicursor mode.
-  --     vim.g.VM_silent_exit = 1
-  --     vim.g.VM_show_warnings = 0
-  --     -- Highlight theme for cursors/selections (optional; values: codedark,
-  --     -- iceblue, neon, ocean, etc.).
-  --     vim.g.VM_theme = "iceblue"
-  --   end,
-  -- },
 }

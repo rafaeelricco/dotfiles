@@ -138,7 +138,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 
 -- Automatically reload files when they change externally without prompting
-vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter" }, {
   desc = "Auto reload files when changed externally",
   group = vim.api.nvim_create_augroup("auto-reload", { clear = true }),
   callback = function()
