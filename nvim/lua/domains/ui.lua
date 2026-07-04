@@ -244,6 +244,26 @@ return {
       "MunifTanjim/nui.nvim",
     },
     cmd = "Neotree",
+    init = function()
+      vim.api.nvim_create_autocmd("VimEnter", {
+        group = vim.api.nvim_create_augroup("NeoTreeDirectoryStart", { clear = true }),
+        once = true,
+        callback = function()
+          local startup_path = vim.fn.argv(0)
+          if startup_path == "" then
+            return
+          end
+
+          local stat = (vim.uv or vim.loop).fs_stat(vim.fn.fnamemodify(startup_path, ":p"))
+          if not stat or stat.type ~= "directory" then
+            return
+          end
+
+          require("lazy").load({ plugins = { "neo-tree.nvim" } })
+          require("neo-tree.setup.netrw").hijack()
+        end,
+      })
+    end,
     keys = {
       { "<leader>e", "<cmd>Neotree toggle<cr>", desc = "Toggle file explorer" },
     },
