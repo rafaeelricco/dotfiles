@@ -61,6 +61,20 @@ return {
   {
     "nvim-telescope/telescope.nvim",
     cmd = "Telescope",
+    init = function()
+      local original_select = vim.ui.select
+
+      local function lazy_telescope_select(...)
+        pcall(require("lazy").load, { plugins = { "telescope.nvim" } })
+        if vim.ui.select ~= lazy_telescope_select then
+          return vim.ui.select(...)
+        end
+
+        return original_select(...)
+      end
+
+      vim.ui.select = lazy_telescope_select
+    end,
     branch = "master",
     keys = {
       { "<leader>sh", "<cmd>Telescope help_tags<cr>", desc = "[S]earch [H]elp" },
