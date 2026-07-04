@@ -1,0 +1,13 @@
+    -- === NEOVIM SPECIFIC ===
+    -- FloatBorder for floating windows
+    FloatBorder = { fg = colors.border, bg = colors.surface_menu },
+    FloatTitle = { fg = colors.fg, bg = colors.surface_menu, bold = true },
+
+    -- WhichKey
+    WhichKey = { fg = colors.keyword },
+    WhichKeyGroup = { fg = colors.type },
+    WhichKeyDesc = { fg = colors.fg },
+    WhichKeySeperator = { fg = colors.comment },
+    WhichKeyNormal = { fg = colors.fg, bg = "NONE" }, -- v3 popup bg: transparent = match editor
+    WhichKeyFloat = { bg = "NONE" }, -- v2 fallback (ignored by which-key v3)
+    WhichKeyBorder = { fg = colors.border, bg = "NONE" },
