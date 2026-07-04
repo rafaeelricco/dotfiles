@@ -3,27 +3,19 @@
 -- Currently configured with Augment Code for context-aware code suggestions.
 
 return {
-  -- snacks.nvim loaded eagerly so its autocmds + vim.ui.input handler install at
-  -- startup (snacks docs require lazy=false/priority=1000). Used by opencode and
-  -- claude-code for input/picker/terminal. ui_select=false leaves vim.ui.select
-  -- to telescope-ui-select (see domains/ui.lua).
-  {
-    "folke/snacks.nvim",
-    lazy = false,
-    priority = 1000,
-    opts = {
-      input = {},
-      picker = { ui_select = false },
-      terminal = {},
-    },
-  },
   {
     "rafaeelricco/claude-code.nvim",
     name = "claude",
-    dependencies = { "folke/snacks.nvim" },
-    -- Load at startup so the plugin (and its commands) are ready immediately,
-    -- instead of deferring to the first ClaudeCode command or keymap.
-    lazy = false,
+    dependencies = {
+      {
+        "folke/snacks.nvim",
+        opts = {
+          input = {},
+          picker = { ui_select = false },
+          terminal = {},
+        },
+      },
+    },
     cmd = {
       "ClaudeCode",
       "ClaudeCodeFocus",
@@ -51,7 +43,7 @@ return {
   --   "NickvanDyke/opencode.nvim",
   --   dependencies = {
   --     -- Recommended for `ask()` and `select()`.
-  --     -- Configured eagerly in the standalone snacks spec above.
+  --     -- Add a snacks dependency here if this block is re-enabled alone.
   --     ---@module 'snacks' <- Loads `snacks.nvim` types for configuration intellisense.
   --     "folke/snacks.nvim",
   --   },

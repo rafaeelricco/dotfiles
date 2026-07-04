@@ -7,6 +7,7 @@ return {
   -- It shows which lines have been added, modified, or deleted.
   {
     "lewis6991/gitsigns.nvim",
+    event = { "BufReadPre", "BufNewFile" },
     opts = {
       signs = {
         add = { text = "+" },
@@ -25,7 +26,6 @@ return {
     dependencies = {
       "nvim-lua/plenary.nvim", -- Required dependency
       "sindrets/diffview.nvim", -- Optional: enhanced diff viewing
-      "nvim-telescope/telescope.nvim", -- Optional: telescope integration
     },
     lazy = false, -- Load at startup for instant `:Neogit` open
     keys = {
