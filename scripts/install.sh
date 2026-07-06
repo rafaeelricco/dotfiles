@@ -231,29 +231,51 @@ link_one() {
   record_linked "${dst} -> ${src}"
 }
 
-# --- codex (optional) --------------------------------------------------------
+# --- skills ------------------------------------------------------------------
 
-# Remove per-skill SYMLINKS that no longer exist in the repo. Never touches real
-# dirs, and never the Codex-bundled .system/ dir.
-prune_codex_skills() {
-  local dir="$1" entry name
+# Remove per-skill SYMLINKS that no longer exist in the repo. Never touches real dirs.
+prune_skill_links() {
+  local dir="$1" label="$2" entry name
   for entry in "${dir}"/*; do
     [ -L "${entry}" ] || continue      # only ever remove symlinks
     name="$(basename "${entry}")"
     [ "${name}" = ".system" ] && continue
-    # Prune only links THIS installer created (pointing into our skills dir)
-    # whose source skill is gone. Leave unrelated user symlinks untouched.
     if [ "$(readlink "${entry}")" = "${SKILLS_SRC}/${name}" ] \
        && [ ! -d "${SKILLS_SRC}/${name}" ]; then
       rm -f "${entry}"
-      echo "pruned stale Codex skill link: ${entry}"
+      echo "pruned stale ${label} skill link: ${entry}"
       record_skip "${entry} (pruned stale link)"
     fi
   done
 }
 
+link_skill_set() {
+  local skills_dir="$1" label="$2" skill name
+
+  # A symlinked skills root makes per-skill dst paths resolve back into the repo
+  # (dst == src), which handle_real would back up and self-link, corrupting the
+  # clone. Refuse to descend through it.
+  if [ -L "${skills_dir}" ]; then
+    echo "error: ${skills_dir} is a symlink; skipping ${label} skill links." >&2
+    echo "       Remove or replace it with a real directory, then re-run." >&2
+    record_skip "${skills_dir} (symlink root; ${label} skills skipped)"
+    return 0
+  fi
+
+  mkdir -p "${skills_dir}"
+  for skill in "${SKILLS_SRC}"/*/; do
+    [ -d "${skill}" ] || continue
+    name="$(basename "${skill}")"
+    link_one "${SKILLS_SRC}/${name}" "${skills_dir}/${name}"
+  done
+
+  prune_skill_links "${skills_dir}" "${label}"
+}
+
+# --- codex (optional) --------------------------------------------------------
+
 link_codex() {
-  local agents_src codex_skills skill name
+  local agents_src codex_skills
   agents_src="${DOTFILES_DIR}/.codex/AGENTS.md"
   codex_skills="${HOME}/.codex/skills"
 
@@ -263,25 +285,8 @@ link_codex() {
     echo "warning: ${agents_src} not found; skipping Codex AGENTS.md." >&2
   fi
 
-  # A symlinked skills root makes per-skill dst paths resolve back into the repo
-  # (dst == src), which handle_real would back up and self-link, corrupting the
-  # clone. Refuse to descend through it.
-  if [ -L "${codex_skills}" ]; then
-    echo "error: ${codex_skills} is a symlink; skipping Codex skill links." >&2
-    echo "       Remove or replace it with a real directory, then re-run." >&2
-    record_skip "${codex_skills} (symlink root; Codex skills skipped)"
-    return 0
-  fi
-
   # Per-skill links (NOT a whole-dir symlink) so ~/.codex/skills/.system survives.
-  mkdir -p "${codex_skills}"
-  for skill in "${SKILLS_SRC}"/*/; do
-    [ -d "${skill}" ] || continue
-    name="$(basename "${skill}")"
-    link_one "${SKILLS_SRC}/${name}" "${codex_skills}/${name}"
-  done
-
-  prune_codex_skills "${codex_skills}"
+  link_skill_set "${codex_skills}" "Codex"
 }
 
 # --- update-only: regenerate plugin marketplace ------------------------------
@@ -372,7 +377,7 @@ main() {
 
   # Claude — always.
   link_one "${CLAUDE_SRC}" "${HOME}/.claude/CLAUDE.md"
-  link_one "${SKILLS_SRC}" "${HOME}/.claude/skills"
+  link_skill_set "${HOME}/.claude/skills" "Claude"
 
   # Codex — optional.
   if [ "${SKIP_CODEX}" = "1" ]; then

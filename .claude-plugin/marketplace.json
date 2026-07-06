@@ -147,6 +147,17 @@
       "repository": "https://github.com/rafaeelricco/dotfiles",
       "category": "skills",
       "tags": ["skill"]
+    },
+    {
+      "name": "validation-council",
+      "source": "./plugins/validation-council",
+      "description": "Orchestrate a read-only validation council for code plans, approaches, implementations, or diffs before coding, before /review, before codex review, or when the user asks to validate, challenge, stress-test, preflight, sanity-check, or get analyst/argument/critique/reviewer subagent feedback.",
+      "author": {
+        "name": "Rafael Ricco"
+      },
+      "repository": "https://github.com/rafaeelricco/dotfiles",
+      "category": "skills",
+      "tags": ["skill"]
     }
   ]
 }
