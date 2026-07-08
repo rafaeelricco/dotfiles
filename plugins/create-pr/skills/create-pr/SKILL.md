@@ -39,6 +39,12 @@ branching, commits, and PR metadata explicit.
 - Never stage unrelated user changes silently. Prefer explicit paths when the
   worktree is mixed.
 - Never force push unless the user explicitly asks for it.
+- In Codex, request escalated execution for mutating git operations and GitHub
+  network actions with `sandbox_permissions: "require_escalated"` and a concise
+  user-facing justification. This includes branch creation or switching, staging,
+  `git reset`, commits, pushes, `gh auth status`, `gh repo view`, `gh pr view`,
+  and `gh pr create`. Keep read-only local inspection commands sandboxed unless
+  they fail with a sandbox-related error, then rerun them with escalation.
 - Load and follow `pr-generate-description` before opening or updating a PR
   body. Do not improvise the PR body from raw diff notes alone.
 
