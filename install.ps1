@@ -247,6 +247,35 @@ function Sync-CodexSkills {
     }
 }
 
+function Sync-Agents {
+    param(
+        [Parameter(Mandatory)][string]$AgentsSrc,
+        [Parameter(Mandatory)][string]$AgentsDir,
+        [bool]$Yes
+    )
+    if (-not (Test-Path -LiteralPath $AgentsSrc -PathType Container)) {
+        return
+    }
+    if (-not (Test-Path -LiteralPath $AgentsDir)) {
+        New-Item -ItemType Directory -Path $AgentsDir -Force | Out-Null
+    }
+
+    $valid = @{}
+    foreach ($agent in (Get-ChildItem -LiteralPath $AgentsSrc -Filter '*.md' -File)) {
+        $valid[$agent.Name] = $true
+        Install-Link -LinkPath (Join-Path $AgentsDir $agent.Name) -TargetPath $agent.FullName -Yes $Yes
+    }
+
+    # Prune stale agent symlinks. Never touch real files.
+    foreach ($entry in (Get-ChildItem -LiteralPath $AgentsDir -Force)) {
+        if ($valid.ContainsKey($entry.Name)) { continue }
+        if (Test-IsSymlink $entry) {
+            Remove-SymlinkSafely -Item $entry
+            Write-Host "  pruned stale agent link: $($entry.Name)"
+        }
+    }
+}
+
 function Show-PrivilegeGuidance {
     param([string]$Dir, [string]$Detail)
     Write-Host ""
@@ -282,6 +311,7 @@ function Invoke-DotfilesInstall {
     Write-Host "== Claude =="
     Install-Link -LinkPath (Join-Parts $HOME @('.claude', 'CLAUDE.md')) -TargetPath (Join-Parts $resolvedDir @('.claude', 'CLAUDE.md')) -Yes $optYes
     Install-Link -LinkPath (Join-Parts $HOME @('.claude', 'skills'))    -TargetPath (Join-Parts $resolvedDir @('.claude', 'skills'))    -Yes $optYes
+    Sync-Agents -AgentsSrc (Join-Parts $resolvedDir @('.claude', 'agents')) -AgentsDir (Join-Parts $HOME @('.claude', 'agents')) -Yes $optYes
 
     if ($optSkipCodex) {
         Write-Host "Skipping Codex (requested)."
