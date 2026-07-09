@@ -70,20 +70,27 @@ def _launch_browser():
     """Return a (playwright, browser) pair.  Caller must close both."""
     from playwright.sync_api import sync_playwright  # lazy import
     pw = sync_playwright().start()
-    launch_options = {
-        "headless": True,
-        "args": [
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage",
-            "--disable-gpu",
-            "--disable-blink-features=AutomationControlled",
-        ],
-    }
-    executable_path = _resolve_chromium_executable(pw.chromium)
-    if executable_path:
-        launch_options["executable_path"] = executable_path
-    browser = pw.chromium.launch(**launch_options)
+    try:
+        launch_options = {
+            "headless": True,
+            "args": [
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+                "--disable-blink-features=AutomationControlled",
+            ],
+        }
+        executable_path = _resolve_chromium_executable(pw.chromium)
+        if executable_path:
+            launch_options["executable_path"] = executable_path
+        browser = pw.chromium.launch(**launch_options)
+    except Exception:
+        try:
+            pw.stop()
+        except Exception:
+            pass
+        raise
     return pw, browser
 
 
@@ -139,8 +146,22 @@ def _fetch_url_text(url: str, wait: float = 8) -> Optional[str]:
 
 
 def check_camofox(port: int = 9377) -> bool:
-    """Always returns True – Playwright needs no separate server."""
-    return True
+    """Return True when Playwright can launch its configured Chromium."""
+    pw = browser = None
+    try:
+        pw, browser = _launch_browser()
+        return True
+    except Exception:
+        return False
+    finally:
+        try:
+            browser and browser.close()
+        except Exception:
+            pass
+        try:
+            pw and pw.stop()
+        except Exception:
+            pass
 
 
 def camofox_open_tab(url: str, session_key: str, port: int = 9377) -> Optional[str]:
