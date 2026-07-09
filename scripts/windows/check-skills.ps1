@@ -17,8 +17,6 @@ $ClaudeMdSrc     = Join-Path $RepoPath ".claude\CLAUDE.md"
 $ClaudeMdLink    = Join-Path $HOME ".claude\CLAUDE.md"
 $AgentsMdSrc     = Join-Path $RepoPath ".codex\AGENTS.md"
 $AgentsMdLink    = Join-Path $HOME ".codex\AGENTS.md"
-$RulesSrc     = Join-Path $RepoPath ".cursor\rules"
-$ExpectedRules = @("pr-workflow.mdc")
 
 $script:pass = 0
 $script:fail = 0
@@ -148,24 +146,6 @@ if (-not (Test-Path -LiteralPath $CodexDir)) {
         }
     }
 }
-Write-Host ""
-
-Write-Host "--- Cursor rules (repo: $RulesSrc) ---" -ForegroundColor Cyan
-if (-not (Test-Path -LiteralPath $RulesSrc)) {
-    Write-Host "  [INFO] no .cursor\rules directory in repo (optional)" -ForegroundColor DarkGray
-} else {
-    foreach ($rule in $ExpectedRules) {
-        $path = Join-Path $RulesSrc $rule
-        if (Test-Path -LiteralPath $path) {
-            Write-Host "  [OK]   $rule present in repo" -ForegroundColor Green
-            $script:pass++
-        } else {
-            Write-Host "  [FAIL] $rule missing in repo" -ForegroundColor Red
-            $script:fail++
-        }
-    }
-}
-Write-Host "  [INFO] ~/.cursor/rules is not checked; configure rules in Cursor Settings or per project." -ForegroundColor DarkGray
 Write-Host ""
 
 Write-Host "--- Global Instructions ---" -ForegroundColor Cyan
