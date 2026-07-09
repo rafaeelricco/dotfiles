@@ -1,7 +1,7 @@
 {
   "name": "create-pr",
   "displayName": "Create PR Skill",
-  "description": "Create and open GitHub pull requests from local repository changes. Use this skill when the user asks to create PR, open PR, abrir PR, criar pull request, ship this branch, ready for review, publish local changes as a pull request, or invokes /create-pr. The skill inspects branch state and diffs, asks before branch, staging, commit, push, base branch, assignee, or ready/draft decisions, requires pr-generate-description before PR creation, pushes with git, and creates the PR with gh.",
+  "description": "Create and open GitHub pull requests from local repository changes. Use this skill when the user asks to create PR, open PR, abrir PR, criar pull request, ship this branch, ready for review, publish local changes as a pull request, or invokes /create-pr. Enters plan mode before any git mutation, asks the user for motivation, scope, branch, and commit approval, requires pr-generate-description for the PR body, and executes only after the user approves the plan.",
   "author": {
     "name": "Rafael Ricco"
   },
