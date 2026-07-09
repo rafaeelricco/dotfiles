@@ -8,9 +8,9 @@ Provides the same public interface as camofox_client but uses Playwright
 Public interface (mirrors camofox_client.py):
   check_camofox(port)            → always True (Playwright needs no server)
   camofox_open_tab(url, ...)     → returns fake tab_id, fetches page
-  camofox_snapshot(tab_id, ...)  → returns stored page text
-  camofox_close_tab(tab_id, ...) → frees stored page text
-  camofox_fetch_page(url, ...)   → open URL, wait, return text content
+  camofox_snapshot(tab_id, ...)  → returns stored ARIA snapshot
+  camofox_close_tab(tab_id, ...) → frees stored ARIA snapshot
+  camofox_fetch_page(url, ...)   → open URL, wait, return ARIA snapshot
   camofox_search(query, ...)     → search via Google/DDG, return results list
 
 Additional high-level helpers for Nitter:
@@ -59,7 +59,7 @@ DEFAULT_NITTER = os.environ.get("NITTER_INSTANCE", NITTER_INSTANCES[0])
 # ---------------------------------------------------------------------------
 # Fake tab registry  (camofox_open_tab / camofox_snapshot compatibility)
 # ---------------------------------------------------------------------------
-_tab_store: dict = {}   # tab_id → page text
+_tab_store: dict = {}   # tab_id → ARIA snapshot
 
 
 # ---------------------------------------------------------------------------
@@ -108,19 +108,12 @@ def _safe_goto(page, url: str, timeout: int = 30000):
 
 
 def _page_text(page) -> str:
-    """Return inner_text of <body>."""
-    try:
-        return page.inner_text("body", timeout=5000) or ""
-    except Exception:
-        pass
-    try:
-        return page.content()
-    except Exception:
-        return ""
+    """Return the body's Playwright YAML ARIA snapshot."""
+    return page.locator("body").aria_snapshot(timeout=5000) or ""
 
 
 def _fetch_url_text(url: str, wait: float = 8) -> Optional[str]:
-    """Fetch *url* with Playwright, return visible text.  None on failure."""
+    """Fetch *url* with Playwright, return an ARIA snapshot. None on failure."""
     pw = browser = None
     try:
         pw, browser = _launch_browser()
@@ -151,7 +144,7 @@ def check_camofox(port: int = 9377) -> bool:
 
 
 def camofox_open_tab(url: str, session_key: str, port: int = 9377) -> Optional[str]:
-    """Fetch *url* and store the text; return a synthetic tab_id."""
+    """Fetch *url* and store its ARIA snapshot; return a synthetic tab_id."""
     if not url.startswith(("http://", "https://")):
         print(f"[playwright_client] rejected non-HTTP URL: {url[:60]}", file=sys.stderr)
         return None
@@ -164,7 +157,7 @@ def camofox_open_tab(url: str, session_key: str, port: int = 9377) -> Optional[s
 
 
 def camofox_snapshot(tab_id: str, port: int = 9377) -> Optional[str]:
-    """Return stored text for *tab_id*."""
+    """Return the stored ARIA snapshot for *tab_id*."""
     return _tab_store.get(tab_id)
 
 
@@ -174,7 +167,7 @@ def camofox_close_tab(tab_id: str, port: int = 9377):
 
 
 def camofox_fetch_page(url: str, session_key: str, wait: float = 8, port: int = 9377) -> Optional[str]:
-    """Fetch *url* via Playwright; return visible text.  Primary entry point."""
+    """Fetch *url* via Playwright; return its ARIA snapshot."""
     return _fetch_url_text(url, wait=wait)
 
 

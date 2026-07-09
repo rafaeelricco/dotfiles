@@ -10,6 +10,9 @@ import re
 import urllib.parse
 from typing import Any, Dict, List, Optional
 
+_BARE_LINK_RE = re.compile(r"^- link(?: \[e\d+\])?:$")
+
+
 def _parse_stats_from_text(raw: str) -> tuple:
     """Parse stats numbers from Nitter text line like 'content  1   22  4,418'.
 
@@ -86,7 +89,7 @@ def parse_timeline_snapshot(snapshot: str, limit: int = 20) -> List[Dict]:
     all_anchors = []  # (line_index, status_path, user, status_id)
     for i in range(n - 1):
         line = lines[i].strip()
-        if not re.match(r'^- link \[e\d+\]:$', line):
+        if not _BARE_LINK_RE.match(line):
             continue
         url_line = lines[i + 1].strip()
         url_match = re.match(r'^- /url:\s+(/(\w+)/status/(\d+)#m)$', url_line)
@@ -102,7 +105,7 @@ def parse_timeline_snapshot(snapshot: str, limit: int = 20) -> List[Dict]:
                 return True
             if stripped.startswith("- text:"):
                 return True
-            if re.match(r'^- link \[e\d+\]:$', stripped):
+            if _BARE_LINK_RE.match(stripped):
                 # Could be avatar/profile link — check if its URL is a
                 # profile (no /status/) vs another tweet anchor
                 if j + 1 < n:
@@ -707,5 +710,4 @@ def parse_article_snapshot(snapshot: str) -> Dict[str, Any]:
         "char_count": char_count,
         "is_partial": is_partial,
     }
-
 
