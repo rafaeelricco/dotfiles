@@ -11,7 +11,7 @@ import urllib.parse
 from typing import Dict, List, Optional
 
 from .. import config, http
-from ..exceptions import BackendUnavailable, XtfError
+from ..exceptions import BackendUnavailable, RateLimited, UpstreamDown
 from ..models import Profile, Reply, Tweet
 from ..parsers.nitter_html import (
     _extract_next_cursor,
@@ -57,6 +57,7 @@ class NitterBackend(Backend):
     def _get_html(self, path: str) -> str:
         """GET a path, failing over across instances on upstream errors."""
         errors: Dict[str, str] = {}
+        last_rate_limit: Optional[RateLimited] = None
         start = self._healthy_instance()
         candidates = [start] + [i for i in self.instances if i != start] if start else list(self.instances)
         for inst in candidates:
@@ -66,10 +67,14 @@ class NitterBackend(Backend):
                 html = http.get_text(inst + path, headers=_HEADERS, timeout=15)
                 self._live = inst
                 return html
-            except XtfError as e:
+            except (RateLimited, UpstreamDown) as e:
+                if isinstance(e, RateLimited):
+                    last_rate_limit = e
                 errors[inst] = f"{e.code}: {e}"
                 self._live = None
                 print(f"[nitter] {inst} failed ({e.code}), trying next instance...", file=sys.stderr)
+        if last_rate_limit is not None:
+            raise last_rate_limit
         raise BackendUnavailable(
             "No Nitter instance reachable. Set XTF_NITTER to your instance(s), "
             f"e.g. XTF_NITTER=http://127.0.0.1:8788. Tried: {errors}"
