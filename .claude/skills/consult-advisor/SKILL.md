@@ -24,7 +24,7 @@ Escalate to the `opus-advisor` sub-agent before executing when the wrong approac
 
 ## How
 
-Call `Agent(subagent_type: "opus-advisor", prompt: <task + relevant file paths + what you're weighing>)`. Read the returned plan. Execute on the current (Sonnet) main loop. Do not re-consult mid-execution unless the plan hits a contradiction with what you find in code.
+Call `Agent(subagent_type: "opus-advisor", description: <3-5 word task summary>, prompt: <task + relevant file paths + what you're weighing>)`. Read the returned plan. Execute on the current (Sonnet) main loop. Do not re-consult mid-execution unless the plan hits a contradiction with what you find in code.
 
 ## Budget
 
