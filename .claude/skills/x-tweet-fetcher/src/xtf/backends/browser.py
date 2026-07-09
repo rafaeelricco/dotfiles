@@ -51,9 +51,9 @@ class BrowserBackend(Backend):
                  nitter_instance: Optional[str] = None):
         self.driver_name = driver or config.browser_driver()
         self.port = port or config.browser_port()
-        # Nitter host used for browser-rendered pages (first configured instance)
+        # Nitter base URL used for browser-rendered pages
         inst = nitter_instance or config.nitter_instances()[0]
-        self.nitter_host = inst.split("://", 1)[-1].rstrip("/")
+        self.nitter_base_url = config._normalize_instance(inst)
         self._drv = None
 
     @property
@@ -128,7 +128,7 @@ class BrowserBackend(Backend):
     def fetch_timeline(self, username: str, limit: int = 20) -> List[Tweet]:
         self._require("err_camofox_not_running_user")
         raw, _pages = self._paged_timeline(
-            f"https://{self.nitter_host}/{username}",
+            f"{self.nitter_base_url}/{username}",
             f"timeline-{username}", limit, max_pages=6,
         )
         return [Tweet.from_snapshot_entry(tw) for tw in raw]
@@ -136,7 +136,7 @@ class BrowserBackend(Backend):
     def fetch_list(self, list_id: str, limit: int = 20) -> List[Tweet]:
         self._require("err_camofox_not_running_list")
         raw, _pages = self._paged_timeline(
-            f"https://{self.nitter_host}/i/lists/{list_id}",
+            f"{self.nitter_base_url}/i/lists/{list_id}",
             f"list-{list_id}", limit, max_pages=10,
         )
         return [Tweet.from_snapshot_entry(tw) for tw in raw]
@@ -144,7 +144,7 @@ class BrowserBackend(Backend):
     def fetch_replies(self, username: str, tweet_id: str,
                       recurse_nested: bool = True) -> List[Reply]:
         self._require("err_camofox_not_running_replies")
-        nitter_url = f"https://{self.nitter_host}/{username}/status/{tweet_id}"
+        nitter_url = f"{self.nitter_base_url}/{username}/status/{tweet_id}"
         print(t("opening_via_camofox", url=nitter_url), file=sys.stderr)
 
         snapshot = self._fetch_page(nitter_url, f"replies-{tweet_id}")
@@ -155,7 +155,7 @@ class BrowserBackend(Backend):
                 if reply.get("replies", 0) > 0 and reply.get("tweet_id"):
                     r_author = reply["author"].lstrip("@")
                     r_tid = reply["tweet_id"]
-                    nested_url = f"https://{self.nitter_host}/{r_author}/status/{r_tid}"
+                    nested_url = f"{self.nitter_base_url}/{r_author}/status/{r_tid}"
                     print(f"[x-tweet-fetcher] nested replies: {r_author}/status/{r_tid}",
                           file=sys.stderr)
                     try:
