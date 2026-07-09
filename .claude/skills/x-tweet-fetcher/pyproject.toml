@@ -17,7 +17,7 @@ classifiers = [
 dependencies = []  # stdlib only; browser mode optionally uses Camofox or Playwright
 
 [project.optional-dependencies]
-playwright = ["playwright>=1.40"]
+playwright = ["playwright>=1.52"]
 dev = ["pytest>=7", "ruff>=0.4"]
 
 [project.scripts]
