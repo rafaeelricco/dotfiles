@@ -91,9 +91,24 @@ Link the versioned skills directory so Claude Code resolves it via `~/.claude/sk
 # macOS / Linux
 mkdir -p "$HOME/.claude"
 ln -s "$(pwd)/.claude/skills" "$HOME/.claude/skills"
+
+# Agents link per file: ~/.claude/agents/ also holds agents installed by
+# other tools, which a whole-directory symlink would hide.
+mkdir -p "$HOME/.claude/agents"
+for agent in "$(pwd)"/.claude/agents/*.md; do
+  [ -f "$agent" ] || continue
+  dest="$HOME/.claude/agents/$(basename "$agent")"
+  if [ -e "$dest" ] && [ ! -L "$dest" ]; then
+    echo "skip: $dest is a real file, not a link"
+    continue
+  fi
+  ln -sfn "$agent" "$dest"
+done
 ```
 
-On Windows, double-click [`scripts/windows/setup-claude-skills.bat`](scripts/windows/setup-claude-skills.bat) (or right-click → "Run as administrator"). It self-elevates via UAC and creates the symlink. If `~/.claude/skills` already exists as a non-empty real directory, the script aborts so you can move its contents into `./.claude/skills/` first.
+On Windows, double-click [`scripts/windows/setup-claude-skills.bat`](scripts/windows/setup-claude-skills.bat) (or right-click → "Run as administrator"). It self-elevates via UAC, creates the skills symlink, and links each `.claude/agents/*.md` into `~/.claude/agents/`. If `~/.claude/skills` already exists as a non-empty real directory, the script aborts so you can move its contents into `./.claude/skills/` first.
+
+> **Note:** agents link per file, so agents installed by other tools stay in place. The `consult-advisor` skill reaches its `opus-advisor` sub-agent through `~/.claude/agents/opus-advisor.md`; without that link the skill cannot resolve it.
 
 #### Claude Code Skill Marketplace
 
@@ -255,7 +270,7 @@ pwsh -Command "Import-Module .\powershell\in_testing_profile.ps1; tabs"
 | Terminal Template     | `powershell/required_config.json`              | Windows Terminal settings with JetBrainsMono, acrylic, and custom keybindings.                                                                                                                      |
 | Windows Cleanup       | `scripts/windows/system-cleanup.bat`           | Elevated maintenance script: clears TEMP, empties Recycle Bin, and runs SFC + DISM repairs.                                                                                                         |
 | macOS Cleanup         | `scripts/macos/system-cleanup.sh`              | Maintenance script: clears temp/trash/logs and dev caches (brew/npm/pnpm/yarn/pip), flushes DNS, purges memory, verifies the boot volume, and optionally deletes Time Machine local snapshots.      |
-| Claude Skills Setup   | `scripts/windows/setup-claude-skills.bat`      | Self-elevating script that symlinks `.claude/skills/` and `.claude/CLAUDE.md` into `~/.claude/`.                                                                                                    |
+| Claude Skills Setup   | `scripts/windows/setup-claude-skills.bat`      | Self-elevating script that symlinks `.claude/skills/` and `.claude/CLAUDE.md` into `~/.claude/`, and links each `.claude/agents/*.md` into `~/.claude/agents/`.                                     |
 | Codex Skills Setup    | `scripts/windows/setup-codex-skills.bat`       | Self-elevating script that links each skill in `.claude/skills/` plus `.codex/AGENTS.md` into `~/.codex/`, preserving `.system/`.                                                                   |
 | Skills Check          | `scripts/windows/check-skills.bat`             | Read-only verifier (no elevation) that validates skill links and the two instruction-file links against the repo and flags orphans or missing entries. |
 | Bootstrap Installer   | `scripts/install.sh` / `install.ps1`           | Clone to `~/.dotfiles`, then symlink `CLAUDE.md` / `skills` / `agents` / Codex links into `$HOME` with timestamped backups; idempotent.                                                             |
