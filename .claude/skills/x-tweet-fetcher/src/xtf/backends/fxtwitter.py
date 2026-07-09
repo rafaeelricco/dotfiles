@@ -188,7 +188,7 @@ class FxTwitterBackend(Backend):
         return normalize_tweet_json(data["tweet"])
 
     def fetch_user_info(self, username: str) -> Profile:
-        data = http.get_json(f"{API}/{username}", timeout=10)
+        data = http.get_json(f"{API}/{username}", timeout=self.timeout)
         u = data.get("user", {})
         if not u:
             raise NotFound(f"user @{username} not found")
@@ -204,7 +204,7 @@ class FxTwitterBackend(Backend):
 
     def fetch_user_info_dict(self, username: str) -> Dict[str, Any]:
         """v1-compatible extended profile dict (includes avatar/banner/etc)."""
-        data = http.get_json(f"{API}/{username}", timeout=10)
+        data = http.get_json(f"{API}/{username}", timeout=self.timeout)
         u = data.get("user", {})
         if not u:
             raise NotFound(f"user @{username} not found")
@@ -223,7 +223,8 @@ class FxTwitterBackend(Backend):
         }
 
 
-def supplement_views(tweets: List[Dict], max_supplement: int = 50) -> List[Dict]:
+def supplement_views(tweets: List[Dict], max_supplement: int = 50,
+                     timeout: int = 5) -> List[Dict]:
     """Fill missing view counts via FxTwitter. Best-effort, never raises."""
     for tw in tweets[:max_supplement]:
         if tw.get("views", 0) != 0:
@@ -237,7 +238,7 @@ def supplement_views(tweets: List[Dict], max_supplement: int = 50) -> List[Dict]
             continue
         try:
             data = http.get_json(
-                f"{API}/{username}/status/{tweet_id}", timeout=5, retries=0
+                f"{API}/{username}/status/{tweet_id}", timeout=timeout, retries=0
             )
             views = data.get("tweet", {}).get("views", 0)
             if views:

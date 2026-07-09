@@ -17,18 +17,20 @@ import urllib.error
 from typing import Optional
 
 
-def check_camofox(port: int = 9377) -> bool:
+def check_camofox(port: int = 9377, timeout: int = 30) -> bool:
     """Return True if Camofox is reachable."""
     try:
         req = urllib.request.Request(f"http://localhost:{port}/tabs", method="GET")
-        with urllib.request.urlopen(req, timeout=3) as resp:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
             resp.read()
         return True
     except Exception:
         return False
 
 
-def camofox_open_tab(url: str, session_key: str, port: int = 9377) -> Optional[str]:
+def camofox_open_tab(
+    url: str, session_key: str, port: int = 9377, timeout: int = 30
+) -> Optional[str]:
     """Open a new Camofox tab; return tabId or None."""
     if not url.startswith(('http://', 'https://')):
         print(f"[Camofox] rejected non-HTTP URL: {url[:60]}", file=sys.stderr)
@@ -45,7 +47,7 @@ def camofox_open_tab(url: str, session_key: str, port: int = 9377) -> Optional[s
             headers={"Content-Type": "application/json"},
             method="POST",
         )
-        with urllib.request.urlopen(req, timeout=10) as resp:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
             data = json.loads(resp.read().decode())
         return data.get("tabId")
     except Exception as e:
@@ -53,11 +55,13 @@ def camofox_open_tab(url: str, session_key: str, port: int = 9377) -> Optional[s
         return None
 
 
-def camofox_snapshot(tab_id: str, port: int = 9377) -> Optional[str]:
+def camofox_snapshot(
+    tab_id: str, port: int = 9377, timeout: int = 30
+) -> Optional[str]:
     """Get page snapshot text from Camofox tab."""
     try:
         url = f"http://localhost:{port}/tabs/{tab_id}/snapshot?userId=x-tweet-fetcher"
-        with urllib.request.urlopen(url, timeout=15) as resp:
+        with urllib.request.urlopen(url, timeout=timeout) as resp:
             data = json.loads(resp.read().decode())
         return data.get("snapshot", "")
     except Exception as e:
@@ -65,30 +69,43 @@ def camofox_snapshot(tab_id: str, port: int = 9377) -> Optional[str]:
         return None
 
 
-def camofox_close_tab(tab_id: str, port: int = 9377):
+def camofox_close_tab(tab_id: str, port: int = 9377, timeout: int = 30):
     """Close a Camofox tab."""
     try:
         req = urllib.request.Request(
             f"http://localhost:{port}/tabs/{tab_id}",
             method="DELETE",
         )
-        urllib.request.urlopen(req, timeout=5)
+        urllib.request.urlopen(req, timeout=timeout)
     except Exception:
         pass
 
 
-def camofox_fetch_page(url: str, session_key: str, wait: float = 8, port: int = 9377) -> Optional[str]:
+def camofox_fetch_page(
+    url: str,
+    session_key: str,
+    wait: float = 8,
+    port: int = 9377,
+    timeout: int = 30,
+) -> Optional[str]:
     """Open URL in Camofox, wait, snapshot, close. Returns snapshot text."""
-    tab_id = camofox_open_tab(url, session_key, port)
+    tab_id = camofox_open_tab(url, session_key, port=port, timeout=timeout)
     if not tab_id:
         return None
     time.sleep(wait)
-    snapshot = camofox_snapshot(tab_id, port)
-    camofox_close_tab(tab_id, port)
+    snapshot = camofox_snapshot(tab_id, port=port, timeout=timeout)
+    camofox_close_tab(tab_id, port=port, timeout=timeout)
     return snapshot
 
 
-def camofox_search(query: str, num: int = 10, lang: str = "zh-CN", engine: str = "google", port: int = 9377) -> list:
+def camofox_search(
+    query: str,
+    num: int = 10,
+    lang: str = "zh-CN",
+    engine: str = "google",
+    port: int = 9377,
+    timeout: int = 30,
+) -> list:
     """
     Search via Camofox. Supports Google and DuckDuckGo.
     
@@ -105,13 +122,19 @@ def camofox_search(query: str, num: int = 10, lang: str = "zh-CN", engine: str =
     
     if engine == "duckduckgo":
         search_url = f"https://duckduckgo.com/?q={encoded}&kl={lang}&t=h_"
-        snapshot = camofox_fetch_page(search_url, f"ddg-{secrets.token_hex(8)}", wait=5, port=port)
+        snapshot = camofox_fetch_page(
+            search_url, f"ddg-{secrets.token_hex(8)}",
+            wait=5, port=port, timeout=timeout,
+        )
         if not snapshot:
             return []
         return _parse_duckduckgo_results(snapshot, num)
     else:
         search_url = f"https://www.google.com/search?q={encoded}&hl={lang}&num={num}"
-        snapshot = camofox_fetch_page(search_url, f"search-{secrets.token_hex(8)}", wait=4, port=port)
+        snapshot = camofox_fetch_page(
+            search_url, f"search-{secrets.token_hex(8)}",
+            wait=4, port=port, timeout=timeout,
+        )
         if not snapshot:
             return []
         return _parse_google_results(snapshot)

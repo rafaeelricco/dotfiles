@@ -48,9 +48,10 @@ class BrowserBackend(Backend):
     name = "browser"
 
     def __init__(self, driver: Optional[str] = None, port: Optional[int] = None,
-                 nitter_instance: Optional[str] = None):
+                 nitter_instance: Optional[str] = None, timeout: int = 30):
         self.driver_name = driver or config.browser_driver()
         self.port = port or config.browser_port()
+        self.timeout = timeout
         # Nitter base URL used for browser-rendered pages
         inst = nitter_instance or config.nitter_instances()[0]
         self.nitter_base_url = config._normalize_instance(inst)
@@ -64,17 +65,18 @@ class BrowserBackend(Backend):
 
     def available(self) -> bool:
         try:
-            return bool(self.drv.check_camofox(self.port))
+            return bool(self.drv.check_camofox(self.port, timeout=self.timeout))
         except BackendUnavailable:
             return False
 
     def _require(self, err_key: str) -> None:
-        if not self.drv.check_camofox(self.port):
+        if not self.drv.check_camofox(self.port, timeout=self.timeout):
             raise BackendUnavailable(t(err_key, port=self.port))
 
     def _fetch_page(self, url: str, session_key: str, wait: float = 8) -> str:
         snapshot = self.drv.camofox_fetch_page(url, session_key=session_key,
-                                               wait=wait, port=self.port)
+                                               wait=wait, port=self.port,
+                                               timeout=self.timeout)
         if not snapshot:
             raise UpstreamDown(t("err_snapshot_failed"))
         return snapshot
@@ -197,7 +199,9 @@ class BrowserBackend(Backend):
         results: List[Dict[str, Any]] = []
         for query in queries:
             print(t("monitor_searching", query=query), file=sys.stderr)
-            raw = self.drv.camofox_search(query, num=limit, port=self.port)
+            raw = self.drv.camofox_search(
+                query, num=limit, port=self.port, timeout=self.timeout
+            )
             for item in raw:
                 url = item.get("url", "").strip()
                 if url and url not in seen_urls and "x.com" in url:

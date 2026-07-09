@@ -37,8 +37,10 @@ _MAX_PAGES = 10
 class NitterBackend(Backend):
     name = "nitter"
 
-    def __init__(self, instances: Optional[List[str]] = None):
+    def __init__(self, instances: Optional[List[str]] = None,
+                 timeout: int = 30):
         self.instances = instances or config.nitter_instances()
+        self.timeout = timeout
         self._live: Optional[str] = None  # cached healthy instance
 
     # ── instance management ──────────────────────────────────────────────
@@ -46,7 +48,7 @@ class NitterBackend(Backend):
         if self._live:
             return self._live
         for inst in self.instances:
-            if http.probe(inst + "/", timeout=3):
+            if http.probe(inst + "/", timeout=self.timeout):
                 self._live = inst
                 return inst
         return None
@@ -64,7 +66,9 @@ class NitterBackend(Backend):
             if inst is None:
                 continue
             try:
-                html = http.get_text(inst + path, headers=_HEADERS, timeout=15)
+                html = http.get_text(
+                    inst + path, headers=_HEADERS, timeout=self.timeout
+                )
                 self._live = inst
                 return html
             except (RateLimited, UpstreamDown) as e:

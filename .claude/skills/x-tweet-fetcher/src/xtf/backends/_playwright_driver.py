@@ -66,7 +66,7 @@ _tab_store: dict = {}   # tab_id → ARIA snapshot
 # Internal browser helpers
 # ---------------------------------------------------------------------------
 
-def _launch_browser():
+def _launch_browser(timeout_seconds: int = 30):
     """Return a (playwright, browser) pair.  Caller must close both."""
     from playwright.sync_api import sync_playwright  # lazy import
     pw = sync_playwright().start()
@@ -84,7 +84,10 @@ def _launch_browser():
         executable_path = _resolve_chromium_executable(pw.chromium)
         if executable_path:
             launch_options["executable_path"] = executable_path
-        browser = pw.chromium.launch(**launch_options)
+        browser = pw.chromium.launch(
+            timeout=timeout_seconds * 1000,
+            **launch_options,
+        )
     except Exception:
         try:
             pw.stop()
@@ -106,10 +109,14 @@ def _new_context(browser, lang: str = "zh-CN"):
     )
 
 
-def _safe_goto(page, url: str, timeout: int = 30000):
+def _safe_goto(page, url: str, timeout_seconds: int = 30):
     """Navigate to url, tolerating timeout errors."""
     try:
-        page.goto(url, timeout=timeout, wait_until="domcontentloaded")
+        page.goto(
+            url,
+            timeout=timeout_seconds * 1000,
+            wait_until="domcontentloaded",
+        )
     except Exception:
         pass  # partial load is fine for JS-heavy pages
 
@@ -119,14 +126,16 @@ def _page_text(page) -> str:
     return page.locator("body").aria_snapshot(timeout=5000) or ""
 
 
-def _fetch_url_text(url: str, wait: float = 8) -> Optional[str]:
+def _fetch_url_text(
+    url: str, wait: float = 8, timeout: int = 30
+) -> Optional[str]:
     """Fetch *url* with Playwright, return an ARIA snapshot. None on failure."""
     pw = browser = None
     try:
-        pw, browser = _launch_browser()
+        pw, browser = _launch_browser(timeout_seconds=timeout)
         ctx = _new_context(browser)
         page = ctx.new_page()
-        _safe_goto(page, url)
+        _safe_goto(page, url, timeout_seconds=timeout)
         time.sleep(wait)
         text = _page_text(page)
         ctx.close()
@@ -145,11 +154,11 @@ def _fetch_url_text(url: str, wait: float = 8) -> Optional[str]:
             pass
 
 
-def check_camofox(port: int = 9377) -> bool:
+def check_camofox(port: int = 9377, timeout: int = 30) -> bool:
     """Return True when Playwright can launch its configured Chromium."""
     pw = browser = None
     try:
-        pw, browser = _launch_browser()
+        pw, browser = _launch_browser(timeout_seconds=timeout)
         return True
     except Exception:
         return False
@@ -164,12 +173,14 @@ def check_camofox(port: int = 9377) -> bool:
             pass
 
 
-def camofox_open_tab(url: str, session_key: str, port: int = 9377) -> Optional[str]:
+def camofox_open_tab(
+    url: str, session_key: str, port: int = 9377, timeout: int = 30
+) -> Optional[str]:
     """Fetch *url* and store its ARIA snapshot; return a synthetic tab_id."""
     if not url.startswith(("http://", "https://")):
         print(f"[playwright_client] rejected non-HTTP URL: {url[:60]}", file=sys.stderr)
         return None
-    text = _fetch_url_text(url, wait=8)
+    text = _fetch_url_text(url, wait=8, timeout=timeout)
     if text is None:
         return None
     tab_id = f"pw-{session_key}-{secrets.token_hex(4)}"
@@ -177,19 +188,27 @@ def camofox_open_tab(url: str, session_key: str, port: int = 9377) -> Optional[s
     return tab_id
 
 
-def camofox_snapshot(tab_id: str, port: int = 9377) -> Optional[str]:
+def camofox_snapshot(
+    tab_id: str, port: int = 9377, timeout: int = 30
+) -> Optional[str]:
     """Return the stored ARIA snapshot for *tab_id*."""
     return _tab_store.get(tab_id)
 
 
-def camofox_close_tab(tab_id: str, port: int = 9377):
-    """Free the stored page text."""
+def camofox_close_tab(tab_id: str, port: int = 9377, timeout: int = 30):
+    """Free the stored ARIA snapshot."""
     _tab_store.pop(tab_id, None)
 
 
-def camofox_fetch_page(url: str, session_key: str, wait: float = 8, port: int = 9377) -> Optional[str]:
+def camofox_fetch_page(
+    url: str,
+    session_key: str,
+    wait: float = 8,
+    port: int = 9377,
+    timeout: int = 30,
+) -> Optional[str]:
     """Fetch *url* via Playwright; return its ARIA snapshot."""
-    return _fetch_url_text(url, wait=wait)
+    return _fetch_url_text(url, wait=wait, timeout=timeout)
 
 
 # ---------------------------------------------------------------------------
@@ -202,6 +221,7 @@ def camofox_search(
     lang: str = "zh-CN",
     engine: str = "google",
     port: int = 9377,
+    timeout: int = 30,
 ) -> list:
     """
     Search via Playwright (Google or DuckDuckGo).
@@ -213,18 +233,18 @@ def camofox_search(
     results = []
 
     try:
-        pw, browser = _launch_browser()
+        pw, browser = _launch_browser(timeout_seconds=timeout)
         ctx = _new_context(browser, lang=lang)
         page = ctx.new_page()
 
         if engine == "duckduckgo":
             search_url = f"https://duckduckgo.com/?q={encoded}&kl={lang}&t=h_"
-            _safe_goto(page, search_url)
+            _safe_goto(page, search_url, timeout_seconds=timeout)
             time.sleep(5)
             results = _extract_ddg_results(page, num)
         else:
             search_url = f"https://www.google.com/search?q={encoded}&hl={lang}&num={num}"
-            _safe_goto(page, search_url)
+            _safe_goto(page, search_url, timeout_seconds=timeout)
             time.sleep(4)
             results = _extract_google_results(page, num)
 

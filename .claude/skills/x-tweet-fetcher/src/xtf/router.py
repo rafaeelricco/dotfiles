@@ -36,13 +36,14 @@ class Router:
                  nitter_instances: Optional[List[str]] = None,
                  browser_driver: Optional[str] = None,
                  browser_port: Optional[int] = None,
-                 browser_nitter: Optional[str] = None):
+                 browser_nitter: Optional[str] = None,
+                 timeout: int = 30):
         """backend: 'auto' | 'nitter' | 'browser' (mirrors the v1 --backend flag)."""
         self.mode = backend
-        self.fxtwitter = FxTwitterBackend()
-        self.nitter = NitterBackend(instances=nitter_instances)
+        self.fxtwitter = FxTwitterBackend(timeout=timeout)
+        self.nitter = NitterBackend(instances=nitter_instances, timeout=timeout)
         self.browser = BrowserBackend(driver=browser_driver, port=browser_port,
-                                      nitter_instance=browser_nitter)
+                                      nitter_instance=browser_nitter, timeout=timeout)
 
     # ── chain construction ───────────────────────────────────────────────
     def _chain(self) -> List[Backend]:

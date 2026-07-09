@@ -34,6 +34,16 @@ def _fail(result: Dict[str, Any], exc: XtfError) -> Dict[str, Any]:
     return result
 
 
+def _positive_timeout(value: str) -> int:
+    try:
+        timeout = int(value)
+    except ValueError as e:
+        raise argparse.ArgumentTypeError("must be a positive integer") from e
+    if timeout <= 0:
+        raise argparse.ArgumentTypeError("must be a positive integer")
+    return timeout
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="xtf",
@@ -68,7 +78,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--replies", "-r", action="store_true", help="Fetch replies")
     parser.add_argument("--pretty", "-p", action="store_true", help="Pretty print JSON")
     parser.add_argument("--text-only", "-t", action="store_true", help="Human-readable output")
-    parser.add_argument("--timeout", type=int, default=30, help="Request timeout in seconds (default: 30)")
+    parser.add_argument("--timeout", type=_positive_timeout, default=30,
+                        help="Request timeout in seconds (default: 30)")
     parser.add_argument("--port", type=int, default=None,
                         help=f"Browser (Camofox) port (default: {config.DEFAULT_BROWSER_PORT})")
     parser.add_argument("--nitter", default=None,
@@ -106,6 +117,7 @@ def main(argv=None) -> None:
         browser_driver=args.browser_driver,
         browser_port=args.port,
         browser_nitter=nitter_instances[0] if nitter_instances else None,
+        timeout=args.timeout,
     )
     pretty = args.pretty
 
@@ -186,7 +198,7 @@ def main(argv=None) -> None:
         result = {"username": args.user, "limit": args.limit}
         try:
             tweets = [tw.to_dict() for tw in router.fetch_timeline(args.user, limit=args.limit)]
-            tweets = supplement_views(tweets)
+            tweets = supplement_views(tweets, timeout=args.timeout)
             result.update({
                 "tweets": tweets, "count": len(tweets),
                 "backend": router.last_backend, "views_supplemented": True,
@@ -248,7 +260,7 @@ def main(argv=None) -> None:
         result = {"url": args.url, "username": username, "tweet_id": tweet_id}
         try:
             replies = [r.to_dict() for r in router.fetch_replies(username, tweet_id)]
-            replies = supplement_views(replies)
+            replies = supplement_views(replies, timeout=args.timeout)
             result.update({
                 "replies": replies, "reply_count": len(replies),
                 "count": len(replies), "backend": router.last_backend,
@@ -289,7 +301,7 @@ def main(argv=None) -> None:
         result = {"list_id": list_id, "limit": args.limit}
         try:
             tweets = [tw.to_dict() for tw in router.fetch_list(list_id, limit=args.limit)]
-            tweets = supplement_views(tweets)
+            tweets = supplement_views(tweets, timeout=args.timeout)
             result.update({
                 "tweets": tweets, "count": len(tweets),
                 "backend": router.last_backend, "views_supplemented": True,
