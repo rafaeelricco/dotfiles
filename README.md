@@ -199,7 +199,7 @@ On Windows, the updated [`setup-claude-skills.bat`](scripts/windows/setup-claude
 
 > **Note:** `.claude/CLAUDE.md` is the source. `.codex/AGENTS.md` mirrors it through a symlink.
 
-To verify all setups at any time, run [`scripts/windows/check-skills.bat`](scripts/windows/check-skills.bat) (no elevation needed) — it inspects `~/.claude/skills`, `~/.codex/skills/`, the two instruction files, validates link targets against the repo, and reports any orphan or missing entries.
+To verify all setups at any time, run [`scripts/windows/check-skills.bat`](scripts/windows/check-skills.bat) (no elevation needed) — it inspects `~/.claude/skills`, `~/.claude/agents/`, `~/.codex/skills/`, the two instruction files, validates link targets against the repo, and reports any missing entries, orphan skills, or stale agent links.
 
 On Windows Terminal, reference `powershell/in_testing_profile.ps1` in your profile command line or import the bundled settings template:
 
@@ -272,7 +272,7 @@ pwsh -Command "Import-Module .\powershell\in_testing_profile.ps1; tabs"
 | macOS Cleanup         | `scripts/macos/system-cleanup.sh`              | Maintenance script: clears temp/trash/logs and dev caches (brew/npm/pnpm/yarn/pip), flushes DNS, purges memory, verifies the boot volume, and optionally deletes Time Machine local snapshots.      |
 | Claude Skills Setup   | `scripts/windows/setup-claude-skills.bat`      | Self-elevating script that symlinks `.claude/skills/` and `.claude/CLAUDE.md` into `~/.claude/`, and links each `.claude/agents/*.md` into `~/.claude/agents/`.                                     |
 | Codex Skills Setup    | `scripts/windows/setup-codex-skills.bat`       | Self-elevating script that links each skill in `.claude/skills/` plus `.codex/AGENTS.md` into `~/.codex/`, preserving `.system/`.                                                                   |
-| Skills Check          | `scripts/windows/check-skills.bat`             | Read-only verifier (no elevation) that validates skill links and the two instruction-file links against the repo and flags orphans or missing entries. |
+| Skills Check          | `scripts/windows/check-skills.bat`             | Read-only verifier (no elevation) that validates skill links, per-file agent links, and the two instruction-file links against the repo and flags orphans, stale agent links, or missing entries.  |
 | Bootstrap Installer   | `scripts/install.sh` / `install.ps1`           | Clone to `~/.dotfiles`, then symlink `CLAUDE.md` / `skills` / `agents` / Codex links into `$HOME` with timestamped backups; idempotent.                                                             |
 | Bootstrap Updater     | `scripts/update.sh` / `update.ps1`             | `git pull --ff-only`, re-link, and regenerate the skill marketplace when `.claude/skills` changed.                                                                                                  |
 | Claude / Codex Skills | `.claude/skills/`                              | Versioned skills shared between Claude Code (`~/.claude/skills`) and Codex CLI (`~/.codex/skills/<skill>`).                                                                                         |

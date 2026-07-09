@@ -8,13 +8,15 @@ if (-not $RepoPath) {
     $RepoPath = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 }
 
-$SkillsSrc    = Join-Path $RepoPath ".claude\skills"
-$ClaudeLink   = Join-Path $HOME ".claude\skills"
-$CodexDir     = Join-Path $HOME ".codex\skills"
-$ClaudeMdSrc  = Join-Path $RepoPath ".claude\CLAUDE.md"
-$ClaudeMdLink = Join-Path $HOME ".claude\CLAUDE.md"
-$AgentsMdSrc  = Join-Path $RepoPath ".codex\AGENTS.md"
-$AgentsMdLink = Join-Path $HOME ".codex\AGENTS.md"
+$SkillsSrc       = Join-Path $RepoPath ".claude\skills"
+$ClaudeLink      = Join-Path $HOME ".claude\skills"
+$AgentsSrc       = Join-Path $RepoPath ".claude\agents"
+$ClaudeAgentsDir = Join-Path $HOME ".claude\agents"
+$CodexDir        = Join-Path $HOME ".codex\skills"
+$ClaudeMdSrc     = Join-Path $RepoPath ".claude\CLAUDE.md"
+$ClaudeMdLink    = Join-Path $HOME ".claude\CLAUDE.md"
+$AgentsMdSrc     = Join-Path $RepoPath ".codex\AGENTS.md"
+$AgentsMdLink    = Join-Path $HOME ".codex\AGENTS.md"
 $RulesSrc     = Join-Path $RepoPath ".cursor\rules"
 $ExpectedRules = @("pr-workflow.mdc")
 
@@ -74,6 +76,42 @@ if (-not (Test-Path -LiteralPath $SkillsSrc)) {
 
 Write-Host "--- Claude ($ClaudeLink) ---" -ForegroundColor Cyan
 Check-Link -Link $ClaudeLink -Expected $SkillsSrc -Label "skills"
+Write-Host ""
+
+Write-Host "--- Claude agents ($ClaudeAgentsDir) ---" -ForegroundColor Cyan
+if (-not (Test-Path -LiteralPath $AgentsSrc)) {
+    Write-Host "  [INFO] no .claude\agents directory in repo (optional)" -ForegroundColor DarkGray
+} elseif (-not (Test-Path -LiteralPath $ClaudeAgentsDir)) {
+    Write-Host "  [FAIL] directory does not exist: $ClaudeAgentsDir" -ForegroundColor Red
+    $script:fail++
+} else {
+    $repoAgents = @(Get-ChildItem -LiteralPath $AgentsSrc -Filter '*.md' -File | Sort-Object Name)
+
+    foreach ($agent in $repoAgents) {
+        Check-Link `
+            -Link (Join-Path $ClaudeAgentsDir $agent.Name) `
+            -Expected $agent.FullName `
+            -Label $agent.Name
+    }
+
+    $staleLinks = Get-ChildItem -LiteralPath $ClaudeAgentsDir -Force -ErrorAction SilentlyContinue |
+                  Where-Object { $_.LinkType } |
+                  Where-Object {
+                      $target = $_.Target
+                      if ($target -is [array]) { $target = $target[0] }
+                      $expectedSource = Join-Path $AgentsSrc $_.Name
+                      $sourceMissing = -not (Test-Path -LiteralPath $expectedSource)
+                      $targetMatches = (Normalize-Path $target) -ieq (Normalize-Path $expectedSource)
+                      $sourceMissing -and $targetMatches
+                  }
+    if ($staleLinks) {
+        Write-Host ""
+        Write-Host "  Stale agent links in $ClaudeAgentsDir (source removed from repo):" -ForegroundColor Yellow
+        foreach ($stale in $staleLinks) {
+            Write-Host "    - $($stale.Name)" -ForegroundColor Yellow
+        }
+    }
+}
 Write-Host ""
 
 Write-Host "--- Codex ($CodexDir) ---" -ForegroundColor Cyan
