@@ -58,8 +58,8 @@ ln -s "$(pwd)/nvim/lua" "$HOME/.config/nvim/lua"
 #### One-line install (Claude Code + optional Codex)
 
 Clones this repo to `~/.dotfiles` (override with `--dir` / `$DOTFILES_DIR`) and symlinks
-`CLAUDE.md` + `skills` into `~/.claude` — and, if Codex is present, `AGENTS.md` + per-skill
-links into `~/.codex`. Existing real files are backed up to `<name>.backup-<timestamp>` first;
+`CLAUDE.md` + `skills` + `agents` into `~/.claude` — and, if Codex is present, `AGENTS.md` +
+per-skill links into `~/.codex`. Existing real files are backed up to `<name>.backup-<timestamp>` first;
 re-running is a safe no-op.
 
 ```bash
@@ -163,11 +163,7 @@ done
 
 On Windows, double-click [`scripts/windows/setup-codex-skills.bat`](scripts/windows/setup-codex-skills.bat) (or right-click → "Run as administrator"). It self-elevates via UAC, then loops through `.claude/skills/` and refreshes the per-skill symlinks. Re-run after pulling new skills into the repo.
 
-Both approaches preserve `~/.codex/skills/.system/` (Codex's bundled skills) by linking per skill instead of symlinking the whole directory.
-
-#### Cursor Rules
-
-Optional rule snippets live under [`.cursor/rules/`](.cursor/rules/) in this repo (for example `pr-workflow.mdc`). Cursor applies **project** rules from each workspace’s own `.cursor/rules` and **user** rules from **Cursor Settings → Rules**. Copy or recreate what you want per project or as a user rule; this repo does not automate a global install.
+Both approaches preserve `~/.codex/skills/.system/` (Codex’s bundled skills) by linking per skill instead of symlinking the whole directory.
 
 #### Global Instructions
 
@@ -188,7 +184,7 @@ On Windows, the updated [`setup-claude-skills.bat`](scripts/windows/setup-claude
 
 > **Note:** `.claude/CLAUDE.md` is the source. `.codex/AGENTS.md` mirrors it through a symlink.
 
-To verify all setups at any time, run [`scripts/windows/check-skills.bat`](scripts/windows/check-skills.bat) (no elevation needed) — it inspects `~/.claude/skills`, `~/.codex/skills/`, optional rule files under `./.cursor/rules`, the two instruction files, validates link targets against the repo, and reports any orphan or missing entries.
+To verify all setups at any time, run [`scripts/windows/check-skills.bat`](scripts/windows/check-skills.bat) (no elevation needed) — it inspects `~/.claude/skills`, `~/.codex/skills/`, the two instruction files, validates link targets against the repo, and reports any orphan or missing entries.
 
 On Windows Terminal, reference `powershell/in_testing_profile.ps1` in your profile command line or import the bundled settings template:
 
@@ -261,13 +257,33 @@ pwsh -Command "Import-Module .\powershell\in_testing_profile.ps1; tabs"
 | macOS Cleanup         | `scripts/macos/system-cleanup.sh`              | Maintenance script: clears temp/trash/logs and dev caches (brew/npm/pnpm/yarn/pip), flushes DNS, purges memory, verifies the boot volume, and optionally deletes Time Machine local snapshots.      |
 | Claude Skills Setup   | `scripts/windows/setup-claude-skills.bat`      | Self-elevating script that symlinks `.claude/skills/` and `.claude/CLAUDE.md` into `~/.claude/`.                                                                                                    |
 | Codex Skills Setup    | `scripts/windows/setup-codex-skills.bat`       | Self-elevating script that links each skill in `.claude/skills/` plus `.codex/AGENTS.md` into `~/.codex/`, preserving `.system/`.                                                                   |
-| Skills Check          | `scripts/windows/check-skills.bat`             | Read-only verifier (no elevation) that validates skill links, optional `.cursor/rules` files in the repo, and the two instruction-file links against the repo and flags orphans or missing entries. |
-| Bootstrap Installer   | `scripts/install.sh` / `install.ps1`           | Clone to `~/.dotfiles`, then symlink `CLAUDE.md` / `skills` / Codex links into `$HOME` with timestamped backups; idempotent.                                                                        |
+| Skills Check          | `scripts/windows/check-skills.bat`             | Read-only verifier (no elevation) that validates skill links and the two instruction-file links against the repo and flags orphans or missing entries. |
+| Bootstrap Installer   | `scripts/install.sh` / `install.ps1`           | Clone to `~/.dotfiles`, then symlink `CLAUDE.md` / `skills` / `agents` / Codex links into `$HOME` with timestamped backups; idempotent.                                                             |
 | Bootstrap Updater     | `scripts/update.sh` / `update.ps1`             | `git pull --ff-only`, re-link, and regenerate the skill marketplace when `.claude/skills` changed.                                                                                                  |
-| Cursor Rules          | `.cursor/rules/`                               | Optional reference rules (for example `pr-workflow.mdc`). Install into a project or as a user rule in Cursor Settings when you want them.                                                           |
 | Claude / Codex Skills | `.claude/skills/`                              | Versioned skills shared between Claude Code (`~/.claude/skills`) and Codex CLI (`~/.codex/skills/<skill>`).                                                                                         |
+| Claude Agents         | `.claude/agents/`                              | Sub-agents invoked by skills (e.g. `opus-advisor`, the Opus-model advisor `consult-advisor` escalates hard planning decisions to). Symlinked per-file into `~/.claude/agents/` by the bootstrap installer (macOS/Linux `install.sh`, Windows `install.ps1`), same as skills.                     |
 | Claude Instructions   | `.claude/CLAUDE.md`                            | Global Claude Code instructions: quality mode + writing style. Symlinked into `~/.claude/CLAUDE.md`.                                                                                                |
 | Codex Instructions    | `.codex/AGENTS.md`                             | Global Codex CLI instructions; identical content to `.claude/CLAUDE.md`. Symlinked into `~/.codex/AGENTS.md`.                                                                                       |
+
+### Available Skills
+
+| Skill | Description |
+| --- | --- |
+| `babysit` | Keeps a GitHub PR merge-ready: triages conflicts, review feedback, and CI failures in a loop. |
+| `caveman` | Ultra-compressed communication mode; cuts token usage ~75%. |
+| `coding-standards` | Functional, type-safe implementation style for code creation, refactors, and reviews. |
+| `consult-advisor` | Escalates hard planning/architecture decisions to the `opus-advisor` sub-agent (`.claude/agents/`) before executing. |
+| `create-pr` | Creates and opens GitHub pull requests from local changes, gated by plan-mode approval. |
+| `e2e-test` | Guided end-to-end test of a running web app after a feature is finished. |
+| `gh-issue-drafter` | Drafts structured GitHub issues (Situation, Direction, Acceptance Criteria, Validation). |
+| `grill-me` | Interviews the user relentlessly to stress-test a plan or design before building. |
+| `meeting-notes-and-actions` | Turns meeting transcripts/notes into share-ready recaps and owner-tagged action items. |
+| `plan-format` | Formats implementation plans as real before/after diffs, not prose. |
+| `pr-generate-description` | Generates structured PR descriptions from git diffs via an interactive questionnaire. |
+| `prompt-master` | Writes and optimizes prompts for other AI tools. |
+| `stop-slop` | Removes AI writing patterns and tells from prose. |
+| `story-mapping` | Jeff Patton-style user story mapping for release planning and backlog sequencing. |
+| `validation-council` | Orchestrates a read-only validation council to stress-test plans/diffs before coding. |
 
 ### Type Checking
 
