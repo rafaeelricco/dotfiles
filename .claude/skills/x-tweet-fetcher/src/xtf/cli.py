@@ -206,7 +206,11 @@ def main(argv=None) -> None:
                   "Nitter cannot fetch X Articles. Falling back to browser.", file=sys.stderr)
         article_id = parse_article_id(args.article)
         if not article_id:
-            print(t("err_prefix") + t("err_invalid_article", input=args.article), file=sys.stderr)
+            message = t("err_invalid_article", input=args.article)
+            if args.text_only:
+                print(t("err_prefix") + message, file=sys.stderr)
+            else:
+                _emit({"error": message, "error_code": "invalid_input"}, pretty)
             sys.exit(1)
         result = {"article_id": article_id}
         try:
@@ -276,7 +280,11 @@ def main(argv=None) -> None:
     if args.list:
         list_id = extract_list_id(args.list)
         if not list_id:
-            print(t("err_prefix") + t("err_invalid_list", input=args.list), file=sys.stderr)
+            message = t("err_invalid_list", input=args.list)
+            if args.text_only:
+                print(t("err_prefix") + message, file=sys.stderr)
+            else:
+                _emit({"error": message, "error_code": "invalid_input"}, pretty)
             sys.exit(1)
         result = {"list_id": list_id, "limit": args.limit}
         try:
