@@ -130,7 +130,7 @@ refresh_repo() {
   if git -C "${dir}" pull --ff-only; then
     after="$(git -C "${dir}" rev-parse HEAD 2>/dev/null || echo "")"
     if [ -n "${before}" ] && [ -n "${after}" ] && [ "${before}" != "${after}" ]; then
-      if git -C "${dir}" diff --name-only "${before}" "${after}" -- .claude/skills | grep -q .; then
+      if git -C "${dir}" diff --name-only "${before}" "${after}" -- .claude/skills .claude/agents | grep -q .; then
         SKILLS_CHANGED=1
       fi
     fi
@@ -272,6 +272,38 @@ link_skill_set() {
   prune_skill_links "${skills_dir}" "${label}"
 }
 
+# --- agents ------------------------------------------------------------------
+
+# Remove per-agent SYMLINKS that no longer exist in the repo. Never touches real files.
+prune_agent_links() {
+  local dir="$1" entry name
+  for entry in "${dir}"/*; do
+    [ -L "${entry}" ] || continue      # only ever remove symlinks
+    name="$(basename "${entry}")"
+    if [ "$(readlink "${entry}")" = "${AGENTS_SRC}/${name}" ] \
+       && [ ! -f "${AGENTS_SRC}/${name}" ]; then
+      rm -f "${entry}"
+      echo "pruned stale agent link: ${entry}"
+      record_skip "${entry} (pruned stale link)"
+    fi
+  done
+}
+
+link_agent_set() {
+  local agents_dir="$1" agent name
+
+  [ -d "${AGENTS_SRC}" ] || return 0
+
+  mkdir -p "${agents_dir}"
+  for agent in "${AGENTS_SRC}"/*.md; do
+    [ -f "${agent}" ] || continue
+    name="$(basename "${agent}")"
+    link_one "${agent}" "${agents_dir}/${name}"
+  done
+
+  prune_agent_links "${agents_dir}"
+}
+
 # --- codex (optional) --------------------------------------------------------
 
 link_codex() {
@@ -366,6 +398,7 @@ main() {
   # Verify the source artifacts exist in the clone.
   CLAUDE_SRC="${DOTFILES_DIR}/.claude/CLAUDE.md"
   SKILLS_SRC="${DOTFILES_DIR}/.claude/skills"
+  AGENTS_SRC="${DOTFILES_DIR}/.claude/agents"
   if [ ! -f "${CLAUDE_SRC}" ]; then
     echo "error: expected file not found: ${CLAUDE_SRC}" >&2
     exit 1
@@ -378,6 +411,7 @@ main() {
   # Claude — always.
   link_one "${CLAUDE_SRC}" "${HOME}/.claude/CLAUDE.md"
   link_skill_set "${HOME}/.claude/skills" "Claude"
+  link_agent_set "${HOME}/.claude/agents"
 
   # Codex — optional.
   if [ "${SKIP_CODEX}" = "1" ]; then

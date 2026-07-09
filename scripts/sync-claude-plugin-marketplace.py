@@ -11,6 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_SKILLS_DIR = ROOT / ".claude" / "skills"
+SOURCE_AGENTS_DIR = ROOT / ".claude" / "agents"
 MARKETPLACE_DIR = ROOT / ".claude-plugin"
 MARKETPLACE_FILE = MARKETPLACE_DIR / "marketplace.json"
 PLUGINS_DIR = ROOT / "plugins"
@@ -19,6 +20,12 @@ MARKETPLACE_NAME = "ricco-skills"
 OWNER_NAME = "Rafael Ricco"
 GITHUB_REPO = "rafaeelricco/dotfiles"
 REPOSITORY = f"https://github.com/{GITHUB_REPO}"
+
+# Skills that bundle a companion sub-agent from .claude/agents/. Extend this map
+# when a skill starts depending on another agent file.
+SKILL_AGENTS: dict[str, list[str]] = {
+    "consult-advisor": ["opus-advisor.md"],
+}
 
 
 def unquote(value: str) -> str:
@@ -146,6 +153,17 @@ def main() -> None:
         plugin_skill_dir = plugin_dir / "skills" / skill_name
 
         shutil.copytree(source_skill_dir, plugin_skill_dir, symlinks=False)
+
+        for agent_file in SKILL_AGENTS.get(skill_name, []):
+            agent_src = SOURCE_AGENTS_DIR / agent_file
+            if not agent_src.exists():
+                raise ValueError(
+                    f"{agent_src} referenced by SKILL_AGENTS['{skill_name}'] not found"
+                )
+            plugin_agent_dir = plugin_dir / "agents"
+            plugin_agent_dir.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(agent_src, plugin_agent_dir / agent_file)
+
         write_json(
             plugin_dir / ".claude-plugin" / "plugin.json",
             plugin_manifest(skill_name, description),
