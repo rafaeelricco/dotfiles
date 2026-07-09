@@ -1,0 +1,9 @@
+{
+  "name": "consult-advisor",
+  "displayName": "Consult Advisor Skill",
+  "description": "Escalate hard planning decisions to the Opus advisor sub-agent before executing. Use when a task has non-obvious tradeoffs, multiple viable approaches, architectural impact, or the user asks \"how should we approach\". Do NOT use for mechanical edits, obvious one-liners, or when the user has already specified the approach.",
+  "author": {
+    "name": "Rafael Ricco"
+  },
+  "repository": "https://github.com/rafaeelricco/dotfiles"
+}
