@@ -4,21 +4,18 @@ from __future__ import annotations
 import re
 from typing import Optional
 
-def parse_tweet_url(url: str) -> tuple:
+_TWEET_URL_RE = re.compile(
+    r"(?:https?://)?(?:www\.)?(?:x\.com|twitter\.com)/"
+    r"([a-zA-Z0-9_]{1,15})/status/(\d+)(?:[/?#].*)?",
+    re.IGNORECASE,
+)
+
+
+def parse_tweet_url(url: str) -> tuple[str, str]:
     """Extract username and tweet_id from X/Twitter URL."""
-    patterns = [
-        r'(?:x\.com|twitter\.com)/([a-zA-Z0-9_]{1,15})/status/(\d+)',
-    ]
-    for pattern in patterns:
-        match = re.search(pattern, url)
-        if match:
-            username = match.group(1)
-            tweet_id = match.group(2)
-            if not re.match(r'^[a-zA-Z0-9_]{1,15}$', username):
-                raise ValueError(f"Invalid username format: {username}")
-            if not tweet_id.isdigit():
-                raise ValueError(f"Invalid tweet ID format: {tweet_id}")
-            return username, tweet_id
+    match = _TWEET_URL_RE.fullmatch(url.strip())
+    if match:
+        return match.group(1), match.group(2)
     raise ValueError(f"Cannot parse tweet URL: {url}")
 
 
@@ -70,5 +67,4 @@ def parse_article_id(input_str: str) -> Optional[str]:
         return m.group(1)
 
     return None
-
 
