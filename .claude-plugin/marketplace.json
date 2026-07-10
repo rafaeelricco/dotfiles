@@ -45,22 +45,9 @@
       ]
     },
     {
-      "name": "consult-advisor",
-      "source": "./plugins/consult-advisor",
-      "description": "Escalate hard planning decisions to the Opus advisor sub-agent before executing. Use when a task has non-obvious tradeoffs, multiple viable approaches, architectural impact, or the user asks \"how should we approach\". Do NOT use for mechanical edits, obvious one-liners, or when the user has already specified the approach.",
-      "author": {
-        "name": "Rafael Ricco"
-      },
-      "repository": "https://github.com/rafaeelricco/dotfiles",
-      "category": "skills",
-      "tags": [
-        "skill"
-      ]
-    },
-    {
       "name": "create-pr",
       "source": "./plugins/create-pr",
-      "description": "Create and open GitHub pull requests from local repository changes. Use this skill when the user asks to create PR, open PR, abrir PR, criar pull request, ship this branch, ready for review, publish local changes as a pull request, or invokes /create-pr. Enters plan mode before any git mutation, asks the user for motivation, scope, branch, and commit approval, requires pr-generate-description for the PR body, and executes only after the user approves the plan.",
+      "description": "Create and open GitHub pull requests from local repository changes. Use when the user asks to create PR, open PR, abrir PR, criar pull request, ship this branch, ready for review, publish local changes as a pull request, or invokes /create-pr. Enters plan mode before any git mutation, asks the user for motivation, scope, branch, and commit approval, requires pr-generate-description for the PR body, and executes only after the user approves the plan.",
       "author": {
         "name": "Rafael Ricco"
       },
@@ -188,9 +175,9 @@
       ]
     },
     {
-      "name": "validation-council",
-      "source": "./plugins/validation-council",
-      "description": "Orchestrate a read-only validation council for code plans, approaches, implementations, or diffs before coding, before /review, before codex review, or when the user asks to validate, challenge, stress-test, preflight, sanity-check, or get analyst/argument/critique/reviewer subagent feedback.",
+      "name": "x-tweet-fetcher",
+      "source": "./plugins/x-tweet-fetcher",
+      "description": "Fetch tweets, replies, timelines, search results, X Lists, and X Articles from X/Twitter without login or API keys. Single tweets: zero dependencies (FxTwitter). Timelines/search/replies: a Nitter instance (XTF_NITTER). Lists/Articles: a browser driver (Camofox or Playwright). Unified JSON schema across all backends; machine-readable error_code for agent branching. Field reports and agent-use questions: Agent Waystation #22 Teahouse: https://github.com/ythx-101/openclaw-qa/discussions/22",
       "author": {
         "name": "Rafael Ricco"
       },

@@ -23,9 +23,7 @@ REPOSITORY = f"https://github.com/{GITHUB_REPO}"
 
 # Skills that bundle a companion sub-agent from .claude/agents/. Extend this map
 # when a skill starts depending on another agent file.
-SKILL_AGENTS: dict[str, list[str]] = {
-    "consult-advisor": ["opus-advisor.md"],
-}
+SKILL_AGENTS: dict[str, list[str]] = {}
 
 
 def unquote(value: str) -> str:
