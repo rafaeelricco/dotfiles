@@ -149,19 +149,6 @@
       ]
     },
     {
-      "name": "stop-slop",
-      "source": "./plugins/stop-slop",
-      "description": "Remove AI writing patterns from prose. Use when drafting, editing, or reviewing text to eliminate predictable AI tells.",
-      "author": {
-        "name": "Rafael Ricco"
-      },
-      "repository": "https://github.com/rafaeelricco/dotfiles",
-      "category": "skills",
-      "tags": [
-        "skill"
-      ]
-    },
-    {
       "name": "story-mapping",
       "source": "./plugins/story-mapping",
       "description": "Jeff Patton-style user story mapping for visualizing user journeys and translating product strategy into prioritized, deliverable work. Use for release planning, MVP definition, backlog sequencing, and cross-team alignment on what to build and in what order.",

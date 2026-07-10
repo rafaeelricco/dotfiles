@@ -294,7 +294,6 @@ pwsh -Command "Import-Module .\powershell\in_testing_profile.ps1; tabs"
 | `plan-format` | Formats implementation plans as real before/after diffs, not prose. |
 | `pr-generate-description` | Generates structured PR descriptions from git diffs via an interactive questionnaire. |
 | `prompt-master` | Writes and optimizes prompts for other AI tools. |
-| `stop-slop` | Removes AI writing patterns and tells from prose. |
 | `story-mapping` | Jeff Patton-style user story mapping for release planning and backlog sequencing. |
 
 ### Type Checking
