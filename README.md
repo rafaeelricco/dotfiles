@@ -124,7 +124,6 @@ Then install only the skills you want:
 claude plugin install create-pr@ricco-skills
 claude plugin install prompt-master@ricco-skills
 claude plugin install gh-issue-drafter@ricco-skills
-claude plugin install e2e-test@ricco-skills
 ```
 
 To install several skills, run one install command per skill. After pulling marketplace updates, refresh the catalog:
@@ -289,7 +288,6 @@ pwsh -Command "Import-Module .\powershell\in_testing_profile.ps1; tabs"
 | `coding-standards` | Functional, type-safe implementation style for code creation, refactors, and reviews. |
 | `consult-advisor` | Escalates hard planning/architecture decisions to the `opus-advisor` sub-agent (`.claude/agents/`) before executing. |
 | `create-pr` | Creates and opens GitHub pull requests from local changes, gated by plan-mode approval. |
-| `e2e-test` | Guided end-to-end test of a running web app after a feature is finished. |
 | `gh-issue-drafter` | Drafts structured GitHub issues (Situation, Direction, Acceptance Criteria, Validation). |
 | `grill-me` | Interviews the user relentlessly to stress-test a plan or design before building. |
 | `meeting-notes-and-actions` | Turns meeting transcripts/notes into share-ready recaps and owner-tagged action items. |
@@ -298,7 +296,6 @@ pwsh -Command "Import-Module .\powershell\in_testing_profile.ps1; tabs"
 | `prompt-master` | Writes and optimizes prompts for other AI tools. |
 | `stop-slop` | Removes AI writing patterns and tells from prose. |
 | `story-mapping` | Jeff Patton-style user story mapping for release planning and backlog sequencing. |
-| `validation-council` | Orchestrates a read-only validation council to stress-test plans/diffs before coding. |
 
 ### Type Checking
 

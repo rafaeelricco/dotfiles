@@ -45,9 +45,9 @@
       ]
     },
     {
-      "name": "create-pr",
-      "source": "./plugins/create-pr",
-      "description": "Create and open GitHub pull requests from local repository changes. Use when the user asks to create PR, open PR, abrir PR, criar pull request, ship this branch, ready for review, publish local changes as a pull request, or invokes /create-pr. Enters plan mode before any git mutation, asks the user for motivation, scope, branch, and commit approval, requires pr-generate-description for the PR body, and executes only after the user approves the plan.",
+      "name": "consult-advisor",
+      "source": "./plugins/consult-advisor",
+      "description": "Escalate hard planning decisions to the Opus advisor sub-agent before executing. Use when a task has non-obvious tradeoffs, multiple viable approaches, architectural impact, or the user asks \"how should we approach\". Do NOT use for mechanical edits, obvious one-liners, or when the user has already specified the approach.",
       "author": {
         "name": "Rafael Ricco"
       },
@@ -58,9 +58,9 @@
       ]
     },
     {
-      "name": "e2e-test",
-      "source": "./plugins/e2e-test",
-      "description": "Run a guided end-to-end test of a running web app after a feature is finished or any time you need to validate real behavior in a browser. Use whenever the user finishes building or changing a feature, or asks to test the app E2E, smoke-test it, click through the UI, verify a flow works end-to-end, check the happy path, or confirm a change works in a real browser — even if they don't say \"E2E\". The skill first discovers how the app actually works from its codebase and the conversation, then interviews for where the app is running, whether to drive it with Claude Preview or Claude in Chrome, and the login credentials, then walks the app toward the goal and reports pass/fail with screenshots, console errors, and failed network calls.",
+      "name": "create-pr",
+      "source": "./plugins/create-pr",
+      "description": "Create and open GitHub pull requests from local repository changes. Use when the user asks to create PR, open PR, abrir PR, criar pull request, ship this branch, ready for review, publish local changes as a pull request, or invokes /create-pr. Enters plan mode before any git mutation, asks the user for motivation, scope, branch, and commit approval, requires pr-generate-description for the PR body, and executes only after the user approves the plan.",
       "author": {
         "name": "Rafael Ricco"
       },
