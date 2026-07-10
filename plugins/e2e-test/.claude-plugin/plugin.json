@@ -1,9 +1,0 @@
-{
-  "name": "e2e-test",
-  "displayName": "E2E Test Skill",
-  "description": "Run a guided end-to-end test of a running web app after a feature is finished or any time you need to validate real behavior in a browser. Use whenever the user finishes building or changing a feature, or asks to test the app E2E, smoke-test it, click through the UI, verify a flow works end-to-end, check the happy path, or confirm a change works in a real browser — even if they don't say \"E2E\". The skill first discovers how the app actually works from its codebase and the conversation, then interviews for where the app is running, whether to drive it with Claude Preview or Claude in Chrome, and the login credentials, then walks the app toward the goal and reports pass/fail with screenshots, console errors, and failed network calls.",
-  "author": {
-    "name": "Rafael Ricco"
-  },
-  "repository": "https://github.com/rafaeelricco/dotfiles"
-}
