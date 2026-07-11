@@ -302,7 +302,7 @@ validate_backups_and_dirs() {
       backup="${STATE_BACKUPS[${index}]}"
       is_known_or_recorded_destination "${original}" || { echo "error: backup record has an unknown destination: ${original}" >&2; exit 1; }
       case "${backup}" in "${original}.backup-"*) ;; *) echo "error: invalid backup record: ${backup}" >&2; exit 1 ;; esac
-      suffix="${backup#${original}.backup-}"
+      suffix="${backup#"${original}".backup-}"
       [[ "${suffix}" =~ ^[0-9]{14}(-[0-9]+)?$ ]] || { echo "error: invalid backup record: ${backup}" >&2; exit 1; }
     done
   fi
