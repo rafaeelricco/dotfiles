@@ -1,9 +1,0 @@
-{
-  "name": "plan-format",
-  "displayName": "Plan Format Skill",
-  "description": "The shape of a plan document — show every change as a real before/after diff, not prose. Use when entering plan mode, starting to plan a code change, writing or editing a plan file, or before calling ExitPlanMode.",
-  "author": {
-    "name": "Rafael Ricco"
-  },
-  "repository": "https://github.com/rafaeelricco/dotfiles"
-}
