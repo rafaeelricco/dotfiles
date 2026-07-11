@@ -235,6 +235,7 @@ assert_managed_repo() {
     "${dir}/"*) echo "error: clone cannot contain HOME: ${dir}" >&2; exit 1 ;;
   esac
   url="$(git -C "${dir}" config --get remote.origin.url 2>/dev/null || true)"
+  url="${url%/}"
   repo_url_is_allowed "${url}" || {
     echo "error: ${dir} does not use an allowed rafaeelricco/dotfiles origin" >&2
     exit 1
