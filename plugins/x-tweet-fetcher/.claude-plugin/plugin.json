@@ -1,9 +1,0 @@
-{
-  "name": "x-tweet-fetcher",
-  "displayName": "X Tweet Fetcher Skill",
-  "description": "Fetch tweets, replies, timelines, search results, X Lists, and X Articles from X/Twitter without login or API keys. Single tweets: zero dependencies (FxTwitter). Timelines/search/replies: a Nitter instance (XTF_NITTER). Lists/Articles: a browser driver (Camofox or Playwright). Unified JSON schema across all backends; machine-readable error_code for agent branching. Field reports and agent-use questions: Agent Waystation #22 Teahouse: https://github.com/ythx-101/openclaw-qa/discussions/22",
-  "author": {
-    "name": "Rafael Ricco"
-  },
-  "repository": "https://github.com/rafaeelricco/dotfiles"
-}

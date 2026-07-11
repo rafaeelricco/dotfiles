@@ -1,438 +1,322 @@
 #!/usr/bin/env bash
-# install.sh — symlink rafaeelricco/dotfiles Claude (and optional Codex) config into $HOME.
-# Safe for `curl -fsSL <raw>/scripts/install.sh | bash`: all logic is inside main(),
-# invoked only on the last line, so a truncated pipe can never run a half-defined script.
-# macOS ships bash 3.2 — no bash4-only features are used.
+# Install this repository's Claude Code and optional Codex configuration.
+# Compatible with the Bash 3.2 shipped by macOS.
 set -euo pipefail
-
-# --- small helpers -----------------------------------------------------------
 
 usage() {
   cat <<'EOF'
-Install rafaeelricco/dotfiles Claude (and optional Codex) config via symlinks.
+Install root CLAUDE.md and skill/ for Claude Code and optional Codex.
 
 Usage: install.sh [options]
 
 Options:
-  -y, --yes         Non-interactive; auto-backup any real files/dirs before linking.
-      --skip-codex  Do not set up Codex, even if it is detected.
-      --dir PATH    Use PATH as the dotfiles clone/target dir (overrides $DOTFILES_DIR).
-      --update      Refresh an existing clone (git pull --ff-only) instead of cloning fresh.
-  -h, --help        Show this help and exit.
+  -y, --yes         Back up conflicts without prompting.
+      --skip-codex  Do not configure Codex.
+      --dir PATH    Override $DOTFILES_DIR / ~/.dotfiles.
+  -h, --help        Show this help.
 
 Environment:
-  DOTFILES_DIR      Clone/target dir. Default: ~/.dotfiles. Overridden by --dir.
+  DOTFILES_DIR       Clone destination (default: ~/.dotfiles).
+  CLAUDE_CONFIG_DIR  Claude user configuration directory.
+  CODEX_HOME         Codex user configuration directory.
 EOF
 }
 
-# Portable, sortable backup suffix — matches the existing install-claude-md.py idiom.
 timestamp() {
   date +%Y%m%d%H%M%S
 }
 
-# Summary accumulators (newline-joined). Not declared local so helpers can append.
-record_linked() { SUMMARY_LINKED="${SUMMARY_LINKED}  ${1}
-"; }
-record_backup() { SUMMARY_BACKED="${SUMMARY_BACKED}  ${1}
-"; }
-record_skip()   { SUMMARY_SKIPPED="${SUMMARY_SKIPPED}  ${1}
-"; }
-
-print_summary() {
-  echo ""
-  echo "=== Summary ==="
-  if [ -n "${SUMMARY_LINKED}" ]; then
-    echo "Linked / up to date:"
-    printf '%s' "${SUMMARY_LINKED}"
-  fi
-  if [ -n "${SUMMARY_BACKED}" ]; then
-    echo "Backed up:"
-    printf '%s' "${SUMMARY_BACKED}"
-  fi
-  if [ -n "${SUMMARY_SKIPPED}" ]; then
-    echo "Skipped / pruned:"
-    printf '%s' "${SUMMARY_SKIPPED}"
-  fi
+backup_name() {
+  local path="$1" candidate index
+  candidate="${path}.backup-$(timestamp)"
+  index=1
+  while [ -e "${candidate}" ] || [ -L "${candidate}" ]; do
+    candidate="${path}.backup-$(timestamp)-${index}"
+    index=$((index + 1))
+  done
+  printf '%s\n' "${candidate}"
 }
-
-# --- argument parsing --------------------------------------------------------
 
 parse_args() {
   while [ "$#" -gt 0 ]; do
     case "$1" in
-      -y|--yes)     ASSUME_YES=1 ;;
+      -y|--yes) ASSUME_YES=1 ;;
       --skip-codex) SKIP_CODEX=1 ;;
-      --update)     UPDATE_ONLY=1 ;;
       --dir)
         shift
-        if [ "$#" -eq 0 ]; then
-          echo "error: --dir requires a path argument" >&2
-          exit 2
-        fi
+        [ "$#" -gt 0 ] || { echo "error: --dir requires a path" >&2; exit 2; }
         DIR_OVERRIDE="$1"
         ;;
-      -h|--help)    usage; exit 0 ;;
-      *)
-        echo "error: unknown option: $1" >&2
-        echo "" >&2
-        usage >&2
-        exit 2
-        ;;
+      -h|--help) usage; exit 0 ;;
+      *) echo "error: unknown option: $1" >&2; usage >&2; exit 2 ;;
     esac
     shift
   done
 }
 
-# --- repo location & git strategy -------------------------------------------
-
-# If this file lives inside a checkout of THIS repo, echo its work-tree root.
-# Returns non-zero (and prints nothing) when piped via curl|bash or elsewhere.
-detect_self_repo() {
-  local src d top url
-  src="${BASH_SOURCE:-$0}"
-  case "${src}" in
-    ""|bash|-bash|*/bash|sh|-sh|*/sh) return 1 ;;
-  esac
-  [ -f "${src}" ] || return 1
-  command -v git >/dev/null 2>&1 || return 1
-  d="$(cd "$(dirname "${src}")" 2>/dev/null && pwd -P)" || return 1
-  top="$(git -C "${d}" rev-parse --show-toplevel 2>/dev/null)" || return 1
-  url="$(git -C "${d}" config --get remote.origin.url 2>/dev/null || true)"
+repo_slug_matches() {
+  local url="$1"
   case "${url}" in
-    *rafaeelricco/dotfiles*) printf '%s\n' "${top}" ;;
+    *rafaeelricco/dotfiles|*rafaeelricco/dotfiles.git) return 0 ;;
     *) return 1 ;;
   esac
 }
 
-# True when DIR is a git work-tree whose origin remote is our repo.
 is_our_repo() {
   local dir="$1" url
   git -C "${dir}" rev-parse --is-inside-work-tree >/dev/null 2>&1 || return 1
   url="$(git -C "${dir}" config --get remote.origin.url 2>/dev/null || true)"
-  case "${url}" in
-    *rafaeelricco/dotfiles*) return 0 ;;
-    *) return 1 ;;
-  esac
+  repo_slug_matches "${url}"
 }
 
-clone_repo() {
-  local dir="$1"
-  echo "Cloning ${REPO_URL} -> ${dir}"
-  mkdir -p "$(dirname "${dir}")"
-  git clone "${REPO_URL}" "${dir}"
-}
-
-# Fast-forward pull; non-fatal on divergence. Records whether .claude/skills moved.
-refresh_repo() {
-  local dir="$1" before after
-  echo "Refreshing existing clone: ${dir}"
-  before="$(git -C "${dir}" rev-parse HEAD 2>/dev/null || echo "")"
-  if git -C "${dir}" pull --ff-only; then
-    after="$(git -C "${dir}" rev-parse HEAD 2>/dev/null || echo "")"
-    if [ -n "${before}" ] && [ -n "${after}" ] && [ "${before}" != "${after}" ]; then
-      if git -C "${dir}" diff --name-only "${before}" "${after}" -- .claude/skills .claude/agents | grep -q .; then
-        SKILLS_CHANGED=1
-      fi
-    fi
-  else
-    echo "warning: could not fast-forward ${dir} (diverged or dirty); using current checkout." >&2
-  fi
-}
-
-# Resolve DOTFILES_DIR to an existing, normalized clone (clone / refresh / abort).
 ensure_repo() {
-  local dir="${DOTFILES_DIR}"
-  if [ -e "${dir}" ]; then
-    if [ ! -d "${dir}" ]; then
-      echo "error: ${dir} exists but is not a directory; refusing to touch it." >&2
+  local dir="$1"
+  if [ -e "${dir}" ] || [ -L "${dir}" ]; then
+    [ -d "${dir}" ] || { echo "error: ${dir} is not a directory" >&2; exit 1; }
+    is_our_repo "${dir}" || {
+      echo "error: ${dir} is not the rafaeelricco/dotfiles clone" >&2
       exit 1
-    fi
-    if is_our_repo "${dir}"; then
-      refresh_repo "${dir}"
-    else
-      echo "error: ${dir} exists but is not the rafaeelricco/dotfiles clone; refusing to touch it." >&2
-      exit 1
-    fi
+    }
+    echo "Using existing clone: ${dir}"
   else
-    if [ "${UPDATE_ONLY}" = "1" ]; then
-      echo "error: --update requires an existing clone at ${dir}, but nothing is there." >&2
-      exit 1
-    fi
-    clone_repo "${dir}"
+    mkdir -p "$(dirname "${dir}")"
+    echo "Cloning https://github.com/rafaeelricco/dotfiles.git -> ${dir}"
+    git clone https://github.com/rafaeelricco/dotfiles.git "${dir}"
   fi
-  # Normalize to an absolute physical path now that it certainly exists.
   DOTFILES_DIR="$(cd "${dir}" && pwd -P)"
 }
 
-# --- symlinking --------------------------------------------------------------
+is_managed_target() {
+  local target="$1" root
+  for root in "${DOTFILES_DIR}" "${DOTFILES_DIR_INPUT}"; do
+    case "${target}" in
+      "${root}/CLAUDE.md"|\
+      "${root}/skill"|"${root}/skill/"*|\
+      "${root}/.claude/CLAUDE.md"|\
+      "${root}/.claude/skills"|"${root}/.claude/skills/"*|\
+      "${root}/.claude/agents/"*|\
+      "${root}/.codex/AGENTS.md") return 0 ;;
+    esac
+  done
+  return 1
+}
 
-# Existing real file/dir at DST: never clobber. Prompt (interactive) or back up.
-handle_real() {
-  local src="$1" dst="$2" ans backup
-  # Identical regular-file content: replacing with a link loses nothing, no backup.
-  if [ -f "${src}" ] && [ -f "${dst}" ] && cmp -s "${src}" "${dst}"; then
-    ln -sfn "${src}" "${dst}"
-    echo "up to date (identical content): ${dst}"
-    record_linked "${dst} -> ${src} (identical content)"
-    return 0
-  fi
-
-  if [ "${INTERACTIVE}" = "1" ]; then
-    printf 'Real path exists: %s\n' "${dst}"
-    printf '  [b]ackup and link, [s]kip, or [a]bort? '
-    # Piped as `curl|bash`, fd 0 is the script text — always read from the terminal.
-    if ! IFS= read -r ans < /dev/tty; then
-      ans="a"
+resolve_conflict() {
+  local path="$1" answer backup
+  if [ "${INTERACTIVE}" -eq 1 ]; then
+    printf 'Conflict: %s\n' "${path}"
+    printf '  [b]ackup, [s]kip, or [a]bort? '
+    if ! IFS= read -r answer < /dev/tty; then
+      answer="a"
     fi
-    case "${ans}" in
+    case "${answer}" in
       b|B) ;;
-      s|S) echo "skipped: ${dst}"; record_skip "${dst} (real path left in place)"; return 0 ;;
-      *)   echo "aborted at: ${dst}" >&2; exit 1 ;;
+      s|S) echo "skipped: ${path}"; return 1 ;;
+      *) echo "aborted at: ${path}" >&2; exit 1 ;;
     esac
   fi
 
-  # Non-interactive default, or interactive [b]: back up then link.
-  backup="${dst}.backup-$(timestamp)"
-  mv "${dst}" "${backup}"
-  ln -sfn "${src}" "${dst}"
-  echo "backed up: ${dst} -> ${backup}"
-  echo "linked: ${dst} -> ${src}"
-  record_backup "${dst} -> ${backup}"
-  record_linked "${dst} -> ${src}"
+  backup="$(backup_name "${path}")"
+  mv "${path}" "${backup}"
+  echo "backed up: ${path} -> ${backup}"
+  return 0
 }
 
-# Idempotently point DST at SRC.
 link_one() {
   local src="$1" dst="$2" current
+  [ -e "${src}" ] || { echo "error: source missing: ${src}" >&2; exit 1; }
   mkdir -p "$(dirname "${dst}")"
 
   if [ -L "${dst}" ]; then
     current="$(readlink "${dst}")"
     if [ "${current}" = "${src}" ]; then
       echo "up to date: ${dst}"
-      record_linked "${dst} (up to date)"
       return 0
     fi
-    # Symlink pointing elsewhere: not user data — just re-point it (no backup).
-    ln -sfn "${src}" "${dst}"
-    echo "re-linked: ${dst} -> ${src}"
-    record_linked "${dst} -> ${src} (re-pointed)"
-    return 0
+    if is_managed_target "${current}"; then
+      rm -f "${dst}"
+    elif ! resolve_conflict "${dst}"; then
+      return 0
+    fi
+  elif [ -e "${dst}" ]; then
+    if ! resolve_conflict "${dst}"; then
+      return 0
+    fi
   fi
 
-  if [ -e "${dst}" ]; then
-    handle_real "${src}" "${dst}"
-    return 0
-  fi
-
-  # Nothing there yet.
-  ln -sfn "${src}" "${dst}"
+  ln -s "${src}" "${dst}"
   echo "linked: ${dst} -> ${src}"
-  record_linked "${dst} -> ${src}"
 }
 
-# --- skills ------------------------------------------------------------------
+prepare_skill_dir() {
+  local dir="$1" label="$2" current
+  if [ -L "${dir}" ]; then
+    current="$(readlink "${dir}")"
+    if is_managed_target "${current}"; then
+      rm -f "${dir}"
+    elif ! resolve_conflict "${dir}"; then
+      echo "${label} skills skipped."
+      return 1
+    fi
+  elif [ -e "${dir}" ] && [ ! -d "${dir}" ]; then
+    if ! resolve_conflict "${dir}"; then
+      echo "${label} skills skipped."
+      return 1
+    fi
+  fi
+  mkdir -p "${dir}"
+}
 
-# Remove per-skill SYMLINKS that no longer exist in the repo. Never touches real dirs.
-prune_skill_links() {
-  local dir="$1" label="$2" entry name
+prune_stale_skill_links() {
+  local dir="$1" entry name target
   for entry in "${dir}"/*; do
-    [ -L "${entry}" ] || continue      # only ever remove symlinks
+    [ -L "${entry}" ] || continue
     name="$(basename "${entry}")"
-    [ "${name}" = ".system" ] && continue
-    if [ "$(readlink "${entry}")" = "${SKILLS_SRC}/${name}" ] \
-       && [ ! -d "${SKILLS_SRC}/${name}" ]; then
+    [ -f "${SKILLS_SRC}/${name}/SKILL.md" ] && continue
+    target="$(readlink "${entry}")"
+    if is_managed_target "${target}"; then
       rm -f "${entry}"
-      echo "pruned stale ${label} skill link: ${entry}"
-      record_skip "${entry} (pruned stale link)"
+      echo "pruned stale skill link: ${entry}"
     fi
   done
 }
 
 link_skill_set() {
-  local skills_dir="$1" label="$2" skill name
-
-  # A symlinked skills root makes per-skill dst paths resolve back into the repo
-  # (dst == src), which handle_real would back up and self-link, corrupting the
-  # clone. Refuse to descend through it.
-  if [ -L "${skills_dir}" ]; then
-    echo "error: ${skills_dir} is a symlink; skipping ${label} skill links." >&2
-    echo "       Remove or replace it with a real directory, then re-run." >&2
-    record_skip "${skills_dir} (symlink root; ${label} skills skipped)"
-    return 0
-  fi
-
-  mkdir -p "${skills_dir}"
-  for skill in "${SKILLS_SRC}"/*/; do
+  local dir="$1" label="$2" skill name count
+  prepare_skill_dir "${dir}" "${label}" || return 0
+  count=0
+  for skill in "${SKILLS_SRC}"/*; do
     [ -d "${skill}" ] || continue
+    [ -f "${skill}/SKILL.md" ] || continue
     name="$(basename "${skill}")"
-    link_one "${SKILLS_SRC}/${name}" "${skills_dir}/${name}"
+    link_one "${skill}" "${dir}/${name}"
+    count=$((count + 1))
   done
-
-  prune_skill_links "${skills_dir}" "${label}"
+  [ "${count}" -gt 0 ] || { echo "error: no skills found in ${SKILLS_SRC}" >&2; exit 1; }
+  prune_stale_skill_links "${dir}"
 }
 
-# --- agents ------------------------------------------------------------------
-
-# Remove per-agent SYMLINKS that no longer exist in the repo. Never touches real files.
-prune_agent_links() {
-  local dir="$1" entry name
+cleanup_managed_skill_dir() {
+  local dir="$1" entry target
+  if [ -L "${dir}" ]; then
+    target="$(readlink "${dir}")"
+    if is_managed_target "${target}"; then
+      rm -f "${dir}"
+      echo "removed legacy managed link: ${dir}"
+    fi
+    return 0
+  fi
+  [ -d "${dir}" ] || return 0
   for entry in "${dir}"/*; do
-    [ -L "${entry}" ] || continue      # only ever remove symlinks
-    name="$(basename "${entry}")"
-    if [ "$(readlink "${entry}")" = "${AGENTS_SRC}/${name}" ] \
-       && [ ! -f "${AGENTS_SRC}/${name}" ]; then
+    [ -L "${entry}" ] || continue
+    target="$(readlink "${entry}")"
+    if is_managed_target "${target}"; then
       rm -f "${entry}"
-      echo "pruned stale agent link: ${entry}"
-      record_skip "${entry} (pruned stale link)"
+      echo "removed legacy managed link: ${entry}"
     fi
   done
 }
 
-link_agent_set() {
-  local agents_dir="$1" agent name
+remove_managed_link() {
+  local path="$1" target
+  [ -L "${path}" ] || return 0
+  target="$(readlink "${path}")"
+  if is_managed_target "${target}"; then
+    rm -f "${path}"
+    echo "removed legacy managed link: ${path}"
+  fi
+}
 
-  [ -d "${AGENTS_SRC}" ] || return 0
+cleanup_legacy_agents() {
+  local home="$1"
+  remove_managed_link "${home}/agents/advisor.md"
+  remove_managed_link "${home}/agents/opus-advisor.md"
+}
 
-  mkdir -p "${agents_dir}"
-  for agent in "${AGENTS_SRC}"/*.md; do
-    [ -f "${agent}" ] || continue
-    name="$(basename "${agent}")"
-    link_one "${agent}" "${agents_dir}/${name}"
+validate_sources() {
+  local skill count
+  [ -f "${GUIDANCE_SRC}" ] || { echo "error: source missing: ${GUIDANCE_SRC}" >&2; exit 1; }
+  [ -d "${SKILLS_SRC}" ] || { echo "error: source missing: ${SKILLS_SRC}" >&2; exit 1; }
+  count=0
+  for skill in "${SKILLS_SRC}"/*; do
+    [ -f "${skill}/SKILL.md" ] || continue
+    count=$((count + 1))
   done
-
-  prune_agent_links "${agents_dir}"
+  [ "${count}" -gt 0 ] || { echo "error: no skills found in ${SKILLS_SRC}" >&2; exit 1; }
 }
 
-# --- codex (optional) --------------------------------------------------------
-
-link_codex() {
-  local agents_src codex_skills
-  agents_src="${DOTFILES_DIR}/.codex/AGENTS.md"
-  codex_skills="${HOME}/.codex/skills"
-
-  if [ -e "${agents_src}" ] || [ -L "${agents_src}" ]; then
-    link_one "${agents_src}" "${HOME}/.codex/AGENTS.md"
-  else
-    echo "warning: ${agents_src} not found; skipping Codex AGENTS.md." >&2
-  fi
-
-  # Per-skill links (NOT a whole-dir symlink) so ~/.codex/skills/.system survives.
-  link_skill_set "${codex_skills}" "Codex"
+codex_is_present() {
+  [ -d "${CODEX_HOME_DIR}" ] || command -v codex >/dev/null 2>&1
 }
 
-# --- update-only: regenerate plugin marketplace ------------------------------
-
-run_sync() {
-  local script="${DOTFILES_DIR}/scripts/sync-claude-plugin-marketplace.py"
-  if ! command -v python3 >/dev/null 2>&1; then
-    echo "skills changed but python3 not found; skipping marketplace sync."
-    return 0
+install_claude() {
+  local default_home="${HOME}/.claude"
+  if [ "${CLAUDE_HOME}" != "${default_home}" ]; then
+    remove_managed_link "${default_home}/CLAUDE.md"
+    cleanup_managed_skill_dir "${default_home}/skills"
+    cleanup_legacy_agents "${default_home}"
   fi
-  if [ ! -f "${script}" ]; then
-    echo "skills changed but ${script} not found; skipping marketplace sync."
-    return 0
-  fi
-  echo "skills changed in pull; regenerating plugin marketplace..."
-  if python3 "${script}"; then
-    echo "  marketplace regenerated."
-  else
-    echo "  warning: sync script failed (non-fatal)." >&2
-  fi
+  cleanup_legacy_agents "${CLAUDE_HOME}"
+  link_one "${GUIDANCE_SRC}" "${CLAUDE_HOME}/CLAUDE.md"
+  link_skill_set "${CLAUDE_HOME}/skills" "Claude"
 }
 
-# --- entry point -------------------------------------------------------------
+install_codex() {
+  local default_home="${HOME}/.codex"
+  if [ "${CODEX_HOME_DIR}" != "${default_home}" ]; then
+    remove_managed_link "${default_home}/AGENTS.md"
+    cleanup_managed_skill_dir "${default_home}/skills"
+  fi
+  cleanup_managed_skill_dir "${CODEX_HOME_DIR}/skills"
+  link_one "${GUIDANCE_SRC}" "${CODEX_HOME_DIR}/AGENTS.md"
+  link_skill_set "${HOME}/.agents/skills" "Codex"
+}
 
 main() {
-  # Repo constant (kept inside main so nothing executable lives at top level).
-  REPO_URL="https://github.com/rafaeelricco/dotfiles.git"
-
-  # Defaults (globals; helpers rely on them).
   ASSUME_YES=0
   SKIP_CODEX=0
-  UPDATE_ONLY=0
   DIR_OVERRIDE=""
   INTERACTIVE=0
-  SKILLS_CHANGED=0
-  SUMMARY_LINKED=""
-  SUMMARY_BACKED=""
-  SUMMARY_SKIPPED=""
-
-  # Capture any pre-set env DOTFILES_DIR before we overwrite the variable.
-  ENV_DOTFILES="${DOTFILES_DIR:-}"
-
   parse_args "$@"
 
-  # git is required for every path (clone or pull).
-  if ! command -v git >/dev/null 2>&1; then
-    echo "error: git is required but was not found on PATH." >&2
-    exit 1
-  fi
+  command -v git >/dev/null 2>&1 || { echo "error: git is required" >&2; exit 1; }
 
-  # Resolve target dir. Priority: --dir, then $DOTFILES_DIR, then self-clone, then default.
   if [ -n "${DIR_OVERRIDE}" ]; then
     DOTFILES_DIR="${DIR_OVERRIDE}"
-  elif [ -n "${ENV_DOTFILES}" ]; then
-    DOTFILES_DIR="${ENV_DOTFILES}"
+  elif [ -n "${DOTFILES_DIR:-}" ]; then
+    DOTFILES_DIR="${DOTFILES_DIR}"
   else
-    local self_repo
-    self_repo="$(detect_self_repo || true)"
-    if [ -n "${self_repo}" ]; then
-      DOTFILES_DIR="${self_repo}"
-    else
-      DOTFILES_DIR="${HOME}/.dotfiles"
-    fi
+    DOTFILES_DIR="${HOME}/.dotfiles"
   fi
 
-  # Interactive only when not forced non-interactive AND a terminal is readable.
-  if [ "${ASSUME_YES}" = "1" ]; then
-    INTERACTIVE=0
-  elif [ -r /dev/tty ]; then
+  if [ "${ASSUME_YES}" -eq 0 ] && [ -t 1 ] && [ -r /dev/tty ]; then
     INTERACTIVE=1
-  else
-    INTERACTIVE=0
   fi
 
-  ensure_repo
+  case "${DOTFILES_DIR}" in
+    /*) DOTFILES_DIR_INPUT="${DOTFILES_DIR}" ;;
+    *) DOTFILES_DIR_INPUT="$(pwd -P)/${DOTFILES_DIR}" ;;
+  esac
+  ensure_repo "${DOTFILES_DIR}"
+  GUIDANCE_SRC="${DOTFILES_DIR}/CLAUDE.md"
+  SKILLS_SRC="${DOTFILES_DIR}/skill"
+  CLAUDE_HOME="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
+  CODEX_HOME_DIR="${CODEX_HOME:-${HOME}/.codex}"
+  validate_sources
 
-  # Verify the source artifacts exist in the clone.
-  CLAUDE_SRC="${DOTFILES_DIR}/.claude/CLAUDE.md"
-  SKILLS_SRC="${DOTFILES_DIR}/.claude/skills"
-  AGENTS_SRC="${DOTFILES_DIR}/.claude/agents"
-  if [ ! -f "${CLAUDE_SRC}" ]; then
-    echo "error: expected file not found: ${CLAUDE_SRC}" >&2
-    exit 1
-  fi
-  if [ ! -d "${SKILLS_SRC}" ]; then
-    echo "error: expected directory not found: ${SKILLS_SRC}" >&2
-    exit 1
-  fi
+  echo "== Claude Code =="
+  install_claude
 
-  # Claude — always.
-  link_one "${CLAUDE_SRC}" "${HOME}/.claude/CLAUDE.md"
-  link_skill_set "${HOME}/.claude/skills" "Claude"
-  link_agent_set "${HOME}/.claude/agents"
-
-  # Codex — optional.
-  if [ "${SKIP_CODEX}" = "1" ]; then
+  if [ "${SKIP_CODEX}" -eq 1 ]; then
     echo "Codex: skipped (--skip-codex)."
-  elif [ -d "${HOME}/.codex" ] || command -v codex >/dev/null 2>&1; then
-    link_codex
+  elif codex_is_present; then
+    echo "== Codex =="
+    install_codex
   else
     echo "Codex: not detected; skipping."
   fi
 
-  # After an --update pull, refresh the generated marketplace if skills changed.
-  if [ "${UPDATE_ONLY}" = "1" ] && [ "${SKILLS_CHANGED}" = "1" ]; then
-    run_sync
-  fi
-
-  print_summary
-
-  if [ "$(uname -s)" = "Darwin" ]; then
-    echo ""
-    echo "macOS: symlinks are ready to use."
-  fi
+  echo "Dotfiles linked from ${DOTFILES_DIR}"
 }
 
 main "$@"

@@ -1,9 +1,0 @@
-{
-  "name": "create-pr",
-  "displayName": "Create PR Skill",
-  "description": "Create and open GitHub pull requests from local repository changes. Use when the user asks to create PR, open PR, abrir PR, criar pull request, ship this branch, ready for review, publish local changes as a pull request, or invokes /create-pr. Enters plan mode before any git mutation, asks the user for motivation, scope, branch, and commit approval, requires pr-generate-description for the PR body, and executes only after the user approves the plan.",
-  "author": {
-    "name": "Rafael Ricco"
-  },
-  "repository": "https://github.com/rafaeelricco/dotfiles"
-}

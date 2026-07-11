@@ -1,9 +1,0 @@
-{
-  "name": "babysit",
-  "displayName": "Babysit Skill",
-  "description": "Keep a GitHub pull request merge-ready by triaging merge conflicts, unresolved review feedback, actionable PR comments, and CI failures in a loop. Use when the user asks to babysit this PR, keep this PR merge-ready, triage PR comments and CI, resolve actionable review feedback, watch CI until mergeable, or get a PR ready to merge.",
-  "author": {
-    "name": "Rafael Ricco"
-  },
-  "repository": "https://github.com/rafaeelricco/dotfiles"
-}

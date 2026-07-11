@@ -1,9 +1,0 @@
-{
-  "name": "consult-advisor",
-  "displayName": "Consult Advisor Skill",
-  "description": "Consult an appropriate advisor through the current environment's native delegation mechanism before executing. Use when a task has non-obvious tradeoffs, multiple viable approaches, architectural impact, or the user asks \"how should we approach\". Do NOT use for mechanical edits, obvious one-liners, or when the user has already specified the approach.",
-  "author": {
-    "name": "Rafael Ricco"
-  },
-  "repository": "https://github.com/rafaeelricco/dotfiles"
-}
