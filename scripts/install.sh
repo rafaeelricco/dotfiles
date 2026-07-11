@@ -5,7 +5,8 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Install root CLAUDE.md and skill/ for Claude Code and optional Codex.
+Install agent instructions and skills for Claude Code and optional Codex.
+Uses CLAUDE.md for Claude Code and AGENTS.md for Codex.
 
 Usage: install.sh [options]
 
