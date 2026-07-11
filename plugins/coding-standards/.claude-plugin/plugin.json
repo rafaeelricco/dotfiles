@@ -1,7 +1,7 @@
 {
   "name": "coding-standards",
   "displayName": "Coding Standards Skill",
-  "description": "Prefer functional, type-safe implementation style for code creation, refactors, debugging fixes, and code review. Use for any code change where implementation style matters, especially TypeScript, JavaScript, React, Node, domain logic, API handlers, and tests.",
+  "description": "Review and shape code creation, debugging fixes, refactors, implementation plans, snippets, diffs, and pull requests for cognitive complexity, functional structure, immutability, type safety, behavioral preservation, and refactor trade-offs. Use when implementation style, maintainability, state modeling, side-effect boundaries, or options-before-implementation materially affect the result.",
   "author": {
     "name": "Rafael Ricco"
   },

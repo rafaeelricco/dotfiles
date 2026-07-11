@@ -108,7 +108,7 @@ done
 
 On Windows, double-click [`scripts/windows/setup-claude-skills.bat`](scripts/windows/setup-claude-skills.bat) (or right-click → "Run as administrator"). It self-elevates via UAC, creates the skills symlink, and links each `.claude/agents/*.md` into `~/.claude/agents/`. If `~/.claude/skills` already exists as a non-empty real directory, the script aborts so you can move its contents into `./.claude/skills/` first.
 
-> **Note:** agents link per file, so agents installed by other tools stay in place. The `consult-advisor` skill reaches its `opus-advisor` sub-agent through `~/.claude/agents/opus-advisor.md`; without that link the skill cannot resolve it.
+> **Note:** agents link per file, so agents installed by other tools stay in place. `.claude/agents/advisor.md` is an optional Claude Code advisor definition; the shared `consult-advisor` skill does not require it and uses each host's native delegation mechanism.
 
 #### Claude Code Skill Marketplace
 
@@ -275,7 +275,7 @@ pwsh -Command "Import-Module .\powershell\in_testing_profile.ps1; tabs"
 | Bootstrap Installer   | `scripts/install.sh` / `install.ps1`           | Clone to `~/.dotfiles`, then symlink `CLAUDE.md` / `skills` / `agents` / Codex links into `$HOME` with timestamped backups; idempotent.                                                             |
 | Bootstrap Updater     | `scripts/update.sh` / `update.ps1`             | `git pull --ff-only`, re-link, and regenerate the skill marketplace when `.claude/skills` changed.                                                                                                  |
 | Claude / Codex Skills | `.claude/skills/`                              | Versioned skills shared between Claude Code (`~/.claude/skills`) and Codex CLI (`~/.codex/skills/<skill>`).                                                                                         |
-| Claude Agents         | `.claude/agents/`                              | Sub-agents invoked by skills (e.g. `opus-advisor`, the Opus-model advisor `consult-advisor` escalates hard planning decisions to). Symlinked per-file into `~/.claude/agents/` by the bootstrap installer (macOS/Linux `install.sh`, Windows `install.ps1`), same as skills.                     |
+| Claude Agents         | `.claude/agents/`                              | Optional Claude Code sub-agent definitions, currently `advisor.md`. Symlinked per-file into `~/.claude/agents/` by the bootstrap installer; shared skills do not require a particular definition.                                                                 |
 | Claude Instructions   | `.claude/CLAUDE.md`                            | Global Claude Code instructions: quality mode + writing style. Symlinked into `~/.claude/CLAUDE.md`.                                                                                                |
 | Codex Instructions    | `.codex/AGENTS.md`                             | Global Codex CLI instructions; identical content to `.claude/CLAUDE.md`. Symlinked into `~/.codex/AGENTS.md`.                                                                                       |
 
@@ -285,8 +285,8 @@ pwsh -Command "Import-Module .\powershell\in_testing_profile.ps1; tabs"
 | --- | --- |
 | `babysit` | Keeps a GitHub PR merge-ready: triages conflicts, review feedback, and CI failures in a loop. |
 | `caveman` | Ultra-compressed communication mode; cuts token usage ~75%. |
-| `coding-standards` | Functional, type-safe implementation style for code creation, refactors, and reviews. |
-| `consult-advisor` | Escalates hard planning/architecture decisions to the `opus-advisor` sub-agent (`.claude/agents/`) before executing. |
+| `coding-standards` | Behavior-preserving code review for complexity, immutability, type safety, and refactor trade-offs. |
+| `consult-advisor` | Consults an appropriate advisor through the current host's native delegation mechanism before hard planning or architecture decisions. |
 | `create-pr` | Creates and opens GitHub pull requests from local changes, gated by plan-mode approval. |
 | `gh-issue-drafter` | Drafts structured GitHub issues (Situation, Direction, Acceptance Criteria, Validation). |
 | `grill-me` | Interviews the user relentlessly to stress-test a plan or design before building. |

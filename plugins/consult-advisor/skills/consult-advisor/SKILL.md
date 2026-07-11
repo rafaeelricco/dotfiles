@@ -1,11 +1,11 @@
 ---
 name: consult-advisor
-description: Escalate hard planning decisions to the Opus advisor sub-agent before executing. Use when a task has non-obvious tradeoffs, multiple viable approaches, architectural impact, or the user asks "how should we approach". Do NOT use for mechanical edits, obvious one-liners, or when the user has already specified the approach.
+description: Consult an appropriate advisor through the current environment's native delegation mechanism before executing. Use when a task has non-obvious tradeoffs, multiple viable approaches, architectural impact, or the user asks "how should we approach". Do NOT use for mechanical edits, obvious one-liners, or when the user has already specified the approach.
 ---
 
 # Consult Advisor
 
-Escalate to the `opus-advisor` sub-agent before executing when the wrong approach would cost more than one advisor call.
+Consult an appropriate advisor before executing when the wrong approach would cost more than one consultation.
 
 ## When to call
 
@@ -24,8 +24,12 @@ Escalate to the `opus-advisor` sub-agent before executing when the wrong approac
 
 ## How
 
-Call `Agent(subagent_type: "opus-advisor", description: <3-5 word task summary>, prompt: <task + relevant file paths + what you're weighing>)`. Read the returned plan. Execute on the current (Sonnet) main loop. Do not re-consult mid-execution unless the plan hits a contradiction with what you find in code.
+Use the current environment's native delegation mechanism to consult an available advisor suited to planning, architecture, or tradeoff analysis.
+
+Send the task, relevant file paths, and the tradeoffs being evaluated. Ask for a concise recommendation, concrete tradeoffs, risks / edge cases, and non-goals. Require decision guidance only — no code or file edits.
+
+Read the guidance, then continue in the main agent, which remains responsible for the decision and execution. Do not consult again during the task unless the code materially contradicts the context sent to the advisor; in that case, surface the mismatch and re-scope the task before any new consultation.
 
 ## Budget
 
-One call per task. A second call is a signal the task is under-scoped — surface that to the user instead of consulting again.
+One consultation per task. A second consultation requires a materially re-scoped task; otherwise, surface that the task is under-scoped.
