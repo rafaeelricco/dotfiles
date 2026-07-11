@@ -9,7 +9,17 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $script:RepoUrl = 'https://github.com/rafaeelricco/dotfiles.git'
-$script:RepoSlug = 'rafaeelricco/dotfiles'
+$script:AllowedRepoUrls = @(
+    'https://github.com/rafaeelricco/dotfiles',
+    'https://github.com/rafaeelricco/dotfiles.git',
+    'git@github.com:rafaeelricco/dotfiles',
+    'git@github.com:rafaeelricco/dotfiles.git',
+    'ssh://git@github.com/rafaeelricco/dotfiles',
+    'ssh://git@github.com/rafaeelricco/dotfiles.git'
+)
+$script:StateHeader = 'dotfiles-lifecycle-state-v1'
+$script:StateReady = $false
+$script:PendingCreatedDirs = [System.Collections.Generic.List[string]]::new()
 
 function Resolve-InstallDir {
     param([string]$DirParam)
@@ -17,17 +27,146 @@ function Resolve-InstallDir {
     [System.IO.Path]::GetFullPath($value)
 }
 
-function Get-RepoSlug {
-    param([string]$Url)
-    if ([string]::IsNullOrWhiteSpace($Url)) { return '' }
-    $normalized = $Url.Trim() -replace '\.git$', ''
-    if ($normalized -match '[:/]([^/:]+/[^/:]+)$') { return $Matches[1].ToLowerInvariant() }
-    $normalized.ToLowerInvariant()
-}
-
 function Assert-Git {
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
         throw 'git was not found on PATH.'
+    }
+}
+
+function Assert-ManagedRepository {
+    param([Parameter(Mandatory)][string]$Path)
+    $item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+    if ($null -eq $item -or -not $item.PSIsContainer -or (Test-IsLink $item)) {
+        throw "clone path must be a real directory: $Path"
+    }
+    $gitDir = Get-Item -LiteralPath (Join-Path $Path '.git') -Force -ErrorAction SilentlyContinue
+    if ($null -eq $gitDir -or -not $gitDir.PSIsContainer -or (Test-IsLink $gitDir)) {
+        throw "clone must have its own .git directory: $Path"
+    }
+
+    $top = & git -C $Path rev-parse --show-toplevel 2>$null
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($top)) { throw "not a git checkout: $Path" }
+    $resolved = (Resolve-Path -LiteralPath $Path).Path.TrimEnd('\', '/')
+    $top = [System.IO.Path]::GetFullPath([string]$top).TrimEnd('\', '/')
+    if (-not $resolved.Equals($top, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "clone path is not the repository root: $Path"
+    }
+
+    $homePath = [System.IO.Path]::GetFullPath($HOME).TrimEnd('\', '/')
+    $root = [System.IO.Path]::GetPathRoot($resolved)
+    if ($resolved.Equals($root, [System.StringComparison]::OrdinalIgnoreCase) -or
+        $resolved.Equals($homePath, [System.StringComparison]::OrdinalIgnoreCase) -or
+        $homePath.StartsWith("$resolved$([System.IO.Path]::DirectorySeparatorChar)", [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "unsafe clone path: $resolved"
+    }
+
+    $origin = & git -C $resolved config --get remote.origin.url 2>$null
+    if ($LASTEXITCODE -ne 0 -or $script:AllowedRepoUrls -notcontains ([string]$origin).Trim()) {
+        throw "$resolved does not use an allowed rafaeelricco/dotfiles origin."
+    }
+
+    $worktreeOutput = @(& git -C $resolved worktree list --porcelain)
+    if ($LASTEXITCODE -ne 0) { throw "could not inspect worktrees for $resolved" }
+    $worktrees = @($worktreeOutput | Where-Object { $_ -like 'worktree *' } | ForEach-Object { $_.Substring(9) })
+    if ($worktrees.Count -ne 1 -or -not (Test-SamePath $worktrees[0] $resolved)) {
+        throw 'linked worktrees are not supported for the managed clone.'
+    }
+}
+
+function Test-ValidStateField {
+    param([Parameter(Mandatory)][string]$Value)
+    if ([string]::IsNullOrEmpty($Value) -or -not [System.IO.Path]::IsPathRooted($Value) -or
+        $Value.Contains("`t") -or $Value.Contains("`r") -or $Value.Contains("`n")) {
+        throw 'lifecycle state paths must be absolute and cannot contain tabs or newlines.'
+    }
+}
+
+function Add-LifecycleStateRecord {
+    param(
+        [Parameter(Mandatory)][ValidateSet('link', 'backup', 'dir')][string]$Type,
+        [Parameter(Mandatory)][string]$First,
+        [string]$Second
+    )
+    if (-not $script:StateReady) { return }
+    Test-ValidStateField $First
+    if ($Second) {
+        Test-ValidStateField $Second
+        $line = "$Type`t$First`t$Second"
+    } else {
+        $line = "$Type`t$First"
+    }
+    $lines = [System.Collections.Generic.List[string]]::new()
+    $lines.AddRange([string[]][System.IO.File]::ReadAllLines($script:StateFile))
+    if ($lines.Contains($line)) { return }
+    $lines.Add($line) | Out-Null
+    $temp = "$($script:StateFile).tmp.$PID"
+    try {
+        [System.IO.File]::WriteAllLines($temp, $lines, [System.Text.UTF8Encoding]::new($false))
+        Move-Item -LiteralPath $temp -Destination $script:StateFile -Force
+    } finally {
+        Remove-Item -LiteralPath $temp -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Assert-LifecycleStateValid {
+    $lines = [System.IO.File]::ReadAllLines($script:StateFile)
+    if ($lines.Count -eq 0 -or $lines[0] -ne $script:StateHeader) {
+        throw "invalid lifecycle state header: $($script:StateFile)"
+    }
+    for ($index = 1; $index -lt $lines.Count; $index++) {
+        if ([string]::IsNullOrEmpty($lines[$index])) { continue }
+        $parts = $lines[$index].Split("`t")
+        if (($parts[0] -in @('link', 'backup') -and $parts.Count -eq 3) -or
+            ($parts[0] -eq 'dir' -and $parts.Count -eq 2)) {
+            foreach ($part in $parts[1..($parts.Count - 1)]) { Test-ValidStateField $part }
+            continue
+        }
+        throw "malformed lifecycle state at line $($index + 1): $($script:StateFile)"
+    }
+}
+
+function Initialize-LifecycleState {
+    param([Parameter(Mandatory)][string]$RepoDir)
+    $script:StateFile = Join-Path $RepoDir '.git\dotfiles-lifecycle-state'
+    $item = Get-Item -LiteralPath $script:StateFile -Force -ErrorAction SilentlyContinue
+    if ($null -ne $item) {
+        if ($item.PSIsContainer -or (Test-IsLink $item)) { throw "lifecycle state is not a regular file: $($script:StateFile)" }
+        Assert-LifecycleStateValid
+    } else {
+        $temp = "$($script:StateFile).tmp.$PID"
+        try {
+            [System.IO.File]::WriteAllText($temp, "$($script:StateHeader)`n", [System.Text.UTF8Encoding]::new($false))
+            Move-Item -LiteralPath $temp -Destination $script:StateFile
+        } finally {
+            Remove-Item -LiteralPath $temp -Force -ErrorAction SilentlyContinue
+        }
+    }
+    $script:StateReady = $true
+    foreach ($created in $script:PendingCreatedDirs) { Add-LifecycleStateRecord -Type dir -First $created }
+    $script:PendingCreatedDirs.Clear()
+}
+
+function New-RecordedDirectory {
+    param([Parameter(Mandatory)][string]$Path)
+    if (Test-Path -LiteralPath $Path -PathType Container) { return }
+    if ($null -ne (Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue)) {
+        throw "directory path is obstructed: $Path"
+    }
+    $missing = [System.Collections.Generic.List[string]]::new()
+    $candidate = $Path
+    while (-not (Test-Path -LiteralPath $candidate)) {
+        $missing.Add($candidate) | Out-Null
+        $parent = Split-Path -Parent $candidate
+        if ([string]::IsNullOrEmpty($parent) -or $parent -eq $candidate) { break }
+        $candidate = $parent
+    }
+    if (-not (Test-Path -LiteralPath $candidate -PathType Container)) { throw "directory path is obstructed: $candidate" }
+    for ($index = $missing.Count - 1; $index -ge 0; $index--) {
+        New-Item -ItemType Directory -Path $missing[$index] | Out-Null
+        $created = [System.IO.Path]::GetFullPath($missing[$index])
+        if (Test-SamePath $created $HOME) { continue }
+        if ($script:StateReady) { Add-LifecycleStateRecord -Type dir -First $created }
+        else { $script:PendingCreatedDirs.Add($created) | Out-Null }
     }
 }
 
@@ -37,21 +176,19 @@ function Ensure-Repo {
         if (-not (Test-Path -LiteralPath $Path -PathType Container)) {
             throw "$Path exists but is not a directory."
         }
-        $origin = & git -C $Path config --get remote.origin.url 2>$null
-        if ($LASTEXITCODE -ne 0 -or (Get-RepoSlug $origin) -ne $script:RepoSlug) {
-            throw "$Path is not the rafaeelricco/dotfiles clone."
-        }
+        Assert-ManagedRepository $Path
         Write-Host "Using existing clone: $Path"
         return
     }
 
     $parent = Split-Path -Parent $Path
     if ($parent -and -not (Test-Path -LiteralPath $parent)) {
-        New-Item -ItemType Directory -Path $parent -Force | Out-Null
+        New-RecordedDirectory $parent
     }
     Write-Host "Cloning $($script:RepoUrl) -> $Path"
     & git clone $script:RepoUrl $Path
     if ($LASTEXITCODE -ne 0) { throw 'git clone failed.' }
+    Assert-ManagedRepository $Path
 }
 
 function Get-ItemIfPresent {
@@ -149,6 +286,7 @@ function Resolve-Conflict {
     } else {
         $backup = Get-BackupPath $Path
         Move-Item -LiteralPath $Path -Destination $backup
+        Add-LifecycleStateRecord -Type backup -First $Path -Second $backup
         Write-Host "backed up: $Path -> $backup"
     }
     $true
@@ -191,13 +329,14 @@ function Install-Link {
     if (-not (Test-Path -LiteralPath $TargetPath)) { throw "source missing: $TargetPath" }
     $parent = Split-Path -Parent $LinkPath
     if ($parent -and -not (Test-Path -LiteralPath $parent)) {
-        New-Item -ItemType Directory -Path $parent -Force | Out-Null
+        New-RecordedDirectory $parent
     }
 
     $item = Get-ItemIfPresent $LinkPath
     if (Test-IsLink $item) {
         $current = Get-LinkTargetPath $item
         if (Test-SamePath $current $TargetPath) {
+            Add-LifecycleStateRecord -Type link -First $LinkPath -Second $TargetPath
             Write-Host "up to date: $LinkPath"
             return
         }
@@ -211,6 +350,7 @@ function Install-Link {
     }
 
     New-SymbolicLinkChecked -LinkPath $LinkPath -TargetPath $TargetPath
+    Add-LifecycleStateRecord -Type link -First $LinkPath -Second $TargetPath
     Write-Host "linked: $LinkPath -> $TargetPath"
 }
 
@@ -232,7 +372,7 @@ function Prepare-SkillDirectory {
         }
     }
     if (-not (Test-Path -LiteralPath $Path)) {
-        New-Item -ItemType Directory -Path $Path -Force | Out-Null
+        New-RecordedDirectory $Path
     }
     $true
 }
@@ -336,7 +476,7 @@ function Invoke-DotfilesInstall {
     Ensure-Repo $requestedRepoDir
     $repoDir = (Resolve-Path -LiteralPath $requestedRepoDir).Path
 
-    $script:GuidanceSrc = Join-Path $repoDir 'CLAUDE.md'
+    $script:GuidanceSrc = Join-Path $repoDir 'INSTRUCTIONS.md'
     $script:SkillsSrc = Join-Path $repoDir 'skill'
     if (-not (Test-Path -LiteralPath $script:GuidanceSrc -PathType Leaf)) { throw "source missing: $($script:GuidanceSrc)" }
     if (-not (Test-Path -LiteralPath $script:SkillsSrc -PathType Container)) { throw "source missing: $($script:SkillsSrc)" }
@@ -344,6 +484,7 @@ function Invoke-DotfilesInstall {
     $script:ManagedRoots = @()
     foreach ($managedRepo in (@($requestedRepoDir, $repoDir) | Select-Object -Unique)) {
         $script:ManagedRoots += @(
+            (Join-Path $managedRepo 'INSTRUCTIONS.md'),
             (Join-Path $managedRepo 'CLAUDE.md'),
             (Join-Path $managedRepo 'skill'),
             (Join-Path $managedRepo '.claude\CLAUDE.md'),
@@ -364,6 +505,7 @@ function Invoke-DotfilesInstall {
     if ($installCodex) {
         Assert-CodexSkillDestinationWritable
     }
+    Initialize-LifecycleState $repoDir
 
     Write-Host '== Claude Code =='
     if (-not (Test-SamePath $claudeHome $defaultClaudeHome)) {

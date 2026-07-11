@@ -6,7 +6,7 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Install agent instructions and skills for Claude Code and optional Codex.
-Uses CLAUDE.md for Claude Code and AGENTS.md for Codex.
+Uses repository INSTRUCTIONS.md for vendor CLAUDE.md and AGENTS.md destinations.
 
 Usage: install.sh [options]
 
@@ -26,6 +26,146 @@ EOF
 
 timestamp() {
   date +%Y%m%d%H%M%S
+}
+
+STATE_HEADER="dotfiles-lifecycle-state-v1"
+STATE_READY=0
+PENDING_CREATED_DIRS=()
+
+absolute_path() {
+  case "$1" in
+    /*) printf '%s\n' "$1" ;;
+    *) printf '%s/%s\n' "$(pwd -P)" "$1" ;;
+  esac
+}
+
+validate_state_field() {
+  case "$1" in
+    /*) ;;
+    *) echo "error: lifecycle state paths must be absolute" >&2; exit 1 ;;
+  esac
+  case "$1" in
+    *$'\t'*|*$'\r'*|*$'\n'*|'')
+      echo "error: lifecycle state paths cannot contain tabs or newlines" >&2
+      exit 1
+      ;;
+  esac
+}
+
+state_record() {
+  local type="$1" first="$2" second="${3:-}" line tmp
+  [ "${STATE_READY}" -eq 1 ] || return 0
+  validate_state_field "${first}"
+  if [ -n "${second}" ]; then
+    validate_state_field "${second}"
+    line="${type}"$'\t'"${first}"$'\t'"${second}"
+  else
+    line="${type}"$'\t'"${first}"
+  fi
+  grep -Fqx -- "${line}" "${STATE_FILE}" && return 0
+  tmp="${STATE_FILE}.tmp.$$"
+  if ! cp "${STATE_FILE}" "${tmp}" || ! printf '%s\n' "${line}" >> "${tmp}" ||
+     ! chmod 600 "${tmp}" || ! mv "${tmp}" "${STATE_FILE}"; then
+    rm -f "${tmp}"
+    echo "error: failed to update lifecycle state: ${STATE_FILE}" >&2
+    exit 1
+  fi
+}
+
+validate_state_file() {
+  local header type first second extra line_number=1
+  IFS= read -r header < "${STATE_FILE}" || header=""
+  [ "${header}" = "${STATE_HEADER}" ] || {
+    echo "error: invalid lifecycle state header: ${STATE_FILE}" >&2
+    exit 1
+  }
+  while IFS=$'\t' read -r type first second extra; do
+    line_number=$((line_number + 1))
+    [ -n "${type}" ] || continue
+    case "${type}" in
+      link|backup)
+        [ -n "${first}" ] && [ -n "${second}" ] && [ -z "${extra}" ] || {
+          echo "error: malformed lifecycle state at line ${line_number}" >&2
+          exit 1
+        }
+        validate_state_field "${first}"
+        validate_state_field "${second}"
+        ;;
+      dir)
+        [ -n "${first}" ] && [ -z "${second}" ] && [ -z "${extra}" ] || {
+          echo "error: malformed lifecycle state at line ${line_number}" >&2
+          exit 1
+        }
+        validate_state_field "${first}"
+        ;;
+      *)
+        echo "error: unknown lifecycle state record at line ${line_number}" >&2
+        exit 1
+        ;;
+    esac
+  done < <(sed '1d' "${STATE_FILE}")
+}
+
+init_state() {
+  local tmp dir
+  STATE_FILE="${DOTFILES_DIR}/.git/dotfiles-lifecycle-state"
+  if [ -e "${STATE_FILE}" ] || [ -L "${STATE_FILE}" ]; then
+    [ -f "${STATE_FILE}" ] && [ ! -L "${STATE_FILE}" ] || {
+      echo "error: lifecycle state is not a regular file: ${STATE_FILE}" >&2
+      exit 1
+    }
+    validate_state_file
+  else
+    tmp="${STATE_FILE}.tmp.$$"
+    if ! (umask 077 && printf '%s\n' "${STATE_HEADER}" > "${tmp}") ||
+       ! mv "${tmp}" "${STATE_FILE}"; then
+      rm -f "${tmp}"
+      echo "error: failed to initialize lifecycle state: ${STATE_FILE}" >&2
+      exit 1
+    fi
+  fi
+  STATE_READY=1
+  if [ "${#PENDING_CREATED_DIRS[@]}" -gt 0 ]; then
+    for dir in "${PENDING_CREATED_DIRS[@]}"; do
+      state_record dir "${dir}"
+    done
+  fi
+  PENDING_CREATED_DIRS=()
+}
+
+ensure_directory() {
+  local requested="$1" parent index created
+  local -a missing
+  missing=()
+  [ -d "${requested}" ] && return 0
+  parent="${requested}"
+  while [ ! -e "${parent}" ] && [ ! -L "${parent}" ]; do
+    missing+=("${parent}")
+    [ "${parent}" != "/" ] || break
+    parent="$(dirname "${parent}")"
+  done
+  [ -d "${parent}" ] || {
+    echo "error: directory path is obstructed: ${parent}" >&2
+    exit 1
+  }
+  index=$((${#missing[@]} - 1))
+  while [ "${index}" -ge 0 ]; do
+    if ! mkdir "${missing[${index}]}"; then
+      echo "error: failed to create directory: ${missing[${index}]}" >&2
+      exit 1
+    fi
+    created="$(cd "${missing[${index}]}" && pwd -P)"
+    if [ -d "${HOME}" ] && [ "${created}" = "$(cd "${HOME}" && pwd -P)" ]; then
+      index=$((index - 1))
+      continue
+    fi
+    if [ "${STATE_READY}" -eq 1 ]; then
+      state_record dir "${created}"
+    else
+      PENDING_CREATED_DIRS+=("${created}")
+    fi
+    index=$((index - 1))
+  done
 }
 
 backup_name() {
@@ -57,42 +197,78 @@ parse_args() {
   done
 }
 
-repo_slug_matches() {
-  local url="$1"
-  case "${url}" in
-    *rafaeelricco/dotfiles|*rafaeelricco/dotfiles.git) return 0 ;;
+repo_url_is_allowed() {
+  case "$1" in
+    https://github.com/rafaeelricco/dotfiles|\
+    https://github.com/rafaeelricco/dotfiles.git|\
+    git@github.com:rafaeelricco/dotfiles|\
+    git@github.com:rafaeelricco/dotfiles.git|\
+    ssh://git@github.com/rafaeelricco/dotfiles|\
+    ssh://git@github.com/rafaeelricco/dotfiles.git) return 0 ;;
     *) return 1 ;;
   esac
 }
 
-is_our_repo() {
-  local dir="$1" url
-  git -C "${dir}" rev-parse --is-inside-work-tree >/dev/null 2>&1 || return 1
+assert_managed_repo() {
+  local dir="$1" url top home worktree_count worktree_path
+  [ -d "${dir}" ] && [ ! -L "${dir}" ] || {
+    echo "error: clone path must be a real directory: ${dir}" >&2
+    exit 1
+  }
+  [ -d "${dir}/.git" ] && [ ! -L "${dir}/.git" ] || {
+    echo "error: clone must have its own .git directory: ${dir}" >&2
+    exit 1
+  }
+  top="$(git -C "${dir}" rev-parse --show-toplevel 2>/dev/null || true)"
+  [ -n "${top}" ] || { echo "error: not a git checkout: ${dir}" >&2; exit 1; }
+  top="$(cd "${top}" && pwd -P)"
+  [ "${top}" = "${dir}" ] || {
+    echo "error: clone path is not the repository root: ${dir}" >&2
+    exit 1
+  }
+  home="$(cd "${HOME}" && pwd -P)"
+  [ "${dir}" != "/" ] && [ "${dir}" != "${home}" ] || {
+    echo "error: unsafe clone path: ${dir}" >&2
+    exit 1
+  }
+  case "${home}/" in
+    "${dir}/"*) echo "error: clone cannot contain HOME: ${dir}" >&2; exit 1 ;;
+  esac
   url="$(git -C "${dir}" config --get remote.origin.url 2>/dev/null || true)"
-  repo_slug_matches "${url}"
+  repo_url_is_allowed "${url}" || {
+    echo "error: ${dir} does not use an allowed rafaeelricco/dotfiles origin" >&2
+    exit 1
+  }
+  worktree_count="$(git -C "${dir}" worktree list --porcelain | awk '/^worktree / { count++ } END { print count + 0 }')"
+  worktree_path="$(git -C "${dir}" worktree list --porcelain | sed -n 's/^worktree //p')"
+  [ "${worktree_count}" -eq 1 ] && [ "${worktree_path}" = "${dir}" ] || {
+    echo "error: linked worktrees are not supported for the managed clone" >&2
+    exit 1
+  }
 }
 
 ensure_repo() {
   local dir="$1"
   if [ -e "${dir}" ] || [ -L "${dir}" ]; then
-    [ -d "${dir}" ] || { echo "error: ${dir} is not a directory" >&2; exit 1; }
-    is_our_repo "${dir}" || {
-      echo "error: ${dir} is not the rafaeelricco/dotfiles clone" >&2
-      exit 1
-    }
+    [ -d "${dir}" ] && [ ! -L "${dir}" ] || { echo "error: ${dir} is not a real directory" >&2; exit 1; }
+    dir="$(cd "${dir}" && pwd -P)"
+    assert_managed_repo "${dir}"
     echo "Using existing clone: ${dir}"
   else
-    mkdir -p "$(dirname "${dir}")"
+    ensure_directory "$(dirname "${dir}")"
     echo "Cloning https://github.com/rafaeelricco/dotfiles.git -> ${dir}"
     git clone https://github.com/rafaeelricco/dotfiles.git "${dir}"
+    dir="$(cd "${dir}" && pwd -P)"
+    assert_managed_repo "${dir}"
   fi
-  DOTFILES_DIR="$(cd "${dir}" && pwd -P)"
+  DOTFILES_DIR="${dir}"
 }
 
 is_managed_target() {
   local target="$1" root
   for root in "${DOTFILES_DIR}" "${DOTFILES_DIR_INPUT}"; do
     case "${target}" in
+      "${root}/INSTRUCTIONS.md"|\
       "${root}/CLAUDE.md"|\
       "${root}/skill"|"${root}/skill/"*|\
       "${root}/.claude/CLAUDE.md"|\
@@ -129,6 +305,7 @@ resolve_conflict() {
       echo "error: failed to back up conflict: ${path}" >&2
       exit 1
     fi
+    state_record backup "${path}" "${backup}"
     echo "backed up: ${path} -> ${backup}"
   fi
   return 0
@@ -148,13 +325,17 @@ remove_conflict() {
 }
 
 link_one() {
-  local src="$1" dst="$2" current
+  local src="$1" dst="$2" current parent name
   [ -e "${src}" ] || { echo "error: source missing: ${src}" >&2; exit 1; }
-  mkdir -p "$(dirname "${dst}")"
+  parent="$(dirname "${dst}")"
+  name="$(basename "${dst}")"
+  ensure_directory "${parent}"
+  dst="$(cd "${parent}" && pwd -P)/${name}"
 
   if [ -L "${dst}" ]; then
     current="$(readlink "${dst}")"
     if [ "${current}" = "${src}" ]; then
+      state_record link "${dst}" "${src}"
       echo "up to date: ${dst}"
       return 0
     fi
@@ -173,6 +354,7 @@ link_one() {
   fi
 
   ln -s "${src}" "${dst}"
+  state_record link "${dst}" "${src}"
   echo "linked: ${dst} -> ${src}"
 }
 
@@ -195,10 +377,7 @@ prepare_skill_dir() {
       return 1
     fi
   fi
-  if ! mkdir -p "${dir}"; then
-    echo "error: failed to prepare skills directory: ${dir}" >&2
-    exit 1
-  fi
+  ensure_directory "${dir}"
 }
 
 prune_stale_skill_links() {
@@ -367,15 +546,16 @@ main() {
     /*) DOTFILES_DIR_INPUT="${DOTFILES_DIR}" ;;
     *) DOTFILES_DIR_INPUT="$(pwd -P)/${DOTFILES_DIR}" ;;
   esac
-  ensure_repo "${DOTFILES_DIR}"
-  GUIDANCE_SRC="${DOTFILES_DIR}/CLAUDE.md"
+  ensure_repo "${DOTFILES_DIR_INPUT}"
+  GUIDANCE_SRC="${DOTFILES_DIR}/INSTRUCTIONS.md"
   SKILLS_SRC="${DOTFILES_DIR}/skill"
-  CLAUDE_HOME="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
-  CODEX_HOME_DIR="${CODEX_HOME:-${HOME}/.codex}"
+  CLAUDE_HOME="$(absolute_path "${CLAUDE_CONFIG_DIR:-${HOME}/.claude}")"
+  CODEX_HOME_DIR="$(absolute_path "${CODEX_HOME:-${HOME}/.codex}")"
   validate_sources
   if [ "${SKIP_CODEX}" -eq 0 ] && codex_is_present; then
     validate_codex_skill_destination
   fi
+  init_state
 
   echo "== Claude Code =="
   install_claude

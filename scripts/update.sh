@@ -15,18 +15,48 @@ Options:
 EOF
 }
 
-repo_slug_matches() {
+repo_url_is_allowed() {
   case "$1" in
-    *rafaeelricco/dotfiles|*rafaeelricco/dotfiles.git) return 0 ;;
+    https://github.com/rafaeelricco/dotfiles|\
+    https://github.com/rafaeelricco/dotfiles.git|\
+    git@github.com:rafaeelricco/dotfiles|\
+    git@github.com:rafaeelricco/dotfiles.git|\
+    ssh://git@github.com/rafaeelricco/dotfiles|\
+    ssh://git@github.com/rafaeelricco/dotfiles.git) return 0 ;;
     *) return 1 ;;
   esac
 }
 
-is_our_repo() {
-  local dir="$1" url
-  git -C "${dir}" rev-parse --is-inside-work-tree >/dev/null 2>&1 || return 1
+assert_managed_repo() {
+  local dir="$1" url top home worktree_count worktree_path
+  [ -d "${dir}" ] && [ ! -L "${dir}" ] || { echo "error: clone path must be a real directory: ${dir}" >&2; exit 1; }
+  [ -d "${dir}/.git" ] && [ ! -L "${dir}/.git" ] || { echo "error: clone must have its own .git directory: ${dir}" >&2; exit 1; }
+  top="$(git -C "${dir}" rev-parse --show-toplevel 2>/dev/null || true)"
+  [ -n "${top}" ] || { echo "error: not a git checkout: ${dir}" >&2; exit 1; }
+  top="$(cd "${top}" && pwd -P)"
+  [ "${top}" = "${dir}" ] || { echo "error: clone path is not the repository root: ${dir}" >&2; exit 1; }
+  home="$(cd "${HOME}" && pwd -P)"
+  [ "${dir}" != "/" ] && [ "${dir}" != "${home}" ] || { echo "error: unsafe clone path: ${dir}" >&2; exit 1; }
+  case "${home}/" in
+    "${dir}/"*) echo "error: clone cannot contain HOME: ${dir}" >&2; exit 1 ;;
+  esac
   url="$(git -C "${dir}" config --get remote.origin.url 2>/dev/null || true)"
-  repo_slug_matches "${url}"
+  repo_url_is_allowed "${url}" || { echo "error: ${dir} does not use an allowed rafaeelricco/dotfiles origin" >&2; exit 1; }
+  worktree_count="$(git -C "${dir}" worktree list --porcelain | awk '/^worktree / { count++ } END { print count + 0 }')"
+  worktree_path="$(git -C "${dir}" worktree list --porcelain | sed -n 's/^worktree //p')"
+  [ "${worktree_count}" -eq 1 ] && [ "${worktree_path}" = "${dir}" ] || {
+    echo "error: linked worktrees are not supported for the managed clone" >&2
+    exit 1
+  }
+}
+
+run_git() {
+  local message="$1"
+  shift
+  git -C "${dir}" "$@" || {
+    echo "error: ${message}; checkout was not relinked" >&2
+    exit 1
+  }
 }
 
 main() {
@@ -61,14 +91,31 @@ main() {
     dir="${HOME}/.dotfiles"
   fi
 
-  [ -d "${dir}" ] || { echo "error: clone not found: ${dir}" >&2; exit 1; }
+  [ -d "${dir}" ] && [ ! -L "${dir}" ] || { echo "error: clone not found or not a real directory: ${dir}" >&2; exit 1; }
   dir="$(cd "${dir}" && pwd -P)"
-  is_our_repo "${dir}" || { echo "error: ${dir} is not the rafaeelricco/dotfiles clone" >&2; exit 1; }
+  assert_managed_repo "${dir}"
 
   export GIT_TERMINAL_PROMPT=0
   echo "Updating ${dir}"
-  git -C "${dir}" pull --ff-only || {
-    echo "error: update failed; checkout was not relinked" >&2
+  run_git "fetch origin/main failed" fetch --force --prune origin \
+    +refs/heads/main:refs/remotes/origin/main
+  run_git "origin/main is missing INSTRUCTIONS.md" cat-file -e refs/remotes/origin/main:INSTRUCTIONS.md
+  run_git "origin/main is missing skill/" cat-file -e refs/remotes/origin/main:skill
+  run_git "origin/main is missing scripts/install.sh" cat-file -e refs/remotes/origin/main:scripts/install.sh
+  run_git "could not switch local main to origin/main" checkout --force -B main refs/remotes/origin/main
+  run_git "reset to origin/main failed" reset --hard refs/remotes/origin/main
+  run_git "pristine cleanup failed" clean -ffdx
+
+  [ "$(git -C "${dir}" symbolic-ref --short HEAD)" = "main" ] || {
+    echo "error: update did not leave the clone on main" >&2
+    exit 1
+  }
+  [ "$(git -C "${dir}" rev-parse HEAD)" = "$(git -C "${dir}" rev-parse refs/remotes/origin/main)" ] || {
+    echo "error: main does not match origin/main" >&2
+    exit 1
+  }
+  [ -z "$(git -C "${dir}" status --porcelain=v1 --untracked-files=all --ignored)" ] || {
+    echo "error: update did not produce a pristine worktree" >&2
     exit 1
   }
 
