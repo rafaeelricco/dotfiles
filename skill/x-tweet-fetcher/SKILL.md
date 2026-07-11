@@ -16,16 +16,16 @@ Fetch tweets from X/Twitter without authentication. For agent-use stories, failu
 
 ## Feature Overview
 
-| Feature | Command | Dependencies |
-|---------|---------|-------------|
-| Single tweet | `xtf --url <tweet_url>` | None (zero deps) |
-| Reply threads | `xtf --url <tweet_url> --replies` | Nitter or browser |
-| User timeline | `xtf --user <username> --limit 50` | Nitter or browser |
-| Search | `xtf --search "<query>"` | Nitter |
-| User profile | `xtf --user-info <username>` | None (zero deps) |
-| X List | `xtf --list <list_url_or_id>` | Browser (Camofox/Playwright) |
-| X Article | `xtf --article <url_or_id>` | Browser (Camofox/Playwright) |
-| Mentions monitor | `xtf --monitor @<username>` | Nitter or browser |
+| Feature          | Command                            | Dependencies                 |
+| ---------------- | ---------------------------------- | ---------------------------- |
+| Single tweet     | `xtf --url <tweet_url>`            | None (zero deps)             |
+| Reply threads    | `xtf --url <tweet_url> --replies`  | Nitter or browser            |
+| User timeline    | `xtf --user <username> --limit 50` | Nitter or browser            |
+| Search           | `xtf --search "<query>"`           | Nitter                       |
+| User profile     | `xtf --user-info <username>`       | None (zero deps)             |
+| X List           | `xtf --list <list_url_or_id>`      | Browser (Camofox/Playwright) |
+| X Article        | `xtf --article <url_or_id>`        | Browser (Camofox/Playwright) |
+| Mentions monitor | `xtf --monitor @<username>`        | Nitter or browser            |
 
 `python3 scripts/fetch_tweet.py` accepts the same flags (v1-compatible entry point).
 

@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-If you call `python3 scripts/fetch_tweet.py ...` today, the flags and exit codes are unchanged and the script is now a thin shim over the `xtf` package. JSON fields are unchanged for every mode **except `--search`**, whose per-tweet schema is now unified with `--user` (see *Behavior changes* #4 below). If you consume `--search` output by field name, read that item before upgrading.
+If you call `python3 scripts/fetch_tweet.py ...` today, the flags and exit codes are unchanged and the script is now a thin shim over the `xtf` package. JSON fields are unchanged for every mode **except `--search`**, whose per-tweet schema is now unified with `--user` (see _Behavior changes_ #4 below). If you consume `--search` output by field name, read that item before upgrading.
 
 ## What's new
 
@@ -24,13 +24,13 @@ If you call `python3 scripts/fetch_tweet.py ...` today, the flags and exit codes
 
 v2 focuses this repo purely on fetching tweets. Removed in v2 (available in the `v1-legacy` git tag):
 
-| Script | Status |
-|--------|--------|
-| `fetch_china.py`, `sogou_wechat.py` | Moving to a separate repo (Chinese-platform fetching) |
-| `tweet_growth*.py`, `x-profile-analyzer.py`, `x_discover.py` | Analytics, out of scope — `v1-legacy` tag |
-| `arxiv_author_finder.py`, `paper_recommend.py`, `paper_to_obsidian.py`, `to_obsidian.py` | Unrelated to tweets — `v1-legacy` tag |
-| `x_mentions_nitter.py` | Merged into `--monitor --backend nitter` |
-| `nitter_client.py`, `camofox_client.py`, `playwright_client.py`, `common.py` | Now live inside `src/xtf/` |
+| Script                                                                                   | Status                                                |
+| ---------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `fetch_china.py`, `sogou_wechat.py`                                                      | Moving to a separate repo (Chinese-platform fetching) |
+| `tweet_growth*.py`, `x-profile-analyzer.py`, `x_discover.py`                             | Analytics, out of scope — `v1-legacy` tag             |
+| `arxiv_author_finder.py`, `paper_recommend.py`, `paper_to_obsidian.py`, `to_obsidian.py` | Unrelated to tweets — `v1-legacy` tag                 |
+| `x_mentions_nitter.py`                                                                   | Merged into `--monitor --backend nitter`              |
+| `nitter_client.py`, `camofox_client.py`, `playwright_client.py`, `common.py`             | Now live inside `src/xtf/`                            |
 
 To pin the old world: `git checkout v1-legacy`.
 

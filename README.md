@@ -47,9 +47,9 @@ curl -fsSL https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/scripts/
 
 ## Installed Paths
 
-| Source | Claude Code | Codex |
-| --- | --- | --- |
-| `CLAUDE.md` | `~/.claude/CLAUDE.md` | `~/.codex/AGENTS.md` |
+| Source         | Claude Code               | Codex                     |
+| -------------- | ------------------------- | ------------------------- |
+| `CLAUDE.md`    | `~/.claude/CLAUDE.md`     | `~/.codex/AGENTS.md`      |
 | `skill/<name>` | `~/.claude/skills/<name>` | `~/.agents/skills/<name>` |
 
 `CLAUDE_CONFIG_DIR` and `CODEX_HOME` are honored. The former Claude
