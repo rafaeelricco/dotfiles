@@ -298,6 +298,35 @@ function Test-CodexPresent {
     (Test-Path -LiteralPath $CodexHome -PathType Container) -or $null -ne (Get-Command codex -ErrorAction SilentlyContinue)
 }
 
+function Assert-CodexSkillDestinationWritable {
+    $destination = Join-Path $HOME '.agents\skills'
+    $item = Get-ItemIfPresent $destination
+    if ($null -ne $item -and $item.PSIsContainer -and -not (Test-IsLink $item)) {
+        $probe = $destination
+    } else {
+        $probe = Split-Path -Parent $destination
+        while (-not (Test-Path -LiteralPath $probe -PathType Container)) {
+            if ($null -ne (Get-ItemIfPresent $probe)) { break }
+            $parent = Split-Path -Parent $probe
+            if ([string]::IsNullOrEmpty($parent) -or (Test-SamePath $parent $probe)) { break }
+            $probe = $parent
+        }
+    }
+
+    if (-not (Test-Path -LiteralPath $probe -PathType Container)) {
+        throw "Codex skills destination is not writable: $probe. Fix its ownership or permissions, then rerun install.ps1."
+    }
+
+    $testFile = Join-Path $probe ".dotfiles-write-test-$([Guid]::NewGuid().ToString('N')).tmp"
+    try {
+        [System.IO.File]::WriteAllText($testFile, '')
+        [System.IO.File]::Delete($testFile)
+    } catch {
+        Remove-Item -LiteralPath $testFile -Force -ErrorAction SilentlyContinue
+        throw "Codex skills destination is not writable: $probe. Fix its ownership or permissions, then rerun install.ps1."
+    }
+}
+
 function Invoke-DotfilesInstall {
     if ($Yes.IsPresent -and $Override.IsPresent) {
         throw '-Yes and -Override cannot be used together.'
@@ -331,6 +360,10 @@ function Invoke-DotfilesInstall {
     $claudeHome = if ($env:CLAUDE_CONFIG_DIR) { [System.IO.Path]::GetFullPath($env:CLAUDE_CONFIG_DIR) } else { $defaultClaudeHome }
     $defaultCodexHome = Join-Path $HOME '.codex'
     $codexHome = if ($env:CODEX_HOME) { [System.IO.Path]::GetFullPath($env:CODEX_HOME) } else { $defaultCodexHome }
+    $installCodex = -not $SkipCodex.IsPresent -and (Test-CodexPresent $codexHome)
+    if ($installCodex) {
+        Assert-CodexSkillDestinationWritable
+    }
 
     Write-Host '== Claude Code =='
     if (-not (Test-SamePath $claudeHome $defaultClaudeHome)) {
@@ -344,7 +377,7 @@ function Invoke-DotfilesInstall {
 
     if ($SkipCodex.IsPresent) {
         Write-Host 'Codex: skipped (-SkipCodex).'
-    } elseif (Test-CodexPresent $codexHome) {
+    } elseif ($installCodex) {
         Write-Host '== Codex =='
         if (-not (Test-SamePath $codexHome $defaultCodexHome)) {
             Remove-ManagedLink (Join-Path $defaultCodexHome 'AGENTS.md')

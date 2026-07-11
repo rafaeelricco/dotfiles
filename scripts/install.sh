@@ -290,6 +290,9 @@ validate_codex_skill_destination() {
   else
     probe="$(dirname "${dir}")"
     while [ ! -d "${probe}" ]; do
+      if [ -e "${probe}" ] || [ -L "${probe}" ]; then
+        break
+      fi
       parent="$(dirname "${probe}")"
       [ "${parent}" != "${probe}" ] || break
       probe="${parent}"
