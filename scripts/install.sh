@@ -5,12 +5,14 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Install root CLAUDE.md and skill/ for Claude Code and optional Codex.
+Install agent instructions and skills for Claude Code and optional Codex.
+Uses CLAUDE.md for Claude Code and AGENTS.md for Codex.
 
 Usage: install.sh [options]
 
 Options:
   -y, --yes         Back up conflicts without prompting.
+      --override    Remove conflicts without backup or prompting.
       --skip-codex  Do not configure Codex.
       --dir PATH    Override $DOTFILES_DIR / ~/.dotfiles.
   -h, --help        Show this help.
@@ -41,6 +43,7 @@ parse_args() {
   while [ "$#" -gt 0 ]; do
     case "$1" in
       -y|--yes) ASSUME_YES=1 ;;
+      --override) OVERRIDE=1 ;;
       --skip-codex) SKIP_CODEX=1 ;;
       --dir)
         shift
@@ -102,24 +105,46 @@ is_managed_target() {
 }
 
 resolve_conflict() {
-  local path="$1" answer backup
-  if [ "${INTERACTIVE}" -eq 1 ]; then
+  local path="$1" answer backup action="${CONFLICT_MODE}"
+  if [ "${action}" = "prompt" ]; then
     printf 'Conflict: %s\n' "${path}"
-    printf '  [b]ackup, [s]kip, or [a]bort? '
+    printf '  [b]ackup, [o]verride, [s]kip, or [a]bort? '
     if ! IFS= read -r answer < /dev/tty; then
       answer="a"
     fi
     case "${answer}" in
-      b|B) ;;
+      b|B) action="backup" ;;
+      o|O) action="override" ;;
       s|S) echo "skipped: ${path}"; return 1 ;;
       *) echo "aborted at: ${path}" >&2; exit 1 ;;
     esac
   fi
 
-  backup="$(backup_name "${path}")"
-  mv "${path}" "${backup}"
-  echo "backed up: ${path} -> ${backup}"
+  if [ "${action}" = "override" ]; then
+    remove_conflict "${path}"
+    echo "overridden: ${path}"
+  else
+    backup="$(backup_name "${path}")"
+    if ! mv "${path}" "${backup}"; then
+      echo "error: failed to back up conflict: ${path}" >&2
+      exit 1
+    fi
+    echo "backed up: ${path} -> ${backup}"
+  fi
   return 0
+}
+
+remove_conflict() {
+  local path="$1"
+  if [ -d "${path}" ] && [ ! -L "${path}" ]; then
+    if ! rm -rf "${path}"; then
+      echo "error: failed to remove conflict: ${path}" >&2
+      exit 1
+    fi
+  elif ! rm -f "${path}"; then
+    echo "error: failed to remove conflict: ${path}" >&2
+    exit 1
+  fi
 }
 
 link_one() {
@@ -134,7 +159,10 @@ link_one() {
       return 0
     fi
     if is_managed_target "${current}"; then
-      rm -f "${dst}"
+      if ! rm -f "${dst}"; then
+        echo "error: failed to remove managed link: ${dst}" >&2
+        exit 1
+      fi
     elif ! resolve_conflict "${dst}"; then
       return 0
     fi
@@ -153,7 +181,10 @@ prepare_skill_dir() {
   if [ -L "${dir}" ]; then
     current="$(readlink "${dir}")"
     if is_managed_target "${current}"; then
-      rm -f "${dir}"
+      if ! rm -f "${dir}"; then
+        echo "error: failed to remove managed link: ${dir}" >&2
+        exit 1
+      fi
     elif ! resolve_conflict "${dir}"; then
       echo "${label} skills skipped."
       return 1
@@ -164,7 +195,10 @@ prepare_skill_dir() {
       return 1
     fi
   fi
-  mkdir -p "${dir}"
+  if ! mkdir -p "${dir}"; then
+    echo "error: failed to prepare skills directory: ${dir}" >&2
+    exit 1
+  fi
 }
 
 prune_stale_skill_links() {
@@ -249,6 +283,29 @@ codex_is_present() {
   [ -d "${CODEX_HOME_DIR}" ] || command -v codex >/dev/null 2>&1
 }
 
+validate_codex_skill_destination() {
+  local dir="${HOME}/.agents/skills" probe parent
+  if [ -d "${dir}" ] && [ ! -L "${dir}" ]; then
+    probe="${dir}"
+  else
+    probe="$(dirname "${dir}")"
+    while [ ! -d "${probe}" ]; do
+      if [ -e "${probe}" ] || [ -L "${probe}" ]; then
+        break
+      fi
+      parent="$(dirname "${probe}")"
+      [ "${parent}" != "${probe}" ] || break
+      probe="${parent}"
+    done
+  fi
+
+  if [ ! -d "${probe}" ] || [ ! -w "${probe}" ] || [ ! -x "${probe}" ]; then
+    echo "error: Codex skills destination is not writable: ${probe}" >&2
+    echo "fix its ownership or permissions, then rerun install.sh" >&2
+    exit 1
+  fi
+}
+
 install_claude() {
   local default_home="${HOME}/.claude"
   if [ "${CLAUDE_HOME}" != "${default_home}" ]; then
@@ -274,10 +331,16 @@ install_codex() {
 
 main() {
   ASSUME_YES=0
+  OVERRIDE=0
   SKIP_CODEX=0
   DIR_OVERRIDE=""
   INTERACTIVE=0
   parse_args "$@"
+
+  if [ "${ASSUME_YES}" -eq 1 ] && [ "${OVERRIDE}" -eq 1 ]; then
+    echo "error: --yes and --override cannot be used together" >&2
+    exit 2
+  fi
 
   command -v git >/dev/null 2>&1 || { echo "error: git is required" >&2; exit 1; }
 
@@ -289,8 +352,15 @@ main() {
     DOTFILES_DIR="${HOME}/.dotfiles"
   fi
 
-  if [ "${ASSUME_YES}" -eq 0 ] && [ -t 1 ] && [ -r /dev/tty ]; then
+  if [ "${ASSUME_YES}" -eq 0 ] && [ "${OVERRIDE}" -eq 0 ] && [ -t 1 ] && [ -r /dev/tty ]; then
     INTERACTIVE=1
+  fi
+  if [ "${OVERRIDE}" -eq 1 ]; then
+    CONFLICT_MODE="override"
+  elif [ "${INTERACTIVE}" -eq 1 ]; then
+    CONFLICT_MODE="prompt"
+  else
+    CONFLICT_MODE="backup"
   fi
 
   case "${DOTFILES_DIR}" in
@@ -303,6 +373,9 @@ main() {
   CLAUDE_HOME="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
   CODEX_HOME_DIR="${CODEX_HOME:-${HOME}/.codex}"
   validate_sources
+  if [ "${SKIP_CODEX}" -eq 0 ] && codex_is_present; then
+    validate_codex_skill_destination
+  fi
 
   echo "== Claude Code =="
   install_claude

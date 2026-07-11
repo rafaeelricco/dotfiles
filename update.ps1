@@ -3,6 +3,7 @@
 param(
     [string]$Dir,
     [switch]$Yes,
+    [switch]$Override,
     [switch]$SkipCodex
 )
 
@@ -24,6 +25,9 @@ function Get-RepoSlug {
 }
 
 try {
+    if ($Yes.IsPresent -and $Override.IsPresent) {
+        throw '-Yes and -Override cannot be used together.'
+    }
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) { throw 'git was not found on PATH.' }
     $repoDir = Resolve-InstallDir $Dir
     if (-not (Test-Path -LiteralPath $repoDir -PathType Container)) { throw "clone not found: $repoDir" }
@@ -45,6 +49,7 @@ try {
 
     $arguments = @{ Dir = $repoDir }
     if ($Yes.IsPresent) { $arguments['Yes'] = $true }
+    if ($Override.IsPresent) { $arguments['Override'] = $true }
     if ($SkipCodex.IsPresent) { $arguments['SkipCodex'] = $true }
     & $installer @arguments
     if ($LASTEXITCODE -ne 0) { throw "install.ps1 failed with exit code $LASTEXITCODE." }

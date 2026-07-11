@@ -8,7 +8,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-green.svg)](https://www.python.org)
 [![GitHub stars](https://img.shields.io/github/stars/ythx-101/x-tweet-fetcher?style=social)](https://github.com/ythx-101/x-tweet-fetcher)
 
-*Three backends · Auto fallback · Unified JSON schema · Built for AI agents*
+_Three backends · Auto fallback · Unified JSON schema · Built for AI agents_
 
 [Quick Start](#-quick-start) · [Backends](#-three-backends) · [Capabilities](#-capabilities) · [Python API](#-python-api) · [Self-hosted Nitter](#-self-hosted-nitter) · [Migrating from v1](#-migrating-from-v1)
 
@@ -53,12 +53,12 @@ Prefer not to install? `python3 scripts/fetch_tweet.py --url ...` works straight
 
 ## 🔀 Three Backends
 
-| Backend | Deps | Speed | Covers |
-|---------|------|-------|--------|
-| **fxtwitter** | None (stdlib) | ⚡⚡ | Single tweets, user profiles |
-| **nitter** | A Nitter instance | ⚡ | Timeline, search, replies, mentions |
-| **browser** | Camofox *or* Playwright | 🐢 | Everything above + **Lists** + **X Articles** |
-| **auto** (default) | Best available | ⚡→🐢 | Nitter first, browser fallback |
+| Backend            | Deps                    | Speed | Covers                                        |
+| ------------------ | ----------------------- | ----- | --------------------------------------------- |
+| **fxtwitter**      | None (stdlib)           | ⚡⚡  | Single tweets, user profiles                  |
+| **nitter**         | A Nitter instance       | ⚡    | Timeline, search, replies, mentions           |
+| **browser**        | Camofox _or_ Playwright | 🐢    | Everything above + **Lists** + **X Articles** |
+| **auto** (default) | Best available          | ⚡→🐢 | Nitter first, browser fallback                |
 
 ```bash
 xtf --user elonmusk                    # auto (default)
@@ -75,16 +75,16 @@ export XTF_BROWSER=playwright          # or: --browser-driver playwright
 
 ## 📊 Capabilities
 
-| Feature | Flag | Backend |
-|---------|------|---------|
-| Single tweet (text, stats, media, quotes) | `--url` | fxtwitter |
-| Reply comments (threaded) | `--url --replies` | nitter / browser |
-| User timeline (paginated) | `--user` | nitter / browser |
-| Search | `--search` | nitter |
-| User profile | `--user-info` | fxtwitter → nitter |
-| X List tweets | `--list` | browser |
-| X Article full text | `--article` | browser |
-| Mentions monitor (incremental, cron-friendly) | `--monitor` | nitter / browser |
+| Feature                                       | Flag              | Backend            |
+| --------------------------------------------- | ----------------- | ------------------ |
+| Single tweet (text, stats, media, quotes)     | `--url`           | fxtwitter          |
+| Reply comments (threaded)                     | `--url --replies` | nitter / browser   |
+| User timeline (paginated)                     | `--user`          | nitter / browser   |
+| Search                                        | `--search`        | nitter             |
+| User profile                                  | `--user-info`     | fxtwitter → nitter |
+| X List tweets                                 | `--list`          | browser            |
+| X Article full text                           | `--article`       | browser            |
+| Mentions monitor (incremental, cron-friendly) | `--monitor`       | nitter / browser   |
 
 **Exit codes** (cron-friendly): `0` success / no new mentions · `1` error / new mentions found · `2` monitor setup error.
 
@@ -112,13 +112,13 @@ All backends normalize into one `Tweet` / `Reply` / `Profile` / `Article` schema
 
 Everything is an environment variable (CLI flags override):
 
-| Variable | Default | Meaning |
-|----------|---------|---------|
-| `XTF_NITTER` | `http://127.0.0.1:8788` | Comma-separated Nitter instances, tried in order with failover |
-| `XTF_BROWSER` | `camofox` | Browser driver: `camofox` or `playwright` |
-| `XTF_BROWSER_PORT` | `9377` | Camofox HTTP port |
-| `XTF_LANG` | `zh` | Message language: `zh` or `en` |
-| `XTF_CACHE_DIR` | `~/.x-tweet-fetcher` | Mentions-monitor cache |
+| Variable           | Default                 | Meaning                                                        |
+| ------------------ | ----------------------- | -------------------------------------------------------------- |
+| `XTF_NITTER`       | `http://127.0.0.1:8788` | Comma-separated Nitter instances, tried in order with failover |
+| `XTF_BROWSER`      | `camofox`               | Browser driver: `camofox` or `playwright`                      |
+| `XTF_BROWSER_PORT` | `9377`                  | Camofox HTTP port                                              |
+| `XTF_LANG`         | `zh`                    | Message language: `zh` or `en`                                 |
+| `XTF_CACHE_DIR`    | `~/.x-tweet-fetcher`    | Mentions-monitor cache                                         |
 
 `NITTER_URL` (the v1 name) is still honored as a fallback for `XTF_NITTER`.
 
@@ -187,7 +187,7 @@ When Nitter or X change their page structure, capture a fresh snapshot into `tes
 
 <div align="center">
 
-*Three backends. Auto fallback. Built for AI agents.*
+_Three backends. Auto fallback. Built for AI agents._
 
 **[GitHub](https://github.com/ythx-101/x-tweet-fetcher)** · **[Issues](https://github.com/ythx-101/x-tweet-fetcher/issues)** · **[#22 Teahouse](https://github.com/ythx-101/openclaw-qa/discussions/22)** · **[Agent Waystation](https://github.com/ythx-101/openclaw-qa)**
 

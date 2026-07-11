@@ -8,7 +8,8 @@ Claude Code, and Codex setup. AI tools share one `CLAUDE.md` and one `skill/`
 tree, installed through safe, repeatable symlinks.
 
 - **One source of truth:** no generated skill or plugin copies.
-- **Safe re-runs:** exact links are no-ops and conflicts can be backed up.
+- **Safe re-runs:** exact links are no-ops and conflicts can be backed up or
+  explicitly overridden.
 - **Cross-platform:** Bash for macOS/Linux and PowerShell 7 for Windows.
 
 ## Quick Install
@@ -30,7 +31,9 @@ curl -fsSL https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/scripts/
 
 The default clone is `~/.dotfiles`. Use `--dir PATH` / `-Dir PATH` or
 `DOTFILES_DIR` to override it. Use `--yes` / `-Yes` to back up conflicts
-without prompting and `--skip-codex` / `-SkipCodex` to install Claude only.
+without prompting, `--override` / `-Override` to permanently remove conflicts
+without backups, and `--skip-codex` / `-SkipCodex` to install Claude only.
+Backup and override modes cannot be used together.
 
 ## Update
 
@@ -44,14 +47,23 @@ curl -fsSL https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/scripts/
 
 ## Installed Paths
 
-| Source | Claude Code | Codex |
-| --- | --- | --- |
-| `CLAUDE.md` | `~/.claude/CLAUDE.md` | `~/.codex/AGENTS.md` |
+| Source         | Claude Code               | Codex                     |
+| -------------- | ------------------------- | ------------------------- |
+| `CLAUDE.md`    | `~/.claude/CLAUDE.md`     | `~/.codex/AGENTS.md`      |
 | `skill/<name>` | `~/.claude/skills/<name>` | `~/.agents/skills/<name>` |
 
 `CLAUDE_CONFIG_DIR` and `CODEX_HOME` are honored. The former Claude
 marketplace is retired; existing marketplace installations are not removed
 automatically.
+
+If a previous command created `~/.agents` as root, restore user ownership
+before installing:
+
+```bash
+sudo chown -R "$(id -un):$(id -gn)" "$HOME/.agents"
+```
+
+Run the installer as your normal user, not with `sudo`.
 
 ## Other Dotfiles
 
