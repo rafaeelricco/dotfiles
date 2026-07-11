@@ -448,7 +448,15 @@ cleanup_legacy_agents() {
 
 validate_sources() {
   local skill count
-  [ -f "${GUIDANCE_SRC}" ] || { echo "error: source missing: ${GUIDANCE_SRC}" >&2; exit 1; }
+  if [ ! -f "${GUIDANCE_SRC}" ]; then
+    if [ -f "${DOTFILES_DIR}/CLAUDE.md" ]; then
+      echo "error: ${DOTFILES_DIR} is an outdated clone (CLAUDE.md was renamed to INSTRUCTIONS.md)" >&2
+      echo "hint: update it first: curl -fsSL https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/scripts/update.sh | bash" >&2
+      exit 1
+    fi
+    echo "error: source missing: ${GUIDANCE_SRC}" >&2
+    exit 1
+  fi
   [ -d "${SKILLS_SRC}" ] || { echo "error: source missing: ${SKILLS_SRC}" >&2; exit 1; }
   count=0
   for skill in "${SKILLS_SRC}"/*; do
