@@ -34,7 +34,7 @@
     {
       "name": "coding-standards",
       "source": "./plugins/coding-standards",
-      "description": "Prefer functional, type-safe implementation style for code creation, refactors, debugging fixes, and code review. Use for any code change where implementation style matters, especially TypeScript, JavaScript, React, Node, domain logic, API handlers, and tests.",
+      "description": "Review and shape code creation, debugging fixes, refactors, implementation plans, snippets, diffs, and pull requests for cognitive complexity, functional structure, immutability, type safety, behavioral preservation, and refactor trade-offs. Use when implementation style, maintainability, state modeling, side-effect boundaries, or options-before-implementation materially affect the result.",
       "author": {
         "name": "Rafael Ricco"
       },
@@ -47,7 +47,7 @@
     {
       "name": "consult-advisor",
       "source": "./plugins/consult-advisor",
-      "description": "Escalate hard planning decisions to the Opus advisor sub-agent before executing. Use when a task has non-obvious tradeoffs, multiple viable approaches, architectural impact, or the user asks \"how should we approach\". Do NOT use for mechanical edits, obvious one-liners, or when the user has already specified the approach.",
+      "description": "Consult an appropriate advisor through the current environment's native delegation mechanism before executing. Use when a task has non-obvious tradeoffs, multiple viable approaches, architectural impact, or the user asks \"how should we approach\". Do NOT use for mechanical edits, obvious one-liners, or when the user has already specified the approach.",
       "author": {
         "name": "Rafael Ricco"
       },
