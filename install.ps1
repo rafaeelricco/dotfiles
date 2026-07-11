@@ -3,6 +3,7 @@
 param(
     [string]$Dir,
     [switch]$Yes,
+    [switch]$Override,
     [switch]$SkipCodex
 )
 
@@ -58,9 +59,11 @@ function Get-ItemIfPresent {
     Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
 }
 
-function Test-IsSymlink {
+function Test-IsLink {
     param([System.IO.FileSystemInfo]$Item)
-    $null -ne $Item -and $Item.LinkType -eq 'SymbolicLink'
+    if ($null -eq $Item) { return $false }
+    if ([string]$Item.LinkType -in @('SymbolicLink', 'SymLink', 'Junction')) { return $true }
+    ($Item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0
 }
 
 function Get-LinkTargetPath {
@@ -94,12 +97,25 @@ function Test-ManagedTarget {
     $false
 }
 
-function Remove-SymlinkSafely {
+function Remove-LinkSafely {
     param([Parameter(Mandatory)][System.IO.FileSystemInfo]$Item)
     if ($Item -is [System.IO.DirectoryInfo]) {
         [System.IO.Directory]::Delete($Item.FullName, $false)
     } else {
         [System.IO.File]::Delete($Item.FullName)
+    }
+}
+
+function Remove-ConflictItem {
+    param([Parameter(Mandatory)][string]$Path)
+    $item = Get-ItemIfPresent $Path
+    if ($null -eq $item) { return }
+    if (Test-IsLink $item) {
+        Remove-LinkSafely $item
+    } elseif ($item.PSIsContainer) {
+        Remove-Item -LiteralPath $Path -Recurse -Force
+    } else {
+        Remove-Item -LiteralPath $Path -Force
     }
 }
 
@@ -117,17 +133,24 @@ function Get-BackupPath {
 
 function Resolve-Conflict {
     param([Parameter(Mandatory)][string]$Path)
-    if ($script:Interactive) {
-        $answer = Read-Host "Conflict: $Path`n  [b]ackup, [s]kip, or [a]bort"
+    $action = $script:ConflictMode
+    if ($action -eq 'Prompt') {
+        $answer = Read-Host "Conflict: $Path`n  [b]ackup, [o]verride, [s]kip, or [a]bort"
         switch -Regex ($answer) {
-            '^[bB]$' { break }
+            '^[bB]$' { $action = 'Backup'; break }
+            '^[oO]$' { $action = 'Override'; break }
             '^[sS]$' { Write-Host "skipped: $Path"; return $false }
             default { throw "aborted at: $Path" }
         }
     }
-    $backup = Get-BackupPath $Path
-    Move-Item -LiteralPath $Path -Destination $backup
-    Write-Host "backed up: $Path -> $backup"
+    if ($action -eq 'Override') {
+        Remove-ConflictItem $Path
+        Write-Host "overridden: $Path"
+    } else {
+        $backup = Get-BackupPath $Path
+        Move-Item -LiteralPath $Path -Destination $backup
+        Write-Host "backed up: $Path -> $backup"
+    }
     $true
 }
 
@@ -172,14 +195,14 @@ function Install-Link {
     }
 
     $item = Get-ItemIfPresent $LinkPath
-    if (Test-IsSymlink $item) {
+    if (Test-IsLink $item) {
         $current = Get-LinkTargetPath $item
         if (Test-SamePath $current $TargetPath) {
             Write-Host "up to date: $LinkPath"
             return
         }
         if (Test-ManagedTarget $current) {
-            Remove-SymlinkSafely $item
+            Remove-LinkSafely $item
         } elseif (-not (Resolve-Conflict $LinkPath)) {
             return
         }
@@ -194,10 +217,10 @@ function Install-Link {
 function Prepare-SkillDirectory {
     param([string]$Path, [string]$Label)
     $item = Get-ItemIfPresent $Path
-    if (Test-IsSymlink $item) {
+    if (Test-IsLink $item) {
         $target = Get-LinkTargetPath $item
         if (Test-ManagedTarget $target) {
-            Remove-SymlinkSafely $item
+            Remove-LinkSafely $item
         } elseif (-not (Resolve-Conflict $Path)) {
             Write-Host "$Label skills skipped."
             return $false
@@ -228,9 +251,9 @@ function Sync-SkillSet {
         Install-Link -LinkPath (Join-Path $Destination $skill.Name) -TargetPath $skill.FullName
     }
     foreach ($entry in @(Get-ChildItem -LiteralPath $Destination -Force)) {
-        if ($valid.ContainsKey($entry.Name) -or -not (Test-IsSymlink $entry)) { continue }
+        if ($valid.ContainsKey($entry.Name) -or -not (Test-IsLink $entry)) { continue }
         if (Test-ManagedTarget (Get-LinkTargetPath $entry)) {
-            Remove-SymlinkSafely $entry
+            Remove-LinkSafely $entry
             Write-Host "pruned stale skill link: $($entry.FullName)"
         }
     }
@@ -239,17 +262,17 @@ function Sync-SkillSet {
 function Clear-ManagedSkillDirectory {
     param([string]$Path)
     $item = Get-ItemIfPresent $Path
-    if (Test-IsSymlink $item) {
+    if (Test-IsLink $item) {
         if (Test-ManagedTarget (Get-LinkTargetPath $item)) {
-            Remove-SymlinkSafely $item
+            Remove-LinkSafely $item
             Write-Host "removed legacy managed link: $Path"
         }
         return
     }
     if ($null -eq $item -or -not $item.PSIsContainer) { return }
     foreach ($entry in @(Get-ChildItem -LiteralPath $Path -Force)) {
-        if ((Test-IsSymlink $entry) -and (Test-ManagedTarget (Get-LinkTargetPath $entry))) {
-            Remove-SymlinkSafely $entry
+        if ((Test-IsLink $entry) -and (Test-ManagedTarget (Get-LinkTargetPath $entry))) {
+            Remove-LinkSafely $entry
             Write-Host "removed legacy managed link: $($entry.FullName)"
         }
     }
@@ -258,8 +281,8 @@ function Clear-ManagedSkillDirectory {
 function Remove-ManagedLink {
     param([string]$Path)
     $item = Get-ItemIfPresent $Path
-    if ((Test-IsSymlink $item) -and (Test-ManagedTarget (Get-LinkTargetPath $item))) {
-        Remove-SymlinkSafely $item
+    if ((Test-IsLink $item) -and (Test-ManagedTarget (Get-LinkTargetPath $item))) {
+        Remove-LinkSafely $item
         Write-Host "removed legacy managed link: $Path"
     }
 }
@@ -276,6 +299,9 @@ function Test-CodexPresent {
 }
 
 function Invoke-DotfilesInstall {
+    if ($Yes.IsPresent -and $Override.IsPresent) {
+        throw '-Yes and -Override cannot be used together.'
+    }
     $requestedRepoDir = Resolve-InstallDir $Dir
     Assert-Git
     Ensure-Repo $requestedRepoDir
@@ -297,7 +323,8 @@ function Invoke-DotfilesInstall {
             (Join-Path $managedRepo '.codex\AGENTS.md')
         )
     }
-    $script:Interactive = [Environment]::UserInteractive -and -not [Console]::IsInputRedirected -and -not $Yes.IsPresent
+    $interactive = [Environment]::UserInteractive -and -not [Console]::IsInputRedirected -and -not $Yes.IsPresent -and -not $Override.IsPresent
+    $script:ConflictMode = if ($Override.IsPresent) { 'Override' } elseif ($interactive) { 'Prompt' } else { 'Backup' }
     Test-SymlinkCapability
 
     $defaultClaudeHome = Join-Path $HOME '.claude'

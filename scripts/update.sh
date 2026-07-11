@@ -8,6 +8,7 @@ Usage: update.sh [options]
 
 Options:
   -y, --yes         Back up conflicts without prompting.
+      --override    Remove conflicts without backup or prompting.
       --skip-codex  Do not configure Codex.
       --dir PATH    Override $DOTFILES_DIR / ~/.dotfiles.
   -h, --help        Show this help.
@@ -29,10 +30,11 @@ is_our_repo() {
 }
 
 main() {
-  local assume_yes=0 skip_codex=0 dir_override="" dir installer
+  local assume_yes=0 override=0 skip_codex=0 dir_override="" dir installer
   while [ "$#" -gt 0 ]; do
     case "$1" in
       -y|--yes) assume_yes=1 ;;
+      --override) override=1 ;;
       --skip-codex) skip_codex=1 ;;
       --dir)
         shift
@@ -44,6 +46,11 @@ main() {
     esac
     shift
   done
+
+  if [ "${assume_yes}" -eq 1 ] && [ "${override}" -eq 1 ]; then
+    echo "error: --yes and --override cannot be used together" >&2
+    exit 2
+  fi
 
   command -v git >/dev/null 2>&1 || { echo "error: git is required" >&2; exit 1; }
   if [ -n "${dir_override}" ]; then
@@ -71,6 +78,7 @@ main() {
   local -a forwarded_args
   forwarded_args=(--dir "${dir}")
   [ "${assume_yes}" -eq 0 ] || forwarded_args+=(--yes)
+  [ "${override}" -eq 0 ] || forwarded_args+=(--override)
   [ "${skip_codex}" -eq 0 ] || forwarded_args+=(--skip-codex)
   bash "${installer}" "${forwarded_args[@]}"
 }
