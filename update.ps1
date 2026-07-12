@@ -4,6 +4,7 @@ param(
     [string]$Dir,
     [switch]$Yes,
     [switch]$Override,
+    [switch]$SkipClaude,
     [switch]$SkipCodex
 )
 
@@ -133,6 +134,7 @@ try {
     $arguments = @{ Dir = $repoDir }
     if ($Yes.IsPresent) { $arguments['Yes'] = $true }
     if ($Override.IsPresent) { $arguments['Override'] = $true }
+    if ($SkipClaude.IsPresent) { $arguments['SkipClaude'] = $true }
     if ($SkipCodex.IsPresent) { $arguments['SkipCodex'] = $true }
     & $installer @arguments
     if ($LASTEXITCODE -ne 0) { throw "install.ps1 failed with exit code $LASTEXITCODE." }

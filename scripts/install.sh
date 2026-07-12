@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Install this repository's Claude Code and optional Codex configuration.
+# Install this repository's Claude Code and Codex configuration when present.
 # Compatible with the Bash 3.2 shipped by macOS.
 set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Install agent instructions and skills for Claude Code and optional Codex.
+Install agent instructions and skills for detected Claude Code and Codex CLIs.
 Uses repository INSTRUCTIONS.md for vendor CLAUDE.md and AGENTS.md destinations.
 
 Usage: install.sh [options]
@@ -13,6 +13,7 @@ Usage: install.sh [options]
 Options:
   -y, --yes         Back up conflicts without prompting.
       --override    Remove conflicts without backup or prompting.
+      --skip-claude Do not configure Claude Code.
       --skip-codex  Do not configure Codex.
       --dir PATH    Override $DOTFILES_DIR / ~/.dotfiles.
   -h, --help        Show this help.
@@ -184,6 +185,7 @@ parse_args() {
     case "$1" in
       -y|--yes) ASSUME_YES=1 ;;
       --override) OVERRIDE=1 ;;
+      --skip-claude) SKIP_CLAUDE=1 ;;
       --skip-codex) SKIP_CODEX=1 ;;
       --dir)
         shift
@@ -467,8 +469,8 @@ validate_sources() {
   [ "${count}" -gt 0 ] || { echo "error: no skills found in ${SKILLS_SRC}" >&2; exit 1; }
 }
 
-codex_is_present() {
-  [ -d "${CODEX_HOME_DIR}" ] || command -v codex >/dev/null 2>&1
+cli_is_present() {
+  type -P "$1" >/dev/null 2>&1
 }
 
 validate_codex_skill_destination() {
@@ -520,6 +522,7 @@ install_codex() {
 main() {
   ASSUME_YES=0
   OVERRIDE=0
+  SKIP_CLAUDE=0
   SKIP_CODEX=0
   DIR_OVERRIDE=""
   INTERACTIVE=0
@@ -561,24 +564,30 @@ main() {
   CLAUDE_HOME="$(absolute_path "${CLAUDE_CONFIG_DIR:-${HOME}/.claude}")"
   CODEX_HOME_DIR="$(absolute_path "${CODEX_HOME:-${HOME}/.codex}")"
   validate_sources
-  if [ "${SKIP_CODEX}" -eq 0 ] && codex_is_present; then
+  if [ "${SKIP_CODEX}" -eq 0 ] && cli_is_present codex; then
     validate_codex_skill_destination
   fi
   init_state
 
-  echo "== Claude Code =="
-  install_claude
+  if [ "${SKIP_CLAUDE}" -eq 1 ]; then
+    echo "Claude Code: skipped (--skip-claude)."
+  elif cli_is_present claude; then
+    echo "== Claude Code =="
+    install_claude
+  else
+    echo "Claude Code: not detected on PATH; skipping."
+  fi
 
   if [ "${SKIP_CODEX}" -eq 1 ]; then
     echo "Codex: skipped (--skip-codex)."
-  elif codex_is_present; then
+  elif cli_is_present codex; then
     echo "== Codex =="
     install_codex
   else
-    echo "Codex: not detected; skipping."
+    echo "Codex: not detected on PATH; skipping."
   fi
 
-  echo "Dotfiles linked from ${DOTFILES_DIR}"
+  echo "Dotfiles setup completed from ${DOTFILES_DIR}"
 }
 
 main "$@"

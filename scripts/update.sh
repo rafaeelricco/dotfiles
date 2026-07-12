@@ -9,6 +9,7 @@ Usage: update.sh [options]
 Options:
   -y, --yes         Back up conflicts without prompting.
       --override    Remove conflicts without backup or prompting.
+      --skip-claude Do not configure Claude Code.
       --skip-codex  Do not configure Codex.
       --dir PATH    Override $DOTFILES_DIR / ~/.dotfiles.
   -h, --help        Show this help.
@@ -60,11 +61,12 @@ run_git() {
 }
 
 main() {
-  local assume_yes=0 override=0 skip_codex=0 dir_override="" dir installer
+  local assume_yes=0 override=0 skip_claude=0 skip_codex=0 dir_override="" dir installer
   while [ "$#" -gt 0 ]; do
     case "$1" in
       -y|--yes) assume_yes=1 ;;
       --override) override=1 ;;
+      --skip-claude) skip_claude=1 ;;
       --skip-codex) skip_codex=1 ;;
       --dir)
         shift
@@ -126,6 +128,7 @@ main() {
   forwarded_args=(--dir "${dir}")
   [ "${assume_yes}" -eq 0 ] || forwarded_args+=(--yes)
   [ "${override}" -eq 0 ] || forwarded_args+=(--override)
+  [ "${skip_claude}" -eq 0 ] || forwarded_args+=(--skip-claude)
   [ "${skip_codex}" -eq 0 ] || forwarded_args+=(--skip-codex)
   bash "${installer}" "${forwarded_args[@]}"
 }
