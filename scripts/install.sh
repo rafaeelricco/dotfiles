@@ -299,11 +299,18 @@ assert_no_local_install() {
 }
 
 assert_no_managed_install() {
-  local candidate
+  local candidate managed_state
   candidate="${MANAGED_DIR_CANDIDATE}"
   case "${candidate}" in /*) ;; *) candidate="$(pwd -P)/${candidate}" ;; esac
   if [ -e "${candidate}" ] || [ -L "${candidate}" ]; then
-    [ -d "${candidate}" ] && [ ! -L "${candidate}" ] && [ "$(cd "${candidate}" && pwd -P)" = "${DOTFILES_DIR}" ] && return 0
+    if [ -d "${candidate}" ] && [ ! -L "${candidate}" ] && [ "$(cd "${candidate}" && pwd -P)" = "${DOTFILES_DIR}" ]; then
+      managed_state="${DOTFILES_DIR}/.git/dotfiles-lifecycle-state"
+      [ ! -e "${managed_state}" ] && [ ! -L "${managed_state}" ] || {
+        echo "error: a managed installation is active at ${candidate}; run scripts/uninstall.sh first" >&2
+        exit 1
+      }
+      return 0
+    fi
     echo "error: managed clone exists at ${candidate}; uninstall it before using --local" >&2
     exit 1
   fi

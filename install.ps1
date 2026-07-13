@@ -125,8 +125,13 @@ function Assert-NoManagedInstall {
     param([Parameter(Mandatory)][string]$LocalRepo)
     $candidate = if ($env:DOTFILES_DIR) { [System.IO.Path]::GetFullPath($env:DOTFILES_DIR) } else { Join-Path $HOME '.dotfiles' }
     $item = Get-Item -LiteralPath $candidate -Force -ErrorAction SilentlyContinue
-    if ($null -ne $item -and -not (Test-SamePath $candidate $LocalRepo)) {
+    if ($null -eq $item) { return }
+    if (-not (Test-SamePath $candidate $LocalRepo)) {
         throw "managed clone exists at $candidate; uninstall it before using -Local."
+    }
+    $managedState = Get-Item -LiteralPath (Join-Path $LocalRepo '.git\dotfiles-lifecycle-state') -Force -ErrorAction SilentlyContinue
+    if ($null -ne $managedState) {
+        throw "a managed installation is active at $candidate; run uninstall.ps1 first."
     }
 }
 
