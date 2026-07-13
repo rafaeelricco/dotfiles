@@ -6,7 +6,8 @@ param(
     [switch]$Yes,
     [switch]$Override,
     [switch]$SkipClaude,
-    [switch]$SkipCodex
+    [switch]$SkipCodex,
+    [switch]$SkipGrok
 )
 
 $ErrorActionPreference = 'Stop'
@@ -139,6 +140,7 @@ try {
         if ($Override.IsPresent) { $arguments['Override'] = $true }
         if ($SkipClaude.IsPresent) { $arguments['SkipClaude'] = $true }
         if ($SkipCodex.IsPresent) { $arguments['SkipCodex'] = $true }
+        if ($SkipGrok.IsPresent) { $arguments['SkipGrok'] = $true }
         & (Join-Path $repoDir 'install.ps1') @arguments
         if ($LASTEXITCODE -ne 0) { throw "install.ps1 failed with exit code $LASTEXITCODE." }
         exit 0
@@ -185,6 +187,7 @@ try {
     if ($Override.IsPresent) { $arguments['Override'] = $true }
     if ($SkipClaude.IsPresent) { $arguments['SkipClaude'] = $true }
     if ($SkipCodex.IsPresent) { $arguments['SkipCodex'] = $true }
+    if ($SkipGrok.IsPresent) { $arguments['SkipGrok'] = $true }
     & $installer @arguments
     if ($LASTEXITCODE -ne 0) { throw "install.ps1 failed with exit code $LASTEXITCODE." }
 } catch {

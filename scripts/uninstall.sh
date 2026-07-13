@@ -235,11 +235,13 @@ add_skill_candidates() {
 }
 
 discover_candidates() {
-  local index default_claude claude_home default_codex codex_home
+  local index default_claude claude_home default_codex codex_home default_grok grok_home
   default_claude="${HOME}/.claude"
   claude_home="$(absolute_path "${CLAUDE_CONFIG_DIR:-${default_claude}}")"
   default_codex="${HOME}/.codex"
   codex_home="$(absolute_path "${CODEX_HOME:-${default_codex}}")"
+  default_grok="${HOME}/.grok"
+  grok_home="$(absolute_path "${GROK_HOME:-${default_grok}}")"
 
   if [ "${#STATE_LINK_DESTS[@]}" -gt 0 ]; then
     for index in "${!STATE_LINK_DESTS[@]}"; do append_unique "${STATE_LINK_DESTS[${index}]}"; done
@@ -251,6 +253,8 @@ discover_candidates() {
   append_known "${claude_home}/CLAUDE.md"
   append_known "${default_codex}/AGENTS.md"
   append_known "${codex_home}/AGENTS.md"
+  append_known "${default_grok}/AGENTS.md"
+  append_known "${grok_home}/AGENTS.md"
   append_known "${default_claude}/agents/advisor.md"
   append_known "${default_claude}/agents/opus-advisor.md"
   append_known "${claude_home}/agents/advisor.md"
@@ -260,6 +264,8 @@ discover_candidates() {
   add_skill_candidates "${default_codex}/skills"
   add_skill_candidates "${codex_home}/skills"
   add_skill_candidates "${HOME}/.agents/skills"
+  add_skill_candidates "${default_grok}/skills"
+  add_skill_candidates "${grok_home}/skills"
 }
 
 link_target_path() {
@@ -301,6 +307,7 @@ is_allowed_source_shape() {
     "AGENTS.md:${DOTFILES_DIR}/CLAUDE.md"|\
     "AGENTS.md:${DOTFILES_DIR}/.claude/CLAUDE.md"|\
     "AGENTS.md:${DOTFILES_DIR}/.codex/AGENTS.md"|\
+    "AGENTS.md:${DOTFILES_DIR}/.grok/AGENTS.md"|\
     "advisor.md:${DOTFILES_DIR}/.claude/agents/advisor.md"|\
     "opus-advisor.md:${DOTFILES_DIR}/.claude/agents/opus-advisor.md"|\
     "skills:${DOTFILES_DIR}/skill"|\

@@ -4,7 +4,7 @@ Keeping a development environment reproducible should not require maintaining
 the same AI instructions in several vendor-specific trees.
 
 This repository is the source of truth for my Neovim, PowerShell, shell,
-Claude Code, and Codex setup. AI tools share one generic `INSTRUCTIONS.md` and
+Claude Code, Codex, and Grok setup. AI tools share one generic `INSTRUCTIONS.md` and
 one `skill/` tree, installed through safe, repeatable symlinks.
 
 - **One source of truth:** no generated skill or plugin copies.
@@ -14,7 +14,7 @@ one `skill/` tree, installed through safe, repeatable symlinks.
 
 ## Quick Install
 
-**Prerequisites:** Git. Claude Code 2.1.203+ and Codex are optional; each is
+**Prerequisites:** Git. Claude Code 2.1.203+, Codex, and Grok are optional; each is
 configured only when its CLI is available on `PATH`. Windows also requires
 PowerShell 7. Developer Mode or an elevated shell is required only when at
 least one detected CLI needs symlinks.
@@ -60,13 +60,13 @@ bash scripts/update.sh --local
 The default clone is `~/.dotfiles`. Use `--dir PATH` / `-Dir PATH` or
 `DOTFILES_DIR` to override it. Use `--yes` / `-Yes` to back up conflicts
 without prompting, `--override` / `-Override` to permanently remove conflicts
-without backups, `--skip-claude` / `-SkipClaude` to skip Claude, and
-`--skip-codex` / `-SkipCodex` to skip Codex. Both skip flags may be combined.
+without backups, `--skip-claude` / `-SkipClaude`, `--skip-codex` / `-SkipCodex`, and
+`--skip-grok` / `-SkipGrok` to skip individual CLIs. Skip flags may be combined.
 Install and update preserve existing configuration for absent or skipped CLIs.
 Backup and override modes cannot be used together.
 
 These scripts configure agent instructions and skills; they do not install,
-remove, or authenticate the Claude Code and Codex CLIs.
+remove, or authenticate the Claude Code, Codex, or Grok CLIs.
 
 ## Update
 
@@ -127,15 +127,15 @@ Repository validation and filesystem failures exit 1; Bash argument errors exit
 
 ## Installed Paths
 
-| Source            | Claude Code               | Codex                     |
-| ----------------- | ------------------------- | ------------------------- |
-| `INSTRUCTIONS.md` | `~/.claude/CLAUDE.md`     | `~/.codex/AGENTS.md`      |
-| `skill/<name>`    | `~/.claude/skills/<name>` | `~/.agents/skills/<name>` |
+| Source            | Claude Code               | Codex                     | Grok                      |
+| ----------------- | ------------------------- | ------------------------- | ------------------------- |
+| `INSTRUCTIONS.md` | `~/.claude/CLAUDE.md`     | `~/.codex/AGENTS.md`      | `~/.grok/AGENTS.md`       |
+| `skill/<name>`    | `~/.claude/skills/<name>` | `~/.agents/skills/<name>` | `~/.grok/skills/<name>`   |
 
 Each column is created or synchronized only when its CLI is detected on `PATH`
 and not explicitly skipped. Existing managed links remain untouched otherwise.
 
-`CLAUDE_CONFIG_DIR` and `CODEX_HOME` are honored. The former Claude
+`CLAUDE_CONFIG_DIR`, `CODEX_HOME`, and `GROK_HOME` are honored. The former Claude
 marketplace is retired; existing marketplace installations are not removed
 automatically.
 
@@ -149,7 +149,7 @@ installation first, then run the checked-out installer with `--local` / `-Local`
 No install command automatically deletes an existing repository.
 
 Managed state survives update and is deleted with the clone. If an older
-installation used a custom `CLAUDE_CONFIG_DIR` or `CODEX_HOME`, supply the same
+installation used a custom `CLAUDE_CONFIG_DIR`, `CODEX_HOME`, or `GROK_HOME`, supply the same
 variable once when running the updated installer, updater, or uninstaller so
 that location can be recorded or cleaned safely.
 
