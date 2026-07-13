@@ -17,8 +17,9 @@ Produce behavior-preserving, evidence-backed recommendations that make code
 easier to understand, test, and change.
 
 Address hidden branching, mixed responsibilities, mutable intermediate state,
-effect coupling, unsafe narrowing, duplicated types, domain models that admit
-illegal states, complexity-relocating helpers, and risky refactors.
+effect coupling, unsafe narrowing, duplicated types, redundant validation of
+trusted type-level proofs, domain models that admit illegal states,
+complexity-relocating helpers, and risky refactors.
 
 Prefer the smallest intervention that resolves the concrete problem.
 
@@ -67,6 +68,31 @@ already approved recommendation.
 | Respect conventions and classify preferences             | Follow repository and framework patterns before generic advice. Separate correctness and safety from optional improvement and style.                                                                                                        | A proposed pattern conflicts with local architecture or an explicit preference.                                                                | The project already defines an effect, dispatch, mutation, or type convention.                                                     | Using convention to excuse a demonstrated correctness or safety problem.                                                                                                                 | Treat avoiding spread as binding when explicit, not as a universal defect.             |
 | Compare intervention trade-offs                          | Compare change cost, readability, testability, maintenance, extensibility, and regression risk. Prevent fashionable or over-structural recommendations.                                                                                     | Multiple fixes change different boundaries or consistency guarantees.                                                                          | Alternatives are materially different and responsible.                                                                             | Manufacturing minimal, intermediate, and structural versions of the same edit.                                                                                                           | Compare local extraction, shared policy, and boundary redesign only when each is real. |
 
+## Trust Type-Level Proofs
+
+Treat a type produced by a trusted boundary as proof of its encoded invariants:
+
+1. Validate external, deserialized, or otherwise untrusted values at the boundary.
+2. Return a type that excludes invalid states after validation succeeds.
+3. Consume that trusted type without revalidating its invariants.
+
+Do not add property-existence checks, null checks, defensive defaults, casts,
+non-null assertions, or impossible-state errors whose only purpose is to prove
+something already guaranteed by the input type.
+
+When a consumer appears to need such a check, inspect the producer contract:
+
+- If the producer type admits the invalid state, fix the constructor, decoder,
+  guard, or result type so the state becomes unrepresentable.
+- If the producer type excludes the invalid state, trust the proof and remove
+  the redundant consumer check.
+- If the value entered through an untrusted boundary or unchecked cast, validate
+  or repair that boundary instead of distributing checks across consumers.
+
+Use consumer-side narrowing as evidence of a possibly over-broad producer type.
+Guidance about inline guard clauses applies only to states still representable
+by the input type, never to re-proving a trusted invariant.
+
 For trusted domain models, make illegal states unrepresentable by default. Keep
 raw API responses, storage records, configuration, and other deserialized values
 as unknown input or boundary DTOs until validation constructs a domain value; a
@@ -88,8 +114,9 @@ layers, or rewrites without concrete necessity and real callers.
 4. Map inputs, outputs, state, errors, effects, edge cases, and ordering.
 5. Locate the actual complexity hotspots and mixed responsibilities.
 6. Inspect mutation, aliasing, and intermediate state.
-7. Inspect type reuse and narrowing, validate raw input at trust boundaries, and
-   inspect trusted domain models for representable illegal states.
+7. Classify values as untrusted boundary inputs or trusted type-level proofs.
+   Before recommending consumer validation, prove its input type admits the
+   checked state; otherwise trust the type and inspect the producer contract.
 8. Separate objective problems from explicit project or user preferences.
 9. Generate only materially different alternatives.
 10. Compare benefits, costs, maintainability, and regression risk.
@@ -162,6 +189,8 @@ stores, retry frameworks, dispatch syntax, or implementations into unrelated cod
 - Preserve external behavior, contracts, errors, edge cases, and relevant execution order.
 - State uncertain assumptions instead of claiming unsupported equivalence.
 - Respect repository instructions and established conventions over generic preferences.
+- Do not revalidate trusted type-level proofs in consumers. Fix overly broad
+  producer contracts instead of narrowing or asserting downstream.
 - Do not add dependencies, unsupported requirements, or speculative flexibility.
 - Keep implementation surgical and remove only artifacts made obsolete by the approved change.
 - Verify the selected behavior before delivery.
