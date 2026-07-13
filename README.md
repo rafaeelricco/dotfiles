@@ -14,8 +14,10 @@ one `skill/` tree, installed through safe, repeatable symlinks.
 
 ## Quick Install
 
-**Prerequisites:** Git and Claude Code 2.1.203+. Windows also requires
-PowerShell 7 plus Developer Mode or an elevated shell for symlinks.
+**Prerequisites:** Git. Claude Code 2.1.203+ and Codex are optional; each is
+configured only when its CLI is available on `PATH`. Windows also requires
+PowerShell 7. Developer Mode or an elevated shell is required only when at
+least one detected CLI needs symlinks.
 
 ### macOS / Linux
 
@@ -32,8 +34,13 @@ curl -fsSL https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/scripts/
 The default clone is `~/.dotfiles`. Use `--dir PATH` / `-Dir PATH` or
 `DOTFILES_DIR` to override it. Use `--yes` / `-Yes` to back up conflicts
 without prompting, `--override` / `-Override` to permanently remove conflicts
-without backups, and `--skip-codex` / `-SkipCodex` to install Claude only.
+without backups, `--skip-claude` / `-SkipClaude` to skip Claude, and
+`--skip-codex` / `-SkipCodex` to skip Codex. Both skip flags may be combined.
+Install and update preserve existing configuration for absent or skipped CLIs.
 Backup and override modes cannot be used together.
+
+These scripts configure agent instructions and skills; they do not install,
+remove, or authenticate the Claude Code and Codex CLIs.
 
 ## Update
 
@@ -83,6 +90,9 @@ Repository validation and filesystem failures exit 1; Bash argument errors exit
 | ------------------ | ------------------------- | ------------------------- |
 | `INSTRUCTIONS.md`  | `~/.claude/CLAUDE.md`     | `~/.codex/AGENTS.md`      |
 | `skill/<name>`     | `~/.claude/skills/<name>` | `~/.agents/skills/<name>` |
+
+Each column is created or synchronized only when its CLI is detected on `PATH`
+and not explicitly skipped. Existing managed links remain untouched otherwise.
 
 `CLAUDE_CONFIG_DIR` and `CODEX_HOME` are honored. The former Claude
 marketplace is retired; existing marketplace installations are not removed

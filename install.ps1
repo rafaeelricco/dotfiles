@@ -4,6 +4,7 @@ param(
     [string]$Dir,
     [switch]$Yes,
     [switch]$Override,
+    [switch]$SkipClaude,
     [switch]$SkipCodex
 )
 
@@ -433,9 +434,9 @@ function Clear-LegacyAgents {
     Remove-ManagedLink (Join-Path $ClaudeHome 'agents\opus-advisor.md')
 }
 
-function Test-CodexPresent {
-    param([string]$CodexHome)
-    (Test-Path -LiteralPath $CodexHome -PathType Container) -or $null -ne (Get-Command codex -ErrorAction SilentlyContinue)
+function Test-CliPresent {
+    param([Parameter(Mandatory)][string]$Name)
+    $null -ne (Get-Command -Name $Name -CommandType Application, ExternalScript -ErrorAction SilentlyContinue)
 }
 
 function Assert-CodexSkillDestinationWritable {
@@ -495,27 +496,36 @@ function Invoke-DotfilesInstall {
     }
     $interactive = [Environment]::UserInteractive -and -not [Console]::IsInputRedirected -and -not $Yes.IsPresent -and -not $Override.IsPresent
     $script:ConflictMode = if ($Override.IsPresent) { 'Override' } elseif ($interactive) { 'Prompt' } else { 'Backup' }
-    Test-SymlinkCapability
 
     $defaultClaudeHome = Join-Path $HOME '.claude'
     $claudeHome = if ($env:CLAUDE_CONFIG_DIR) { [System.IO.Path]::GetFullPath($env:CLAUDE_CONFIG_DIR) } else { $defaultClaudeHome }
     $defaultCodexHome = Join-Path $HOME '.codex'
     $codexHome = if ($env:CODEX_HOME) { [System.IO.Path]::GetFullPath($env:CODEX_HOME) } else { $defaultCodexHome }
-    $installCodex = -not $SkipCodex.IsPresent -and (Test-CodexPresent $codexHome)
+    $installClaude = -not $SkipClaude.IsPresent -and (Test-CliPresent 'claude')
+    $installCodex = -not $SkipCodex.IsPresent -and (Test-CliPresent 'codex')
+    if ($installClaude -or $installCodex) {
+        Test-SymlinkCapability
+    }
     if ($installCodex) {
         Assert-CodexSkillDestinationWritable
     }
     Initialize-LifecycleState $repoDir
 
-    Write-Host '== Claude Code =='
-    if (-not (Test-SamePath $claudeHome $defaultClaudeHome)) {
-        Remove-ManagedLink (Join-Path $defaultClaudeHome 'CLAUDE.md')
-        Clear-ManagedSkillDirectory (Join-Path $defaultClaudeHome 'skills')
-        Clear-LegacyAgents $defaultClaudeHome
+    if ($SkipClaude.IsPresent) {
+        Write-Host 'Claude Code: skipped (-SkipClaude).'
+    } elseif ($installClaude) {
+        Write-Host '== Claude Code =='
+        if (-not (Test-SamePath $claudeHome $defaultClaudeHome)) {
+            Remove-ManagedLink (Join-Path $defaultClaudeHome 'CLAUDE.md')
+            Clear-ManagedSkillDirectory (Join-Path $defaultClaudeHome 'skills')
+            Clear-LegacyAgents $defaultClaudeHome
+        }
+        Clear-LegacyAgents $claudeHome
+        Install-Link -LinkPath (Join-Path $claudeHome 'CLAUDE.md') -TargetPath $script:GuidanceSrc
+        Sync-SkillSet -Destination (Join-Path $claudeHome 'skills') -Label 'Claude'
+    } else {
+        Write-Host 'Claude Code: not detected on PATH; skipping.'
     }
-    Clear-LegacyAgents $claudeHome
-    Install-Link -LinkPath (Join-Path $claudeHome 'CLAUDE.md') -TargetPath $script:GuidanceSrc
-    Sync-SkillSet -Destination (Join-Path $claudeHome 'skills') -Label 'Claude'
 
     if ($SkipCodex.IsPresent) {
         Write-Host 'Codex: skipped (-SkipCodex).'
@@ -529,10 +539,10 @@ function Invoke-DotfilesInstall {
         Install-Link -LinkPath (Join-Path $codexHome 'AGENTS.md') -TargetPath $script:GuidanceSrc
         Sync-SkillSet -Destination (Join-Path $HOME '.agents\skills') -Label 'Codex'
     } else {
-        Write-Host 'Codex: not detected; skipping.'
+        Write-Host 'Codex: not detected on PATH; skipping.'
     }
 
-    Write-Host "Dotfiles linked from $repoDir"
+    Write-Host "Dotfiles setup completed from $repoDir"
 }
 
 try {
