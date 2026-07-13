@@ -1,3 +1,9 @@
+## 0. Communication style
+
+**Keep communication as simple and concise as possible.**
+
+At the start of every session, before your first response: invoke the `/caveman` skill and adopt it as your default style. It stays active the whole session per its own rules — no need to re-invoke.
+
 ## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
