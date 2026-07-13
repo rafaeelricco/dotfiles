@@ -1,0 +1,4 @@
+interface:
+  display_name: "Visual Recap"
+  short_description: "Draft visual PR recaps from branch diffs"
+  default_prompt: "Use $visual-recap to analyze this PR and draft a concise reviewer-facing visual recap."
