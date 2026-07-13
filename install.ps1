@@ -6,7 +6,8 @@ param(
     [switch]$Yes,
     [switch]$Override,
     [switch]$SkipClaude,
-    [switch]$SkipCodex
+    [switch]$SkipCodex,
+    [switch]$SkipGrok
 )
 
 $ErrorActionPreference = 'Stop'
@@ -600,7 +601,8 @@ function Invoke-DotfilesInstall {
             (Join-Path $managedRepo '.claude\CLAUDE.md'),
             (Join-Path $managedRepo '.claude\skills'),
             (Join-Path $managedRepo '.claude\agents'),
-            (Join-Path $managedRepo '.codex\AGENTS.md')
+            (Join-Path $managedRepo '.codex\AGENTS.md'),
+            (Join-Path $managedRepo '.grok\AGENTS.md')
         )
     }
     $interactive = [Environment]::UserInteractive -and -not [Console]::IsInputRedirected -and -not $Yes.IsPresent -and -not $Override.IsPresent
@@ -610,9 +612,12 @@ function Invoke-DotfilesInstall {
     $claudeHome = if ($env:CLAUDE_CONFIG_DIR) { [System.IO.Path]::GetFullPath($env:CLAUDE_CONFIG_DIR) } else { $defaultClaudeHome }
     $defaultCodexHome = Join-Path $HOME '.codex'
     $codexHome = if ($env:CODEX_HOME) { [System.IO.Path]::GetFullPath($env:CODEX_HOME) } else { $defaultCodexHome }
+    $defaultGrokHome = Join-Path $HOME '.grok'
+    $grokHome = if ($env:GROK_HOME) { [System.IO.Path]::GetFullPath($env:GROK_HOME) } else { $defaultGrokHome }
     $installClaude = -not $SkipClaude.IsPresent -and (Test-CliPresent 'claude')
     $installCodex = -not $SkipCodex.IsPresent -and (Test-CliPresent 'codex')
-    if ($installClaude -or $installCodex) {
+    $installGrok = -not $SkipGrok.IsPresent -and (Test-CliPresent 'grok')
+    if ($installClaude -or $installCodex -or $installGrok) {
         Test-SymlinkCapability
     }
     if ($installCodex) {
@@ -650,6 +655,20 @@ function Invoke-DotfilesInstall {
         Sync-SkillSet -Destination (Join-Path $HOME '.agents\skills') -Label 'Codex'
     } else {
         Write-Host 'Codex: not detected on PATH; skipping.'
+    }
+
+    if ($SkipGrok.IsPresent) {
+        Write-Host 'Grok: skipped (-SkipGrok).'
+    } elseif ($installGrok) {
+        Write-Host '== Grok =='
+        if (-not (Test-SamePath $grokHome $defaultGrokHome)) {
+            Remove-ManagedLink (Join-Path $defaultGrokHome 'AGENTS.md')
+            Clear-ManagedSkillDirectory (Join-Path $defaultGrokHome 'skills')
+        }
+        Install-Link -LinkPath (Join-Path $grokHome 'AGENTS.md') -TargetPath $script:GuidanceSrc
+        Sync-SkillSet -Destination (Join-Path $grokHome 'skills') -Label 'Grok'
+    } else {
+        Write-Host 'Grok: not detected on PATH; skipping.'
     }
 
     Write-Host "Dotfiles setup completed from $repoDir"

@@ -198,9 +198,12 @@ function Get-Candidates {
     $claudeHome = if ($env:CLAUDE_CONFIG_DIR) { [System.IO.Path]::GetFullPath($env:CLAUDE_CONFIG_DIR) } else { $defaultClaude }
     $defaultCodex = Join-Path $HOME '.codex'
     $codexHome = if ($env:CODEX_HOME) { [System.IO.Path]::GetFullPath($env:CODEX_HOME) } else { $defaultCodex }
+    $defaultGrok = Join-Path $HOME '.grok'
+    $grokHome = if ($env:GROK_HOME) { [System.IO.Path]::GetFullPath($env:GROK_HOME) } else { $defaultGrok }
     foreach ($path in @(
         (Join-Path $defaultClaude 'CLAUDE.md'), (Join-Path $claudeHome 'CLAUDE.md'),
         (Join-Path $defaultCodex 'AGENTS.md'), (Join-Path $codexHome 'AGENTS.md'),
+        (Join-Path $defaultGrok 'AGENTS.md'), (Join-Path $grokHome 'AGENTS.md'),
         (Join-Path $defaultClaude 'agents\advisor.md'), (Join-Path $defaultClaude 'agents\opus-advisor.md'),
         (Join-Path $claudeHome 'agents\advisor.md'), (Join-Path $claudeHome 'agents\opus-advisor.md')
     )) { $candidates.Add($path) | Out-Null; $known.Add($path) | Out-Null }
@@ -209,6 +212,8 @@ function Get-Candidates {
     Add-SkillCandidates (Join-Path $defaultCodex 'skills') $candidates $known
     Add-SkillCandidates (Join-Path $codexHome 'skills') $candidates $known
     Add-SkillCandidates (Join-Path $HOME '.agents\skills') $candidates $known
+    Add-SkillCandidates (Join-Path $defaultGrok 'skills') $candidates $known
+    Add-SkillCandidates (Join-Path $grokHome 'skills') $candidates $known
     [pscustomobject]@{ All = $candidates; Known = $known }
 }
 
@@ -225,7 +230,8 @@ function Test-AllowedSourceShape {
     $name = Split-Path -Leaf $Destination
     $guidanceTargets = @(
         (Join-Path $RepoDir 'INSTRUCTIONS.md'), (Join-Path $RepoDir 'CLAUDE.md'),
-        (Join-Path $RepoDir '.claude\CLAUDE.md'), (Join-Path $RepoDir '.codex\AGENTS.md')
+        (Join-Path $RepoDir '.claude\CLAUDE.md'), (Join-Path $RepoDir '.codex\AGENTS.md'),
+        (Join-Path $RepoDir '.grok\AGENTS.md')
     )
     if ($name -in @('CLAUDE.md', 'AGENTS.md')) {
         return $null -ne ($guidanceTargets | Where-Object { Test-SamePath $_ $Target } | Select-Object -First 1)

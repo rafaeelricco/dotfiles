@@ -5,7 +5,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Install agent instructions and skills for detected Claude Code and Codex CLIs.
+Install agent instructions and skills for detected Claude Code, Codex, and Grok CLIs.
 Uses repository INSTRUCTIONS.md for vendor CLAUDE.md and AGENTS.md destinations.
 
 Usage: install.sh [options]
@@ -15,6 +15,7 @@ Options:
       --override    Remove conflicts without backup or prompting.
       --skip-claude Do not configure Claude Code.
       --skip-codex  Do not configure Codex.
+      --skip-grok   Do not configure Grok.
       --local       Use this checkout without cloning or changing Git state.
       --dir PATH    Override $DOTFILES_DIR / ~/.dotfiles.
   -h, --help        Show this help.
@@ -23,6 +24,7 @@ Environment:
   DOTFILES_DIR       Clone destination (default: ~/.dotfiles).
   CLAUDE_CONFIG_DIR  Claude user configuration directory.
   CODEX_HOME         Codex user configuration directory.
+  GROK_HOME          Grok user configuration directory.
 EOF
 }
 
@@ -224,6 +226,7 @@ parse_args() {
       --override) OVERRIDE=1 ;;
       --skip-claude) SKIP_CLAUDE=1 ;;
       --skip-codex) SKIP_CODEX=1 ;;
+      --skip-grok) SKIP_GROK=1 ;;
       --local) LOCAL_MODE=1 ;;
       --dir)
         shift
@@ -382,7 +385,8 @@ is_managed_target() {
       "${root}/.claude/CLAUDE.md"|\
       "${root}/.claude/skills"|"${root}/.claude/skills/"*|\
       "${root}/.claude/agents/"*|\
-      "${root}/.codex/AGENTS.md") return 0 ;;
+      "${root}/.codex/AGENTS.md"|\
+      "${root}/.grok/AGENTS.md") return 0 ;;
     esac
   done
   return 1
@@ -624,11 +628,22 @@ install_codex() {
   link_skill_set "${HOME}/.agents/skills" "Codex"
 }
 
+install_grok() {
+  local default_home="${HOME}/.grok"
+  if [ "${GROK_HOME_DIR}" != "${default_home}" ]; then
+    remove_managed_link "${default_home}/AGENTS.md"
+    cleanup_managed_skill_dir "${default_home}/skills"
+  fi
+  link_one "${GUIDANCE_SRC}" "${GROK_HOME_DIR}/AGENTS.md"
+  link_skill_set "${GROK_HOME_DIR}/skills" "Grok"
+}
+
 main() {
   ASSUME_YES=0
   OVERRIDE=0
   SKIP_CLAUDE=0
   SKIP_CODEX=0
+  SKIP_GROK=0
   DIR_OVERRIDE=""
   LOCAL_MODE=0
   LOCAL_STATE_SOURCE=""
@@ -681,6 +696,7 @@ main() {
   SKILLS_SRC="${DOTFILES_DIR}/skill"
   CLAUDE_HOME="$(absolute_path "${CLAUDE_CONFIG_DIR:-${HOME}/.claude}")"
   CODEX_HOME_DIR="$(absolute_path "${CODEX_HOME:-${HOME}/.codex}")"
+  GROK_HOME_DIR="$(absolute_path "${GROK_HOME:-${HOME}/.grok}")"
   validate_sources
   if [ "${SKIP_CODEX}" -eq 0 ] && cli_is_present codex; then
     validate_codex_skill_destination
@@ -703,6 +719,15 @@ main() {
     install_codex
   else
     echo "Codex: not detected on PATH; skipping."
+  fi
+
+  if [ "${SKIP_GROK}" -eq 1 ]; then
+    echo "Grok: skipped (--skip-grok)."
+  elif cli_is_present grok; then
+    echo "== Grok =="
+    install_grok
+  else
+    echo "Grok: not detected on PATH; skipping."
   fi
 
   echo "Dotfiles setup completed from ${DOTFILES_DIR}"
