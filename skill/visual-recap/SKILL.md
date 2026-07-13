@@ -33,4 +33,4 @@ Produce a compact PR comment from current code, not PR prose or commit messages 
 
 ## Posting
 
-Post only after a separate explicit confirmation naming the target PR. Recheck its head first; regenerate if it changed. Otherwise post the exact approved comment body—excluding preview metadata—using the GitHub connector first, then return the comment URL.
+Post only after a separate explicit confirmation naming the target PR. Recheck its head first. If the head changed since the approved preview, do not post: regenerate the recap, emit a fresh `Re-read <target> at <head SHA>... Not posted.` preview, and require a new explicit confirmation before posting. If the head is unchanged, post the exact approved comment body—excluding preview metadata—using the GitHub connector first, then return the comment URL.
