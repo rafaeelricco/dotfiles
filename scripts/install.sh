@@ -15,6 +15,7 @@ Options:
       --override    Remove conflicts without backup or prompting.
       --skip-claude Do not configure Claude Code.
       --skip-codex  Do not configure Codex.
+      --local       Use this checkout without cloning or changing Git state.
       --dir PATH    Override $DOTFILES_DIR / ~/.dotfiles.
   -h, --help        Show this help.
 
@@ -30,8 +31,13 @@ timestamp() {
 }
 
 STATE_HEADER="dotfiles-lifecycle-state-v1"
+LOCAL_STATE_HEADER="dotfiles-local-lifecycle-state-v1"
 STATE_READY=0
 PENDING_CREATED_DIRS=()
+
+local_state_file() {
+  printf '%s/dotfiles/local-install-state\n' "${XDG_STATE_HOME:-${HOME}/.local/state}"
+}
 
 absolute_path() {
   case "$1" in
@@ -74,9 +80,9 @@ state_record() {
 }
 
 validate_state_file() {
-  local header type first second extra line_number=1
+  local header type first second extra line_number=1 source_count=0
   IFS= read -r header < "${STATE_FILE}" || header=""
-  [ "${header}" = "${STATE_HEADER}" ] || {
+  [ "${header}" = "${EXPECTED_STATE_HEADER}" ] || {
     echo "error: invalid lifecycle state header: ${STATE_FILE}" >&2
     exit 1
   }
@@ -84,6 +90,15 @@ validate_state_file() {
     line_number=$((line_number + 1))
     [ -n "${type}" ] || continue
     case "${type}" in
+      source)
+        [ "${header}" = "${LOCAL_STATE_HEADER}" ] && [ -n "${first}" ] && [ -z "${second}" ] && [ -z "${extra}" ] || {
+          echo "error: malformed lifecycle state at line ${line_number}" >&2
+          exit 1
+        }
+        validate_state_field "${first}"
+        LOCAL_STATE_SOURCE="${first}"
+        source_count=$((source_count + 1))
+        ;;
       link|backup)
         [ -n "${first}" ] && [ -n "${second}" ] && [ -z "${extra}" ] || {
           echo "error: malformed lifecycle state at line ${line_number}" >&2
@@ -105,26 +120,33 @@ validate_state_file() {
         ;;
     esac
   done < <(sed '1d' "${STATE_FILE}")
+  if [ "${header}" = "${LOCAL_STATE_HEADER}" ] && [ "${source_count}" -ne 1 ]; then
+    echo "error: local lifecycle state must contain exactly one source" >&2
+    exit 1
+  fi
 }
 
-init_state() {
-  local tmp dir
-  STATE_FILE="${DOTFILES_DIR}/.git/dotfiles-lifecycle-state"
+init_state_file() {
+  local header="$1" source="${2:-}" tmp dir
+  EXPECTED_STATE_HEADER="${header}"
   if [ -e "${STATE_FILE}" ] || [ -L "${STATE_FILE}" ]; then
     [ -f "${STATE_FILE}" ] && [ ! -L "${STATE_FILE}" ] || {
       echo "error: lifecycle state is not a regular file: ${STATE_FILE}" >&2
       exit 1
     }
-    validate_state_file
   else
     tmp="${STATE_FILE}.tmp.$$"
-    if ! (umask 077 && printf '%s\n' "${STATE_HEADER}" > "${tmp}") ||
+    if ! (umask 077 && {
+      printf '%s\n' "${header}"
+      [ -z "${source}" ] || printf 'source\t%s\n' "${source}"
+    } > "${tmp}") ||
        ! mv "${tmp}" "${STATE_FILE}"; then
       rm -f "${tmp}"
       echo "error: failed to initialize lifecycle state: ${STATE_FILE}" >&2
       exit 1
     fi
   fi
+  validate_state_file
   STATE_READY=1
   if [ "${#PENDING_CREATED_DIRS[@]}" -gt 0 ]; then
     for dir in "${PENDING_CREATED_DIRS[@]}"; do
@@ -132,6 +154,21 @@ init_state() {
     done
   fi
   PENDING_CREATED_DIRS=()
+}
+
+init_state() {
+  if [ "${LOCAL_MODE}" -eq 1 ]; then
+    STATE_FILE="$(local_state_file)"
+    mkdir -p "$(dirname "${STATE_FILE}")"
+    init_state_file "${LOCAL_STATE_HEADER}" "${DOTFILES_DIR}"
+    [ "${LOCAL_STATE_SOURCE}" = "${DOTFILES_DIR}" ] || {
+      echo "error: local installation belongs to another checkout: ${LOCAL_STATE_SOURCE}" >&2
+      exit 1
+    }
+  else
+    STATE_FILE="${DOTFILES_DIR}/.git/dotfiles-lifecycle-state"
+    init_state_file "${STATE_HEADER}"
+  fi
 }
 
 ensure_directory() {
@@ -187,6 +224,7 @@ parse_args() {
       --override) OVERRIDE=1 ;;
       --skip-claude) SKIP_CLAUDE=1 ;;
       --skip-codex) SKIP_CODEX=1 ;;
+      --local) LOCAL_MODE=1 ;;
       --dir)
         shift
         [ "$#" -gt 0 ] || { echo "error: --dir requires a path" >&2; exit 2; }
@@ -197,6 +235,10 @@ parse_args() {
     esac
     shift
   done
+  if [ "${LOCAL_MODE}" -eq 1 ] && [ -n "${DIR_OVERRIDE}" ]; then
+    echo "error: --local and --dir cannot be combined" >&2
+    exit 2
+  fi
 }
 
 repo_url_is_allowed() {
@@ -209,6 +251,69 @@ repo_url_is_allowed() {
     ssh://git@github.com/rafaeelricco/dotfiles.git) return 0 ;;
     *) return 1 ;;
   esac
+}
+
+resolve_local_repo() {
+  local script source_dir repo
+  script="${BASH_SOURCE[0]}"
+  case "${script}" in /*) ;; *) script="$(pwd -P)/${script}" ;; esac
+  [ -f "${script}" ] || {
+    echo "error: --local requires running the checked-out scripts/install.sh" >&2
+    exit 1
+  }
+  source_dir="$(cd "$(dirname "${script}")" && pwd -P)"
+  repo="$(cd "${source_dir}/.." && pwd -P)"
+  [ "${script}" = "${repo}/scripts/install.sh" ] || {
+    echo "error: --local requires running the checked-out scripts/install.sh" >&2
+    exit 1
+  }
+  printf '%s\n' "${repo}"
+}
+
+assert_local_repo() {
+  local dir="$1" url top home
+  [ -d "${dir}" ] && [ ! -L "${dir}" ] || { echo "error: local checkout must be a real directory: ${dir}" >&2; exit 1; }
+  [ -d "${dir}/.git" ] && [ ! -L "${dir}/.git" ] || {
+    echo "error: --local must run from the primary checkout, not a linked worktree" >&2
+    exit 1
+  }
+  top="$(git -C "${dir}" rev-parse --show-toplevel 2>/dev/null || true)"
+  [ -n "${top}" ] || { echo "error: not a git checkout: ${dir}" >&2; exit 1; }
+  top="$(cd "${top}" && pwd -P)"
+  [ "${top}" = "${dir}" ] || { echo "error: local checkout is not the repository root: ${dir}" >&2; exit 1; }
+  home="$(cd "${HOME}" && pwd -P)"
+  [ "${dir}" != "/" ] && [ "${dir}" != "${home}" ] || { echo "error: unsafe local checkout: ${dir}" >&2; exit 1; }
+  case "${home}/" in "${dir}/"*) echo "error: local checkout cannot contain HOME: ${dir}" >&2; exit 1 ;; esac
+  url="$(git -C "${dir}" config --get remote.origin.url 2>/dev/null || true)"
+  url="${url%/}"
+  repo_url_is_allowed "${url}" || { echo "error: ${dir} does not use an allowed rafaeelricco/dotfiles origin" >&2; exit 1; }
+}
+
+assert_no_local_install() {
+  local state
+  state="$(local_state_file)"
+  [ ! -e "${state}" ] && [ ! -L "${state}" ] || {
+    echo "error: a local installation is active; run scripts/uninstall.sh --local first" >&2
+    exit 1
+  }
+}
+
+assert_no_managed_install() {
+  local candidate managed_state
+  candidate="${MANAGED_DIR_CANDIDATE}"
+  case "${candidate}" in /*) ;; *) candidate="$(pwd -P)/${candidate}" ;; esac
+  if [ -e "${candidate}" ] || [ -L "${candidate}" ]; then
+    if [ -d "${candidate}" ] && [ ! -L "${candidate}" ] && [ "$(cd "${candidate}" && pwd -P)" = "${DOTFILES_DIR}" ]; then
+      managed_state="${DOTFILES_DIR}/.git/dotfiles-lifecycle-state"
+      [ ! -e "${managed_state}" ] && [ ! -L "${managed_state}" ] || {
+        echo "error: a managed installation is active at ${candidate}; run scripts/uninstall.sh first" >&2
+        exit 1
+      }
+      return 0
+    fi
+    echo "error: managed clone exists at ${candidate}; uninstall it before using --local" >&2
+    exit 1
+  fi
 }
 
 assert_managed_repo() {
@@ -525,6 +630,9 @@ main() {
   SKIP_CLAUDE=0
   SKIP_CODEX=0
   DIR_OVERRIDE=""
+  LOCAL_MODE=0
+  LOCAL_STATE_SOURCE=""
+  MANAGED_DIR_CANDIDATE="${DOTFILES_DIR:-${HOME}/.dotfiles}"
   INTERACTIVE=0
   parse_args "$@"
 
@@ -535,12 +643,20 @@ main() {
 
   command -v git >/dev/null 2>&1 || { echo "error: git is required" >&2; exit 1; }
 
-  if [ -n "${DIR_OVERRIDE}" ]; then
-    DOTFILES_DIR="${DIR_OVERRIDE}"
-  elif [ -n "${DOTFILES_DIR:-}" ]; then
-    DOTFILES_DIR="${DOTFILES_DIR}"
+  if [ "${LOCAL_MODE}" -eq 1 ]; then
+    DOTFILES_DIR="$(resolve_local_repo)"
+    assert_local_repo "${DOTFILES_DIR}"
+    assert_no_managed_install
+    DOTFILES_DIR_INPUT="${DOTFILES_DIR}"
   else
-    DOTFILES_DIR="${HOME}/.dotfiles"
+    assert_no_local_install
+    if [ -n "${DIR_OVERRIDE}" ]; then
+      DOTFILES_DIR="${DIR_OVERRIDE}"
+    elif [ -n "${DOTFILES_DIR:-}" ]; then
+      DOTFILES_DIR="${DOTFILES_DIR}"
+    else
+      DOTFILES_DIR="${HOME}/.dotfiles"
+    fi
   fi
 
   if [ "${ASSUME_YES}" -eq 0 ] && [ "${OVERRIDE}" -eq 0 ] && [ -t 1 ] && [ -r /dev/tty ]; then
@@ -554,11 +670,13 @@ main() {
     CONFLICT_MODE="backup"
   fi
 
-  case "${DOTFILES_DIR}" in
-    /*) DOTFILES_DIR_INPUT="${DOTFILES_DIR}" ;;
-    *) DOTFILES_DIR_INPUT="$(pwd -P)/${DOTFILES_DIR}" ;;
-  esac
-  ensure_repo "${DOTFILES_DIR_INPUT}"
+  if [ "${LOCAL_MODE}" -eq 0 ]; then
+    case "${DOTFILES_DIR}" in
+      /*) DOTFILES_DIR_INPUT="${DOTFILES_DIR}" ;;
+      *) DOTFILES_DIR_INPUT="$(pwd -P)/${DOTFILES_DIR}" ;;
+    esac
+    ensure_repo "${DOTFILES_DIR_INPUT}"
+  fi
   GUIDANCE_SRC="${DOTFILES_DIR}/INSTRUCTIONS.md"
   SKILLS_SRC="${DOTFILES_DIR}/skill"
   CLAUDE_HOME="$(absolute_path "${CLAUDE_CONFIG_DIR:-${HOME}/.claude}")"

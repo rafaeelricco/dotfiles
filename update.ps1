@@ -1,6 +1,7 @@
 #Requires -Version 7.0
 [CmdletBinding()]
 param(
+    [switch]$Local,
     [string]$Dir,
     [switch]$Yes,
     [switch]$Override,
@@ -22,6 +23,38 @@ function Resolve-InstallDir {
     param([string]$DirParam)
     $value = if ($DirParam) { $DirParam } elseif ($env:DOTFILES_DIR) { $env:DOTFILES_DIR } else { Join-Path $HOME '.dotfiles' }
     [System.IO.Path]::GetFullPath($value)
+}
+
+function Get-LocalStateFile {
+    $base = if ($IsWindows -and $env:LOCALAPPDATA) { $env:LOCALAPPDATA } elseif ($env:XDG_STATE_HOME) { $env:XDG_STATE_HOME } else { Join-Path $HOME '.local/state' }
+    Join-Path (Join-Path $base 'dotfiles') 'local-install-state'
+}
+
+function Resolve-LocalRepository {
+    if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) { throw '-Local requires running the checked-out update.ps1.' }
+    $repo = [System.IO.Path]::GetFullPath($PSScriptRoot).TrimEnd('\', '/')
+    $gitDir = Get-ItemIfPresent (Join-Path $repo '.git')
+    if ($null -eq $gitDir -or -not $gitDir.PSIsContainer -or (Test-IsLink $gitDir)) {
+        throw '-Local must run from the primary checkout.'
+    }
+    $repo
+}
+
+function Assert-LocalStateSource {
+    param([Parameter(Mandatory)][string]$RepoDir)
+    $path = Get-LocalStateFile
+    $item = Get-ItemIfPresent $path
+    if ($null -eq $item -or $item.PSIsContainer -or (Test-IsLink $item)) { throw 'no local installation; run install.ps1 -Local first.' }
+    $lines = [System.IO.File]::ReadAllLines($path)
+    if ($lines.Count -lt 2 -or $lines[0] -ne 'dotfiles-local-lifecycle-state-v1') { throw 'invalid local lifecycle state.' }
+    $parts = $lines[1].Split("`t")
+    if ($parts.Count -ne 2 -or $parts[0] -ne 'source' -or -not (Test-SamePath $parts[1] $RepoDir)) {
+        throw 'local lifecycle state does not match this checkout.'
+    }
+}
+
+function Assert-NoLocalInstall {
+    if ($null -ne (Get-ItemIfPresent (Get-LocalStateFile))) { throw 'a local installation is active; run update.ps1 -Local.' }
 }
 
 function Get-ItemIfPresent {
@@ -96,6 +129,22 @@ try {
     if ($Yes.IsPresent -and $Override.IsPresent) {
         throw '-Yes and -Override cannot be used together.'
     }
+    if ($Local.IsPresent -and $Dir) { throw '-Local and -Dir cannot be combined.' }
+
+    if ($Local.IsPresent) {
+        $repoDir = Resolve-LocalRepository
+        Assert-LocalStateSource $repoDir
+        $arguments = @{ Local = $true }
+        if ($Yes.IsPresent) { $arguments['Yes'] = $true }
+        if ($Override.IsPresent) { $arguments['Override'] = $true }
+        if ($SkipClaude.IsPresent) { $arguments['SkipClaude'] = $true }
+        if ($SkipCodex.IsPresent) { $arguments['SkipCodex'] = $true }
+        & (Join-Path $repoDir 'install.ps1') @arguments
+        if ($LASTEXITCODE -ne 0) { throw "install.ps1 failed with exit code $LASTEXITCODE." }
+        exit 0
+    }
+
+    Assert-NoLocalInstall
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) { throw 'git was not found on PATH.' }
     $repoDir = Resolve-InstallDir $Dir
     if (-not (Test-Path -LiteralPath $repoDir -PathType Container)) { throw "clone not found: $repoDir" }

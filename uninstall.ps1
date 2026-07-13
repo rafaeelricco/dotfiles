@@ -1,6 +1,7 @@
 #Requires -Version 7.0
 [CmdletBinding()]
 param(
+    [switch]$Local,
     [string]$Dir,
     [switch]$Yes,
     [Alias('h')][switch]$Help
@@ -8,6 +9,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $StateHeader = 'dotfiles-lifecycle-state-v1'
+$LocalStateHeader = 'dotfiles-local-lifecycle-state-v1'
 $AllowedRepoUrls = @(
     'https://github.com/rafaeelricco/dotfiles',
     'https://github.com/rafaeelricco/dotfiles.git',
@@ -19,9 +21,10 @@ $AllowedRepoUrls = @(
 
 function Show-Usage {
     @'
-Usage: uninstall.ps1 [-Dir PATH] [-Yes] [-Help]
+Usage: uninstall.ps1 [-Local] [-Dir PATH] [-Yes] [-Help]
 
   -Yes       Bypass the required UNINSTALL confirmation.
+  -Local     Remove local-mode links and state; preserve checkout.
   -Dir PATH  Override DOTFILES_DIR / $HOME\.dotfiles.
   -Help      Show this help.
 '@ | Write-Host
@@ -31,6 +34,25 @@ function Resolve-InstallDir {
     param([string]$DirParam)
     $value = if ($DirParam) { $DirParam } elseif ($env:DOTFILES_DIR) { $env:DOTFILES_DIR } else { Join-Path $HOME '.dotfiles' }
     [System.IO.Path]::GetFullPath($value)
+}
+
+function Get-LocalStateFile {
+    $base = if ($IsWindows -and $env:LOCALAPPDATA) { $env:LOCALAPPDATA } elseif ($env:XDG_STATE_HOME) { $env:XDG_STATE_HOME } else { Join-Path $HOME '.local/state' }
+    Join-Path (Join-Path $base 'dotfiles') 'local-install-state'
+}
+
+function Resolve-LocalRepository {
+    if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) { throw '-Local requires running the checked-out uninstall.ps1.' }
+    $repo = [System.IO.Path]::GetFullPath($PSScriptRoot).TrimEnd('\', '/')
+    $gitDir = Get-ItemIfPresent (Join-Path $repo '.git')
+    if ($null -eq $gitDir -or -not $gitDir.PSIsContainer -or (Test-IsLink $gitDir)) {
+        throw '-Local must run from the primary checkout.'
+    }
+    $repo
+}
+
+function Assert-NoLocalInstall {
+    if ($null -ne (Get-ItemIfPresent (Get-LocalStateFile))) { throw 'a local installation is active; run uninstall.ps1 -Local.' }
 }
 
 function Get-ItemIfPresent {
@@ -109,22 +131,31 @@ function Assert-StateField {
 }
 
 function Read-LifecycleState {
-    param([string]$RepoDir)
+    param([string]$RepoDir, [switch]$LocalState)
     $state = [pscustomobject]@{
+        Source = ''
         Links = [System.Collections.Generic.List[object]]::new()
         Backups = [System.Collections.Generic.List[object]]::new()
         Directories = [System.Collections.Generic.List[string]]::new()
     }
-    $path = Join-Path $RepoDir '.git\dotfiles-lifecycle-state'
+    $path = if ($LocalState.IsPresent) { Get-LocalStateFile } else { Join-Path $RepoDir '.git\dotfiles-lifecycle-state' }
+    $expectedHeader = if ($LocalState.IsPresent) { $LocalStateHeader } else { $StateHeader }
     $item = Get-ItemIfPresent $path
     if ($null -eq $item) { return $state }
     if ($item.PSIsContainer -or (Test-IsLink $item)) { throw "lifecycle state is not a regular file: $path" }
     $lines = [System.IO.File]::ReadAllLines($path)
-    if ($lines.Count -eq 0 -or $lines[0] -ne $StateHeader) { throw "invalid lifecycle state header: $path" }
+    if ($lines.Count -eq 0 -or $lines[0] -ne $expectedHeader) { throw "invalid lifecycle state header: $path" }
+    $sourceCount = 0
     for ($index = 1; $index -lt $lines.Count; $index++) {
         if ([string]::IsNullOrEmpty($lines[$index])) { continue }
         $parts = $lines[$index].Split("`t")
         switch ($parts[0]) {
+            'source' {
+                if (-not $LocalState.IsPresent -or $parts.Count -ne 2) { throw "malformed lifecycle state at line $($index + 1)" }
+                Assert-StateField $parts[1]
+                $state.Source = $parts[1]
+                $sourceCount++
+            }
             'link' {
                 if ($parts.Count -ne 3) { throw "malformed lifecycle state at line $($index + 1)" }
                 Assert-StateField $parts[1]; Assert-StateField $parts[2]
@@ -143,6 +174,7 @@ function Read-LifecycleState {
             default { throw "unknown lifecycle state record at line $($index + 1)" }
         }
     }
+    if ($LocalState.IsPresent -and $sourceCount -ne 1) { throw 'local lifecycle state must contain exactly one source.' }
     $state
 }
 
@@ -296,8 +328,13 @@ function Remove-EmptyRecordedDirectories {
 
 function Confirm-Uninstall {
     param([string]$RepoDir, [object]$State)
-    Write-Host 'This will permanently remove managed links, recorded backups, and clone:'
-    Write-Host "  $RepoDir"
+    if ($Local.IsPresent) {
+        Write-Host 'This will permanently remove local-mode links and recorded backups.'
+        Write-Host "Checkout will be preserved: $RepoDir"
+    } else {
+        Write-Host 'This will permanently remove managed links, recorded backups, and clone:'
+        Write-Host "  $RepoDir"
+    }
     if ($State.Backups.Count -gt 0) {
         Write-Host 'Recorded backups to delete:'
         foreach ($backup in $State.Backups) { Write-Host "  $($backup.Path)" }
@@ -315,6 +352,28 @@ function Confirm-Uninstall {
 
 function Invoke-DotfilesUninstall {
     if ($Help.IsPresent) { Show-Usage; return }
+    if ($Local.IsPresent -and $Dir) { throw '-Local and -Dir cannot be combined.' }
+    if ($Local.IsPresent) {
+        $repoDir = Resolve-LocalRepository
+        $statePath = Get-LocalStateFile
+        if ($null -eq (Get-ItemIfPresent $statePath)) { Write-Host 'Local dotfiles are already uninstalled.'; return }
+        $state = Read-LifecycleState -RepoDir $repoDir -LocalState
+        if (-not (Test-SamePath $state.Source $repoDir)) { throw "local installation belongs to another checkout: $($state.Source)" }
+        $candidates = Get-Candidates $state
+        $managedLinks = Get-ManagedLinks $repoDir $state $candidates
+        Assert-StateCleanupSafe $repoDir $state $candidates
+        Confirm-Uninstall $repoDir $state
+        foreach ($link in $managedLinks) { Remove-LinkSafely $link; Write-Host "removed managed link: $($link.FullName)" }
+        Remove-RecordedBackups $state
+        Remove-EmptyRecordedDirectories $state
+        Remove-Item -LiteralPath $statePath -Force
+        $stateDir = Split-Path -Parent $statePath
+        if (@(Get-ChildItem -LiteralPath $stateDir -Force).Count -eq 0) { Remove-Item -LiteralPath $stateDir -Force }
+        Write-Host 'Local dotfiles links uninstalled; checkout preserved.'
+        return
+    }
+
+    Assert-NoLocalInstall
     $repoDir = Resolve-InstallDir $Dir
     $item = Get-ItemIfPresent $repoDir
     if ($null -eq $item) { Write-Host 'Dotfiles are already uninstalled.'; return }

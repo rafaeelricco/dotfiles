@@ -31,6 +31,32 @@ curl -fsSL https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/scripts/
 & ([scriptblock]::Create((irm 'https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/install.ps1')))
 ```
 
+Remote install uses managed mode and clones `~/.dotfiles` by default.
+
+## Local Checkout Install
+
+Use local mode from the primary checkout to avoid a second clone:
+
+```bash
+bash scripts/install.sh --local
+```
+
+```powershell
+.\install.ps1 -Local
+```
+
+Local mode links instructions and skills directly from that checkout. It never
+clones or changes Git state. Edits to an existing skill are live immediately.
+After adding or removing a skill, reconcile the global links with:
+
+```bash
+bash scripts/update.sh --local
+```
+
+```powershell
+.\update.ps1 -Local
+```
+
 The default clone is `~/.dotfiles`. Use `--dir PATH` / `-Dir PATH` or
 `DOTFILES_DIR` to override it. Use `--yes` / `-Yes` to back up conflicts
 without prompting, `--override` / `-Override` to permanently remove conflicts
@@ -44,11 +70,15 @@ remove, or authenticate the Claude Code and Codex CLIs.
 
 ## Update
 
-Update is authoritative and destructive inside the managed clone. It fetches
+Managed update is authoritative and destructive inside the managed clone. It fetches
 GitHub `main`, forces local `main` to that commit, and removes every untracked,
 ignored, and nested-repository path with `git clean -ffdx`. Invoking update is
 the authorization for this cleanup; `--yes` / `-Yes` still means “back up
 installer conflicts without prompting.”
+
+Local update only reconciles links from the checkout that created the local
+installation. It never fetches, pulls, checks out, resets, cleans, commits, or
+changes the index or working tree.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/scripts/update.sh | bash
@@ -59,6 +89,17 @@ curl -fsSL https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/scripts/
 ```
 
 ## Uninstall
+
+Local uninstall removes recorded links and backups while preserving the
+checkout:
+
+```bash
+bash scripts/uninstall.sh --local
+```
+
+```powershell
+.\uninstall.ps1 -Local
+```
 
 Remote uninstall requires an explicit confirmation flag:
 
@@ -86,10 +127,10 @@ Repository validation and filesystem failures exit 1; Bash argument errors exit
 
 ## Installed Paths
 
-| Source             | Claude Code               | Codex                     |
-| ------------------ | ------------------------- | ------------------------- |
-| `INSTRUCTIONS.md`  | `~/.claude/CLAUDE.md`     | `~/.codex/AGENTS.md`      |
-| `skill/<name>`     | `~/.claude/skills/<name>` | `~/.agents/skills/<name>` |
+| Source            | Claude Code               | Codex                     |
+| ----------------- | ------------------------- | ------------------------- |
+| `INSTRUCTIONS.md` | `~/.claude/CLAUDE.md`     | `~/.codex/AGENTS.md`      |
+| `skill/<name>`    | `~/.claude/skills/<name>` | `~/.agents/skills/<name>` |
 
 Each column is created or synchronized only when its CLI is detected on `PATH`
 and not explicitly skipped. Existing managed links remain untouched otherwise.
@@ -98,16 +139,24 @@ and not explicitly skipped. Existing managed links remain untouched otherwise.
 marketplace is retired; existing marketplace installations are not removed
 automatically.
 
-The installer records managed link destinations, backups, and directories in
-`<clone>/.git/dotfiles-lifecycle-state`. The state survives update and is
-deleted with the clone. If an older installation used a custom
-`CLAUDE_CONFIG_DIR` or `CODEX_HOME`, supply the same variable once when running
-the updated installer, updater, or uninstaller so that location can be recorded
-or cleaned safely.
+Managed mode records link destinations, backups, and directories in
+`<clone>/.git/dotfiles-lifecycle-state`. Local mode records the same data plus
+its source checkout in `${XDG_STATE_HOME:-~/.local/state}/dotfiles/local-install-state`
+on macOS/Linux and `%LOCALAPPDATA%\dotfiles\local-install-state` on Windows.
 
-Existing clones must use the official GitHub HTTPS or SSH origin, be standalone
+Managed and local modes cannot coexist. To migrate, uninstall the managed
+installation first, then run the checked-out installer with `--local` / `-Local`.
+No install command automatically deletes an existing repository.
+
+Managed state survives update and is deleted with the clone. If an older
+installation used a custom `CLAUDE_CONFIG_DIR` or `CODEX_HOME`, supply the same
+variable once when running the updated installer, updater, or uninstaller so
+that location can be recorded or cleaned safely.
+
+Managed clones must use the official GitHub HTTPS or SSH origin, be standalone
 checkouts at the exact path passed through `--dir` / `-Dir`, and have no linked
-worktrees. These checks run before update cleanup or uninstall deletion.
+worktrees. Local mode requires the primary checkout but permits other linked
+worktrees to exist. A linked worktree itself cannot be the local source.
 
 If a previous command created `~/.agents` as root, restore user ownership
 before installing:

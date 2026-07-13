@@ -11,9 +11,49 @@ Options:
       --override    Remove conflicts without backup or prompting.
       --skip-claude Do not configure Claude Code.
       --skip-codex  Do not configure Codex.
+      --local       Reconcile links without changing Git state.
       --dir PATH    Override $DOTFILES_DIR / ~/.dotfiles.
   -h, --help        Show this help.
 EOF
+}
+
+local_state_file() {
+  printf '%s/dotfiles/local-install-state\n' "${XDG_STATE_HOME:-${HOME}/.local/state}"
+}
+
+resolve_local_repo() {
+  local script source_dir repo
+  script="${BASH_SOURCE[0]}"
+  case "${script}" in /*) ;; *) script="$(pwd -P)/${script}" ;; esac
+  [ -f "${script}" ] || { echo "error: --local requires running the checked-out scripts/update.sh" >&2; exit 1; }
+  source_dir="$(cd "$(dirname "${script}")" && pwd -P)"
+  repo="$(cd "${source_dir}/.." && pwd -P)"
+  [ "${script}" = "${repo}/scripts/update.sh" ] && [ -d "${repo}/.git" ] && [ ! -L "${repo}/.git" ] || {
+    echo "error: --local must run from the primary checkout" >&2
+    exit 1
+  }
+  printf '%s\n' "${repo}"
+}
+
+assert_local_state_source() {
+  local repo="$1" state header source_type source extra
+  state="$(local_state_file)"
+  [ -f "${state}" ] && [ ! -L "${state}" ] || { echo "error: no local installation; run scripts/install.sh --local first" >&2; exit 1; }
+  IFS= read -r header < "${state}" || header=""
+  IFS=$'\t' read -r source_type source extra < <(sed -n '2p' "${state}")
+  [ "${header}" = "dotfiles-local-lifecycle-state-v1" ] && [ "${source_type}" = "source" ] && [ "${source}" = "${repo}" ] && [ -z "${extra}" ] || {
+    echo "error: local lifecycle state does not match this checkout" >&2
+    exit 1
+  }
+}
+
+assert_no_local_install() {
+  local state
+  state="$(local_state_file)"
+  [ ! -e "${state}" ] && [ ! -L "${state}" ] || {
+    echo "error: a local installation is active; run scripts/update.sh --local" >&2
+    exit 1
+  }
 }
 
 repo_url_is_allowed() {
@@ -61,13 +101,14 @@ run_git() {
 }
 
 main() {
-  local assume_yes=0 override=0 skip_claude=0 skip_codex=0 dir_override="" dir installer
+  local local_mode=0 assume_yes=0 override=0 skip_claude=0 skip_codex=0 dir_override="" dir installer repo
   while [ "$#" -gt 0 ]; do
     case "$1" in
       -y|--yes) assume_yes=1 ;;
       --override) override=1 ;;
       --skip-claude) skip_claude=1 ;;
       --skip-codex) skip_codex=1 ;;
+      --local) local_mode=1 ;;
       --dir)
         shift
         [ "$#" -gt 0 ] || { echo "error: --dir requires a path" >&2; exit 2; }
@@ -83,6 +124,25 @@ main() {
     echo "error: --yes and --override cannot be used together" >&2
     exit 2
   fi
+  if [ "${local_mode}" -eq 1 ] && [ -n "${dir_override}" ]; then
+    echo "error: --local and --dir cannot be combined" >&2
+    exit 2
+  fi
+
+  if [ "${local_mode}" -eq 1 ]; then
+    repo="$(resolve_local_repo)"
+    assert_local_state_source "${repo}"
+    local -a local_args
+    local_args=(--local)
+    [ "${assume_yes}" -eq 0 ] || local_args+=(--yes)
+    [ "${override}" -eq 0 ] || local_args+=(--override)
+    [ "${skip_claude}" -eq 0 ] || local_args+=(--skip-claude)
+    [ "${skip_codex}" -eq 0 ] || local_args+=(--skip-codex)
+    bash "${repo}/scripts/install.sh" "${local_args[@]}"
+    exit 0
+  fi
+
+  assert_no_local_install
 
   command -v git >/dev/null 2>&1 || { echo "error: git is required" >&2; exit 1; }
   if [ -n "${dir_override}" ]; then

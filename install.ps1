@@ -1,6 +1,7 @@
 #Requires -Version 7.0
 [CmdletBinding()]
 param(
+    [switch]$Local,
     [string]$Dir,
     [switch]$Yes,
     [switch]$Override,
@@ -19,8 +20,20 @@ $script:AllowedRepoUrls = @(
     'ssh://git@github.com/rafaeelricco/dotfiles.git'
 )
 $script:StateHeader = 'dotfiles-lifecycle-state-v1'
+$script:LocalStateHeader = 'dotfiles-local-lifecycle-state-v1'
 $script:StateReady = $false
 $script:PendingCreatedDirs = [System.Collections.Generic.List[string]]::new()
+
+function Get-LocalStateFile {
+    $base = if ($IsWindows -and $env:LOCALAPPDATA) {
+        $env:LOCALAPPDATA
+    } elseif ($env:XDG_STATE_HOME) {
+        $env:XDG_STATE_HOME
+    } else {
+        Join-Path $HOME '.local/state'
+    }
+    Join-Path (Join-Path $base 'dotfiles') 'local-install-state'
+}
 
 function Resolve-InstallDir {
     param([string]$DirParam)
@@ -74,6 +87,54 @@ function Assert-ManagedRepository {
     }
 }
 
+function Resolve-LocalRepository {
+    if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) {
+        throw '-Local requires running the checked-out install.ps1.'
+    }
+    $repo = [System.IO.Path]::GetFullPath($PSScriptRoot).TrimEnd('\', '/')
+    if (-not (Test-Path -LiteralPath (Join-Path $repo 'install.ps1') -PathType Leaf)) {
+        throw '-Local requires running the checked-out install.ps1.'
+    }
+    $repo
+}
+
+function Assert-LocalRepository {
+    param([Parameter(Mandatory)][string]$Path)
+    $item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+    if ($null -eq $item -or -not $item.PSIsContainer -or (Test-IsLink $item)) { throw "local checkout must be a real directory: $Path" }
+    $gitDir = Get-Item -LiteralPath (Join-Path $Path '.git') -Force -ErrorAction SilentlyContinue
+    if ($null -eq $gitDir -or -not $gitDir.PSIsContainer -or (Test-IsLink $gitDir)) {
+        throw '-Local must run from the primary checkout, not a linked worktree.'
+    }
+    $top = & git -C $Path rev-parse --show-toplevel 2>$null
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($top) -or -not (Test-SamePath $top $Path)) {
+        throw "local checkout is not the repository root: $Path"
+    }
+    $origin = & git -C $Path config --get remote.origin.url 2>$null
+    if ($LASTEXITCODE -ne 0 -or $script:AllowedRepoUrls -notcontains ([string]$origin).Trim().TrimEnd('/')) {
+        throw "$Path does not use an allowed rafaeelricco/dotfiles origin."
+    }
+}
+
+function Assert-NoLocalInstall {
+    $state = Get-Item -LiteralPath (Get-LocalStateFile) -Force -ErrorAction SilentlyContinue
+    if ($null -ne $state) { throw 'a local installation is active; run uninstall.ps1 -Local first.' }
+}
+
+function Assert-NoManagedInstall {
+    param([Parameter(Mandatory)][string]$LocalRepo)
+    $candidate = if ($env:DOTFILES_DIR) { [System.IO.Path]::GetFullPath($env:DOTFILES_DIR) } else { Join-Path $HOME '.dotfiles' }
+    $item = Get-Item -LiteralPath $candidate -Force -ErrorAction SilentlyContinue
+    if ($null -eq $item) { return }
+    if (-not (Test-SamePath $candidate $LocalRepo)) {
+        throw "managed clone exists at $candidate; uninstall it before using -Local."
+    }
+    $managedState = Get-Item -LiteralPath (Join-Path $LocalRepo '.git\dotfiles-lifecycle-state') -Force -ErrorAction SilentlyContinue
+    if ($null -ne $managedState) {
+        throw "a managed installation is active at $candidate; run uninstall.ps1 first."
+    }
+}
+
 function Test-ValidStateField {
     param([Parameter(Mandatory)][string]$Value)
     if ([string]::IsNullOrEmpty($Value) -or -not [System.IO.Path]::IsPathRooted($Value) -or
@@ -111,12 +172,19 @@ function Add-LifecycleStateRecord {
 
 function Assert-LifecycleStateValid {
     $lines = [System.IO.File]::ReadAllLines($script:StateFile)
-    if ($lines.Count -eq 0 -or $lines[0] -ne $script:StateHeader) {
+    if ($lines.Count -eq 0 -or $lines[0] -ne $script:ExpectedStateHeader) {
         throw "invalid lifecycle state header: $($script:StateFile)"
     }
+    $sourceCount = 0
     for ($index = 1; $index -lt $lines.Count; $index++) {
         if ([string]::IsNullOrEmpty($lines[$index])) { continue }
         $parts = $lines[$index].Split("`t")
+        if ($parts[0] -eq 'source' -and $script:ExpectedStateHeader -eq $script:LocalStateHeader -and $parts.Count -eq 2) {
+            Test-ValidStateField $parts[1]
+            $script:LocalStateSource = $parts[1]
+            $sourceCount++
+            continue
+        }
         if (($parts[0] -in @('link', 'backup') -and $parts.Count -eq 3) -or
             ($parts[0] -eq 'dir' -and $parts.Count -eq 2)) {
             foreach ($part in $parts[1..($parts.Count - 1)]) { Test-ValidStateField $part }
@@ -124,11 +192,15 @@ function Assert-LifecycleStateValid {
         }
         throw "malformed lifecycle state at line $($index + 1): $($script:StateFile)"
     }
+    if ($script:ExpectedStateHeader -eq $script:LocalStateHeader -and $sourceCount -ne 1) {
+        throw 'local lifecycle state must contain exactly one source.'
+    }
 }
 
 function Initialize-LifecycleState {
     param([Parameter(Mandatory)][string]$RepoDir)
     $script:StateFile = Join-Path $RepoDir '.git\dotfiles-lifecycle-state'
+    $script:ExpectedStateHeader = $script:StateHeader
     $item = Get-Item -LiteralPath $script:StateFile -Force -ErrorAction SilentlyContinue
     if ($null -ne $item) {
         if ($item.PSIsContainer -or (Test-IsLink $item)) { throw "lifecycle state is not a regular file: $($script:StateFile)" }
@@ -141,6 +213,35 @@ function Initialize-LifecycleState {
         } finally {
             Remove-Item -LiteralPath $temp -Force -ErrorAction SilentlyContinue
         }
+    }
+    $script:StateReady = $true
+    foreach ($created in $script:PendingCreatedDirs) { Add-LifecycleStateRecord -Type dir -First $created }
+    $script:PendingCreatedDirs.Clear()
+}
+
+function Initialize-LocalLifecycleState {
+    param([Parameter(Mandatory)][string]$RepoDir)
+    $script:StateFile = Get-LocalStateFile
+    $script:ExpectedStateHeader = $script:LocalStateHeader
+    $parent = Split-Path -Parent $script:StateFile
+    if (-not (Test-Path -LiteralPath $parent -PathType Container)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
+    $item = Get-Item -LiteralPath $script:StateFile -Force -ErrorAction SilentlyContinue
+    if ($null -ne $item) {
+        if ($item.PSIsContainer -or (Test-IsLink $item)) { throw "lifecycle state is not a regular file: $($script:StateFile)" }
+        Assert-LifecycleStateValid
+    } else {
+        $content = "$($script:LocalStateHeader)`nsource`t$RepoDir`n"
+        $temp = "$($script:StateFile).tmp.$PID"
+        try {
+            [System.IO.File]::WriteAllText($temp, $content, [System.Text.UTF8Encoding]::new($false))
+            Move-Item -LiteralPath $temp -Destination $script:StateFile
+        } finally {
+            Remove-Item -LiteralPath $temp -Force -ErrorAction SilentlyContinue
+        }
+        Assert-LifecycleStateValid
+    }
+    if (-not (Test-SamePath $script:LocalStateSource $RepoDir)) {
+        throw "local installation belongs to another checkout: $($script:LocalStateSource)"
     }
     $script:StateReady = $true
     foreach ($created in $script:PendingCreatedDirs) { Add-LifecycleStateRecord -Type dir -First $created }
@@ -472,9 +573,17 @@ function Invoke-DotfilesInstall {
     if ($Yes.IsPresent -and $Override.IsPresent) {
         throw '-Yes and -Override cannot be used together.'
     }
-    $requestedRepoDir = Resolve-InstallDir $Dir
+    if ($Local.IsPresent -and $Dir) { throw '-Local and -Dir cannot be combined.' }
     Assert-Git
-    Ensure-Repo $requestedRepoDir
+    if ($Local.IsPresent) {
+        $requestedRepoDir = Resolve-LocalRepository
+        Assert-LocalRepository $requestedRepoDir
+        Assert-NoManagedInstall $requestedRepoDir
+    } else {
+        Assert-NoLocalInstall
+        $requestedRepoDir = Resolve-InstallDir $Dir
+        Ensure-Repo $requestedRepoDir
+    }
     $repoDir = (Resolve-Path -LiteralPath $requestedRepoDir).Path
 
     $script:GuidanceSrc = Join-Path $repoDir 'INSTRUCTIONS.md'
@@ -509,7 +618,8 @@ function Invoke-DotfilesInstall {
     if ($installCodex) {
         Assert-CodexSkillDestinationWritable
     }
-    Initialize-LifecycleState $repoDir
+    if ($Local.IsPresent) { Initialize-LocalLifecycleState $repoDir }
+    else { Initialize-LifecycleState $repoDir }
 
     if ($SkipClaude.IsPresent) {
         Write-Host 'Claude Code: skipped (-SkipClaude).'
