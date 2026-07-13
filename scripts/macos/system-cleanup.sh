@@ -3,7 +3,7 @@
 # macOS system maintenance / cleanup.
 # Mirrors scripts/windows/system-cleanup.bat: clears temp, trash, logs and
 # package-manager caches, flushes DNS, verifies the boot volume, and (with
-# confirmation) deletes Time Machine local snapshots.
+# confirmation) empties Trash and deletes Time Machine local snapshots.
 #
 set -euo pipefail
 
@@ -54,13 +54,21 @@ section "Log files"
 purge_dir "$HOME/Library/Logs"
 sudo_purge_dir /Library/Logs/DiagnosticReports
 
-section "Emptying Trash"
-purge_dir "$HOME/.Trash"
-for vol in /Volumes/*; do
-  sudo_purge_dir "$vol/.Trashes"
-done
+echo
+echo "WARNING: permanently deletes items in Trash (user + volume .Trashes)."
+read -r -p "Empty Trash? (y/N): " CONFIRM_TRASH
+if [[ "${CONFIRM_TRASH:-}" == [yY] ]]; then
+  section "Emptying Trash"
+  purge_dir "$HOME/.Trash"
+  for vol in /Volumes/*; do
+    [[ -d "$vol" ]] || continue
+    sudo_purge_dir "$vol/.Trashes"
+  done
+else
+  echo "Skipped Trash."
+fi
 
-clean_if_present brew brew cleanup -s
+clean_if_present brew brew cleanup
 clean_if_present npm npm cache clean --force
 clean_if_present pnpm pnpm store prune
 clean_if_present yarn yarn cache clean
