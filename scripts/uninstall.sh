@@ -4,8 +4,11 @@
 set -euo pipefail
 
 STATE_HEADER="dotfiles-lifecycle-state-v1"
+LOCAL_STATE_HEADER="dotfiles-local-lifecycle-state-v1"
 ASSUME_YES=0
+LOCAL_MODE=0
 DIR_OVERRIDE=""
+LOCAL_STATE_SOURCE=""
 STATE_LINK_DESTS=()
 STATE_LINK_TARGETS=()
 STATE_BACKUP_ORIGINALS=()
@@ -21,9 +24,37 @@ Usage: uninstall.sh [options]
 
 Options:
   -y, --yes       Bypass the required UNINSTALL confirmation.
+      --local     Remove local-mode links and state; preserve checkout.
       --dir PATH  Override $DOTFILES_DIR / ~/.dotfiles.
   -h, --help      Show this help.
 EOF
+}
+
+local_state_file() {
+  printf '%s/dotfiles/local-install-state\n' "${XDG_STATE_HOME:-${HOME}/.local/state}"
+}
+
+resolve_local_repo() {
+  local script source_dir repo
+  script="${BASH_SOURCE[0]}"
+  case "${script}" in /*) ;; *) script="$(pwd -P)/${script}" ;; esac
+  [ -f "${script}" ] || { echo "error: --local requires running the checked-out scripts/uninstall.sh" >&2; exit 1; }
+  source_dir="$(cd "$(dirname "${script}")" && pwd -P)"
+  repo="$(cd "${source_dir}/.." && pwd -P)"
+  [ "${script}" = "${repo}/scripts/uninstall.sh" ] && [ -d "${repo}/.git" ] && [ ! -L "${repo}/.git" ] || {
+    echo "error: --local must run from the primary checkout" >&2
+    exit 1
+  }
+  printf '%s\n' "${repo}"
+}
+
+assert_no_local_install() {
+  local state
+  state="$(local_state_file)"
+  [ ! -e "${state}" ] && [ ! -L "${state}" ] || {
+    echo "error: a local installation is active; run scripts/uninstall.sh --local" >&2
+    exit 1
+  }
 }
 
 absolute_path() {
@@ -107,8 +138,14 @@ validate_state_field() {
 }
 
 load_state() {
-  local header type first second extra line_number=1
-  STATE_FILE="${DOTFILES_DIR}/.git/dotfiles-lifecycle-state"
+  local header type first second extra line_number=1 source_count=0 expected_header
+  if [ "${LOCAL_MODE}" -eq 1 ]; then
+    STATE_FILE="$(local_state_file)"
+    expected_header="${LOCAL_STATE_HEADER}"
+  else
+    STATE_FILE="${DOTFILES_DIR}/.git/dotfiles-lifecycle-state"
+    expected_header="${STATE_HEADER}"
+  fi
   [ -e "${STATE_FILE}" ] || return 0
   [ -f "${STATE_FILE}" ] && [ ! -L "${STATE_FILE}" ] || {
     echo "error: lifecycle state is not a regular file: ${STATE_FILE}" >&2
@@ -116,11 +153,17 @@ load_state() {
   }
   exec 3< "${STATE_FILE}"
   IFS= read -r header <&3 || header=""
-  [ "${header}" = "${STATE_HEADER}" ] || { echo "error: invalid lifecycle state header" >&2; exit 1; }
+  [ "${header}" = "${expected_header}" ] || { echo "error: invalid lifecycle state header" >&2; exit 1; }
   while IFS=$'\t' read -r type first second extra <&3; do
     line_number=$((line_number + 1))
     [ -n "${type}" ] || continue
     case "${type}" in
+      source)
+        [ "${LOCAL_MODE}" -eq 1 ] && [ -n "${first}" ] && [ -z "${second}" ] && [ -z "${extra}" ] || { echo "error: malformed lifecycle state at line ${line_number}" >&2; exit 1; }
+        validate_state_field "${first}"
+        LOCAL_STATE_SOURCE="${first}"
+        source_count=$((source_count + 1))
+        ;;
       link)
         [ -n "${first}" ] && [ -n "${second}" ] && [ -z "${extra}" ] || { echo "error: malformed lifecycle state at line ${line_number}" >&2; exit 1; }
         validate_state_field "${first}"
@@ -144,6 +187,10 @@ load_state() {
     esac
   done
   exec 3<&-
+  if [ "${LOCAL_MODE}" -eq 1 ] && [ "${source_count}" -ne 1 ]; then
+    echo "error: local lifecycle state must contain exactly one source" >&2
+    exit 1
+  fi
 }
 
 append_unique() {
@@ -326,8 +373,13 @@ validate_backups_and_dirs() {
 
 confirm_uninstall() {
   local backup answer
-  echo "This will permanently remove managed links, recorded backups, and clone:"
-  echo "  ${DOTFILES_DIR}"
+  if [ "${LOCAL_MODE}" -eq 1 ]; then
+    echo "This will permanently remove local-mode links and recorded backups."
+    echo "Checkout will be preserved: ${DOTFILES_DIR}"
+  else
+    echo "This will permanently remove managed links, recorded backups, and clone:"
+    echo "  ${DOTFILES_DIR}"
+  fi
   if [ "${#STATE_BACKUPS[@]}" -gt 0 ]; then
     echo "Recorded backups to delete:"
     for backup in "${STATE_BACKUPS[@]}"; do echo "  ${backup}"; done
@@ -387,6 +439,7 @@ parse_args() {
   while [ "$#" -gt 0 ]; do
     case "$1" in
       -y|--yes) ASSUME_YES=1 ;;
+      --local) LOCAL_MODE=1 ;;
       --dir)
         shift
         [ "$#" -gt 0 ] || { echo "error: --dir requires a path" >&2; exit 2; }
@@ -397,11 +450,49 @@ parse_args() {
     esac
     shift
   done
+  if [ "${LOCAL_MODE}" -eq 1 ] && [ -n "${DIR_OVERRIDE}" ]; then
+    echo "error: --local and --dir cannot be combined" >&2
+    exit 2
+  fi
+}
+
+remove_local_state() {
+  local state state_dir
+  state="$(local_state_file)"
+  state_dir="$(dirname "${state}")"
+  rm -f "${state}" || { echo "error: failed to remove local lifecycle state" >&2; exit 1; }
+  rmdir "${state_dir}" 2>/dev/null || true
 }
 
 main() {
   local requested
   parse_args "$@"
+  if [ "${LOCAL_MODE}" -eq 1 ]; then
+    DOTFILES_DIR="$(resolve_local_repo)"
+    STATE_FILE="$(local_state_file)"
+    if [ ! -e "${STATE_FILE}" ] && [ ! -L "${STATE_FILE}" ]; then
+      echo "Local dotfiles are already uninstalled."
+      exit 0
+    fi
+    command -v git >/dev/null 2>&1 || { echo "error: git is required" >&2; exit 1; }
+    load_state
+    [ "${LOCAL_STATE_SOURCE}" = "${DOTFILES_DIR}" ] || {
+      echo "error: local installation belongs to another checkout: ${LOCAL_STATE_SOURCE}" >&2
+      exit 1
+    }
+    discover_candidates
+    classify_candidates
+    validate_backups_and_dirs
+    confirm_uninstall
+    remove_managed_links
+    remove_recorded_backups
+    remove_empty_recorded_dirs
+    remove_local_state
+    echo "Local dotfiles links uninstalled; checkout preserved."
+    exit 0
+  fi
+
+  assert_no_local_install
   if [ -n "${DIR_OVERRIDE}" ]; then requested="${DIR_OVERRIDE}"
   elif [ -n "${DOTFILES_DIR:-}" ]; then requested="${DOTFILES_DIR}"
   else requested="${HOME}/.dotfiles"
