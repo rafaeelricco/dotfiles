@@ -39,6 +39,26 @@ return {
       { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>",    desc = "Deny diff" },
     },
   },
+  {
+    "rafaeelricco/copy.nvim",
+    -- Bridge auto-starts MCP WebSocket; load at startup so agents can connect.
+    lazy = false,
+    config = true,
+    opts = {
+      send = {
+        -- Visual mode only; does not clash with Claude normal-mode <leader>ac.
+        keymap = "<leader>ac",
+      },
+    },
+    keys = {
+      {
+        "<leader>ac",
+        ":CopySendSelection<CR>",
+        mode = "x",
+        desc = "Copy selection as @file#L ref",
+      },
+    },
+  },
   -- {
   --   "NickvanDyke/opencode.nvim",
   --   dependencies = {
