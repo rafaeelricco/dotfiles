@@ -8,13 +8,26 @@ At the start of every session, before your first response: invoke the `/caveman`
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
 
-Before implementing:
+Before any tools, edits, or subagents:
 
 - Never assume anything the user didn't say. If an unspecified detail changes what you'd build, clarify first — use `/grill-me` (or a direct question) before acting; don't guess.
 - If interpretations differ materially, don't pick one silently — name them and ask. Answer obvious factual questions directly; don't manufacture confusion or hedge.
 - If a simpler approach exists, say so. Push back when warranted.
 
-## 2. Simplicity First
+## 2. Fan Out, Then Consult Advisor
+
+**Lead agent: think, gather context in parallel, pressure-test with `consult-advisor`, then continue.**
+
+On multi-concern work, do this in order:
+
+1. Decompose into independent concerns (files, layers, behaviors).
+2. Spawn parallel workers — **one per independent concern, usually 3–6** (0 if the skip line applies). Prefer explore / read-only workers for research. Brief each with objective, boundaries, and expected output (paths, findings, gaps). Keep scopes sharp and non-overlapping.
+3. Synthesize: key paths, facts, gaps, provisional approach.
+4. Follow `consult-advisor` with that synthesis as task, paths, and tradeoffs — not a one-liner.
+
+Skip 2–4 for single-file mechanical edits when the target and approach are already known. If workers are unavailable, explore with normal tools, then still use `consult-advisor` when that skill applies.
+
+## 3. Simplicity First
 
 **Minimum code that solves the problem. Nothing speculative.**
 
@@ -28,7 +41,7 @@ Minimum means no speculative features, abstractions, or config — **not** a thi
 
 The test: every abstraction, parameter, and file in the change has a caller in the change. No caller = speculative = cut.
 
-## 3. Surgical Changes
+## 4. Surgical Changes
 
 **Touch only what you must. Clean up only your own mess.**
 
@@ -46,7 +59,7 @@ When your changes create orphans:
 
 The test: Every changed line should trace directly to the user's request.
 
-## 4. Goal-Driven Execution
+## 5. Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
 
@@ -66,8 +79,12 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 5. Plan Mode: Make Changes Reviewable
+## 6. Plan Mode: Make Changes Reviewable
 
 **Plans show the change as a diff, not prose. I'm approving diffs.**
 
-When you enter plan mode or begin planning a code change, invoke the `/plan-format` skill and follow it for the plan document — it stays active per its own rules.
+When you enter plan mode or begin planning a code change:
+
+- Follow Fan Out, Then Consult Advisor first when that rule applies (context before the plan).
+- Invoke `grill-me` and follow it to stress-test the plan with the user until decisions are resolved — one question at a time per that skill.
+- Invoke `plan-format` and follow it for the plan document — it stays active per its own rules.
