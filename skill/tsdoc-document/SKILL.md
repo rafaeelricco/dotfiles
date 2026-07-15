@@ -18,7 +18,8 @@ that TypeDoc and TSDoc-aware tools can parse. Do not turn the file into an essay
 
 - Document a function, method, class, interface, type, or module.
 - Improve existing JSDoc/TSDoc (redundant types, missing why, bad tags).
-- Add `@deprecated`, `@example`, `@throws`, `@remarks`, `@see`, `@typeParam`.
+- Add `@deprecated`, `@example`, `@throws`, `@remarks`, `@see`, `@typeParam`,
+  `@module`, `@packageDocumentation`.
 
 ## When not to use
 
@@ -101,6 +102,24 @@ function applyDiscount(price: number, discount: number): number {
   // ...
 }
 ````
+
+### Module / file
+
+Place as the **first** comment in the file, before imports. TypeDoc treats a
+top comment as module docs only when tagged; otherwise it can attach to the
+first import or declaration.
+
+```ts
+/**
+ * Payment helpers for checkout flows.
+ *
+ * @packageDocumentation
+ * @module payments
+ */
+```
+
+Prefer `@packageDocumentation` for package entry / barrel intent; use
+`@module` when documenting a specific module name for TypeDoc.
 
 ### Interface / type (prefer over large inline objects)
 
