@@ -38,8 +38,9 @@ that TypeDoc and TSDoc-aware tools can parse. Do not turn the file into an essay
    `@remarks`.
 5. **Document public surface** — exported APIs and non-obvious internals.
    Skip trivial getters and self-explanatory one-liners unless asked.
-6. **Surgical** — only touch comments (and extract a named type when an
-   inline object type blocks clear docs). No drive-by refactors.
+6. **Surgical** — docs-only runs touch comments only. Exception: extract a
+   named type when an inline object type blocks clear field docs (no renames
+   or public signature changes). No drive-by refactors.
 
 ## Decision: comment or not?
 
@@ -163,7 +164,10 @@ unclear, ask one short question or document only what the code proves.
 ## Workflow
 
 1. Read the target symbol and its callers (enough to know the real contract).
-2. Prefer strengthening types/names when that removes the need for a comment.
+2. Prefer clearer local/private types or names only when that removes the need
+   for a comment and does not change exported public signatures. On a docs-only
+   request, do not rename symbols or narrow public types unless the user
+   explicitly asks; use the extract-named-type exception in principle 6 only.
 3. Decide doc depth: none / one-line / full block.
 4. Write or rewrite TSDoc using the templates above.
 5. Strip redundant `@param {Type}` and “what the code already says”.
