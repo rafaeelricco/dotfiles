@@ -67,7 +67,7 @@ examples/see → modifiers (`@deprecated`, etc.).
  * @param name - meaning, units, constraints (not the type)
  * @typeParam T - role of the generic
  * @returns meaning of the result (not the type)
- * @throws {ErrorType} when …
+ * @throws {@link ErrorType} when …
  * @example
  * ```ts
  * …
@@ -89,7 +89,7 @@ examples/see → modifiers (`@deprecated`, etc.).
  * @param discount - Discount percentage (0–100).
  * @returns Final price after applying the discount.
  *
- * @throws {RangeError} If discount is outside the 0–100 range.
+ * @throws {@link RangeError} If discount is outside the 0–100 range.
  *
  * @example
  * ```ts
@@ -186,7 +186,7 @@ Keep output short. No lecture on documentation theory.
 - First sentence works as a hover summary in the editor.
 - Tags match real params, returns, throws, and generics in the signature.
 - Examples compile against the real API shape.
-- No classic JSDoc type braces on TypeScript parameters.
+- No classic JSDoc type braces on `@param` or `@throws` (use `{@link ErrorType}` for throws).
 - Markdown in comments is fine; keep it scannable.
 
 ## Out of scope (do not expand unless user upgrades the skill)
