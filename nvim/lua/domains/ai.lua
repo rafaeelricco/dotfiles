@@ -46,8 +46,9 @@ return {
     config = true,
     opts = {
       send = {
-        -- Visual mode only; does not clash with Claude normal-mode <leader>ac.
-        keymap = "<leader>ac",
+        -- Disable plugin auto-map; lazy.keys owns visual <leader>ac
+        -- (avoids double-bind warn vs Claude normal-mode <leader>ac).
+        keymap = false,
       },
     },
     keys = {
