@@ -167,7 +167,10 @@ function activate { & .\venv\Scripts\activate.ps1 }
 # Without OSC 9;9, WT falls back to profile startingDirectory (%USERPROFILE%).
 # https://learn.microsoft.com/windows/terminal/tutorials/new-tab-same-directory
 if ($env:WT_SESSION) {
-    $script:__DotfilesBasePrompt = $function:prompt
+    if ($null -eq $script:__DotfilesWrappedPrompt -or
+        $function:prompt -ne $script:__DotfilesWrappedPrompt) {
+        $script:__DotfilesBasePrompt = $function:prompt
+    }
     function global:prompt {
         $result = & $script:__DotfilesBasePrompt
         $loc = $executionContext.SessionState.Path.CurrentLocation
@@ -176,4 +179,5 @@ if ($env:WT_SESSION) {
         }
         $result
     }
+    $script:__DotfilesWrappedPrompt = $function:prompt
 }
