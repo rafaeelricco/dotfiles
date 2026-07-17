@@ -2,9 +2,11 @@ $env:PATH += ";C:\Users\Rafael\scoop\apps\git\current\usr\bin"
 
 $__githubToken = [Environment]::GetEnvironmentVariable('GITHUB_TOKEN', 'User')
 if ($__githubToken) {
-    $env:GITHUB_TOKEN = $__githubToken
-    $__ghToken = [Environment]::GetEnvironmentVariable('GH_TOKEN', 'User')
-    $env:GH_TOKEN = if ($__ghToken) { $__ghToken } else { $__githubToken }
+    if (-not $env:GITHUB_TOKEN) { $env:GITHUB_TOKEN = $__githubToken }
+    if (-not $env:GH_TOKEN) {
+        $__ghToken = [Environment]::GetEnvironmentVariable('GH_TOKEN', 'User')
+        $env:GH_TOKEN = if ($__ghToken) { $__ghToken } else { $__githubToken }
+    }
 }
 Remove-Variable __githubToken, __ghToken -ErrorAction SilentlyContinue
 
