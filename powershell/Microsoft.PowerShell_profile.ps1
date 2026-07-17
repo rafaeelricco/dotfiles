@@ -1,5 +1,13 @@
 $env:PATH += ";C:\Users\Rafael\scoop\apps\git\current\usr\bin"
 
+$__githubToken = [Environment]::GetEnvironmentVariable('GITHUB_TOKEN', 'User')
+if ($__githubToken) {
+    $env:GITHUB_TOKEN = $__githubToken
+    $__ghToken = [Environment]::GetEnvironmentVariable('GH_TOKEN', 'User')
+    $env:GH_TOKEN = if ($__ghToken) { $__ghToken } else { $__githubToken }
+}
+Remove-Variable __githubToken, __ghToken -ErrorAction SilentlyContinue
+
 $MaximumHistoryCount = 20000
 
 $script:__PSGalleryReady = $false
@@ -154,3 +162,18 @@ function home     { Set-Location -Path $env:USERPROFILE }
 function personal { Set-Location -Path 'D:\Personal' }
 function ambar    { Set-Location -Path 'D:\Projects' }
 function activate { & .\venv\Scripts\activate.ps1 }
+
+# Windows Terminal: report CWD so duplicateTab / splitMode:duplicate inherit path.
+# Without OSC 9;9, WT falls back to profile startingDirectory (%USERPROFILE%).
+# https://learn.microsoft.com/windows/terminal/tutorials/new-tab-same-directory
+if ($env:WT_SESSION) {
+    $script:__DotfilesBasePrompt = $function:prompt
+    function global:prompt {
+        $result = & $script:__DotfilesBasePrompt
+        $loc = $executionContext.SessionState.Path.CurrentLocation
+        if ($loc.Provider.Name -eq 'FileSystem') {
+            $result += "$([char]27)]9;9;`"$($loc.ProviderPath)`"$([char]27)\"
+        }
+        $result
+    }
+}
