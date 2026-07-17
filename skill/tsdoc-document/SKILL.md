@@ -45,14 +45,14 @@ that TypeDoc and TSDoc-aware tools can parse. Do not turn the file into an essay
 
 ## Decision: comment or not?
 
-| Situation | Action |
-|-----------|--------|
-| Signature + name fully explain behavior | No comment (or one-line only if exported public API) |
-| Non-obvious contract, units, defaults, side effects | Document |
-| Throws / fails in specific cases | `@throws` |
-| Caller needs copy-paste usage | `@example` |
-| Replacement exists | `@deprecated` with replacement name |
-| Complex object shape | Named `interface`/`type` + field JSDoc |
+| Situation                                           | Action                                               |
+| --------------------------------------------------- | ---------------------------------------------------- |
+| Signature + name fully explain behavior             | No comment (or one-line only if exported public API) |
+| Non-obvious contract, units, defaults, side effects | Document                                             |
+| Throws / fails in specific cases                    | `@throws`                                            |
+| Caller needs copy-paste usage                       | `@example`                                           |
+| Replacement exists                                  | `@deprecated` with replacement name                  |
+| Complex object shape                                | Named `interface`/`type` + field JSDoc               |
 
 ## Comment anatomy (TSDoc)
 

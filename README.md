@@ -127,10 +127,10 @@ Repository validation and filesystem failures exit 1; Bash argument errors exit
 
 ## Installed Paths
 
-| Source            | Claude Code               | Codex                     | Grok                      |
-| ----------------- | ------------------------- | ------------------------- | ------------------------- |
-| `INSTRUCTIONS.md` | `~/.claude/CLAUDE.md`     | `~/.codex/AGENTS.md`      | `~/.grok/AGENTS.md`       |
-| `skill/<name>`    | `~/.claude/skills/<name>` | `~/.agents/skills/<name>` | `~/.grok/skills/<name>`   |
+| Source            | Claude Code               | Codex                     | Grok                    |
+| ----------------- | ------------------------- | ------------------------- | ----------------------- |
+| `INSTRUCTIONS.md` | `~/.claude/CLAUDE.md`     | `~/.codex/AGENTS.md`      | `~/.grok/AGENTS.md`     |
+| `skill/<name>`    | `~/.claude/skills/<name>` | `~/.agents/skills/<name>` | `~/.grok/skills/<name>` |
 
 Each column is created or synchronized only when its CLI is detected on `PATH`
 and not explicitly skipped. Existing managed links remain untouched otherwise.
