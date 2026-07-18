@@ -190,6 +190,29 @@ return {
       pcall(require("telescope").load_extension, "fzf")
       pcall(require("telescope").load_extension, "ui-select")
 
+      if vim.fn.has("win32") == 1 then
+        local action_set = require("telescope.actions.set")
+        local original_edit = action_set.edit
+
+        action_set.edit = function(prompt_bufnr, command)
+          local fnameescape = vim.fn.fnameescape
+          vim.fn.fnameescape = function(path)
+            local escaped = fnameescape(path)
+            local need_extra_esc = path:find("[%[%]`$~]")
+            local esc = need_extra_esc and "\\\\" or "\\"
+            escaped = escaped:gsub("\\[%(%)%^&;]", esc .. "%1")
+            if need_extra_esc then
+              escaped = escaped:gsub("\\\\['` ]", "\\%1")
+            end
+            return escaped
+          end
+          local ok, err = pcall(original_edit, prompt_bufnr, command)
+          vim.fn.fnameescape = fnameescape
+          if not ok then
+            error(err)
+          end
+        end
+      end
     end,
   },
 
