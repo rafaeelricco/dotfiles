@@ -30,10 +30,9 @@ before fixing any in-scope blocker. Report what remains.
   loop does not skip this gate — it only authorizes the scoped non-merge writes
   for the scope the user confirms there, and never authorizes merging. Absent a
   full-loop request, also ask for explicit approval before each write.
-- Never add AI attribution. Never include `Co-authored-by:` trailers or credit
-  lines for Claude, Codex, Cursor, or similar tools in commit messages. Never
-  merge, force-push, rewrite history, or modify protected branch settings unless
-  explicitly asked.
+- Never merge, force-push, rewrite history, or modify protected branch settings
+  unless explicitly asked. Commit messages follow `commit-message` (no AI
+  trailers or attribution).
 
 ## Workflow
 
@@ -44,8 +43,8 @@ before fixing any in-scope blocker. Report what remains.
    ask the user what they want to resolve and how. Build the Review Fix Plan for
    the chosen scope. Do not fix before the user confirms.
 3. Fix only the validated, in-scope blockers the user chose.
-4. With approval or full-loop authorization, stage scoped files, commit, push,
-   and re-check.
+4. With approval or full-loop authorization, stage scoped files, commit via
+   `commit-message`, push, and re-check.
 5. Repeat from Context Gathering until merge-ready, waiting on remote checks, or
    blocked by a human decision.
 
@@ -95,7 +94,7 @@ Before editing actionable review feedback:
   coherent fix cluster.
 - For each commit section, include: comment(s), files touched with line refs
   when available, focused `diff` blocks for planned changes, a commit message
-  in the Commit Message Format below, planned reply text, and verification.
+  drafted per `commit-message`, planned reply text, and verification.
 - Include only focused diffs or hunk-level patch sketches that explain the
   proposed change. Do not include a separate code preview section or unrelated
   large diffs.
@@ -103,61 +102,6 @@ Before editing actionable review feedback:
   and why the grouped fix is coherent.
 - Put non-code comments in a `Reply-Only Threads` section with planned reply
   text and no commit.
-
-## Commit Message Format
-
-Follow the imperative commit style. Each fix commit becomes one line of the
-squashed PR merge body, so write every commit as a self-contained message. Keep
-one logical change per commit, mapped to a single review comment, coherent fix
-cluster, or CI failure.
-
-Title (first line): present-tense imperative verb first (`Add`, `Fix`, `Update`,
-`Refactor`, `Remove`…), capitalized, no trailing period. Do NOT use a
-Conventional Commits prefix — never `feat:`, `fix:`, `chore:`, `docs:`, etc.
-Start directly with the verb. No ticket IDs, no `WIP`, no noise words.
-
-Classify the change size internally — never print the label:
-
-- SMALL — one file, minor change (a few lines, typo, log tweak, single function).
-- MEDIUM — multiple files, or a substantial change in one file.
-- LARGE — many files and/or broad impact.
-
-Format by size:
-
-- SMALL → a single title line, no body.
-- MEDIUM / LARGE → title, one blank line, then `- ` bullets. Each bullet is a
-  complete imperative sentence ending with a period, describing what the change
-  does (and often where). Put code symbols, paths, and types in backticks
-  (`resolveReviewThread`, `src/middleware/rateLimit.ts`). When behavior changed,
-  the final bullet covers tests ("Cover the new flow with unit tests for ...").
-
-Rules:
-
-1. One logical change per commit; one discrete edit per bullet.
-2. Version bumps, formatting-only changes, and renames each get their own commit
-   (renames stated literally as old → new, noting imports were updated).
-3. Titles never end with a period and never carry a prefix; body bullets always
-   end with a period.
-4. No multiline code fences anywhere in the message.
-5. No emojis, no `Co-Authored-By`, no AI attribution.
-
-Commit with a quoted heredoc so backticks stay literal (MEDIUM / LARGE):
-
-```bash
-git commit -F - <<'MSG'
-Imperative title, capitalized, no period, no prefix
-
-- Imperative sentence describing one change, with `symbols` in backticks.
-- One discrete edit per bullet; describe what the change does and where.
-- Tests assert the corrected behavior.
-MSG
-```
-
-For a SMALL fix, commit a single title line:
-
-```bash
-git commit -m "Imperative title, capitalized, no period, no prefix"
-```
 
 ## Merge Conflicts
 
@@ -202,8 +146,8 @@ If the PR is conflicted or behind base:
 - For review feedback fixes, make one commit per actionable comment or coherent
   fix cluster from the Review Fix Plan.
 - Stage only files that belong to the current comment or fix cluster.
-- Commit with the exact message planned for that comment or fix cluster,
-  formatted per Commit Message Format.
+- Commit with the exact message planned for that comment or fix cluster via
+  `commit-message` (load and follow that skill for format and `git commit`).
 - Push only after approval or full-loop authorization.
 - Re-check PR status, unresolved review threads, and CI.
 - After an approved commit and push fixes review feedback, reply to each
