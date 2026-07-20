@@ -28,11 +28,12 @@ repo explicitly requires a different convention.
 
 - Title and body format
 - Forbidden trailers and noise (AI attribution, Conventional Commits prefixes)
-- `git commit` invocation recipes (`-m` vs heredoc)
+- `git commit` invocation recipes (`-m` vs temp-file `-F`)
 
 **Does not own**
 
-- Staging (`git add`, `git add -p`, `git reset`)
+- Staging for workflow callers (`babysit`, `create-pr`). Standalone commit may
+  stage only an unambiguous or user-confirmed scope before `git commit`.
 - Commit split policy (by review cluster vs by change category)
 - Approval gates, push, PR body, rebase/amend policy
 
@@ -86,16 +87,33 @@ If the index is empty or mixed beyond the approved scope, stop and report — do
 not invent a split or stage on behalf of a workflow skill unless the user only
 asked to commit and scope is unambiguous.
 
-**MEDIUM / LARGE** — quoted heredoc so backticks stay literal:
+**MEDIUM / LARGE** — write the message to a temp file, then `git commit -F`
+(portable on Bash and PowerShell; keeps backticks literal without shell heredoc):
 
 ```bash
-git commit -F - <<'MSG'
+msg="$(mktemp)"
+cat >"$msg" <<'MSG'
 Imperative title, capitalized, no period, no prefix
 
 - Imperative sentence describing one change, with `symbols` in backticks.
 - One discrete edit per bullet; describe what the change does and where.
 - Tests assert the corrected behavior.
 MSG
+git commit -F "$msg"
+rm -f "$msg"
+```
+
+```powershell
+$msg = [System.IO.Path]::GetTempFileName()
+@'
+Imperative title, capitalized, no period, no prefix
+
+- Imperative sentence describing one change, with `symbols` in backticks.
+- One discrete edit per bullet; describe what the change does and where.
+- Tests assert the corrected behavior.
+'@ | Set-Content -Path $msg -Encoding utf8NoBOM
+git commit -F $msg
+Remove-Item $msg
 ```
 
 **SMALL**:
@@ -106,10 +124,22 @@ git commit -m "Imperative title, capitalized, no period, no prefix"
 
 ## Standalone use
 
-When the user asks only to commit / write a commit message:
+Branch intent from the user phrasing:
+
+**Draft-only** (`write a commit message`, `format this commit`, or
+`/commit-message` without an explicit commit request):
+
+1. Inspect `git status` and diffs as needed for context.
+2. Draft the message per Message format; return the text (and optional recipe).
+3. Do **not** run `git commit`.
+
+**Commit** (`commit this`, or a clear ask to create a commit):
 
 1. Inspect `git status` and `git diff --cached` (and unstaged if needed).
 2. If nothing is staged and scope is unclear, ask once what to include — do not
    silently stage the whole worktree.
-3. Draft the message per Message format; run `git commit` per recipes above.
-4. Do not push, open a PR, or rewrite history unless asked.
+3. If nothing is staged and scope is unambiguous (or the user just confirmed
+   scope), stage that confirmed scope, then continue. If the index is still
+   empty, stop and report — never run `git commit` on an empty index.
+4. Draft the message per Message format; run `git commit` per recipes above.
+5. Do not push, open a PR, or rewrite history unless asked.
