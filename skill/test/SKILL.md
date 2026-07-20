@@ -1,7 +1,7 @@
 ---
 name: test
-description: Run an extremely strict validation of a change set (local, branch, or PR) by discovering this repo's verify commands, selecting checks that would fail if the change were wrong, executing them, and refusing to pass without evidence. Use for a deep behavioral validation of uncommitted work, a branch, or a pull request.
-when-to-use: "Use when asked to '/test', test local changes, test a branch, test a PR, QA a diff, or validate a change set."
+description: Run an extremely strict validation of a change set (local, branch, or PR) by discovering this repo's verify commands, selecting checks that would fail if the change were wrong, executing them, and refusing to pass without evidence. Invoke only via the explicit `/test` slash command (model auto-invocation is disabled).
+when-to-use: "Use when the user explicitly invokes `/test` (with optional --local, --branch, or --pr flags)."
 argument-hint: "[--local | --branch <name> | --pr <number-or-url>]"
 disable-model-invocation: true
 ---
@@ -29,8 +29,8 @@ Start from this baseline:
 ```
 
 - Default target: local changes (staged, unstaged, untracked) when no mode flag is given.
-- `--branch <name>`: validate the diff from the merge-base with `origin/main` (else `origin/master`) to that branch. Do not checkout the user's active branch as a side effect.
-- `--pr <number-or-url>`: validate the PR diff via `gh`. If `gh` is missing or unauthenticated, stop with instructions to run `gh auth login`.
+- `--branch <name>`: resolve the remote default base as `refs/remotes/origin/HEAD` (fallback `origin/main`, then `origin/master`). Compute the change set as merge-base(base, branch)…branch tip. **Materialize the target:** create a temporary `git worktree` at the branch's exact tip SHA, run discovery and all validation commands inside that worktree, then remove the worktree. Never switch the user's primary checkout as a side effect; never run branch-mode checks only against the active working tree.
+- `--pr <number-or-url>`: validate the PR diff via `gh`. If `gh` is missing or unauthenticated, stop with instructions to run `gh auth login`. **Before executing any PR-discovered install/test/make/CI-local command:** decide trust. If the PR is from an external fork, unknown author, or otherwise untrusted source, do not run untrusted tree scripts on the developer machine—require an explicit user trust decision, or run only in an isolated environment, or restrict command/script discovery to the trusted base revision. Without that gate, mark BLOCKED (not PASS). Prefer materializing the PR head in a temporary worktree (or equivalent isolation) the same way as `--branch` when execution is approved.
 - Empty change set: stop. There is nothing to validate.
 
 This skill is not `/review` (maintainability of the code) and not `/check-work` (whether this session finished the user's request). It does not scaffold new test suites unless the user separately asks for that.
@@ -81,6 +81,10 @@ Apply the baseline prompt above, plus these explicit validation rules:
    - Do not skip a failed product test and still claim overall success.
    - Do not over-index on elaborate runtime setups in v1; if the decisive check needs a device/browser and tools are absent, state the gap instead of building a framework.
 
+8. **Materialize non-local targets; gate untrusted PR execution.**
+   - For `--branch` (and approved `--pr` execution): discovery + checks run at the target revision (temp worktree at tip SHA), not only as a file-list over the user's current tree.
+   - For untrusted `--pr` sources: explicit trust / isolation / base-only scripts before any package script or Makefile from the PR tree; else BLOCKED.
+
 ## Primary Validation Questions
 
 For every meaningful change set, ask:
@@ -108,6 +112,8 @@ Escalate when you see:
 - Empty or docs-only diffs padded with unrelated green checks.
 - Residual risk omitted when an obvious decisive check was available and skipped.
 - PR mode continuing without `gh` authentication.
+- `--branch` validation run against the user's active checkout instead of a worktree at the branch tip.
+- `--pr` execution of package/Make/CI scripts from an untrusted fork without an explicit trust or isolation gate.
 
 ## Preferred Remedies
 
@@ -139,6 +145,8 @@ Good phrases:
 - `docs-only diff; no behavioral verification required`
 - `this check does not cover the changed module; we need a tighter proof`
 - `gh is not authenticated; stop and run gh auth login before PR validation`
+- `branch tip materialized in temp worktree <path>; primary checkout unchanged`
+- `PR author is external fork; blocked until user trusts execution or we restrict to base-revision scripts`
 
 ## Output Expectations
 
@@ -199,5 +207,7 @@ Treat these as presumptive blockers unless justified clearly:
 - PR validation proceeded without working `gh` auth
 - the wrong package was tested for the files that changed
 - residual risk hides an obvious available check
+- `--branch` checks ran on the active tree without materializing the branch tip
+- untrusted `--pr` scripts ran without an explicit trust or isolation decision
 
 If those conditions are not met, leave an explicit verdict short of PASS and state what proof is still required.
