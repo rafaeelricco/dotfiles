@@ -155,9 +155,9 @@ Choose delivery based on PR state:
 
 Suggest 2 or 3 plain PR titles:
 
-- No conventional-commit prefix unless the user or repo requires it.
+- Title style per `commit-message` (imperative, no Conventional Commits prefix
+  unless the user or repo requires a different convention).
 - Keep each title under 72 characters.
-- Use short imperative or descriptive wording.
 
 ## Error Handling
 
