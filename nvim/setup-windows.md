@@ -56,7 +56,6 @@ setx CXX g++
 
 Also required at runtime (not via scoop):
 
-- **`claude` CLI** on `PATH` — drives `claude-code.nvim` (`:ClaudeCode*` commands).
 - **Node.js** (`scoop install nodejs`) — GitHub Copilot. Usually already present.
 
 > **gcc, not zig:** gcc covers both jobs — building treesitter parsers and

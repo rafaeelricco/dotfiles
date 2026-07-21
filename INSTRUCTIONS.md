@@ -10,7 +10,7 @@ At the start of every session, before your first response: invoke the `/caveman`
 
 Before any tools, edits, or subagents:
 
-- Never assume anything the user didn't say. If an unspecified detail changes what you'd build, clarify first — use `/grill-me` (or a direct question) before acting; don't guess.
+- Never assume anything the user didn't say. If an unspecified detail changes what you'd build, ask before acting; don't guess.
 - If interpretations differ materially, don't pick one silently — name them and ask. Answer obvious factual questions directly; don't manufacture confusion or hedge.
 - If a simpler approach exists, say so. Push back when warranted.
 
@@ -86,5 +86,5 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 When you enter plan mode or begin planning a code change:
 
 - Follow Fan Out, Then Consult Advisor first when that rule applies (context before the plan).
-- Invoke `grill-me` and follow it to stress-test the plan with the user until decisions are resolved — one question at a time per that skill.
+- Stress-test the plan with the user until decisions are resolved — one question at a time, hardest-first.
 - Invoke `plan-format` and follow it for the plan document — it stays active per its own rules.

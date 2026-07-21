@@ -3,6 +3,7 @@
 -- Currently configured with Augment Code for context-aware code suggestions.
 
 return {
+  --[[
   {
     "rafaeelricco/claude-code.nvim",
     name = "claude",
@@ -39,9 +40,9 @@ return {
       { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>",    desc = "Deny diff" },
     },
   },
+  ]]
   {
     "rafaeelricco/copy.nvim",
-    -- Bridge auto-starts MCP WebSocket; load at startup so agents can connect.
     lazy = false,
     config = true,
     opts = {
