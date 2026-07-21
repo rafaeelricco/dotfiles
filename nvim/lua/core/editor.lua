@@ -105,6 +105,21 @@ vim.opt.whichwrap = "b,s,<,>,[,]"  -- Allow cursor to wrap at line boundaries
 vim.keymap.set("i", "<M-BS>", "<C-w>", { desc = "Delete word backward" })
 
 -- =============================================
+-- Word navigation (portable across macOS / Windows)
+-- =============================================
+-- Alt (Windows) / Option (macOS, when terminal sends Meta) + arrows.
+-- No OS guard: if the terminal never delivers <M-Left>/<M-Right>, maps are inert.
+-- Shift+arrows intentionally untouched (terminal selection on Ghostty / WT).
+vim.keymap.set({ "n", "v" }, "<M-Left>", "b", { desc = "Word backward" })
+vim.keymap.set({ "n", "v" }, "<M-Right>", "w", { desc = "Word forward" })
+vim.keymap.set("i", "<M-Left>", "<C-o>b", { desc = "Word backward" })
+vim.keymap.set("i", "<M-Right>", "<C-o>w", { desc = "Word forward" })
+
+-- Explicit insert-mode Ctrl+arrows (nvim default is similar; pin behavior).
+vim.keymap.set("i", "<C-Left>", "<C-o>b", { desc = "Word backward" })
+vim.keymap.set("i", "<C-Right>", "<C-o>w", { desc = "Word forward" })
+
+-- =============================================
 -- Diagnostic Navigation
 -- =============================================
 
