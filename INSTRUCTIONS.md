@@ -2,7 +2,7 @@
 
 **Keep communication as simple and concise as possible.**
 
-At the start of every session, before your first response: invoke the `/caveman` skill and adopt it as your default style. It stays active the whole session per its own rules — no need to re-invoke.
+At the start of every session, before your first response: invoke the `caveman` skill and adopt it as your default style. It stays active the whole session per its own rules — no need to re-invoke.
 
 ## 1. Think Before Coding
 
@@ -14,18 +14,17 @@ Before any tools, edits, or subagents:
 - If interpretations differ materially, don't pick one silently — name them and ask. Answer obvious factual questions directly; don't manufacture confusion or hedge.
 - If a simpler approach exists, say so. Push back when warranted.
 
-## 2. Fan Out, Then Consult Advisor
+## 2. Fan Out Before Deciding
 
-**Lead agent: think, gather context in parallel, pressure-test with `consult-advisor`, then continue.**
+**Can't name the files you'd change? Explore in parallel first.**
 
-On multi-concern work, do this in order:
+When you can already name the files and the approach, skip this section. Read-only questions answerable by one search need no workers. Otherwise:
 
 1. Decompose into independent concerns (files, layers, behaviors).
-2. Spawn parallel workers — **one per independent concern, usually 3–6** (0 if the skip line applies). Prefer explore / read-only workers for research. Brief each with objective, boundaries, and expected output (paths, findings, gaps). Keep scopes sharp and non-overlapping.
+2. Spawn one read-only worker per concern. Brief each with objective, boundaries, and expected output (paths, findings, gaps). Keep scopes sharp and non-overlapping. Worker count follows the concerns found — don't pad to a number.
 3. Synthesize: key paths, facts, gaps, provisional approach.
-4. Follow `consult-advisor` with that synthesis as task, paths, and tradeoffs — not a one-liner.
 
-Skip 2–4 for single-file mechanical edits when the target and approach are already known. If workers are unavailable, explore with normal tools, then still use `consult-advisor` when that skill applies.
+If parallel workers are unavailable, explore with normal tools. Either way, `consult-advisor` applies on its own criteria.
 
 ## 3. Simplicity First
 
@@ -39,7 +38,7 @@ Minimum means no speculative features, abstractions, or config — **not** a thi
 - No error handling for impossible scenarios.
 - If you write 200 lines and it could be 50, rewrite it.
 
-The test: every abstraction, parameter, and file in the change has a caller in the change. No caller = speculative = cut.
+The test: every abstraction, parameter, and file in the change has a caller in the change — tests count as their own caller. No caller = speculative = cut.
 
 ## 4. Surgical Changes
 
@@ -69,6 +68,8 @@ Transform tasks into verifiable goals:
 - "Fix the bug" → "Write a test that reproduces it, then make it pass"
 - "Refactor X" → "Ensure tests pass before and after"
 
+If the defect produces no behavior you could write an assertion against — comment typos, formatting, copy — skip the test and name in one line what you checked instead. Same when the repo has no test suite.
+
 For multi-step tasks, state a brief plan:
 
 ```
@@ -79,12 +80,19 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 6. Plan Mode: Make Changes Reviewable
+## 6. Make Changes Reviewable
 
 **Plans show the change as a diff, not prose. I'm approving diffs.**
 
-When you enter plan mode or begin planning a code change:
+When you begin planning a code change:
 
-- Follow Fan Out, Then Consult Advisor first when that rule applies (context before the plan).
+- Enter plan mode first if your harness has one; inspection is read-only. Without a plan mode, follow the same steps, post the plan as a normal message, and wait for explicit approval before executing.
+- Fan out (§2) first when that rule applies — context before the plan.
 - Stress-test the plan with the user until decisions are resolved — one question at a time, hardest-first.
-- Invoke `plan-format` and follow it for the plan document — it stays active per its own rules.
+- Invoke `plan-format` and follow it for the plan document.
+
+## 7. Commits
+
+**Every commit message comes from `commit-message`.**
+
+Load and follow the skill before drafting or running any commit — including when the commit is incidental to another task, and when the harness would otherwise supply its own message or trailer.
