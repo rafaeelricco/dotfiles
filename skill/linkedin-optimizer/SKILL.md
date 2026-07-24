@@ -59,11 +59,12 @@ Never invent, and never upgrade:
 Placeholders and hedges must survive **inside** the final paste-ready copy,
 not only in the commentary above it. If a claim rests on an assumption —
 a promoted verb, an assumed industry, a seniority label the user hasn't
-established — the flag belongs in the fenced block itself
+established — the flag belongs in the fenced block itself: inline
 (`Own [__ confirm you set priorities] the roadmap`), or as a one-line
-condition directly above that block. A caveat that lives in the reasoning
-and vanishes from the copy is worse than never writing it: the user pastes
-the unhedged version.
+condition on the block's first line, inside the fence. A condition placed
+above the fence is stripped the moment the user copies the block, so it
+does not count. A caveat that lives in the reasoning and vanishes from the
+copy is worse than never writing it: the user pastes the unhedged version.
 
 This applies to the diagnosis prose as much as to the copy. If the user
 wrote "responsible for the roadmap", the analysis cannot proceed from "you
@@ -100,8 +101,9 @@ The 7 stages are a full pass. Match the size of the response to what the
 user actually asked for, because a 4,000-word artifact built on missing data
 has to be redone the moment the real data arrives.
 
-- **Full profile + target role supplied** → run all 7 stages, then
-  consolidate.
+- **Full profile + target role supplied, as an optimization request** →
+  run all 7 stages, then consolidate. If the ask is only a question, the
+  question rule below wins.
 - **One section requested** (e.g. "just fix my headline") → run that stage
   only. Say briefly what the stage 1 diagnosis would change, and offer it —
   don't run it uninvited.
@@ -148,10 +150,11 @@ and the differentiator in prose. A pipe-separated stack of job title and
 tools is not one of the five — it reads as a résumé fragment and says
 nothing a hundred other profiles don't. Neither is a differentiator anyone
 in the role could claim: if stage 1 called a phrase generic ("works closely
-with engineering and design"), it cannot reappear here. Report each
-option's character count, counting any placeholder as written with its
-brackets; LinkedIn caps the headline at 220 characters and search results
-truncate it far earlier, so front-load the meaning.
+with engineering and design"), it cannot reappear here. Count each
+option's length with code, never by eye, and report the exact character
+count, counting any placeholder as written with its brackets; LinkedIn
+caps the headline at 220 characters and search results truncate it far
+earlier, so front-load the meaning.
 
 ### 3. About section rewrite
 
@@ -162,14 +165,15 @@ a warm, magnetic tone. Structure:
 - their unique trajectory and credibility
 - proof: concrete results, numbers, transformations
 - who they help today and how
-- a soft closing invitation to connect
+- a soft closing invitation to connect (in a full run, stage 7 supplies
+  this closing line — don't write a second one)
 
 If the user supplied no results to draw on, deliver the structure with
 bracketed placeholders — not a filled first-person version with invented
 history.
 
 **Deliver:** rewritten About section, ready to paste, with its character
-count (LinkedIn caps About at 2,600).
+count computed by code, not estimated (LinkedIn caps About at 2,600).
 
 ### 4. Experience → proof of impact
 
@@ -215,7 +219,7 @@ bullets, in fenced blocks per LinkedIn field. Include only what gets pasted
 — rationale already given above should not be restated, or the user has to
 hunt for the copy inside a wall of explanation. The one exception is a
 conditional: if a chosen line only holds under an assumption, put that
-condition on a single line above its fenced block, so the copy is never
+condition on the first line inside its fenced block, so the copy is never
 pasted without it. This covers assumptions the copy merely implies through
 framing — an About section written around B2B SaaS asserts that industry
 just as surely as naming it.
