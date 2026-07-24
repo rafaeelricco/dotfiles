@@ -61,12 +61,13 @@ Multi-step tasks get a plan first:
 
 Plans are approved as diffs, not prose.
 
-When you start planning a code change:
+Load `plan-format` and follow it before writing any plan text for a code change — full plan, sketch, outline, or a plan posted alongside an open question. Unresolved decisions don't defer it: the question and the formatted plan ship in the same response. §5's numbered-step format doesn't substitute for it.
+
+Then, while planning:
 
 - Enter plan mode if the harness has one; otherwise post the plan as a normal message and wait for explicit approval. Inspection stays read-only either way.
 - Fan out (§2) first when it applies — context before the plan.
 - Stress-test with the user until decisions resolve. One question at a time, hardest first.
-- Invoke `plan-format` and follow it for the plan document.
 
 ## 7. Commits
 
