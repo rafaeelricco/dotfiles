@@ -3,8 +3,13 @@
 
 Swaps INSTRUCTIONS.md in place (the file ~/.claude/CLAUDE.md symlinks to), so
 skill auto-invocation is exercised under real conditions. The original file is
-restored on exit, including on Ctrl-C. Refuses to start if INSTRUCTIONS.md has
-uncommitted changes.
+restored on exit, including on Ctrl-C.
+
+A hard kill (SIGKILL, parent process exit) skips that restore and strands a
+variant in the working tree, where it has previously been swept into a commit.
+Two guards cover that: a lockfile so two sweeps can never interleave, and a
+startup reconcile that restores INSTRUCTIONS.md from HEAD when its contents are
+provably a leftover variant rather than real edits.
 
 Usage:
     evals/run.py                      # all probes, all variants, 5 runs each
@@ -15,6 +20,7 @@ Usage:
 
 import argparse
 import json
+import os
 import shutil
 import signal
 import subprocess
@@ -25,6 +31,7 @@ from pathlib import Path
 EVALS = Path(__file__).resolve().parent
 REPO = EVALS.parent
 INSTRUCTIONS = REPO / "INSTRUCTIONS.md"
+LOCKFILE = EVALS / ".sweep.lock"
 RUN_TIMEOUT_S = 600
 
 
@@ -32,6 +39,57 @@ def git(*args, cwd=REPO, check=True):
     return subprocess.run(
         ["git", *args], cwd=cwd, check=check, capture_output=True, text=True
     )
+
+
+def acquire_lock() -> bool:
+    """Refuse to start while another sweep owns the repo. Reclaims a stale lock
+    whose owning process is gone."""
+    if LOCKFILE.exists():
+        try:
+            pid = int(LOCKFILE.read_text().split()[0])
+            os.kill(pid, 0)
+        except (ValueError, IndexError, ProcessLookupError):
+            print(f"reclaiming stale lock at {LOCKFILE}", file=sys.stderr)
+        except PermissionError:
+            pass  # process exists, owned by another user
+        else:
+            print(
+                f"error: another sweep is running (pid {pid}).\n"
+                f"       Two sweeps cannot share one INSTRUCTIONS.md — wait for it,\n"
+                f"       or delete {LOCKFILE} if you know that process is dead.",
+                file=sys.stderr,
+            )
+            return False
+    LOCKFILE.write_text(f"{os.getpid()}\n")
+    return True
+
+
+def reconcile_instructions() -> bool:
+    """Undo a variant stranded by a hard-killed sweep, but never touch real edits.
+
+    A killed sweep leaves a variant sitting in the working tree, where it has
+    been committed by accident before. If the dirty content is byte-identical to
+    a known variant it can only be that leftover, so restore it from HEAD.
+    Anything else is the user's own work — refuse and let them decide.
+    """
+    if not git("status", "--porcelain", "--", str(INSTRUCTIONS)).stdout.strip():
+        return True
+    current = INSTRUCTIONS.read_text()
+    for variant in sorted((EVALS / "variants").glob("*.md")):
+        if variant.read_text() == current:
+            print(
+                f"INSTRUCTIONS.md was left as '{variant.stem}' by an interrupted sweep — "
+                "restoring from HEAD.",
+                file=sys.stderr,
+            )
+            git("checkout", "--", str(INSTRUCTIONS))
+            return True
+    print(
+        "error: INSTRUCTIONS.md has uncommitted changes that match no variant.\n"
+        "       Commit or stash them first — the runner overwrites this file.",
+        file=sys.stderr,
+    )
+    return False
 
 
 def make_sandbox(dirty: bool) -> Path:
@@ -102,14 +160,8 @@ def main() -> int:
     ap.add_argument("-o", "--out", default=str(EVALS / "results"), help="output dir")
     args = ap.parse_args()
 
-    if git("status", "--porcelain", "--", str(INSTRUCTIONS)).stdout.strip():
-        print(
-            "error: INSTRUCTIONS.md has uncommitted changes. Commit or stash first —\n"
-            "       the runner overwrites it and restores from git on exit.",
-            file=sys.stderr,
-        )
-        return 1
-
+    # Resolve the work list before taking the lock, so an argument typo cannot
+    # leave a lockfile behind.
     probes = json.loads((EVALS / "probes.json").read_text())["probes"]
     if args.probe:
         probes = [p for p in probes if p["id"] in args.probe]
@@ -120,8 +172,18 @@ def main() -> int:
         print("error: no probes or no variants matched", file=sys.stderr)
         return 1
 
+    if not reconcile_instructions():
+        return 1
+    if not acquire_lock():
+        return 1
+
     original = INSTRUCTIONS.read_text()
-    restore = lambda *_: (INSTRUCTIONS.write_text(original), sys.exit(130))
+
+    def restore(*_):
+        INSTRUCTIONS.write_text(original)
+        LOCKFILE.unlink(missing_ok=True)
+        sys.exit(130)
+
     signal.signal(signal.SIGINT, restore)
     signal.signal(signal.SIGTERM, restore)
 
@@ -143,6 +205,7 @@ def main() -> int:
                     )
     finally:
         INSTRUCTIONS.write_text(original)
+        LOCKFILE.unlink(missing_ok=True)
 
     print(f"\ndone. results in {out_root}\nnow run: evals/grade.py {out_root}")
     return 0
