@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+"""Run the instruction probes against each variant in variants/.
+
+Swaps INSTRUCTIONS.md in place (the file ~/.claude/CLAUDE.md symlinks to), so
+skill auto-invocation is exercised under real conditions. The original file is
+restored on exit, including on Ctrl-C. Refuses to start if INSTRUCTIONS.md has
+uncommitted changes.
+
+Usage:
+    evals/run.py                      # all probes, all variants, 5 runs each
+    evals/run.py -n 3                 # 3 runs per probe
+    evals/run.py -p p6-plan-mode      # one probe (repeatable)
+    evals/run.py -v candidate         # one variant (repeatable)
+"""
+
+import argparse
+import json
+import shutil
+import signal
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+EVALS = Path(__file__).resolve().parent
+REPO = EVALS.parent
+INSTRUCTIONS = REPO / "INSTRUCTIONS.md"
+RUN_TIMEOUT_S = 600
+
+
+def git(*args, cwd=REPO, check=True):
+    return subprocess.run(
+        ["git", *args], cwd=cwd, check=check, capture_output=True, text=True
+    )
+
+
+def make_sandbox(dirty: bool) -> Path:
+    path = Path(tempfile.mkdtemp(prefix="eval-fixture-"))
+    for src in (EVALS / "fixture").iterdir():
+        shutil.copy2(src, path / src.name)
+        (path / src.name).chmod(0o755)
+    ident = [
+        "-c", "user.email=eval@example.invalid",
+        "-c", "user.name=Eval Runner",
+        "-c", "commit.gpgsign=false",
+    ]
+    subprocess.run(["git", "init", "-q"], cwd=path, check=True)
+    subprocess.run(["git", *ident, "add", "-A"], cwd=path, check=True)
+    subprocess.run(
+        ["git", *ident, "commit", "-qm", "fixture baseline"], cwd=path, check=True
+    )
+    if dirty:
+        with (path / "README.md").open("a") as fh:
+            fh.write("\nSupports `--verbose` for detailed output.\n")
+    return path
+
+
+def run_probe(probe: dict, out_dir: Path) -> None:
+    sandbox = make_sandbox(probe["dirty"]) if probe["sandbox"] == "fixture" else None
+    cwd = sandbox or REPO
+    cmd = [
+        "claude", "-p",
+        "--output-format", "stream-json",
+        "--verbose",
+        "--permission-mode", probe["permission_mode"],
+        "--allowedTools", *probe["allowed_tools"],
+    ]
+    # Clear any prior sweep's artifacts so grading never mixes runs from an
+    # older version of the probe with fresh ones.
+    shutil.rmtree(out_dir, ignore_errors=True)
+    out_dir.mkdir(parents=True)
+    try:
+        proc = subprocess.run(
+            cmd,
+            cwd=cwd,
+            input=probe["prompt"],
+            capture_output=True,
+            text=True,
+            timeout=RUN_TIMEOUT_S,
+        )
+        (out_dir / "transcript.jsonl").write_text(proc.stdout)
+        (out_dir / "stderr.txt").write_text(proc.stderr)
+    except subprocess.TimeoutExpired:
+        (out_dir / "transcript.jsonl").write_text("")
+        (out_dir / "stderr.txt").write_text(f"TIMEOUT after {RUN_TIMEOUT_S}s\n")
+
+    if sandbox:
+        (out_dir / "diff.patch").write_text(
+            git("diff", "HEAD", cwd=sandbox, check=False).stdout
+        )
+        shutil.copytree(
+            sandbox, out_dir / "workdir", ignore=shutil.ignore_patterns(".git")
+        )
+        shutil.rmtree(sandbox, ignore_errors=True)
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("-n", "--runs", type=int, default=5, help="runs per probe (default 5)")
+    ap.add_argument("-p", "--probe", action="append", help="probe id (repeatable)")
+    ap.add_argument("-v", "--variant", action="append", help="variant name (repeatable)")
+    ap.add_argument("-o", "--out", default=str(EVALS / "results"), help="output dir")
+    args = ap.parse_args()
+
+    if git("status", "--porcelain", "--", str(INSTRUCTIONS)).stdout.strip():
+        print(
+            "error: INSTRUCTIONS.md has uncommitted changes. Commit or stash first —\n"
+            "       the runner overwrites it and restores from git on exit.",
+            file=sys.stderr,
+        )
+        return 1
+
+    probes = json.loads((EVALS / "probes.json").read_text())["probes"]
+    if args.probe:
+        probes = [p for p in probes if p["id"] in args.probe]
+    variants = sorted((EVALS / "variants").glob("*.md"))
+    if args.variant:
+        variants = [v for v in variants if v.stem in args.variant]
+    if not probes or not variants:
+        print("error: no probes or no variants matched", file=sys.stderr)
+        return 1
+
+    original = INSTRUCTIONS.read_text()
+    restore = lambda *_: (INSTRUCTIONS.write_text(original), sys.exit(130))
+    signal.signal(signal.SIGINT, restore)
+    signal.signal(signal.SIGTERM, restore)
+
+    out_root = Path(args.out)
+    total = len(variants) * len(probes) * args.runs
+    done = 0
+    try:
+        for variant in variants:
+            INSTRUCTIONS.write_text(variant.read_text())
+            for probe in probes:
+                for run in range(1, args.runs + 1):
+                    done += 1
+                    print(
+                        f"[{done}/{total}] {variant.stem} :: {probe['id']} :: run-{run}",
+                        flush=True,
+                    )
+                    run_probe(
+                        probe, out_root / variant.stem / probe["id"] / f"run-{run}"
+                    )
+    finally:
+        INSTRUCTIONS.write_text(original)
+
+    print(f"\ndone. results in {out_root}\nnow run: evals/grade.py {out_root}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
