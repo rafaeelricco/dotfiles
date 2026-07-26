@@ -64,6 +64,12 @@ evals/grade.py evals/results --baseline plan-format-gate
 
 To find which variant is live: `diff INSTRUCTIONS.md evals/variants/*.md`.
 
+The same applies to probes. Editing a probe's prompt or assertions invalidates
+every result already collected under its id — `run.py` clears the run directories
+it rewrites, but results for variants you *don't* re-run survive and will be
+graded against the new assertions as if comparable. Delete
+`results/<variant>/<probe>/` for any arm you are not re-running.
+
 ## Reading the result
 
 The rewrite was behavior-preserving by design, so the expected outcome is **no

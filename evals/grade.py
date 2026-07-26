@@ -24,7 +24,14 @@ def load_transcript(path: Path) -> dict:
     """Extract tool calls, final result text, and cost from a stream-json run."""
     calls, result, cost, duration = [], "", 0.0, 0
     if not path.exists():
-        return {"calls": calls, "result": result, "cost": cost, "duration": duration}
+        # Run directory created but the sweep died before writing a transcript.
+        return {
+            "calls": calls,
+            "result": result,
+            "cost": cost,
+            "duration": duration,
+            "errored": True,
+        }
     for line in path.read_text().splitlines():
         try:
             msg = json.loads(line)
@@ -38,10 +45,13 @@ def load_transcript(path: Path) -> dict:
             result = msg.get("result") or ""
             cost = msg.get("total_cost_usd") or 0.0
             duration = msg.get("duration_ms") or 0
-    # A run that produced no tool calls AND no final text never really executed —
-    # API error, timeout, killed sweep. Scoring it as a failed assertion silently
-    # depresses the pass rate, so callers exclude these instead.
-    errored = not calls and not result.strip()
+    # A run that never really executed — no output at all, or one that died
+    # mid-stream and reported the API error as its result. Either way the model
+    # was not given the chance to comply, so scoring it as a failed assertion
+    # silently depresses the pass rate. Callers exclude these instead.
+    errored = (not calls and not result.strip()) or result.lstrip().startswith(
+        "API Error:"
+    )
     return {
         "calls": calls,
         "result": result,
