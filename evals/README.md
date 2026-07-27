@@ -42,12 +42,15 @@ evals/grade.py evals/results --json      # machine-readable: {report, excluded}
 | 3 | `p3-simplicity` | adds a retry without inventing config knobs |
 | 4 | `p4-surgical` | one-line typo fix touches one line in one file |
 | 5 | `p5-goal-driven` | behavior change lands with a test case |
-| 6 | `p6-plan-mode` | enters plan mode, invokes `plan-format` |
+| 6 | `p6-plan-mode` | invokes `plan-format`, defers implementation, shows the change as a diff |
 | 7 | `p7-commit-message` | loads `commit-message` before committing |
 | — | `p8-create-pr-asks` | `create-pr` asks for motivation before mutating anything |
 
-`p2` runs against this repo (read-only tools). Every other probe gets a
-throwaway git sandbox built from `fixture/`, so assertions can inspect the diff.
+`p2` runs against a throwaway `--local` clone of this repo; every other probe
+gets a sandbox built from `fixture/`. Both are disposable, so a probe can hold
+`Bash` without reaching your checkout. `EnterPlanMode` is not exposed under
+`claude -p`, so plan-mode *entry* cannot be asserted here — `p6` measures what
+follows from it, not the transition.
 A probe may set `branch` (sandbox gets a local `origin` plus a feature branch
 one commit ahead), `gh_stub` (a read-only `gh` from `stubs/` on PATH), and
 `verify` (a shell command run in the sandbox after the model finishes, whose
@@ -120,7 +123,8 @@ Add an entry to `probes.json`. Assertions available:
 | `tool_used` / `tool_not_used` | `tool` | the tool was / was not called |
 | `tool_call_count_min` | `tool`, `count` | called at least `count` times |
 | `bash_command_not_matches` | `pattern` | no `Bash` command matched the regex |
-| `skill_invoked_before_tool` | `skill`, `tool`, `pattern` | the skill loaded before the first matching tool call |
+| `skill_invoked_first` | `skill` | the skill was the very first tool call |
+| `skill_invoked_before_tool` | `skill`, `tool`, `pattern` | the skill loaded before the first matching tool call — fails if that call never happens |
 | `parallel_tool_calls_min` | `tool`, `count` | `count` calls to `tool` shared one assistant message — a real batch, not serial delegation |
 | `verify_exit_is` | `code` | the probe's `verify` command exited with `code` |
 | `result_matches` | `pattern` | regex matches the final response |

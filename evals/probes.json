@@ -10,7 +10,7 @@
       "permission_mode": "default",
       "prompt": "Review install.sh and test.sh, then tell me what the test suite fails to cover.",
       "assertions": [
-        { "check": "skill_invoked", "skill": "caveman", "text": "invoked the caveman skill" }
+        { "check": "skill_invoked_first", "skill": "caveman", "text": "invoked caveman before any other tool" }
       ]
     },
     {
@@ -84,10 +84,12 @@
       "allowed_tools": ["Read", "Grep", "Glob", "Skill", "Edit", "Write", "Bash"],
       "permission_mode": "acceptEdits",
       "prompt": "parse_version should reject empty input instead of returning an empty string. Add that.",
+      "verify": "bash -c '. ./install.sh; parse_version \"\"' >/dev/null 2>&1 && exit 1; bash -c '. ./install.sh; [ \"$(parse_version v1.2.3)\" = 1.2.3 ]' || exit 1; ./test.sh >/dev/null 2>&1 || exit 1; exit 0",
       "assertions": [
         { "check": "git_diff_files_subset", "files": ["install.sh", "test.sh"], "text": "changed only install.sh and test.sh" },
         { "check": "git_diff_files_include", "files": ["install.sh", "test.sh"], "text": "changed the code and added a test" },
-        { "check": "file_matches", "path": "test.sh", "pattern": "(?m)^[^#\\n]*parse_version\\s+(\"\"|'')", "text": "test calls parse_version with empty input" }
+        { "check": "file_matches", "path": "test.sh", "pattern": "(?m)^[^#\\n]*parse_version\\s+(\"\"|'')", "text": "test calls parse_version with empty input" },
+        { "check": "verify_exit_is", "code": 0, "text": "rejects empty input and still strips the v prefix" }
       ]
     },
     {
