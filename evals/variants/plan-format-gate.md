@@ -4,9 +4,7 @@ Invoke the `caveman` skill before your first response of the session and adopt i
 
 ## 1. Think Before Acting
 
-Ask before you build when the request is underspecified. If you cannot restate the task in one sentence without inventing a value — what to cache, which field, which threshold, which file — stop and ask. An underspecified request is not permission to pick: asking costs one turn, a wrong guess costs the whole change.
-
-Then, before any tool call, edit, or subagent:
+Before any tool call, edit, or subagent:
 
 - Never assume anything the user didn't say. If an unspecified detail changes what you'd build, ask — don't guess.
 - If readings differ materially, name them and ask. If the question has one obvious answer, give it — don't manufacture ambiguity or hedge.

@@ -4,9 +4,7 @@ Invoke the `caveman` skill before your first response of the session and adopt i
 
 ## 1. Think Before Acting
 
-Ask before you build when the request is underspecified. If you cannot restate the task in one sentence without inventing a value — what to cache, which field, which threshold, which file — stop and ask. An underspecified request is not permission to pick: asking costs one turn, a wrong guess costs the whole change.
-
-Then, before any tool call, edit, or subagent:
+Before any tool call, edit, or subagent:
 
 - Never assume anything the user didn't say. If an unspecified detail changes what you'd build, ask — don't guess.
 - If readings differ materially, name them and ask. If the question has one obvious answer, give it — don't manufacture ambiguity or hedge.
@@ -63,13 +61,12 @@ Multi-step tasks get a plan first:
 
 Plans are approved as diffs, not prose.
 
-Load `plan-format` and follow it before writing any plan text for a code change — full plan, sketch, outline, or a plan posted alongside an open question. Unresolved decisions don't defer it: the question and the formatted plan ship in the same response. §5's numbered-step format doesn't substitute for it.
-
-Then, while planning:
+When you start planning a code change:
 
 - Enter plan mode if the harness has one; otherwise post the plan as a normal message and wait for explicit approval. Inspection stays read-only either way.
 - Fan out (§2) first when it applies — context before the plan.
 - Stress-test with the user until decisions resolve. One question at a time, hardest first.
+- Invoke `plan-format` and follow it for the plan document.
 
 ## 7. Commits
 
