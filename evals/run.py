@@ -38,6 +38,22 @@ LOCKFILE = EVALS / ".sweep.lock"
 RUN_TIMEOUT_S = 600
 
 
+def _as_text(stream) -> str:
+    """TimeoutExpired carries bytes even under text=True."""
+    if isinstance(stream, bytes):
+        return stream.decode(errors="replace")
+    return stream or ""
+
+
+def clone_repo() -> Path:
+    """Repo-backed probes run against a throwaway clone, never the live checkout:
+    they hold Bash unattended and nothing restores the working tree afterwards.
+    `--local` hardlinks, so this is cheap."""
+    path = Path(tempfile.mkdtemp(prefix="eval-repo-"))
+    subprocess.run(["git", "clone", "-q", "--local", str(REPO), str(path)], check=True)
+    return path
+
+
 def git(*args, cwd=REPO, check=True):
     return subprocess.run(
         ["git", *args], cwd=cwd, check=check, capture_output=True, text=True
@@ -170,8 +186,11 @@ def make_sandbox(probe: dict) -> Path:
 
 
 def run_probe(probe: dict, out_dir: Path) -> None:
-    sandbox = make_sandbox(probe) if probe["sandbox"] == "fixture" else None
-    cwd = sandbox or REPO
+    is_fixture = probe["sandbox"] == "fixture"
+    sandbox = make_sandbox(probe) if is_fixture else clone_repo()
+    cwd = sandbox
+    # Pin the pre-run commit: `git diff HEAD` goes blind the moment the model commits.
+    base_sha = git("rev-parse", "HEAD", cwd=sandbox).stdout.strip()
     env = os.environ.copy()
     stub_bin = None
     if probe.get("gh_stub"):
@@ -202,9 +221,9 @@ def run_probe(probe: dict, out_dir: Path) -> None:
     except subprocess.TimeoutExpired as e:
         # Keep whatever streamed before the hang: a run that mutated the sandbox
         # and then stalled is a failure, not an infrastructure exclusion.
-        (out_dir / "transcript.jsonl").write_text(e.stdout or "")
+        (out_dir / "transcript.jsonl").write_text(_as_text(e.stdout))
         (out_dir / "stderr.txt").write_text(
-            f"TIMEOUT after {RUN_TIMEOUT_S}s\n{e.stderr or ''}"
+            f"TIMEOUT after {RUN_TIMEOUT_S}s\n{_as_text(e.stderr)}"
         )
 
     if stub_bin:
@@ -214,7 +233,7 @@ def run_probe(probe: dict, out_dir: Path) -> None:
         # git_diff_* assertion is blind to a file the model created.
         subprocess.run(["git", "add", "-A", "-N"], cwd=sandbox, check=False)
         (out_dir / "diff.patch").write_text(
-            git("diff", "HEAD", cwd=sandbox, check=False).stdout
+            git("diff", base_sha, cwd=sandbox, check=False).stdout
         )
         if verify := probe.get("verify"):
             # Run in the sandbox during the sweep, never in grade.py — grading
@@ -223,9 +242,10 @@ def run_probe(probe: dict, out_dir: Path) -> None:
                 ["bash", "-c", verify], cwd=sandbox, capture_output=True, text=True
             )
             (out_dir / "verify-exit.txt").write_text(str(rc.returncode))
-        shutil.copytree(
-            sandbox, out_dir / "workdir", ignore=shutil.ignore_patterns(".git")
-        )
+        if is_fixture:
+            shutil.copytree(
+                sandbox, out_dir / "workdir", ignore=shutil.ignore_patterns(".git")
+            )
         shutil.rmtree(sandbox, ignore_errors=True)
         shutil.rmtree(
             sandbox.with_name(sandbox.name + "-origin.git"), ignore_errors=True
@@ -239,6 +259,10 @@ def main() -> int:
     ap.add_argument("-v", "--variant", action="append", help="variant name (repeatable)")
     ap.add_argument("-o", "--out", default=str(EVALS / "results"), help="output dir")
     args = ap.parse_args()
+
+    if args.runs < 1:
+        print("error: --runs must be >= 1", file=sys.stderr)
+        return 1
 
     # Resolve the work list before taking the lock, so an argument typo cannot
     # leave a lockfile behind.
