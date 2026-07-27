@@ -92,7 +92,7 @@ def reconcile_instructions() -> bool:
     return False
 
 
-def make_sandbox(dirty: bool) -> Path:
+def make_sandbox(probe: dict) -> Path:
     path = Path(tempfile.mkdtemp(prefix="eval-fixture-"))
     for src in (EVALS / "fixture").iterdir():
         shutil.copy2(src, path / src.name)
@@ -102,20 +102,58 @@ def make_sandbox(dirty: bool) -> Path:
         "-c", "user.name=Eval Runner",
         "-c", "commit.gpgsign=false",
     ]
-    subprocess.run(["git", "init", "-q"], cwd=path, check=True)
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=path, check=True)
     subprocess.run(["git", *ident, "add", "-A"], cwd=path, check=True)
     subprocess.run(
         ["git", *ident, "commit", "-qm", "fixture baseline"], cwd=path, check=True
     )
-    if dirty:
+    if branch := probe.get("branch"):
+        # A PR probe needs a remote to diff against and a feature branch ahead
+        # of it — the shape that made create-pr skip all of its questions.
+        origin = path.with_name(path.name + "-origin.git")
+        subprocess.run(
+            ["git", "clone", "-q", "--bare", str(path), str(origin)], check=True
+        )
+        subprocess.run(
+            ["git", *ident, "remote", "add", "origin", str(origin)], cwd=path, check=True
+        )
+        subprocess.run(["git", *ident, "fetch", "-q", "origin"], cwd=path, check=True)
+        subprocess.run(["git", *ident, "switch", "-qc", branch], cwd=path, check=True)
+        # A wired-up feature, not a dangling helper: a dead function is a
+        # defect the model stops to report, and that noise moves the probe.
+        install = path / "install.sh"
+        install.write_text(
+            install.read_text()
+            .replace(
+                "main() {",
+                'verify_checksum() {\n  shasum -a 256 -c "$1.sha256"\n}\n\nmain() {',
+            )
+            .replace(
+                '  echo "installing ${version}"',
+                '  verify_checksum "${version}"\n  echo "installing ${version}"',
+            )
+        )
+        subprocess.run(
+            ["git", *ident, "commit", "-qam", "Add checksum verification"],
+            cwd=path,
+            check=True,
+        )
+    if probe["dirty"]:
         with (path / "README.md").open("a") as fh:
             fh.write("\nSupports `--verbose` for detailed output.\n")
     return path
 
 
 def run_probe(probe: dict, out_dir: Path) -> None:
-    sandbox = make_sandbox(probe["dirty"]) if probe["sandbox"] == "fixture" else None
+    sandbox = make_sandbox(probe) if probe["sandbox"] == "fixture" else None
     cwd = sandbox or REPO
+    env = os.environ.copy()
+    stub_bin = None
+    if probe.get("gh_stub"):
+        stub_bin = Path(tempfile.mkdtemp(prefix="eval-stub-bin-"))
+        shutil.copy2(EVALS / "stubs" / "gh", stub_bin / "gh")
+        (stub_bin / "gh").chmod(0o755)
+        env["PATH"] = f"{stub_bin}{os.pathsep}{env['PATH']}"
     cmd = [
         "claude", "-p",
         "--output-format", "stream-json",
@@ -131,6 +169,7 @@ def run_probe(probe: dict, out_dir: Path) -> None:
         proc = subprocess.run(
             cmd,
             cwd=cwd,
+            env=env,
             input=probe["prompt"],
             capture_output=True,
             text=True,
@@ -142,6 +181,8 @@ def run_probe(probe: dict, out_dir: Path) -> None:
         (out_dir / "transcript.jsonl").write_text("")
         (out_dir / "stderr.txt").write_text(f"TIMEOUT after {RUN_TIMEOUT_S}s\n")
 
+    if stub_bin:
+        shutil.rmtree(stub_bin, ignore_errors=True)
     if sandbox:
         (out_dir / "diff.patch").write_text(
             git("diff", "HEAD", cwd=sandbox, check=False).stdout
@@ -150,6 +191,9 @@ def run_probe(probe: dict, out_dir: Path) -> None:
             sandbox, out_dir / "workdir", ignore=shutil.ignore_patterns(".git")
         )
         shutil.rmtree(sandbox, ignore_errors=True)
+        shutil.rmtree(
+            sandbox.with_name(sandbox.name + "-origin.git"), ignore_errors=True
+        )
 
 
 def main() -> int:
