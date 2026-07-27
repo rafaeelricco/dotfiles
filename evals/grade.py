@@ -130,6 +130,9 @@ def main() -> int:
     probes = {p["id"]: p for p in json.loads((EVALS / "probes.json").read_text())["probes"]}
     variants = sorted(d.name for d in args.results.iterdir() if d.is_dir())
     report = {}
+    # Tracked outside `report` so the `if not per_run` skip below cannot also
+    # swallow the record of why a probe never scored.
+    excluded = {}
 
     for variant in variants:
         report[variant] = {}
@@ -153,6 +156,8 @@ def main() -> int:
                     per_assertion[assertion["text"]].append(ok)
                     outcomes.append(ok)
                 per_run.append(all(outcomes))
+            if errored:
+                excluded[(variant, probe_id)] = errored
             if not per_run:
                 continue
             report[variant][probe_id] = {
@@ -215,16 +220,11 @@ def main() -> int:
     else:
         print(f"\nNothing scored below {ref}.\n")
 
-    dropped = [
-        (v, pid, r["errored"])
-        for v in variants
-        for pid, r in report[v].items()
-        if r.get("errored")
-    ]
-    if dropped:
+    if excluded:
         print("## Runs excluded (no tool calls, no output — API error or kill)\n")
-        for variant, probe_id, count in dropped:
-            print(f"- {variant}/`{probe_id}`: {count} excluded")
+        for (variant, probe_id), count in sorted(excluded.items()):
+            note = "" if report[variant].get(probe_id) else " — probe never scored"
+            print(f"- {variant}/`{probe_id}`: {count} excluded{note}")
         print("\nThese are infrastructure failures, not rule violations. Re-run to replace them.\n")
 
     low_n = min(
