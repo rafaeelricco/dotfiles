@@ -52,25 +52,32 @@ def acquire_lock() -> tuple[bool, bool]:
     the working tree is crash residue rather than a deliberate copy.
     """
     after_crash = False
-    if LOCKFILE.exists():
+    while True:
         try:
-            pid = int(LOCKFILE.read_text().split()[0])
-            os.kill(pid, 0)
-        except (ValueError, IndexError, ProcessLookupError):
-            print(f"reclaiming stale lock at {LOCKFILE}", file=sys.stderr)
-            after_crash = True
-        except PermissionError:
-            pass  # process exists, owned by another user
-        else:
+            fd = os.open(LOCKFILE, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError:
+            try:
+                pid = int(LOCKFILE.read_text().split()[0])
+                os.kill(pid, 0)
+            except (ValueError, IndexError, ProcessLookupError, FileNotFoundError):
+                print(f"reclaiming stale lock at {LOCKFILE}", file=sys.stderr)
+                LOCKFILE.unlink(missing_ok=True)
+                after_crash = True
+                continue
+            except PermissionError:
+                owner = f"pid {pid}, owned by another user"
+            else:
+                owner = f"pid {pid}"
             print(
-                f"error: another sweep is running (pid {pid}).\n"
+                f"error: another sweep is running ({owner}).\n"
                 f"       Two sweeps cannot share one INSTRUCTIONS.md — wait for it,\n"
                 f"       or delete {LOCKFILE} if you know that process is dead.",
                 file=sys.stderr,
             )
             return False, False
-    LOCKFILE.write_text(f"{os.getpid()}\n")
-    return True, after_crash
+        os.write(fd, f"{os.getpid()}\n".encode())
+        os.close(fd)
+        return True, after_crash
 
 
 def reconcile_instructions(after_crash: bool) -> bool:
@@ -192,16 +199,30 @@ def run_probe(probe: dict, out_dir: Path) -> None:
         )
         (out_dir / "transcript.jsonl").write_text(proc.stdout)
         (out_dir / "stderr.txt").write_text(proc.stderr)
-    except subprocess.TimeoutExpired:
-        (out_dir / "transcript.jsonl").write_text("")
-        (out_dir / "stderr.txt").write_text(f"TIMEOUT after {RUN_TIMEOUT_S}s\n")
+    except subprocess.TimeoutExpired as e:
+        # Keep whatever streamed before the hang: a run that mutated the sandbox
+        # and then stalled is a failure, not an infrastructure exclusion.
+        (out_dir / "transcript.jsonl").write_text(e.stdout or "")
+        (out_dir / "stderr.txt").write_text(
+            f"TIMEOUT after {RUN_TIMEOUT_S}s\n{e.stderr or ''}"
+        )
 
     if stub_bin:
         shutil.rmtree(stub_bin, ignore_errors=True)
     if sandbox:
+        # Intent-to-add so untracked files appear in the diff; without this every
+        # git_diff_* assertion is blind to a file the model created.
+        subprocess.run(["git", "add", "-A", "-N"], cwd=sandbox, check=False)
         (out_dir / "diff.patch").write_text(
             git("diff", "HEAD", cwd=sandbox, check=False).stdout
         )
+        if verify := probe.get("verify"):
+            # Run in the sandbox during the sweep, never in grade.py — grading
+            # stays a read-only pass over recorded results.
+            rc = subprocess.run(
+                ["bash", "-c", verify], cwd=sandbox, capture_output=True, text=True
+            )
+            (out_dir / "verify-exit.txt").write_text(str(rc.returncode))
         shutil.copytree(
             sandbox, out_dir / "workdir", ignore=shutil.ignore_patterns(".git")
         )
