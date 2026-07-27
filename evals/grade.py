@@ -15,6 +15,7 @@ import json
 import re
 import statistics
 import sys
+from collections import Counter
 from pathlib import Path
 
 EVALS = Path(__file__).resolve().parent
@@ -38,9 +39,14 @@ def load_transcript(path: Path) -> dict:
         except json.JSONDecodeError:
             continue
         if msg.get("type") == "assistant":
+            msg_id = msg.get("message", {}).get("id")
             for block in msg.get("message", {}).get("content", []):
                 if block.get("type") == "tool_use":
-                    calls.append({"name": block.get("name"), "input": block.get("input") or {}})
+                    calls.append({
+                        "name": block.get("name"),
+                        "input": block.get("input") or {},
+                        "msg_id": msg_id,
+                    })
         elif msg.get("type") == "result":
             result = msg.get("result") or ""
             cost = msg.get("total_cost_usd") or 0.0
@@ -97,6 +103,27 @@ def check(assertion: dict, run_dir: Path, tx: dict) -> bool:
             and re.search(assertion["pattern"], c["input"].get("command", ""))
             for c in calls
         )
+    if kind == "skill_invoked_before_tool":
+        skill_at = next(
+            (i for i, c in enumerate(calls)
+             if c["name"] == "Skill" and c["input"].get("skill") == assertion["skill"]),
+            None,
+        )
+        tool_at = next(
+            (i for i, c in enumerate(calls)
+             if c["name"] == assertion["tool"]
+             and re.search(assertion["pattern"], json.dumps(c["input"]))),
+            None,
+        )
+        return skill_at is not None and (tool_at is None or skill_at < tool_at)
+    if kind == "parallel_tool_calls_min":
+        # Blocks share one message id when the model emits them in a single
+        # turn; that, not stream position, is what makes them concurrent.
+        batches = Counter(c["msg_id"] for c in calls if c["name"] == assertion["tool"])
+        return max(batches.values(), default=0) >= assertion["count"]
+    if kind == "verify_exit_is":
+        f = run_dir / "verify-exit.txt"
+        return f.exists() and f.read_text().strip() == str(assertion["code"])
 
     patch_file = run_dir / "diff.patch"
     patch = patch_file.read_text() if patch_file.exists() else ""
@@ -179,7 +206,11 @@ def main() -> int:
             }
 
     if args.json:
-        json.dump(report, sys.stdout, indent=2)
+        # `excluded` is keyed by tuple, which json cannot serialize — re-nest it.
+        nested = {}
+        for (variant, probe_id), count in excluded.items():
+            nested.setdefault(variant, {})[probe_id] = count
+        json.dump({"report": report, "excluded": nested}, sys.stdout, indent=2)
         return 0
 
     ref = args.baseline if args.baseline in variants else variants[0]
