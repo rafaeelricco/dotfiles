@@ -8,8 +8,11 @@ restored on exit, including on Ctrl-C.
 A hard kill (SIGKILL, parent process exit) skips that restore and strands a
 variant in the working tree, where it has previously been swept into a commit.
 Two guards cover that: a lockfile so two sweeps can never interleave, and a
-startup reconcile that restores INSTRUCTIONS.md from HEAD when its contents are
-provably a leftover variant rather than real edits.
+startup reconcile that restores INSTRUCTIONS.md when a reclaimed stale lock
+proves the previous sweep died. The lock is taken first, so reconcile can never
+revert the file out from under a sweep that is still running, and matching a
+variant is not on its own treated as residue — copying a winning variant onto
+the live file is a deliberate act the reconcile refuses to undo.
 
 Usage:
     evals/run.py                      # all probes, all variants, 5 runs each
@@ -41,15 +44,21 @@ def git(*args, cwd=REPO, check=True):
     )
 
 
-def acquire_lock() -> bool:
-    """Refuse to start while another sweep owns the repo. Reclaims a stale lock
-    whose owning process is gone."""
+def acquire_lock() -> tuple[bool, bool]:
+    """Refuse to start while another sweep owns the repo.
+
+    Returns `(acquired, after_crash)`. `after_crash` is True only when the lock
+    was reclaimed from a dead process — the one case where a variant sitting in
+    the working tree is crash residue rather than a deliberate copy.
+    """
+    after_crash = False
     if LOCKFILE.exists():
         try:
             pid = int(LOCKFILE.read_text().split()[0])
             os.kill(pid, 0)
         except (ValueError, IndexError, ProcessLookupError):
             print(f"reclaiming stale lock at {LOCKFILE}", file=sys.stderr)
+            after_crash = True
         except PermissionError:
             pass  # process exists, owned by another user
         else:
@@ -59,27 +68,36 @@ def acquire_lock() -> bool:
                 f"       or delete {LOCKFILE} if you know that process is dead.",
                 file=sys.stderr,
             )
-            return False
+            return False, False
     LOCKFILE.write_text(f"{os.getpid()}\n")
-    return True
+    return True, after_crash
 
 
-def reconcile_instructions() -> bool:
+def reconcile_instructions(after_crash: bool) -> bool:
     """Undo a variant stranded by a hard-killed sweep, but never touch real edits.
 
     A killed sweep leaves a variant sitting in the working tree, where it has
-    been committed by accident before. If the dirty content is byte-identical to
-    a known variant it can only be that leftover, so restore it from HEAD.
-    Anything else is the user's own work — refuse and let them decide.
+    been committed by accident before. Restore it from the index only when the
+    reclaimed lock proves a sweep died. Without that proof, variant-identical
+    content is a deliberate copy — promoting a winning variant to the live file
+    is the normal workflow — so refuse and let the user decide.
     """
     if not git("status", "--porcelain", "--", str(INSTRUCTIONS)).stdout.strip():
         return True
     current = INSTRUCTIONS.read_text()
     for variant in sorted((EVALS / "variants").glob("*.md")):
         if variant.read_text() == current:
+            if not after_crash:
+                print(
+                    f"error: INSTRUCTIONS.md matches variant '{variant.stem}' but is\n"
+                    "       uncommitted, and no sweep was interrupted — so this looks\n"
+                    "       deliberate. Commit or stash it; the runner overwrites it.",
+                    file=sys.stderr,
+                )
+                return False
             print(
                 f"INSTRUCTIONS.md was left as '{variant.stem}' by an interrupted sweep — "
-                "restoring from HEAD.",
+                f"restoring. Undo with: cp evals/variants/{variant.stem}.md INSTRUCTIONS.md",
                 file=sys.stderr,
             )
             git("checkout", "--", str(INSTRUCTIONS))
@@ -161,9 +179,6 @@ def run_probe(probe: dict, out_dir: Path) -> None:
         "--permission-mode", probe["permission_mode"],
         "--allowedTools", *probe["allowed_tools"],
     ]
-    # Clear any prior sweep's artifacts so grading never mixes runs from an
-    # older version of the probe with fresh ones.
-    shutil.rmtree(out_dir, ignore_errors=True)
     out_dir.mkdir(parents=True)
     try:
         proc = subprocess.run(
@@ -216,9 +231,11 @@ def main() -> int:
         print("error: no probes or no variants matched", file=sys.stderr)
         return 1
 
-    if not reconcile_instructions():
+    acquired, after_crash = acquire_lock()
+    if not acquired:
         return 1
-    if not acquire_lock():
+    if not reconcile_instructions(after_crash):
+        LOCKFILE.unlink(missing_ok=True)
         return 1
 
     original = INSTRUCTIONS.read_text()
@@ -238,6 +255,11 @@ def main() -> int:
         for variant in variants:
             INSTRUCTIONS.write_text(variant.read_text())
             for probe in probes:
+                # Clear the whole arm so a smaller -n cannot leave stale runs
+                # behind for grade.py's `run-*` glob to fold back in.
+                shutil.rmtree(
+                    out_root / variant.stem / probe["id"], ignore_errors=True
+                )
                 for run in range(1, args.runs + 1):
                     done += 1
                     print(
