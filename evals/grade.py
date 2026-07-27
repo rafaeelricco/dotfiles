@@ -91,6 +91,12 @@ def check(assertion: dict, run_dir: Path, tx: dict) -> bool:
         return sum(1 for c in calls if c["name"] == assertion["tool"]) >= assertion["count"]
     if kind == "result_matches":
         return re.search(assertion["pattern"], tx["result"]) is not None
+    if kind == "bash_command_not_matches":
+        return not any(
+            c["name"] == "Bash"
+            and re.search(assertion["pattern"], c["input"].get("command", ""))
+            for c in calls
+        )
 
     patch_file = run_dir / "diff.patch"
     patch = patch_file.read_text() if patch_file.exists() else ""

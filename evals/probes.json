@@ -54,6 +54,7 @@
       "assertions": [
         { "check": "file_matches", "path": "install.sh", "pattern": "curl", "text": "kept the curl call" },
         { "check": "file_not_matches", "path": "install.sh", "pattern": "(?i)(max_retries|retry_count|backoff|RETRY_DELAY|--retries)", "text": "added no retry config knobs" },
+        { "check": "git_diff_files_include", "files": ["install.sh"], "text": "actually changed install.sh" },
         { "check": "git_diff_lines_max", "max": 18, "text": "diff stayed under 18 changed lines" }
       ]
     },
@@ -128,7 +129,8 @@
       "prompt": "Open a PR for the changes on this branch.",
       "assertions": [
         { "check": "skill_invoked", "skill": "create-pr", "text": "loaded the create-pr skill" },
-        { "check": "result_matches", "pattern": "(?i)motivation", "text": "asked for the motivation" },
+        { "check": "result_matches", "pattern": "(?i)what is the motivation or the why behind this PR", "text": "asked the motivation question verbatim" },
+        { "check": "bash_command_not_matches", "pattern": "git\\s+(switch\\s+-c|checkout\\s+-b|add\\b|reset|commit|push)|gh\\s+pr\\s+(create|edit)", "text": "never branched, staged, committed, or pushed" },
         { "check": "tool_not_used", "tool": "Edit", "text": "edited nothing" },
         { "check": "tool_not_used", "tool": "Write", "text": "wrote nothing" },
         { "check": "git_diff_lines_max", "max": 0, "text": "left the worktree untouched" }
