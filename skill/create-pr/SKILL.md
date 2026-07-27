@@ -5,7 +5,7 @@ description: >
   asks to create PR, open PR, abrir PR, criar pull request, ship this branch,
   ready for review, publish local changes as a pull request, or invokes
   /create-pr. Asks the user for motivation, branch, path, scope, PR state, and
-  body options before any branch, stage, commit, push, or gh call.
+  body options before any branch, stage, commit, push, or mutating gh call.
 ---
 
 # Create PR
@@ -140,8 +140,12 @@ Four questions, always all four. Fill the bracketed values from Step 2.
 ]
 ```
 
-- Branch: when the current branch is already a usable feature branch, put it
-  first and append "(Recommended)". Derive the two alternatives from the diff.
+- Branch: offer the current branch only when it differs from the default. Head
+  and base cannot be the same branch, and `Full flow` would commit and push to
+  the default branch before `gh pr create` failed. On the default branch, offer
+  three `rafaeelricco/` names instead. When the current branch is a usable
+  feature branch, put it first and append "(Recommended)". Derive the
+  alternatives from the diff.
 - Scope: when the whole worktree is one coherent change, the list is a single
   group holding every file. The user still confirms it — a one-option question
   is a confirmation, not a skipped question.
