@@ -36,8 +36,12 @@ Two exits skip Step 3 by ending the run, not by proceeding past it:
 1. The user waives it in their own words ("don't ask, just ship it"). The
    invented-motivation ban survives the waiver: write the body from the diff
    and state that no motivation was provided.
-2. No interactive user (headless, `-p`). Stop after Step 2 and report the plan
-   you would have proposed. Mutate nothing.
+2. No interactive user. The signal is the interactive tools being absent —
+   under `claude -p` there is no `AskUserQuestion` and no plan mode. Stop after
+   Step 2 and report the plan you would have proposed, quoting the Step 3a
+   question verbatim so the user sees exactly what you would have asked.
+   Mutate nothing. This outranks Step 1's Codex fallback: when plan mode and
+   the user are both absent, report and stop rather than asking and waiting.
 
 Accept-edits, autonomous mode, and "proceed without asking" guidance are
 neither of those.
@@ -50,7 +54,9 @@ present in Step 4 is the approval artifact for every mutation in Step 5.
 
 If plan mode does not exist in this harness (e.g. Codex), follow the same
 steps, post the Step 4 plan as a normal message, and wait for the user's
-explicit approval before executing anything.
+explicit approval before executing anything. That assumes a user is there to
+approve. If the interactive tools are missing because the run is headless, take
+the second exit under "When NOT to ask" instead.
 
 ## Step 2 — Inspect (read-only)
 
