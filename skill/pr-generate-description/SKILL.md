@@ -28,6 +28,14 @@ out:
 
 Do not draft PR descriptions from memory alone when this skill applies.
 
+## Invoked by a caller
+
+When `create-pr` (or another workflow skill) loads this skill, it already holds
+the git context and the user's motivation. Skip §1 and the motivation question
+in §3, ask only the §3 formatting questions, and take the PR title from the
+caller. §1, the motivation question, and title suggestions apply to standalone
+use only.
+
 ## Workflow
 
 1. Detect git context: branch, base branch, diff, and PR state.
@@ -153,7 +161,8 @@ Choose delivery based on PR state:
   `pr-description.markdown` in the repository root, then also show the
   description in chat.
 
-Suggest 2 or 3 plain PR titles:
+Standalone only — a caller supplies its own approved title. Suggest 2 or 3
+plain PR titles:
 
 - Title style per `commit-message` (imperative, no Conventional Commits prefix
   unless the user or repo requires a different convention).

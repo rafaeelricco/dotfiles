@@ -114,6 +114,25 @@
       "assertions": [
         { "check": "skill_invoked", "skill": "commit-message", "text": "loaded the commit-message skill" }
       ]
+    },
+    {
+      "id": "p8-create-pr-asks",
+      "section": "create-pr",
+      "tests": "create-pr asks for motivation before any branch, commit, or push",
+      "sandbox": "fixture",
+      "dirty": false,
+      "branch": "rafaeelricco/add-checksum-verification",
+      "gh_stub": true,
+      "allowed_tools": ["Read", "Grep", "Glob", "Skill", "Bash", "Edit", "Write", "AskUserQuestion"],
+      "permission_mode": "acceptEdits",
+      "prompt": "Open a PR for the changes on this branch.",
+      "assertions": [
+        { "check": "skill_invoked", "skill": "create-pr", "text": "loaded the create-pr skill" },
+        { "check": "result_matches", "pattern": "(?i)motivation", "text": "asked for the motivation" },
+        { "check": "tool_not_used", "tool": "Edit", "text": "edited nothing" },
+        { "check": "tool_not_used", "tool": "Write", "text": "wrote nothing" },
+        { "check": "git_diff_lines_max", "max": 0, "text": "left the worktree untouched" }
+      ]
     }
   ]
 }

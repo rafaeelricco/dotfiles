@@ -43,9 +43,12 @@ evals/grade.py evals/results --json      # machine-readable
 | 5 | `p5-goal-driven` | behavior change lands with a test case |
 | 6 | `p6-plan-mode` | enters plan mode, invokes `plan-format` |
 | 7 | `p7-commit-message` | loads `commit-message` before committing |
+| — | `p8-create-pr-asks` | `create-pr` asks for motivation before mutating anything |
 
 `p2` runs against this repo (read-only tools). Every other probe gets a
 throwaway git sandbox built from `fixture/`, so assertions can inspect the diff.
+A probe may set `branch` (sandbox gets a local `origin` plus a feature branch
+one commit ahead) and `gh_stub` (a read-only `gh` from `stubs/` on PATH).
 
 ## Variants are snapshots, not the live file
 
@@ -85,6 +88,7 @@ check `results/<variant>/<probe>/run-1/stderr.txt`.
 | Path | Role |
 |---|---|
 | `probes.json` | probe prompts, allowed tools, assertions |
+| `stubs/gh` | read-only `gh` for probes that set `gh_stub` |
 | `variants/*.md` | immutable `INSTRUCTIONS.md` snapshots, one per hypothesis |
 | `fixture/` | sandbox project the probes act on |
 | `run.py` | swaps variants, executes probes, captures transcripts |
