@@ -115,7 +115,15 @@ def check(assertion: dict, run_dir: Path, tx: dict) -> bool:
              and re.search(assertion["pattern"], json.dumps(c["input"]))),
             None,
         )
-        return skill_at is not None and (tool_at is None or skill_at < tool_at)
+        # The target must actually run: "loaded X before committing" is not
+        # satisfied by never committing.
+        return skill_at is not None and tool_at is not None and skill_at < tool_at
+    if kind == "skill_invoked_first":
+        return (
+            bool(calls)
+            and calls[0]["name"] == "Skill"
+            and calls[0]["input"].get("skill") == assertion["skill"]
+        )
     if kind == "parallel_tool_calls_min":
         # Blocks share one message id when the model emits them in a single
         # turn; that, not stream position, is what makes them concurrent.
@@ -218,15 +226,18 @@ def main() -> int:
     ordered = [ref, *others]
     print(f"# Instruction eval — {ref} (reference) vs {', '.join(others) or 'nothing'}\n")
     delta_heads = [f"Δ {v}" for v in others]
-    print("| § | Probe | " + " | ".join(ordered + delta_heads) + " | n |")
-    print("|---|---|" + "---|" * (len(ordered) + len(delta_heads) + 1))
+    print("| § | Probe | " + " | ".join(ordered + delta_heads) + " |")
+    print("|---|---|" + "---|" * (len(ordered) + len(delta_heads)))
 
     regressions = []
     for probe_id, probe in probes.items():
         rows = {v: report.get(v, {}).get(probe_id) for v in ordered}
         if not any(rows.values()):
             continue
-        cells = [pct(rows[v]["pass_rate"]) if rows[v] else "  —  " for v in ordered]
+        cells = [
+            f"{pct(rows[v]['pass_rate'])} n={rows[v]['n']}" if rows[v] else "  —  "
+            for v in ordered
+        ]
         for other in others:
             if rows[ref] and rows[other]:
                 d = rows[other]["pass_rate"] - rows[ref]["pass_rate"]
@@ -235,15 +246,19 @@ def main() -> int:
                     regressions.append((probe_id, other, rows[ref], rows[other]))
             else:
                 cells.append("  —  ")
-        n = next((r["n"] for r in rows.values() if r), 0)
         sec = next((r["section"] for r in rows.values() if r), "?")
-        print(f"| {sec} | `{probe_id}` | " + " | ".join(cells) + f" | {n} |")
+        print(f"| {sec} | `{probe_id}` | " + " | ".join(cells) + " |")
 
-    print("\n## Cost per full pass\n")
+    print("\n## Cost per sweep\n")
     for variant in variants:
         total = sum(r["cost_usd"] for r in report[variant].values())
         avg_ms = statistics.mean([r["duration_ms"] for r in report[variant].values()] or [0])
-        print(f"- **{variant}**: ${total:.4f}, mean run {avg_ms / 1000:.1f}s")
+        runs = sum(r["n"] + r["errored"] for r in report[variant].values())
+        per_run = f", ${total / runs:.4f}/run" if runs else ""
+        print(
+            f"- **{variant}**: ${total:.4f} over {runs} runs{per_run}, "
+            f"mean run {avg_ms / 1000:.1f}s"
+        )
 
     if regressions:
         print(f"\n## Below {ref} — failing assertions\n")
