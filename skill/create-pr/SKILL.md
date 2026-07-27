@@ -31,17 +31,23 @@ Never. Step 3 has no conditional branches — every question fires on every run.
 A question whose answer you can already guess is still asked; you put that
 answer first and append "(Recommended)" to its label.
 
-Two exits skip Step 3 by ending the run, not by proceeding past it:
+Two situations change how Step 3 runs. Neither authorizes a mutation, and
+neither skips the Step 4 plan:
 
-1. The user waives it in their own words ("don't ask, just ship it"). The
-   invented-motivation ban survives the waiver: write the body from the diff
-   and state that no motivation was provided.
-2. No interactive user. The signal is the interactive tools being absent —
-   under `claude -p` there is no `AskUserQuestion` and no plan mode. Stop after
-   Step 2 and report the plan you would have proposed, quoting the Step 3a
-   question verbatim so the user sees exactly what you would have asked.
-   Mutate nothing. This outranks Step 1's Codex fallback: when plan mode and
-   the user are both absent, report and stop rather than asking and waiting.
+1. The user waives the questions in their own words ("don't ask, just ship
+   it"). Skip 3a–3c and continue. For each waived question take the answer you
+   would have marked "(Recommended)", write the body from the diff, and present
+   the Step 4 plan as usual so the user sees those defaults before approving.
+   The waiver covers the questions, not the approval gate. The
+   invented-motivation ban survives it: state that no motivation was provided.
+2. No `AskUserQuestion` and no plan mode. Do not try to infer whether a user is
+   present — you cannot observe that, and Codex-style harnesses lack both tools
+   while a user is very much there. Degrade to prose: in one message, ask the
+   Step 3a question verbatim, report the Step 2 findings and the plan you would
+   propose, and end your turn. Mutate nothing until a user message approves it.
+   If someone is there they answer and the run continues from Step 3; if nobody
+   answers, the run ends having mutated nothing, which is the correct outcome.
+   Never treat your own message, a timeout, or the end of the run as approval.
 
 Accept-edits, autonomous mode, and "proceed without asking" guidance are
 neither of those.
@@ -53,10 +59,9 @@ anything else. Inspection happens read-only inside plan mode; the plan you
 present in Step 4 is the approval artifact for every mutation in Step 5.
 
 If plan mode does not exist in this harness (e.g. Codex), follow the same
-steps, post the Step 4 plan as a normal message, and wait for the user's
-explicit approval before executing anything. That assumes a user is there to
-approve. If the interactive tools are missing because the run is headless, take
-the second exit under "When NOT to ask" instead.
+steps and post the Step 4 plan as a normal message instead. Execute only after
+a user message approves it — see the second item under "When NOT to ask", which
+covers both this case and a run with no user at all.
 
 ## Step 2 — Inspect (read-only)
 
@@ -168,7 +173,8 @@ words.
 
 Load `plan-format`. State concretely:
 
-- **Branch only** — approved branch name and base. Nothing else.
+- **Branch only** — approved branch name and base, or "already on it, nothing
+  to create" when the approved branch is the current one. Nothing else.
 - **You handle commits** — Step 2 findings and the suggested split. No commands.
 - **Full flow** — branch (new or current) and base; the commit split, one
   commit per category (feature, refactor, formatting, tests, config), ordered
@@ -187,13 +193,18 @@ Run exactly what was approved. Make no new decisions.
 
 **Branch only**
 
+If the approved branch is the one you are already on there is nothing to
+create — say so and stop. Otherwise:
+
 ```bash
 git switch -c "approved-branch-name"
 ```
 
 **You handle commits** — report and stop. No mutating commands.
 
-**Full flow** — create the branch when approved:
+**Full flow** — run `switch -c` only when the approved branch is one of the new
+`rafaeelricco/` names; when the user approved the current branch, skip it and
+commit on the branch you are on:
 
 ```bash
 git switch -c "approved-branch-name"
