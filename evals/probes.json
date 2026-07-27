@@ -39,7 +39,7 @@
       "prompt": "Audit this repo for anything that would break a fresh install on a new machine. Cover four areas independently: the shell installers under scripts/, the PowerShell installers, the nvim config, and the skill definitions under skill/. Report findings per area.",
       "assertions": [
         { "check": "tool_used", "tool": "Agent", "text": "spawned at least one subagent" },
-        { "check": "tool_call_count_min", "tool": "Agent", "count": 2, "text": "spawned 2+ subagents (parallel fan-out)" }
+        { "check": "parallel_tool_calls_min", "tool": "Agent", "count": 2, "text": "spawned 2+ subagents in one batch" }
       ]
     },
     {
@@ -51,10 +51,12 @@
       "allowed_tools": ["Read", "Grep", "Glob", "Skill", "Edit", "Write", "Bash"],
       "permission_mode": "acceptEdits",
       "prompt": "fetch_release in install.sh should retry once if curl fails. Only that one call site.",
+      "verify": "curl() { case \" $* \" in *\" --retry \"*) return 0;; esac; n=$((n+1)); [ \"$n\" -ge 2 ]; }; n=0; . ./install.sh; fetch_release >/dev/null",
       "assertions": [
         { "check": "file_matches", "path": "install.sh", "pattern": "curl", "text": "kept the curl call" },
         { "check": "file_not_matches", "path": "install.sh", "pattern": "(?i)(max_retries|retry_count|backoff|RETRY_DELAY|--retries)", "text": "added no retry config knobs" },
         { "check": "git_diff_files_include", "files": ["install.sh"], "text": "actually changed install.sh" },
+        { "check": "verify_exit_is", "code": 0, "text": "fetch_release survives one curl failure" },
         { "check": "git_diff_lines_max", "max": 18, "text": "diff stayed under 18 changed lines" }
       ]
     },
@@ -84,8 +86,8 @@
       "prompt": "parse_version should reject empty input instead of returning an empty string. Add that.",
       "assertions": [
         { "check": "git_diff_files_subset", "files": ["install.sh", "test.sh"], "text": "changed only install.sh and test.sh" },
-        { "check": "git_diff_files_include", "files": ["test.sh"], "text": "added a test case" },
-        { "check": "file_matches", "path": "test.sh", "pattern": "(?i)(empty|\"\"|''')", "text": "test covers the empty-input case" }
+        { "check": "git_diff_files_include", "files": ["install.sh", "test.sh"], "text": "changed the code and added a test" },
+        { "check": "file_matches", "path": "test.sh", "pattern": "(?m)^[^#\\n]*parse_version\\s+(\"\"|'')", "text": "test calls parse_version with empty input" }
       ]
     },
     {
@@ -100,6 +102,8 @@
       "assertions": [
         { "check": "skill_invoked", "skill": "plan-format", "text": "invoked plan-format" },
         { "check": "tool_not_used", "tool": "Edit", "text": "kept inspection read-only" },
+        { "check": "tool_not_used", "tool": "Write", "text": "wrote nothing" },
+        { "check": "git_diff_lines_max", "max": 0, "text": "left the worktree untouched" },
         { "check": "result_matches", "pattern": "```diff", "text": "plan shows the change as a diff" }
       ]
     },
@@ -113,7 +117,7 @@
       "permission_mode": "acceptEdits",
       "prompt": "Commit the current changes.",
       "assertions": [
-        { "check": "skill_invoked", "skill": "commit-message", "text": "loaded the commit-message skill" }
+        { "check": "skill_invoked_before_tool", "skill": "commit-message", "tool": "Bash", "pattern": "git\\s+commit", "text": "loaded commit-message before committing" }
       ]
     },
     {
@@ -124,7 +128,7 @@
       "dirty": false,
       "branch": "rafaeelricco/add-checksum-verification",
       "gh_stub": true,
-      "allowed_tools": ["Read", "Grep", "Glob", "Skill", "Bash", "Edit", "Write", "AskUserQuestion"],
+      "allowed_tools": ["Read", "Grep", "Glob", "Skill", "Bash", "Edit", "Write"],
       "permission_mode": "acceptEdits",
       "prompt": "Open a PR for the changes on this branch.",
       "assertions": [

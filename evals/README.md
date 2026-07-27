@@ -29,7 +29,7 @@ with `-n 1` to confirm the plumbing, then raise it — single runs prove nothing
 ```bash
 evals/run.py -n 1 -p p0-caveman          # smoke test, 4 runs
 evals/run.py -n 10 -p p6-plan-mode       # one probe, high confidence
-evals/grade.py evals/results --json      # machine-readable
+evals/grade.py evals/results --json      # machine-readable: {report, excluded}
 ```
 
 ## Probes
@@ -49,7 +49,16 @@ evals/grade.py evals/results --json      # machine-readable
 `p2` runs against this repo (read-only tools). Every other probe gets a
 throwaway git sandbox built from `fixture/`, so assertions can inspect the diff.
 A probe may set `branch` (sandbox gets a local `origin` plus a feature branch
-one commit ahead) and `gh_stub` (a read-only `gh` from `stubs/` on PATH).
+one commit ahead), `gh_stub` (a read-only `gh` from `stubs/` on PATH), and
+`verify` (a shell command run in the sandbox after the model finishes, whose
+exit code `verify_exit_is` asserts on). `verify` runs during the sweep, never
+during grading — `grade.py` stays a read-only pass over recorded results.
+
+`diff.patch` is captured after `git add -A -N`, so files the model *creates*
+show up too. Without that every `git_diff_*` assertion is blind to a new file.
+A run that times out now keeps whatever it streamed before hanging and is
+graded as a failure rather than excluded, so a run cannot hide a mutation
+behind a hang.
 
 ## Variants are snapshots, not the live file
 
@@ -67,6 +76,11 @@ evals/grade.py evals/results --baseline plan-format-gate
 ```
 
 To find which variant is live: `diff INSTRUCTIONS.md evals/variants/*.md`.
+
+Results collected before an assertion existed cannot satisfy it — a probe that
+gains a `verify` command scores 0% against old runs that have no
+`verify-exit.txt`. That is stale data, not a regression. Delete the arm and
+re-sweep.
 
 The same applies to probes. Editing a probe's prompt or assertions invalidates
 every result already collected under its id — `run.py` clears the run directories
@@ -106,6 +120,9 @@ Add an entry to `probes.json`. Assertions available:
 | `tool_used` / `tool_not_used` | `tool` | the tool was / was not called |
 | `tool_call_count_min` | `tool`, `count` | called at least `count` times |
 | `bash_command_not_matches` | `pattern` | no `Bash` command matched the regex |
+| `skill_invoked_before_tool` | `skill`, `tool`, `pattern` | the skill loaded before the first matching tool call |
+| `parallel_tool_calls_min` | `tool`, `count` | `count` calls to `tool` shared one assistant message — a real batch, not serial delegation |
+| `verify_exit_is` | `code` | the probe's `verify` command exited with `code` |
 | `result_matches` | `pattern` | regex matches the final response |
 | `file_matches` / `file_not_matches` | `path`, `pattern` | regex matches the file after the run |
 | `git_diff_files_subset` | `files` | changed files ⊆ `files` |
