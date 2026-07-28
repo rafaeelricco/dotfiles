@@ -28,6 +28,11 @@
       },
       "id": "User.splitPane.A6751878",
       "keys": "alt+shift+d"
+    },
+    {
+      "command": "duplicateTab",
+      "id": "User.duplicateTab",
+      "keys": "ctrl+shift+t"
     }
   ],
   "copyFormatting": "none",
@@ -45,7 +50,9 @@
   "tabSwitcherMode": "mru",
   "startupActions": "",
   "profiles": {
-    "defaults": {},
+    "defaults": {
+      "background": "#141414"
+    },
     "list": [
       {
         "adjustIndistinguishableColors": "indexed",

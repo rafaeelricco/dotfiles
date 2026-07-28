@@ -16,8 +16,8 @@ one `skill/` tree, installed through safe, repeatable symlinks.
 
 **Prerequisites:** Git. Claude Code 2.1.203+, Codex, and Grok are optional; each is
 configured only when its CLI is available on `PATH`. Windows also requires
-PowerShell 7. Developer Mode or an elevated shell is required only when at
-least one detected CLI needs symlinks.
+PowerShell 7. Developer Mode or an elevated shell is required when agent or
+Windows terminal install needs symlinks.
 
 ### macOS / Linux
 
@@ -61,12 +61,15 @@ The default clone is `~/.dotfiles`. Use `--dir PATH` / `-Dir PATH` or
 `DOTFILES_DIR` to override it. Use `--yes` / `-Yes` to back up conflicts
 without prompting, `--override` / `-Override` to permanently remove conflicts
 without backups, `--skip-claude` / `-SkipClaude`, `--skip-codex` / `-SkipCodex`, and
-`--skip-grok` / `-SkipGrok` to skip individual CLIs. Skip flags may be combined.
-Install and update preserve existing configuration for absent or skipped CLIs.
-Backup and override modes cannot be used together.
+`--skip-grok` / `-SkipGrok` to skip individual CLIs, and `-SkipTerminal` on
+Windows to skip PowerShell profile / Windows Terminal setup. Skip flags may be
+combined. Install and update preserve existing configuration for absent or
+skipped CLIs. Backup and override modes cannot be used together.
 
 These scripts configure agent instructions and skills; they do not install,
-remove, or authenticate the Claude Code, Codex, or Grok CLIs.
+remove, or authenticate the Claude Code, Codex, or Grok CLIs. On Windows they
+also link the PowerShell profile and theme and merge managed Windows Terminal
+keys (unless `-SkipTerminal`).
 
 ## Update
 
@@ -135,6 +138,22 @@ Repository validation and filesystem failures exit 1; Bash argument errors exit
 Each column is created or synchronized only when its CLI is detected on `PATH`
 and not explicitly skipped. Existing managed links remain untouched otherwise.
 
+### Windows terminal (`install.ps1` only; skip with `-SkipTerminal`)
+
+| Source | Destination |
+| ------ | ----------- |
+| `powershell/Microsoft.PowerShell_profile.ps1` | `$PROFILE` (current PowerShell 7 host profile) |
+| `powershell/themes/robbyrussell.omp.json` | `<profile-dir>/themes/robbyrussell.omp.json` |
+| managed WT keys | live `settings.json` (Store package or unpackaged path) |
+
+Managed Windows Terminal keys only:
+
+- `profiles.defaults.background` = `#141414`
+- action: `ctrl+shift+t` → `duplicateTab` (same CWD as the current tab; the profile emits OSC 9;9 so Terminal knows the path)
+
+`powershell/required_config.json` is a **reference snapshot**, not fully installed.
+Install does not replace the whole Windows Terminal settings file.
+
 `CLAUDE_CONFIG_DIR`, `CODEX_HOME`, and `GROK_HOME` are honored. The former Claude
 marketplace is retired; existing marketplace installations are not removed
 automatically.
@@ -171,4 +190,6 @@ Run the installer as your normal user, not with `sudo`.
 
 - [`nvim/`](nvim/) — Neovim configuration and setup guides.
 - [`powershell/`](powershell/) — PowerShell profile and terminal theme.
+  On Windows, `install.ps1` links the profile and theme and merges managed
+  Windows Terminal keys (`#141414` background, `Ctrl+Shift+T` → `duplicateTab`).
 - [`.zshrc`](.zshrc) — Zsh configuration.

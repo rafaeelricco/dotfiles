@@ -7,7 +7,8 @@ param(
     [switch]$Override,
     [switch]$SkipClaude,
     [switch]$SkipCodex,
-    [switch]$SkipGrok
+    [switch]$SkipGrok,
+    [switch]$SkipTerminal
 )
 
 $ErrorActionPreference = 'Stop'
@@ -146,7 +147,7 @@ function Test-ValidStateField {
 
 function Add-LifecycleStateRecord {
     param(
-        [Parameter(Mandatory)][ValidateSet('link', 'backup', 'dir')][string]$Type,
+        [Parameter(Mandatory)][ValidateSet('link', 'backup', 'dir', 'terminal')][string]$Type,
         [Parameter(Mandatory)][string]$First,
         [string]$Second
     )
@@ -187,7 +188,7 @@ function Assert-LifecycleStateValid {
             continue
         }
         if (($parts[0] -in @('link', 'backup') -and $parts.Count -eq 3) -or
-            ($parts[0] -eq 'dir' -and $parts.Count -eq 2)) {
+            ($parts[0] -in @('dir', 'terminal') -and $parts.Count -eq 2)) {
             foreach ($part in $parts[1..($parts.Count - 1)]) { Test-ValidStateField $part }
             continue
         }
@@ -570,6 +571,144 @@ function Assert-CodexSkillDestinationWritable {
     }
 }
 
+function Get-WindowsTerminalSettingsPath {
+    if (-not $env:LOCALAPPDATA) { return $null }
+    $candidates = @(
+        (Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'),
+        (Join-Path $env:LOCALAPPDATA 'Microsoft\Windows Terminal\settings.json')
+    )
+    foreach ($path in $candidates) {
+        if (Test-Path -LiteralPath $path -PathType Leaf) { return $path }
+    }
+    $null
+}
+
+function ConvertFrom-WindowsTerminalJson {
+    param([Parameter(Mandatory)][string]$Text)
+    try {
+        return ($Text | ConvertFrom-Json -AsHashtable -ErrorAction Stop)
+    } catch {
+        # Windows Terminal settings often use JSONC (// comments, trailing commas).
+        $noBlock = [regex]::Replace($Text, '(?s)/\*.*?\*/', '')
+        $lines = foreach ($line in ($noBlock -split "`n")) {
+            $inString = $false
+            $escaped = $false
+            $cut = $line.Length
+            for ($i = 0; $i -lt $line.Length; $i++) {
+                $ch = $line[$i]
+                if ($escaped) { $escaped = $false; continue }
+                if ($ch -eq '\' -and $inString) { $escaped = $true; continue }
+                if ($ch -eq '"') { $inString = -not $inString; continue }
+                if (-not $inString -and $ch -eq '/' -and ($i + 1) -lt $line.Length -and $line[$i + 1] -eq '/') {
+                    $cut = $i
+                    break
+                }
+            }
+            $line.Substring(0, $cut)
+        }
+        $stripped = ($lines -join "`n")
+        $stripped = [regex]::Replace($stripped, ',(\s*[}\]])', '$1')
+        $stripped | ConvertFrom-Json -AsHashtable -ErrorAction Stop
+    }
+}
+
+function Write-WindowsTerminalJson {
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [Parameter(Mandatory)]$Settings
+    )
+    $json = $Settings | ConvertTo-Json -Depth 100
+    $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+    [System.IO.File]::WriteAllText($Path, $json + [Environment]::NewLine, $utf8NoBom)
+}
+
+function Get-JsonMapKeys {
+    param($Action)
+    if ($null -eq $Action) { return $null }
+    if ($Action -is [System.Collections.IDictionary]) { return [string]$Action['keys'] }
+    if ($null -ne $Action.PSObject -and $null -ne $Action.PSObject.Properties['keys']) {
+        return [string]$Action.keys
+    }
+    $null
+}
+
+function Merge-WindowsTerminalManagedSettings {
+    param([Parameter(Mandatory)][string]$SettingsPath)
+    $managedBackground = '#141414'
+    $managedKeys = 'ctrl+shift+t'
+
+    $raw = [System.IO.File]::ReadAllText($SettingsPath)
+    $settings = ConvertFrom-WindowsTerminalJson -Text $raw
+    if ($settings -isnot [System.Collections.IDictionary]) {
+        throw "Windows Terminal settings root must be an object: $SettingsPath"
+    }
+
+    if (-not $settings.ContainsKey('profiles') -or $null -eq $settings['profiles']) {
+        $settings['profiles'] = @{}
+    }
+    $profiles = $settings['profiles']
+    if ($profiles -isnot [System.Collections.IDictionary]) {
+        throw "Windows Terminal profiles must be an object: $SettingsPath"
+    }
+    if (-not $profiles.ContainsKey('defaults') -or $null -eq $profiles['defaults']) {
+        $profiles['defaults'] = @{}
+    }
+    $defaults = $profiles['defaults']
+    if ($defaults -isnot [System.Collections.IDictionary]) {
+        throw "Windows Terminal profiles.defaults must be an object: $SettingsPath"
+    }
+    $defaults['background'] = $managedBackground
+
+    $filtered = [System.Collections.Generic.List[object]]::new()
+    if ($settings.ContainsKey('actions') -and $null -ne $settings['actions']) {
+        foreach ($action in @($settings['actions'])) {
+            if ((Get-JsonMapKeys $action) -eq $managedKeys) { continue }
+            $filtered.Add($action) | Out-Null
+        }
+    }
+    $filtered.Add([ordered]@{
+            command = 'duplicateTab'
+            id      = 'User.duplicateTab'
+            keys    = $managedKeys
+        }) | Out-Null
+    $settings['actions'] = [object[]]@($filtered.ToArray())
+
+    Write-WindowsTerminalJson -Path $SettingsPath -Settings $settings
+}
+
+function Install-WindowsTerminalDotfiles {
+    param([Parameter(Mandatory)][string]$RepoDir)
+    if (-not $IsWindows) { return }
+    if ($SkipTerminal.IsPresent) {
+        Write-Host 'Terminal: skipped (-SkipTerminal).'
+        return
+    }
+
+    Write-Host '== PowerShell / Windows Terminal =='
+    $profileSrc = Join-Path $RepoDir 'powershell\Microsoft.PowerShell_profile.ps1'
+    $themeSrc = Join-Path $RepoDir 'powershell\themes\robbyrussell.omp.json'
+    if (-not (Test-Path -LiteralPath $profileSrc -PathType Leaf)) { throw "source missing: $profileSrc" }
+    if (-not (Test-Path -LiteralPath $themeSrc -PathType Leaf)) { throw "source missing: $themeSrc" }
+
+    $profileDest = $PROFILE
+    if ([string]::IsNullOrWhiteSpace($profileDest)) {
+        throw 'PowerShell $PROFILE is empty; cannot install the profile link.'
+    }
+    $themeDest = Join-Path (Split-Path -Parent $profileDest) 'themes\robbyrussell.omp.json'
+
+    Install-Link -LinkPath $profileDest -TargetPath $profileSrc
+    Install-Link -LinkPath $themeDest -TargetPath $themeSrc
+
+    $settingsPath = Get-WindowsTerminalSettingsPath
+    if ($null -eq $settingsPath) {
+        Write-Host 'Windows Terminal: settings.json not found; skipping WT merge.'
+        return
+    }
+    Merge-WindowsTerminalManagedSettings -SettingsPath $settingsPath
+    Add-LifecycleStateRecord -Type terminal -First $settingsPath
+    Write-Host "Windows Terminal: merged managed keys into $settingsPath"
+}
+
 function Invoke-DotfilesInstall {
     if ($Yes.IsPresent -and $Override.IsPresent) {
         throw '-Yes and -Override cannot be used together.'
@@ -602,7 +741,9 @@ function Invoke-DotfilesInstall {
             (Join-Path $managedRepo '.claude\skills'),
             (Join-Path $managedRepo '.claude\agents'),
             (Join-Path $managedRepo '.codex\AGENTS.md'),
-            (Join-Path $managedRepo '.grok\AGENTS.md')
+            (Join-Path $managedRepo '.grok\AGENTS.md'),
+            (Join-Path $managedRepo 'powershell\Microsoft.PowerShell_profile.ps1'),
+            (Join-Path $managedRepo 'powershell\themes\robbyrussell.omp.json')
         )
     }
     $interactive = [Environment]::UserInteractive -and -not [Console]::IsInputRedirected -and -not $Yes.IsPresent -and -not $Override.IsPresent
@@ -617,7 +758,8 @@ function Invoke-DotfilesInstall {
     $installClaude = -not $SkipClaude.IsPresent -and (Test-CliPresent 'claude')
     $installCodex = -not $SkipCodex.IsPresent -and (Test-CliPresent 'codex')
     $installGrok = -not $SkipGrok.IsPresent -and (Test-CliPresent 'grok')
-    if ($installClaude -or $installCodex -or $installGrok) {
+    $installTerminal = $IsWindows -and -not $SkipTerminal.IsPresent
+    if ($installClaude -or $installCodex -or $installGrok -or $installTerminal) {
         Test-SymlinkCapability
     }
     if ($installCodex) {
@@ -670,6 +812,8 @@ function Invoke-DotfilesInstall {
     } else {
         Write-Host 'Grok: not detected on PATH; skipping.'
     }
+
+    Install-WindowsTerminalDotfiles -RepoDir $repoDir
 
     Write-Host "Dotfiles setup completed from $repoDir"
 }
