@@ -54,7 +54,8 @@ snapshot.
 
 ## Gate 2 — Synthesize
 
-Collapse worker output before anything downstream reads it:
+Collapse worker output before anything downstream reads it. Use these four
+labels verbatim — Gate 3 and the eval harness both key on them:
 
 ```
 Paths:    <file:line — what lives there>

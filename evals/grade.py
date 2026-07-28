@@ -124,6 +124,22 @@ def check(assertion: dict, run_dir: Path, tx: dict) -> bool:
             and calls[0]["name"] == "Skill"
             and calls[0]["input"].get("skill") == assertion["skill"]
         )
+    if kind == "tool_used_after_skill":
+        skill_at = next(
+            (i for i, c in enumerate(calls)
+             if c["name"] == "Skill" and c["input"].get("skill") == assertion["skill"]),
+            None,
+        )
+        if skill_at is None:
+            return False
+        pattern = assertion.get("pattern")
+        # Scan only past the skill load, so a gate-1 worker spawned earlier
+        # cannot satisfy (or spuriously fail) the check.
+        return any(
+            c["name"] == assertion["tool"]
+            and (pattern is None or re.search(pattern, json.dumps(c["input"])))
+            for c in calls[skill_at + 1:]
+        )
     if kind == "tool_used_before_skill":
         tool_at = next(
             (i for i, c in enumerate(calls) if c["name"] == assertion["tool"]),

@@ -128,6 +128,7 @@ Add an entry to `probes.json`. Assertions available:
 | `skill_invoked_first` | `skill` | the skill was the very first tool call |
 | `skill_invoked_before_tool` | `skill`, `tool`, `pattern` | the skill loaded before the first matching tool call — fails if that call never happens |
 | `tool_used_before_skill` | `tool`, `skill` | the tool was called before the skill loaded — fails if either never happens |
+| `tool_used_after_skill` | `tool`, `skill`, optional `pattern` | the tool was called after the skill loaded, optionally matching `pattern` against the call input — earlier calls are ignored |
 | `parallel_tool_calls_min` | `tool`, `count` | `count` calls to `tool` shared one assistant message — a real batch, not serial delegation |
 | `verify_exit_is` | `code` | the probe's `verify` command exited with `code` |
 | `result_matches` | `pattern` | regex matches the final response |
