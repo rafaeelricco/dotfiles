@@ -157,6 +157,7 @@
         { "check": "parallel_tool_calls_min", "tool": "Agent", "count": 2, "text": "fanned out 2+ workers in one batch (gate 1)" },
         { "check": "tool_used_before_skill", "tool": "Agent", "skill": "consult-advisor", "text": "fanned out before consulting the advisor (gate 1 -> 3)" },
         { "check": "skill_invoked", "skill": "consult-advisor", "text": "refined through consult-advisor (gate 3)" },
+        { "check": "tool_used_after_skill", "tool": "Agent", "skill": "consult-advisor", "text": "delegated to an advisor after loading consult-advisor (gate 3)" },
         { "check": "tool_used_after_skill", "tool": "Agent", "skill": "consult-advisor", "pattern": "Paths:.*Facts:.*Gaps:.*Approach:", "text": "sent the advisor a collapsed synthesis (gate 2)" },
         { "check": "skill_invoked_before_tool", "skill": "consult-advisor", "tool": "Skill", "pattern": "\"skill\": \"plan-format\"", "text": "consulted before planning (gate 3 -> 4)" },
         { "check": "skill_invoked", "skill": "plan-format", "text": "loaded plan-format (gate 4)" },
