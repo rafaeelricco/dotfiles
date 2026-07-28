@@ -60,7 +60,7 @@ Collapse worker output before anything downstream reads it:
 Paths:    <file:line — what lives there>
 Facts:    <what the code does today, verified>
 Gaps:     <what no worker resolved>
-Approach: <provisional, one paragraph>
+Approach: <provisional, one paragraph — advisor input, not plan text>
 ```
 
 Never forward raw worker transcripts. The advisor and the plan need the
