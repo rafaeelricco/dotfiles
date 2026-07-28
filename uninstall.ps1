@@ -200,13 +200,24 @@ function Get-Candidates {
     $codexHome = if ($env:CODEX_HOME) { [System.IO.Path]::GetFullPath($env:CODEX_HOME) } else { $defaultCodex }
     $defaultGrok = Join-Path $HOME '.grok'
     $grokHome = if ($env:GROK_HOME) { [System.IO.Path]::GetFullPath($env:GROK_HOME) } else { $defaultGrok }
+    $profilePath = $PROFILE
+    $themePath = if (-not [string]::IsNullOrWhiteSpace($profilePath)) {
+        Join-Path (Split-Path -Parent $profilePath) 'themes\robbyrussell.omp.json'
+    } else {
+        $null
+    }
     foreach ($path in @(
         (Join-Path $defaultClaude 'CLAUDE.md'), (Join-Path $claudeHome 'CLAUDE.md'),
         (Join-Path $defaultCodex 'AGENTS.md'), (Join-Path $codexHome 'AGENTS.md'),
         (Join-Path $defaultGrok 'AGENTS.md'), (Join-Path $grokHome 'AGENTS.md'),
         (Join-Path $defaultClaude 'agents\advisor.md'), (Join-Path $defaultClaude 'agents\opus-advisor.md'),
-        (Join-Path $claudeHome 'agents\advisor.md'), (Join-Path $claudeHome 'agents\opus-advisor.md')
-    )) { $candidates.Add($path) | Out-Null; $known.Add($path) | Out-Null }
+        (Join-Path $claudeHome 'agents\advisor.md'), (Join-Path $claudeHome 'agents\opus-advisor.md'),
+        $profilePath, $themePath
+    )) {
+        if ([string]::IsNullOrWhiteSpace($path)) { continue }
+        $candidates.Add($path) | Out-Null
+        $known.Add($path) | Out-Null
+    }
     Add-SkillCandidates (Join-Path $defaultClaude 'skills') $candidates $known
     Add-SkillCandidates (Join-Path $claudeHome 'skills') $candidates $known
     Add-SkillCandidates (Join-Path $defaultCodex 'skills') $candidates $known
@@ -235,6 +246,12 @@ function Test-AllowedSourceShape {
     )
     if ($name -in @('CLAUDE.md', 'AGENTS.md')) {
         return $null -ne ($guidanceTargets | Where-Object { Test-SamePath $_ $Target } | Select-Object -First 1)
+    }
+    if ($name -eq 'Microsoft.PowerShell_profile.ps1') {
+        return Test-SamePath $Target (Join-Path $RepoDir 'powershell\Microsoft.PowerShell_profile.ps1')
+    }
+    if ($name -eq 'robbyrussell.omp.json') {
+        return Test-SamePath $Target (Join-Path $RepoDir 'powershell\themes\robbyrussell.omp.json')
     }
     if ($name -in @('advisor.md', 'opus-advisor.md')) {
         return Test-SamePath $Target (Join-Path $RepoDir ".claude\agents\$name")
@@ -356,6 +373,124 @@ function Confirm-Uninstall {
     }
 }
 
+function Get-WindowsTerminalSettingsPath {
+    if (-not $env:LOCALAPPDATA) { return $null }
+    $candidates = @(
+        (Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'),
+        (Join-Path $env:LOCALAPPDATA 'Microsoft\Windows Terminal\settings.json')
+    )
+    foreach ($path in $candidates) {
+        if (Test-Path -LiteralPath $path -PathType Leaf) { return $path }
+    }
+    $null
+}
+
+function ConvertFrom-WindowsTerminalJson {
+    param([Parameter(Mandatory)][string]$Text)
+    try {
+        return ($Text | ConvertFrom-Json -AsHashtable -ErrorAction Stop)
+    } catch {
+        $noBlock = [regex]::Replace($Text, '(?s)/\*.*?\*/', '')
+        $lines = foreach ($line in ($noBlock -split "`n")) {
+            $inString = $false
+            $escaped = $false
+            $cut = $line.Length
+            for ($i = 0; $i -lt $line.Length; $i++) {
+                $ch = $line[$i]
+                if ($escaped) { $escaped = $false; continue }
+                if ($ch -eq '\' -and $inString) { $escaped = $true; continue }
+                if ($ch -eq '"') { $inString = -not $inString; continue }
+                if (-not $inString -and $ch -eq '/' -and ($i + 1) -lt $line.Length -and $line[$i + 1] -eq '/') {
+                    $cut = $i
+                    break
+                }
+            }
+            $line.Substring(0, $cut)
+        }
+        $stripped = ($lines -join "`n")
+        $stripped = [regex]::Replace($stripped, ',(\s*[}\]])', '$1')
+        $stripped | ConvertFrom-Json -AsHashtable -ErrorAction Stop
+    }
+}
+
+function Write-WindowsTerminalJson {
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [Parameter(Mandatory)]$Settings
+    )
+    $json = $Settings | ConvertTo-Json -Depth 100
+    $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+    [System.IO.File]::WriteAllText($Path, $json + [Environment]::NewLine, $utf8NoBom)
+}
+
+function Get-JsonMapKeys {
+    param($Action)
+    if ($null -eq $Action) { return $null }
+    if ($Action -is [System.Collections.IDictionary]) { return [string]$Action['keys'] }
+    if ($null -ne $Action.PSObject -and $null -ne $Action.PSObject.Properties['keys']) {
+        return [string]$Action.keys
+    }
+    $null
+}
+
+function Test-IsDuplicateTabCommand {
+    param($Command)
+    if ($null -eq $Command) { return $false }
+    if ($Command -is [string]) { return $Command -eq 'duplicateTab' }
+    if ($Command -is [System.Collections.IDictionary]) {
+        return [string]$Command['action'] -eq 'duplicateTab'
+    }
+    if ($null -ne $Command.PSObject -and $null -ne $Command.PSObject.Properties['action']) {
+        return [string]$Command.action -eq 'duplicateTab'
+    }
+    $false
+}
+
+function Undo-WindowsTerminalManagedSettings {
+    if (-not $IsWindows) { return }
+    $settingsPath = Get-WindowsTerminalSettingsPath
+    if ($null -eq $settingsPath) { return }
+
+    $managedBackground = '#141414'
+    $managedKeys = 'ctrl+shift+t'
+    $raw = [System.IO.File]::ReadAllText($settingsPath)
+    $settings = ConvertFrom-WindowsTerminalJson -Text $raw
+    if ($settings -isnot [System.Collections.IDictionary]) { return }
+
+    $changed = $false
+    if ($settings.ContainsKey('profiles') -and $settings['profiles'] -is [System.Collections.IDictionary]) {
+        $profiles = $settings['profiles']
+        if ($profiles.ContainsKey('defaults') -and $profiles['defaults'] -is [System.Collections.IDictionary]) {
+            $defaults = $profiles['defaults']
+            if ($defaults.ContainsKey('background') -and [string]$defaults['background'] -eq $managedBackground) {
+                $defaults.Remove('background') | Out-Null
+                $changed = $true
+            }
+        }
+    }
+
+    if ($settings.ContainsKey('actions') -and $null -ne $settings['actions']) {
+        $filtered = [System.Collections.Generic.List[object]]::new()
+        foreach ($action in @($settings['actions'])) {
+            $keys = Get-JsonMapKeys $action
+            $command = $null
+            if ($action -is [System.Collections.IDictionary]) { $command = $action['command'] }
+            elseif ($null -ne $action.PSObject -and $null -ne $action.PSObject.Properties['command']) { $command = $action.command }
+            if ($keys -eq $managedKeys -and (Test-IsDuplicateTabCommand $command)) {
+                $changed = $true
+                continue
+            }
+            $filtered.Add($action) | Out-Null
+        }
+        $settings['actions'] = [object[]]@($filtered.ToArray())
+    }
+
+    if ($changed) {
+        Write-WindowsTerminalJson -Path $settingsPath -Settings $settings
+        Write-Host "Windows Terminal: removed managed keys from $settingsPath"
+    }
+}
+
 function Invoke-DotfilesUninstall {
     if ($Help.IsPresent) { Show-Usage; return }
     if ($Local.IsPresent -and $Dir) { throw '-Local and -Dir cannot be combined.' }
@@ -370,6 +505,7 @@ function Invoke-DotfilesUninstall {
         Assert-StateCleanupSafe $repoDir $state $candidates
         Confirm-Uninstall $repoDir $state
         foreach ($link in $managedLinks) { Remove-LinkSafely $link; Write-Host "removed managed link: $($link.FullName)" }
+        Undo-WindowsTerminalManagedSettings
         Remove-RecordedBackups $state
         Remove-EmptyRecordedDirectories $state
         Remove-Item -LiteralPath $statePath -Force
@@ -393,6 +529,7 @@ function Invoke-DotfilesUninstall {
     Confirm-Uninstall $repoDir $state
 
     foreach ($link in $managedLinks) { Remove-LinkSafely $link; Write-Host "removed managed link: $($link.FullName)" }
+    Undo-WindowsTerminalManagedSettings
     Remove-RecordedBackups $state
     Remove-EmptyRecordedDirectories $state
     Assert-ManagedRepository $repoDir

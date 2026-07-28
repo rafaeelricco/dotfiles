@@ -78,7 +78,7 @@ function Install-RequiredWingetApp {
 }
 
 if (Install-RequiredWingetApp -Id 'JanDeDobbeleer.OhMyPosh' -CommandProbe 'oh-my-posh') {
-    $themeFile = Join-Path $env:USERPROFILE 'Documents\PowerShell\themes\robbyrussell.omp.json'
+    $themeFile = Join-Path (Split-Path -Parent $PROFILE) 'themes\robbyrussell.omp.json'
     try {
         if (Test-Path $themeFile) {
             & ([ScriptBlock]::Create((oh-my-posh init pwsh --config $themeFile --print) -join "`n"))
