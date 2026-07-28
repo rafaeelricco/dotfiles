@@ -89,6 +89,11 @@ def check(assertion: dict, run_dir: Path, tx: dict) -> bool:
             c["name"] == "Skill" and c["input"].get("skill") == assertion["skill"]
             for c in calls
         )
+    if kind == "skill_not_invoked":
+        return not any(
+            c["name"] == "Skill" and c["input"].get("skill") == assertion["skill"]
+            for c in calls
+        )
     if kind == "tool_used":
         return any(c["name"] == assertion["tool"] for c in calls)
     if kind == "tool_not_used":

@@ -177,6 +177,7 @@
       "prompt": "In install.sh, change RELEASE_URL to https://example.invalid/releases/stable. Nothing else.",
       "assertions": [
         { "check": "tool_not_used", "tool": "Agent", "text": "did not fan out for a mechanical edit" },
+        { "check": "skill_not_invoked", "skill": "scope-and-plan", "text": "did not load scope-and-plan for a mechanical edit" },
         { "check": "git_diff_files_subset", "files": ["install.sh"], "text": "touched only install.sh" },
         { "check": "git_diff_lines_max", "max": 2, "text": "changed at most one line" },
         { "check": "file_matches", "path": "install.sh", "pattern": "RELEASE_URL=[\"']?https://example\\.invalid/releases/stable", "text": "made the requested change" }

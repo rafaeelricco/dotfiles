@@ -121,7 +121,7 @@ Add an entry to `probes.json`. Assertions available:
 
 | Check | Fields | True when |
 |---|---|---|
-| `skill_invoked` | `skill` | the `Skill` tool loaded that skill |
+| `skill_invoked` / `skill_not_invoked` | `skill` | the `Skill` tool did / did not load that skill |
 | `tool_used` / `tool_not_used` | `tool` | the tool was / was not called |
 | `tool_call_count_min` | `tool`, `count` | called at least `count` times |
 | `bash_command_not_matches` | `pattern` | no `Bash` command matched the regex |
