@@ -45,8 +45,10 @@ evals/grade.py evals/results --json      # machine-readable: {report, excluded}
 | 6 | `p6-plan-mode` | invokes `plan-format`, defers implementation, shows the change as a diff |
 | 7 | `p7-commit-message` | loads `commit-message` before committing |
 | — | `p8-create-pr-asks` | `create-pr` asks for motivation before mutating anything |
+| — | `p9-scope-and-plan` | fans out, refines via `consult-advisor`, plans via `plan-format` |
+| — | `p10-scope-and-plan-skips` | mechanical edit lands with no fan-out |
 
-`p2` runs against a throwaway `--local` clone of this repo; every other probe
+`p2` and `p9` run against a throwaway `--local` clone of this repo; every other probe
 gets a sandbox built from `fixture/`. Both are disposable, so a probe can hold
 `Bash` without reaching your checkout. `EnterPlanMode` is not exposed under
 `claude -p`, so plan-mode *entry* cannot be asserted here — `p6` measures what
@@ -119,12 +121,14 @@ Add an entry to `probes.json`. Assertions available:
 
 | Check | Fields | True when |
 |---|---|---|
-| `skill_invoked` | `skill` | the `Skill` tool loaded that skill |
+| `skill_invoked` / `skill_not_invoked` | `skill` | the `Skill` tool did / did not load that skill |
 | `tool_used` / `tool_not_used` | `tool` | the tool was / was not called |
 | `tool_call_count_min` | `tool`, `count` | called at least `count` times |
 | `bash_command_not_matches` | `pattern` | no `Bash` command matched the regex |
 | `skill_invoked_first` | `skill` | the skill was the very first tool call |
 | `skill_invoked_before_tool` | `skill`, `tool`, `pattern` | the skill loaded before the first matching tool call — fails if that call never happens |
+| `tool_used_before_skill` | `tool`, `skill` | the tool was called before the skill loaded — fails if either never happens |
+| `tool_used_after_skill` | `tool`, `skill`, optional `pattern` | the tool was called after the skill loaded, optionally matching `pattern` against the call input — earlier calls are ignored |
 | `parallel_tool_calls_min` | `tool`, `count` | `count` calls to `tool` shared one assistant message — a real batch, not serial delegation |
 | `verify_exit_is` | `code` | the probe's `verify` command exited with `code` |
 | `result_matches` | `pattern` | regex matches the final response |

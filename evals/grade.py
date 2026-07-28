@@ -89,6 +89,11 @@ def check(assertion: dict, run_dir: Path, tx: dict) -> bool:
             c["name"] == "Skill" and c["input"].get("skill") == assertion["skill"]
             for c in calls
         )
+    if kind == "skill_not_invoked":
+        return not any(
+            c["name"] == "Skill" and c["input"].get("skill") == assertion["skill"]
+            for c in calls
+        )
     if kind == "tool_used":
         return any(c["name"] == assertion["tool"] for c in calls)
     if kind == "tool_not_used":
@@ -124,6 +129,35 @@ def check(assertion: dict, run_dir: Path, tx: dict) -> bool:
             and calls[0]["name"] == "Skill"
             and calls[0]["input"].get("skill") == assertion["skill"]
         )
+    if kind == "tool_used_after_skill":
+        skill_at = next(
+            (i for i, c in enumerate(calls)
+             if c["name"] == "Skill" and c["input"].get("skill") == assertion["skill"]),
+            None,
+        )
+        if skill_at is None:
+            return False
+        pattern = assertion.get("pattern")
+        # Scan only past the skill load, so a gate-1 worker spawned earlier
+        # cannot satisfy (or spuriously fail) the check.
+        return any(
+            c["name"] == assertion["tool"]
+            and (pattern is None or re.search(pattern, json.dumps(c["input"])))
+            for c in calls[skill_at + 1:]
+        )
+    if kind == "tool_used_before_skill":
+        tool_at = next(
+            (i for i, c in enumerate(calls) if c["name"] == assertion["tool"]),
+            None,
+        )
+        skill_at = next(
+            (i for i, c in enumerate(calls)
+             if c["name"] == "Skill" and c["input"].get("skill") == assertion["skill"]),
+            None,
+        )
+        # Both ends must run: "fanned out before consulting" is not satisfied
+        # by never fanning out.
+        return tool_at is not None and skill_at is not None and tool_at < skill_at
     if kind == "parallel_tool_calls_min":
         # Blocks share one message id when the model emits them in a single
         # turn; that, not stream position, is what makes them concurrent.
