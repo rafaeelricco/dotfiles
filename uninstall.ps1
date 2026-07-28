@@ -253,8 +253,8 @@ function Test-AllowedSourceShape {
     if ($name -in @('CLAUDE.md', 'AGENTS.md')) {
         return $null -ne ($guidanceTargets | Where-Object { Test-SamePath $_ $Target } | Select-Object -First 1)
     }
-    if ($name -eq 'Microsoft.PowerShell_profile.ps1') {
-        return Test-SamePath $Target (Join-Path $RepoDir 'powershell\Microsoft.PowerShell_profile.ps1')
+    if (Test-SamePath $Target (Join-Path $RepoDir 'powershell\Microsoft.PowerShell_profile.ps1')) {
+        return $true
     }
     if ($name -eq 'robbyrussell.omp.json') {
         return Test-SamePath $Target (Join-Path $RepoDir 'powershell\themes\robbyrussell.omp.json')
