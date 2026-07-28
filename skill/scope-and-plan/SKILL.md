@@ -27,7 +27,7 @@ gets rejected, and the rejection costs more than the fan-out saved.
 
 - You can already name every file and the approach → plan directly
 - One search answers the whole question → run it instead
-- User specified the approach → execute it
+- User specified the approach → proceed directly
 - Mechanical work: rename, format, dependency bump, typo
 
 N workers burn tokens and add latency before the first useful output. In doubt,
