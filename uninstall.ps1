@@ -137,6 +137,7 @@ function Read-LifecycleState {
         Links = [System.Collections.Generic.List[object]]::new()
         Backups = [System.Collections.Generic.List[object]]::new()
         Directories = [System.Collections.Generic.List[string]]::new()
+        TerminalSettings = [System.Collections.Generic.List[string]]::new()
     }
     $path = if ($LocalState.IsPresent) { Get-LocalStateFile } else { Join-Path $RepoDir '.git\dotfiles-lifecycle-state' }
     $expectedHeader = if ($LocalState.IsPresent) { $LocalStateHeader } else { $StateHeader }
@@ -170,6 +171,11 @@ function Read-LifecycleState {
                 if ($parts.Count -ne 2) { throw "malformed lifecycle state at line $($index + 1)" }
                 Assert-StateField $parts[1]
                 $state.Directories.Add($parts[1]) | Out-Null
+            }
+            'terminal' {
+                if ($parts.Count -ne 2) { throw "malformed lifecycle state at line $($index + 1)" }
+                Assert-StateField $parts[1]
+                $state.TerminalSettings.Add($parts[1]) | Out-Null
             }
             default { throw "unknown lifecycle state record at line $($index + 1)" }
         }
@@ -505,7 +511,7 @@ function Invoke-DotfilesUninstall {
         Assert-StateCleanupSafe $repoDir $state $candidates
         Confirm-Uninstall $repoDir $state
         foreach ($link in $managedLinks) { Remove-LinkSafely $link; Write-Host "removed managed link: $($link.FullName)" }
-        Undo-WindowsTerminalManagedSettings
+        if ($state.TerminalSettings.Count -gt 0) { Undo-WindowsTerminalManagedSettings }
         Remove-RecordedBackups $state
         Remove-EmptyRecordedDirectories $state
         Remove-Item -LiteralPath $statePath -Force
@@ -529,7 +535,7 @@ function Invoke-DotfilesUninstall {
     Confirm-Uninstall $repoDir $state
 
     foreach ($link in $managedLinks) { Remove-LinkSafely $link; Write-Host "removed managed link: $($link.FullName)" }
-    Undo-WindowsTerminalManagedSettings
+    if ($state.TerminalSettings.Count -gt 0) { Undo-WindowsTerminalManagedSettings }
     Remove-RecordedBackups $state
     Remove-EmptyRecordedDirectories $state
     Assert-ManagedRepository $repoDir

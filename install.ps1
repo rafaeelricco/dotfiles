@@ -147,7 +147,7 @@ function Test-ValidStateField {
 
 function Add-LifecycleStateRecord {
     param(
-        [Parameter(Mandatory)][ValidateSet('link', 'backup', 'dir')][string]$Type,
+        [Parameter(Mandatory)][ValidateSet('link', 'backup', 'dir', 'terminal')][string]$Type,
         [Parameter(Mandatory)][string]$First,
         [string]$Second
     )
@@ -188,7 +188,7 @@ function Assert-LifecycleStateValid {
             continue
         }
         if (($parts[0] -in @('link', 'backup') -and $parts.Count -eq 3) -or
-            ($parts[0] -eq 'dir' -and $parts.Count -eq 2)) {
+            ($parts[0] -in @('dir', 'terminal') -and $parts.Count -eq 2)) {
             foreach ($part in $parts[1..($parts.Count - 1)]) { Test-ValidStateField $part }
             continue
         }
@@ -705,6 +705,7 @@ function Install-WindowsTerminalDotfiles {
         return
     }
     Merge-WindowsTerminalManagedSettings -SettingsPath $settingsPath
+    Add-LifecycleStateRecord -Type terminal -First $settingsPath
     Write-Host "Windows Terminal: merged managed keys into $settingsPath"
 }
 
