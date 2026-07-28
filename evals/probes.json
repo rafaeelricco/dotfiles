@@ -160,7 +160,9 @@
         { "check": "skill_invoked_before_tool", "skill": "consult-advisor", "tool": "Skill", "pattern": "\"skill\": \"plan-format\"", "text": "consulted before planning (gate 3 -> 4)" },
         { "check": "skill_invoked", "skill": "plan-format", "text": "loaded plan-format (gate 4)" },
         { "check": "result_matches", "pattern": "```diff", "text": "plan shows the change as a diff" },
-        { "check": "git_diff_lines_max", "max": 0, "text": "kept inspection read-only" }
+        { "check": "tool_not_used", "tool": "Edit", "text": "edited nothing" },
+        { "check": "tool_not_used", "tool": "Write", "text": "wrote nothing" },
+        { "check": "git_diff_lines_max", "max": 0, "text": "left the worktree untouched" }
       ]
     },
     {
