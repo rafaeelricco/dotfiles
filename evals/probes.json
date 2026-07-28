@@ -141,6 +141,40 @@
         { "check": "tool_not_used", "tool": "Write", "text": "wrote nothing" },
         { "check": "git_diff_lines_max", "max": 0, "text": "left the worktree untouched" }
       ]
+    },
+    {
+      "id": "p9-scope-and-plan",
+      "section": "scope-and-plan",
+      "tests": "a short 'get context, use sub-agents, then plan' request runs the full fan-out -> consult-advisor -> plan-format chain",
+      "sandbox": "repo",
+      "dirty": false,
+      "allowed_tools": ["Read", "Grep", "Glob", "Skill", "Agent", "Bash", "Edit", "Write"],
+      "permission_mode": "default",
+      "prompt": "Uninstalling is losing user data: backups that were edited after they were created get deleted anyway. Start by getting context — use sub-agents in parallel to decompose this — then plan the fix for me. Don't implement it.",
+      "assertions": [
+        { "check": "skill_invoked", "skill": "scope-and-plan", "text": "loaded the scope-and-plan skill" },
+        { "check": "parallel_tool_calls_min", "tool": "Agent", "count": 2, "text": "fanned out 2+ workers in one batch (gate 1)" },
+        { "check": "skill_invoked", "skill": "consult-advisor", "text": "refined through consult-advisor (gate 3)" },
+        { "check": "skill_invoked", "skill": "plan-format", "text": "loaded plan-format (gate 4)" },
+        { "check": "result_matches", "pattern": "```diff", "text": "plan shows the change as a diff" },
+        { "check": "git_diff_lines_max", "max": 0, "text": "kept inspection read-only" }
+      ]
+    },
+    {
+      "id": "p10-scope-and-plan-skips",
+      "section": "scope-and-plan",
+      "tests": "a mechanical single-file edit does not trigger fan-out",
+      "sandbox": "fixture",
+      "dirty": false,
+      "allowed_tools": ["Read", "Grep", "Glob", "Skill", "Agent", "Edit"],
+      "permission_mode": "acceptEdits",
+      "prompt": "In install.sh, change RELEASE_URL to https://example.invalid/releases/stable. Nothing else.",
+      "assertions": [
+        { "check": "tool_not_used", "tool": "Agent", "text": "did not fan out for a mechanical edit" },
+        { "check": "git_diff_files_subset", "files": ["install.sh"], "text": "touched only install.sh" },
+        { "check": "git_diff_lines_max", "max": 2, "text": "changed at most one line" },
+        { "check": "file_matches", "path": "install.sh", "pattern": "releases/stable", "text": "made the requested change" }
+      ]
     }
   ]
 }

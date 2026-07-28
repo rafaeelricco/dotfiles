@@ -45,8 +45,10 @@ evals/grade.py evals/results --json      # machine-readable: {report, excluded}
 | 6 | `p6-plan-mode` | invokes `plan-format`, defers implementation, shows the change as a diff |
 | 7 | `p7-commit-message` | loads `commit-message` before committing |
 | — | `p8-create-pr-asks` | `create-pr` asks for motivation before mutating anything |
+| — | `p9-scope-and-plan` | fans out, refines via `consult-advisor`, plans via `plan-format` |
+| — | `p10-scope-and-plan-skips` | mechanical edit lands with no fan-out |
 
-`p2` runs against a throwaway `--local` clone of this repo; every other probe
+`p2` and `p9` run against a throwaway `--local` clone of this repo; every other probe
 gets a sandbox built from `fixture/`. Both are disposable, so a probe can hold
 `Bash` without reaching your checkout. `EnterPlanMode` is not exposed under
 `claude -p`, so plan-mode *entry* cannot be asserted here — `p6` measures what
