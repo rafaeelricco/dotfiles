@@ -124,6 +124,19 @@ def check(assertion: dict, run_dir: Path, tx: dict) -> bool:
             and calls[0]["name"] == "Skill"
             and calls[0]["input"].get("skill") == assertion["skill"]
         )
+    if kind == "tool_used_before_skill":
+        tool_at = next(
+            (i for i, c in enumerate(calls) if c["name"] == assertion["tool"]),
+            None,
+        )
+        skill_at = next(
+            (i for i, c in enumerate(calls)
+             if c["name"] == "Skill" and c["input"].get("skill") == assertion["skill"]),
+            None,
+        )
+        # Both ends must run: "fanned out before consulting" is not satisfied
+        # by never fanning out.
+        return tool_at is not None and skill_at is not None and tool_at < skill_at
     if kind == "parallel_tool_calls_min":
         # Blocks share one message id when the model emits them in a single
         # turn; that, not stream position, is what makes them concurrent.
