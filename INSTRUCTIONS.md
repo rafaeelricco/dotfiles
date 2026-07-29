@@ -67,7 +67,8 @@ Load `plan-format` and follow it before writing any plan text for a code change 
 
 Then, while planning:
 
-- Enter plan mode if the harness has one; otherwise post the plan as a normal message and wait for explicit approval. Inspection stays read-only either way.
+- Enter plan mode before inspecting: call `EnterPlanMode`, present the plan, then `ExitPlanMode`. Inspection stays read-only until approval.
+- `EnterPlanMode`/`ExitPlanMode` are often deferred, not absent — load them with `ToolSearch "select:EnterPlanMode,ExitPlanMode"` before concluding the harness has no plan mode. Only if that returns neither, post the plan as a normal message and wait for explicit approval.
 - Fan out (§2) first when it applies — context before the plan.
 - Stress-test with the user until decisions resolve. One question at a time, hardest first.
 

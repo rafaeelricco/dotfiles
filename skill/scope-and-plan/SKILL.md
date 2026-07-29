@@ -13,8 +13,9 @@ description: >
 
 Gather context in parallel, refine it once, then present a plan as diffs.
 
-Four gates, in order. Each gate feeds the next — a plan built on thin context
-gets rejected, and the rejection costs more than the fan-out saved.
+Five gates, Gate 0 through Gate 4, in order. Each gate feeds the next — a plan
+built on thin context gets rejected, and the rejection costs more than the
+fan-out saved.
 
 ## When to use
 
@@ -32,6 +33,19 @@ gets rejected, and the rejection costs more than the fan-out saved.
 
 N workers burn tokens and add latency before the first useful output. In doubt,
 run one search first — if it resolves the request, this skill was not needed.
+
+## Gate 0 — Plan mode
+
+Call `EnterPlanMode` now, before spawning a worker or reading a file. Gates 1-3
+are read-only, so nothing in them needs plan mode off.
+
+`EnterPlanMode` and `ExitPlanMode` may be deferred — absent from the tool list
+until loaded. Load both before concluding they do not exist:
+`ToolSearch "select:EnterPlanMode,ExitPlanMode"`.
+
+Only if that search returns neither does the harness lack plan mode (e.g.
+Codex). Then run every gate the same way and post the Gate 4 plan as a normal
+message.
 
 ## Gate 1 — Fan out
 
@@ -76,9 +90,9 @@ Skip only when `consult-advisor`'s own "When NOT to call" applies.
 
 ## Gate 4 — Plan
 
-Load `plan-format` and follow it before writing any plan text. Enter plan mode if
-the harness has one; otherwise post the plan and wait for explicit approval.
-Inspection stays read-only either way.
+Load `plan-format` and follow it before writing any plan text. Present the plan,
+then call `ExitPlanMode`. Approval of that plan is the gate for implementation.
+Inspection stays read-only until then.
 
 Unresolved decisions do not defer the plan: the open question and the formatted
 plan ship in the same response.
@@ -93,3 +107,5 @@ plan ship in the same response.
   and re-scope before planning.
 - **Gaps block the plan** → name the gap as an open question inside the plan. Do
   not fan out a second round to close it.
+- **`EnterPlanMode` not in the tool list** → deferred, not absent. Run the Gate 0
+  `ToolSearch` before falling back to a plain message.
