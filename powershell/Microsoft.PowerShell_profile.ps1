@@ -1,15 +1,18 @@
 $env:PATH += ";C:\Users\Rafael\scoop\apps\git\current\usr\bin"
 
-# GitHub PAT for private deps (replace placeholder; do not commit real token).
-# Precedence: existing process env > User Windows env > placeholder below.
+# GitHub PAT for private deps. Set it in the Windows User env when needed:
+#   setx GITHUB_TOKEN <token>
+# Precedence: existing process env > User Windows env. Left unset when neither has
+# one, so `gh` falls back to the credentials from `gh auth login`.
 if (-not $env:GITHUB_TOKEN) {
     $__githubTokenUser = [Environment]::GetEnvironmentVariable('GITHUB_TOKEN', 'User')
-    $env:GITHUB_TOKEN = if ($__githubTokenUser) { $__githubTokenUser } else { 'YOUR_GITHUB_TOKEN' }
+    if ($__githubTokenUser) { $env:GITHUB_TOKEN = $__githubTokenUser }
     Remove-Variable __githubTokenUser -ErrorAction SilentlyContinue
 }
 if (-not $env:GH_TOKEN) {
     $__ghTokenUser = [Environment]::GetEnvironmentVariable('GH_TOKEN', 'User')
-    $env:GH_TOKEN = if ($__ghTokenUser) { $__ghTokenUser } else { $env:GITHUB_TOKEN }
+    if ($__ghTokenUser) { $env:GH_TOKEN = $__ghTokenUser }
+    elseif ($env:GITHUB_TOKEN) { $env:GH_TOKEN = $env:GITHUB_TOKEN }
     Remove-Variable __ghTokenUser -ErrorAction SilentlyContinue
 }
 
