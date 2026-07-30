@@ -269,6 +269,9 @@ function Register-CliMcps {
             'codex' { Register-CodexExa -Key $Key *> $null }
             'grok' { Register-GrokExa -Key $Key *> $null }
         }
+        # PS 7.0-7.2 does not turn a nonzero native exit into a terminating error,
+        # and `*> $null` hides the CLI's message, so check the status explicitly.
+        if ($LASTEXITCODE -ne 0) { throw "$Cli mcp add exa failed (exit $LASTEXITCODE)" }
         $names.Add('exa')
     }
     if ($script:WantArgent) {
@@ -277,8 +280,6 @@ function Register-CliMcps {
             'codex' { Register-CodexArgent *> $null }
             'grok' { Register-GrokArgent *> $null }
         }
-        # PS 7.0-7.2 does not turn a nonzero native exit into a terminating error,
-        # and `*> $null` hides the CLI's message, so check the status explicitly.
         if ($LASTEXITCODE -ne 0) { throw "$Cli mcp add argent failed (exit $LASTEXITCODE)" }
         $names.Add('argent')
     }
