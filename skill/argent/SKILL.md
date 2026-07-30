@@ -15,7 +15,7 @@ Argent ships **many** skills (`argent-*`) plus MCP tools (`mcp__argent__*` / Arg
 1. MCP server `argent` registered (`argent mcp`). If tools missing, run:
    `scripts/mcp/install-mcp.ps1 -Mcp argent` (Windows) or `scripts/mcp/install-mcp.sh --mcp argent` (Unix).
 2. Official pack under skill roots (same installer). If `/argent-test-ui-flow` unknown, re-run installer or:
-   `npx --force skills add software-mansion/argent/packages/skills/skills#v$(argent --version) --skill * -y -g -a grok`
+   `npx --force skills add software-mansion/argent/packages/skills/skills#v$(argent --version) --skill '*' -y -g -a grok`
 
 ## Route (load the matching skill, then follow it)
 
