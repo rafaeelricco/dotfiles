@@ -38,7 +38,8 @@ Usage: install-mcp.ps1 [-Mcp <list>] [-ExaKey <key>] [-SkipClaude] [-SkipCodex] 
 
 MCPs:
   exa       Exa search (HTTP). Optional API key → https://dashboard.exa.ai/api-keys
-  argent    Software Mansion Argent (stdio). Needs Node ≥ 20.11 + npm; global install.
+  argent    Software Mansion Argent (stdio + skills). Needs Node ≥ 20.11 + npm; global install.
+            Also installs argent-* skills via npx skills -g (Grok/Claude/Codex agents).
   codex-cc  OpenAI Codex plugin for Claude Code (not an MCP). Needs claude on PATH.
             Optional runtime: npm i -g @openai/codex; then codex login.
 
@@ -136,6 +137,53 @@ function Install-ArgentPackage {
         throw "npm install finished but 'argent' not on PATH; open a new shell or fix npm global bin"
     }
     Write-Host "installed: $ArgentPkg"
+}
+
+function Get-ArgentVersion {
+    $raw = (& argent --version 2>$null | Out-String).Trim()
+    if (-not $raw) { throw "could not read 'argent --version'" }
+    if ($raw -match '(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)') { return $Matches[1] }
+    throw "unparseable argent version: $raw"
+}
+
+# Mirrors argent init skills step: version-pinned GitHub source + npx skills -g.
+# Agent ids match vercel-labs/skills (grok → ~/.grok/skills).
+function Install-ArgentSkills {
+    param(
+        [bool]$SkipClaude,
+        [bool]$SkipCodex,
+        [bool]$SkipGrok
+    )
+    Write-Host '== Argent skills =='
+    $version = Get-ArgentVersion
+    $source = "software-mansion/argent/packages/skills/skills#v$version"
+    $agents = [System.Collections.Generic.List[string]]::new()
+    if (-not $SkipGrok -and (Test-CliPresent 'grok')) { $agents.Add('grok') }
+    if (-not $SkipClaude -and (Test-CliPresent 'claude')) { $agents.Add('claude-code') }
+    if (-not $SkipCodex -and (Test-CliPresent 'codex')) { $agents.Add('codex') }
+    if ($agents.Count -eq 0) {
+        # Still install for Grok path even if CLI binary missing (skills are files).
+        $agents.Add('grok')
+    }
+    $npxArgs = @('--force', 'skills', 'add', $source, '--skill', '*', '-y', '-g')
+    foreach ($a in $agents) { $npxArgs += @('-a', $a) }
+    Write-Host ("npx {0}" -f ($npxArgs -join ' '))
+    & npx @npxArgs
+    if ($LASTEXITCODE -ne 0) {
+        $pkgRoot = & npm root -g
+        $bundled = Join-Path $pkgRoot '@swmansion\argent\skills'
+        if (-not (Test-Path -LiteralPath $bundled)) {
+            throw "npx skills add failed (exit $LASTEXITCODE); no bundled fallback at $bundled"
+        }
+        Write-Host "retry with bundled: $bundled"
+        $npxArgs = @('--force', 'skills', 'add', $bundled, '--skill', '*', '-y', '-g')
+        foreach ($a in $agents) { $npxArgs += @('-a', $a) }
+        & npx @npxArgs
+        if ($LASTEXITCODE -ne 0) {
+            throw "npx skills add (bundled) failed (exit $LASTEXITCODE)"
+        }
+    }
+    Write-Host ("installed skills for: {0}" -f ($agents -join ', '))
 }
 
 # Claude Code plugin (not an MCP). Install once; no per-CLI mcp add.
@@ -255,6 +303,7 @@ function Invoke-McpInstall {
     if ($script:WantArgent) {
         Assert-NodeForArgent
         Install-ArgentPackage
+        Install-ArgentSkills -SkipClaude $SkipClaude.IsPresent -SkipCodex $SkipCodex.IsPresent -SkipGrok $SkipGrok.IsPresent
     }
     if ($script:WantCodexCc) {
         Install-CodexCcPlugin -SkipClaudeCli $SkipClaude.IsPresent

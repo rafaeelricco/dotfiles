@@ -1,14 +1,17 @@
 $env:PATH += ";C:\Users\Rafael\scoop\apps\git\current\usr\bin"
 
-$__githubToken = [Environment]::GetEnvironmentVariable('GITHUB_TOKEN', 'User')
-if ($__githubToken) {
-    if (-not $env:GITHUB_TOKEN) { $env:GITHUB_TOKEN = $__githubToken }
-    if (-not $env:GH_TOKEN) {
-        $__ghToken = [Environment]::GetEnvironmentVariable('GH_TOKEN', 'User')
-        $env:GH_TOKEN = if ($__ghToken) { $__ghToken } else { $__githubToken }
-    }
+# GitHub PAT for private deps (replace placeholder; do not commit real token).
+# Precedence: existing process env > User Windows env > placeholder below.
+if (-not $env:GITHUB_TOKEN) {
+    $__githubTokenUser = [Environment]::GetEnvironmentVariable('GITHUB_TOKEN', 'User')
+    $env:GITHUB_TOKEN = if ($__githubTokenUser) { $__githubTokenUser } else { 'YOUR_GITHUB_TOKEN' }
+    Remove-Variable __githubTokenUser -ErrorAction SilentlyContinue
 }
-Remove-Variable __githubToken, __ghToken -ErrorAction SilentlyContinue
+if (-not $env:GH_TOKEN) {
+    $__ghTokenUser = [Environment]::GetEnvironmentVariable('GH_TOKEN', 'User')
+    $env:GH_TOKEN = if ($__ghTokenUser) { $__ghTokenUser } else { $env:GITHUB_TOKEN }
+    Remove-Variable __ghTokenUser -ErrorAction SilentlyContinue
+}
 
 $MaximumHistoryCount = 20000
 
@@ -164,6 +167,21 @@ function home     { Set-Location -Path $env:USERPROFILE }
 function personal { Set-Location -Path 'D:\Personal' }
 function ambar    { Set-Location -Path 'D:\Projects' }
 function activate { & .\venv\Scripts\activate.ps1 }
+
+# Non-interactive bash from Windows (bash utils.sh / wsl bash -c) does not load ~/.bashrc.
+# BASH_ENV forces Linux brew node/pnpm so Windows nodejs shims are not used first.
+$env:BASH_ENV = '/home/administrator/.wsl_dev_env'
+if ($env:WSLENV -notmatch '(^|:)BASH_ENV(/|$)') {
+    $env:WSLENV = if ($env:WSLENV) { "$env:WSLENV`:BASH_ENV/u" } else { 'BASH_ENV/u' }
+}
+# WSL does not inherit arbitrary Windows process env; list tokens so project .npmrc
+# (${GITHUB_TOKEN}) expands inside bash/pnpm. Set after GITHUB_TOKEN/GH_TOKEN above.
+foreach ($__wslEnvName in @('GITHUB_TOKEN', 'GH_TOKEN')) {
+    if ($env:WSLENV -notmatch "(^|:)$([regex]::Escape($__wslEnvName))(/|$)") {
+        $env:WSLENV = if ($env:WSLENV) { "$env:WSLENV`:$__wslEnvName" } else { $__wslEnvName }
+    }
+}
+Remove-Variable __wslEnvName -ErrorAction SilentlyContinue
 
 # Windows Terminal: report CWD so duplicateTab / splitMode:duplicate inherit path.
 # Without OSC 9;9, WT falls back to profile startingDirectory (%USERPROFILE%).

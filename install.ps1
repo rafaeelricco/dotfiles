@@ -425,6 +425,39 @@ function Test-SymlinkCapability {
     }
 }
 
+function Install-CopiedFile {
+    param(
+        [Parameter(Mandatory)][string]$DestPath,
+        [Parameter(Mandatory)][string]$SourcePath
+    )
+    if (-not (Test-Path -LiteralPath $SourcePath -PathType Leaf)) { throw "source missing: $SourcePath" }
+    $parent = Split-Path -Parent $DestPath
+    if ($parent -and -not (Test-Path -LiteralPath $parent)) {
+        New-RecordedDirectory $parent
+    }
+
+    $item = Get-ItemIfPresent $DestPath
+    if (Test-IsLink $item) {
+        $current = Get-LinkTargetPath $item
+        if (Test-ManagedTarget $current) {
+            Remove-LinkSafely $item
+        } elseif (-not (Resolve-Conflict $DestPath)) {
+            return
+        }
+    } elseif ($null -ne $item) {
+        # Real file already present: preserve secrets. Only -Override replaces.
+        if ($script:ConflictMode -eq 'Override') {
+            Remove-ConflictItem $DestPath
+        } else {
+            Write-Host "kept existing file: $DestPath"
+            return
+        }
+    }
+
+    Copy-Item -LiteralPath $SourcePath -Destination $DestPath -Force
+    Write-Host "copied: $DestPath <- $SourcePath"
+}
+
 function Install-Link {
     param(
         [Parameter(Mandatory)][string]$LinkPath,
@@ -692,11 +725,11 @@ function Install-WindowsTerminalDotfiles {
 
     $profileDest = $PROFILE
     if ([string]::IsNullOrWhiteSpace($profileDest)) {
-        throw 'PowerShell $PROFILE is empty; cannot install the profile link.'
+        throw 'PowerShell $PROFILE is empty; cannot install the profile.'
     }
     $themeDest = Join-Path (Split-Path -Parent $profileDest) 'themes\robbyrussell.omp.json'
 
-    Install-Link -LinkPath $profileDest -TargetPath $profileSrc
+    Install-CopiedFile -DestPath $profileDest -SourcePath $profileSrc
     Install-Link -LinkPath $themeDest -TargetPath $themeSrc
 
     $settingsPath = Get-WindowsTerminalSettingsPath

@@ -68,7 +68,7 @@ skipped CLIs. Backup and override modes cannot be used together.
 
 These scripts configure agent instructions and skills; they do not install,
 remove, or authenticate the Claude Code, Codex, or Grok CLIs. On Windows they
-also link the PowerShell profile and theme and merge managed Windows Terminal
+also copy the PowerShell profile, link the theme, and merge managed Windows Terminal
 keys (unless `-SkipTerminal`).
 
 ## Update
@@ -142,7 +142,7 @@ and not explicitly skipped. Existing managed links remain untouched otherwise.
 
 | Source | Destination |
 | ------ | ----------- |
-| `powershell/Microsoft.PowerShell_profile.ps1` | `$PROFILE` (current PowerShell 7 host profile) |
+| `powershell/Microsoft.PowerShell_profile.ps1` | `$PROFILE` (**copy**, not symlink; re-install skips existing file unless `-Override`) |
 | `powershell/themes/robbyrussell.omp.json` | `<profile-dir>/themes/robbyrussell.omp.json` |
 | managed WT keys | live `settings.json` (Store package or unpackaged path) |
 
@@ -153,6 +153,18 @@ Managed Windows Terminal keys only:
 
 `powershell/required_config.json` is a **reference snapshot**, not fully installed.
 Install does not replace the whole Windows Terminal settings file.
+
+### Node/pnpm via WSL (Windows, optional)
+
+Non-interactive `bash` from PowerShell can use Linux Homebrew node/pnpm via
+`BASH_ENV` → `~/.wsl_dev_env` (avoids Windows Node shims that fail with
+`exec: node: not found`). See [`scripts/windows/README.md`](scripts/windows/README.md).
+
+```powershell
+wsl -d Ubuntu-24.04 -- bash /mnt/<drive>/.../dotfiles/scripts/windows/setup-wsl-node.sh
+```
+
+Docker: install **Docker Desktop** on Windows (not docker-ce inside the distro).
 
 `CLAUDE_CONFIG_DIR`, `CODEX_HOME`, and `GROK_HOME` are honored. The former Claude
 marketplace is retired; existing marketplace installations are not removed
@@ -190,8 +202,11 @@ Run the installer as your normal user, not with `sudo`.
 
 - [`nvim/`](nvim/) — Neovim configuration and setup guides.
 - [`powershell/`](powershell/) — PowerShell profile and terminal theme.
-  On Windows, `install.ps1` links the profile and theme and merges managed
+  On Windows, `install.ps1` **copies** the profile (template; put secrets only on the live `$PROFILE`),
+  links the theme, and merges managed
   Windows Terminal keys (`#141414` background, `Ctrl+Shift+T` → `duplicateTab`).
+- [`scripts/windows/`](scripts/windows/) — Windows helpers: Node/pnpm-via-WSL
+  (`setup-wsl-node.sh`, `wsl_dev_env` + profile `BASH_ENV`), and system cleanup.
 - [`.zshrc`](.zshrc) — Zsh configuration.
 - [`scripts/mcp/`](scripts/mcp/) — `install-mcp.sh` / `install-mcp.ps1` register
   selected tools (Exa, Argent MCP servers, and the OpenAI Codex Claude Code
@@ -199,8 +214,12 @@ Run the installer as your normal user, not with `sudo`.
   checkbox list (toggle by number, Enter to confirm). Non-interactive:
   `--mcp exa,argent,codex-cc` / `-Mcp all`. Exa prompts for an optional API key
   (or `--exa-key` / `-ExaKey`); blank = free tier. Argent installs
-  `@swmansion/argent` globally via npm (Node ≥ 20.11) and registers a stdio MCP
-  (`argent mcp`). `codex-cc` runs `claude plugin marketplace add
+  `@swmansion/argent` globally via npm (Node ≥ 20.11), registers a stdio MCP
+  (`argent mcp`), and installs upstream `argent-*` skills via `npx skills -g`
+  for Grok / Claude Code / Codex. Invoke UI tests with `/argent` (router in
+  `skill/argent`) or `/argent-test-ui-flow`. After adding the router skill,
+  re-run `install.ps1` / `update.ps1` so it links into `~/.grok/skills`.
+  `codex-cc` runs `claude plugin marketplace add
   openai/codex-plugin-cc` and `claude plugin install codex@openai-codex -s user`
   (Claude-only; not an MCP). Optional Codex runtime: `npm i -g @openai/codex`.
   Not hooked into the main installer.

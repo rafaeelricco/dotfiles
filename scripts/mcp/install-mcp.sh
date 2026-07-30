@@ -27,7 +27,8 @@ Options:
 
 MCPs:
   exa       Exa search (HTTP). Optional API key → https://dashboard.exa.ai/api-keys
-  argent    Software Mansion Argent (stdio). Needs Node ≥ 20.11 + npm; global install.
+  argent    Software Mansion Argent (stdio + skills). Needs Node ≥ 20.11 + npm; global install.
+            Also installs argent-* skills via npx skills -g (Grok/Claude/Codex agents).
   codex-cc  OpenAI Codex plugin for Claude Code (not an MCP). Needs claude on PATH.
             Optional runtime: npm i -g @openai/codex; then codex login.
 
@@ -198,6 +199,57 @@ install_argent_package() {
   echo "installed: ${ARGENT_PKG}"
 }
 
+argent_version() {
+  local raw ver
+  raw="$(argent --version 2>/dev/null | head -n1 | tr -d '\r')"
+  # Bash 3.2 (macOS): no \d; use [0-9].
+  ver="$(printf '%s' "$raw" | sed -nE 's/.*([0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.-]+)?).*/\1/p' | head -n1)"
+  if [ -z "$ver" ]; then
+    echo "error: unparseable argent version: ${raw}" >&2
+    exit 1
+  fi
+  printf '%s' "$ver"
+}
+
+# Mirrors argent init skills step: version-pinned GitHub source + npx skills -g.
+# Agent ids match vercel-labs/skills (grok → ~/.grok/skills).
+install_argent_skills() {
+  echo "== Argent skills =="
+  local version source agents="" a
+  version="$(argent_version)"
+  source="software-mansion/argent/packages/skills/skills#v${version}"
+  # Bash 3.2: no arrays with += reliably across all contexts — build arg list via set --.
+  if [ "${SKIP_GROK}" -eq 0 ] && cli_is_present grok; then agents="${agents} grok"; fi
+  if [ "${SKIP_CLAUDE}" -eq 0 ] && cli_is_present claude; then agents="${agents} claude-code"; fi
+  if [ "${SKIP_CODEX}" -eq 0 ] && cli_is_present codex; then agents="${agents} codex"; fi
+  agents="${agents# }"
+  if [ -z "${agents}" ]; then agents="grok"; fi
+
+  set -- --force skills add "$source" --skill '*' -y -g
+  for a in ${agents}; do
+    set -- "$@" -a "$a"
+  done
+  echo "npx $*"
+  if ! npx "$@"; then
+    local bundled
+    bundled="$(npm root -g)/@swmansion/argent/skills"
+    if [ ! -d "$bundled" ]; then
+      echo "error: npx skills add failed; no bundled fallback at ${bundled}" >&2
+      exit 1
+    fi
+    echo "retry with bundled: ${bundled}"
+    set -- --force skills add "$bundled" --skill '*' -y -g
+    for a in ${agents}; do
+      set -- "$@" -a "$a"
+    done
+    npx "$@" || {
+      echo "error: npx skills add (bundled) failed" >&2
+      exit 1
+    }
+  fi
+  echo "installed skills for: ${agents}"
+}
+
 # Claude Code plugin (not an MCP). Install once; no per-CLI mcp add.
 install_codex_cc_plugin() {
   echo "== Codex plugin (Claude Code) =="
@@ -299,6 +351,7 @@ main() {
   if [ "${WANT_ARGENT}" -eq 1 ]; then
     require_node_for_argent
     install_argent_package
+    install_argent_skills
   fi
   if [ "${WANT_CODEX_CC}" -eq 1 ]; then
     install_codex_cc_plugin
