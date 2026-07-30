@@ -193,3 +193,7 @@ Run the installer as your normal user, not with `sudo`.
   On Windows, `install.ps1` links the profile and theme and merges managed
   Windows Terminal keys (`#141414` background, `Ctrl+Shift+T` → `duplicateTab`).
 - [`.zshrc`](.zshrc) — Zsh configuration.
+- [`scripts/mcp/`](scripts/mcp/) — `install-mcp.sh` / `install-mcp.ps1` register
+  the Exa MCP server with every detected agent CLI. Run by hand; the script
+  prompts for an Exa API key, which each CLI then stores in plaintext in its own
+  configuration. A blank answer registers Exa's free tier.
