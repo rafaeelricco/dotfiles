@@ -194,6 +194,13 @@ Run the installer as your normal user, not with `sudo`.
   Windows Terminal keys (`#141414` background, `Ctrl+Shift+T` → `duplicateTab`).
 - [`.zshrc`](.zshrc) — Zsh configuration.
 - [`scripts/mcp/`](scripts/mcp/) — `install-mcp.sh` / `install-mcp.ps1` register
-  the Exa MCP server with every detected agent CLI. Run by hand; the script
-  prompts for an Exa API key, which each CLI then stores in plaintext in its own
-  configuration. A blank answer registers Exa's free tier.
+  selected tools (Exa, Argent MCP servers, and the OpenAI Codex Claude Code
+  plugin) with every detected agent CLI. Run by hand. Interactive mode shows a
+  checkbox list (toggle by number, Enter to confirm). Non-interactive:
+  `--mcp exa,argent,codex-cc` / `-Mcp all`. Exa prompts for an optional API key
+  (or `--exa-key` / `-ExaKey`); blank = free tier. Argent installs
+  `@swmansion/argent` globally via npm (Node ≥ 20.11) and registers a stdio MCP
+  (`argent mcp`). `codex-cc` runs `claude plugin marketplace add
+  openai/codex-plugin-cc` and `claude plugin install codex@openai-codex -s user`
+  (Claude-only; not an MCP). Optional Codex runtime: `npm i -g @openai/codex`.
+  Not hooked into the main installer.
