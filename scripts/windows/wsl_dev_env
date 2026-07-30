@@ -1,0 +1,4 @@
+# Sourced by non-interactive bash via BASH_ENV (PowerShell profile) and by
+# interactive shells via ~/.bashrc / ~/.profile. Puts Homebrew first on PATH so
+# Linux node/pnpm win over Windows PATH interop under /mnt/*/Program Files/nodejs.
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
