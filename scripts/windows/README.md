@@ -1,7 +1,7 @@
 # Windows helpers
 
 Terminal / WSL pieces live here and in `powershell/Microsoft.PowerShell_profile.ps1`
-(linked by `install.ps1` → `$PROFILE`).
+(copied by `install.ps1` → `$PROFILE`; re-install keeps the existing file unless `-Override`).
 
 | Topic | Goal |
 | ----- | ---- |
