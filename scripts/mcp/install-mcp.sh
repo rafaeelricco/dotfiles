@@ -202,8 +202,9 @@ install_argent_package() {
 argent_version() {
   local raw ver
   raw="$(argent --version 2>/dev/null | head -n1 | tr -d '\r')"
-  # Bash 3.2 (macOS): no \d; use [0-9].
-  ver="$(printf '%s' "$raw" | sed -nE 's/.*([0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.-]+)?).*/\1/p' | head -n1)"
+  # Bash 3.2 (macOS): no \d; use [0-9]. grep -o avoids the leading .* of a sed
+  # substitution, which is greedy enough to eat all but the last major digit.
+  ver="$(printf '%s' "$raw" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.-]+)?' | head -n1)"
   if [ -z "$ver" ]; then
     echo "error: unparseable argent version: ${raw}" >&2
     exit 1
