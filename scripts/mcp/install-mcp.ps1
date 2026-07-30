@@ -162,6 +162,10 @@ function Install-ArgentSkills {
     if (-not $SkipClaude -and (Test-CliPresent 'claude')) { $agents.Add('claude-code') }
     if (-not $SkipCodex -and (Test-CliPresent 'codex')) { $agents.Add('codex') }
     if ($agents.Count -eq 0) {
+        if ($SkipGrok) {
+            Write-Host 'skipped: argent skills (no eligible agent)'
+            return
+        }
         # Still install for Grok path even if CLI binary missing (skills are files).
         $agents.Add('grok')
     }

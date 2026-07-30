@@ -223,7 +223,14 @@ install_argent_skills() {
   if [ "${SKIP_CLAUDE}" -eq 0 ] && cli_is_present claude; then agents="${agents} claude-code"; fi
   if [ "${SKIP_CODEX}" -eq 0 ] && cli_is_present codex; then agents="${agents} codex"; fi
   agents="${agents# }"
-  if [ -z "${agents}" ]; then agents="grok"; fi
+  if [ -z "${agents}" ]; then
+    # Fallback covers a missing grok binary, not an explicit --skip-grok.
+    if [ "${SKIP_GROK}" -eq 1 ]; then
+      echo "skipped: argent skills (no eligible agent)"
+      return 0
+    fi
+    agents="grok"
+  fi
 
   set -- --force skills add "$source" --skill '*' -y -g
   for a in ${agents}; do
