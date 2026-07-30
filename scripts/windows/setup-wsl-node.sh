@@ -36,11 +36,14 @@ if ! grep -qF '.wsl_dev_env' "${HOME}/.profile" 2>/dev/null; then
 fi
 
 eval "$("$BREW_BIN" shellenv)"
-if ! command -v node >/dev/null 2>&1; then
+BREW_PREFIX="${BREW_BIN%/bin/brew}"
+# A PATH match is not proof: WSL interop exposes Windows shims (/mnt/.../nodejs/pnpm)
+# that satisfy `command -v` but exec a node that does not exist inside Linux.
+if [[ ! -x "${BREW_PREFIX}/bin/node" ]]; then
   echo "installing node via brew..."
   brew install node
 fi
-if ! command -v pnpm >/dev/null 2>&1; then
+if [[ ! -x "${BREW_PREFIX}/bin/pnpm" ]]; then
   echo "installing pnpm via brew..."
   brew install pnpm
 fi
