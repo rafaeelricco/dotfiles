@@ -183,7 +183,8 @@ Its `references/template.md` renders the body; the Motivation section carries
 
 ## Step 4 — Present the plan
 
-Load `plan-format`. State concretely:
+Load `plan-format` for diff and prose style. This plan names its own sections,
+overriding that skill's Shape list. State concretely:
 
 - **Branch only** — approved branch name and base, or "already on it, nothing
   to create" when the approved branch is the current one. Nothing else.
