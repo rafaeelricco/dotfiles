@@ -202,6 +202,10 @@ def run_probe(probe: dict, out_dir: Path) -> None:
         "claude", "-p",
         "--output-format", "stream-json",
         "--verbose",
+        # Pinned: eval cost and pass rates both move with model/effort, so
+        # neither may drift with the ambient session config.
+        "--model", "claude-opus-5",
+        "--effort", "medium",
         "--permission-mode", probe["permission_mode"],
         "--allowedTools", *probe["allowed_tools"],
     ]
