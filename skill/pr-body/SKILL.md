@@ -52,16 +52,21 @@ What is the motivation or the why behind this PR? Briefly describe the problem i
 
 Never auto-generate it, never read it off the commit messages, never skip it.
 
-Then one `AskUserQuestion` call:
+Then `AskUserQuestion` — at most four questions per call (tool schema limit):
+
+**Call 1 (always):**
 
 - Demo Video — none / `[video_url]` placeholder / user supplies a URL. Ask for
   the URL if they pick the third.
-- Mermaid Diagram — offer only when the diff changed a flow or architecture.
 - Changed Files Table — off by default.
 - Writing Style — concise (terse bullets, one line each) / standard (one or two
   sentences with context) / verbose (rationale and tradeoffs).
 - Sections — Motivation, Demo Video, What's New, Architecture Flow, Changed
   Files, Additional for Run Locally, Testing & Feedback.
+
+**Call 2 (only when the diff changed a flow or architecture):**
+
+- Mermaid Diagram — include a flow diagram or skip it.
 
 ## Write
 

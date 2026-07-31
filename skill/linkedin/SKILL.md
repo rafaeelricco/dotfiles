@@ -32,8 +32,16 @@ Match the user's free text against this table.
 | full profile, everything, whole thing      | `all`         | every area, in table order |
 
 1. Exactly one row matches → run that area. Do not offer the others.
-2. Two or more rows match, zero rows match, or no argument at all → one `AskUserQuestion` listing the
-   areas, most likely first with `(Recommended)`. This is the only place a menu appears.
+2. Two or more rows match, zero rows match, or no argument at all → staged area chooser.
+   Never more than four options per `AskUserQuestion` (tool schema limit):
+   a. First call — group, most likely first with `(Recommended)`:
+      - Profile copy (`headline` / `about` / `experience`)
+      - Full profile (`all`)
+      - Discovery & focus (`keywords` / `positioning`)
+      - Cover & SSI (`cover` / `ssi`)
+   b. Second call only when the chosen group has more than one area — list those areas
+      only, most likely first with `(Recommended)`. Single-area groups (`all`) skip this.
+   This is the only place a menu appears.
 3. Named area is outside this table → say so plainly and stop. Do not improvise doctrine.
 
 ## Source
@@ -177,7 +185,10 @@ The user reads their own score at `linkedin.com/sales/ssi`. Never estimate it fo
 
 ## Reference files
 
-Read only the one the routed area names. Do not load more than one.
+Read only the reference files the routed area needs. A single named area loads at
+most one file. Routed `all` is the sole multi-file exception: load every reference
+the generative areas name (`headline`, `about`, `experience`) so each section keeps
+its contract. Do not load references for areas that are not in the route.
 
 | File                       | Read when                                   |
 | -------------------------- | ------------------------------------------- |

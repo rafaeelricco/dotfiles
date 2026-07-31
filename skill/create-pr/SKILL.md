@@ -17,7 +17,7 @@ branched, staged, committed, pushed, or opened before every answer is in.
 
 1. `EnterPlanMode` — before any other tool call.
 2. Inspect — read-only.
-3. Ask — one prose question, then one or two `AskUserQuestion` calls.
+3. Ask — one prose question, then the `AskUserQuestion` calls in 3b–3c.
 4. Present the plan, then `ExitPlanMode`.
 5. Execute exactly what was approved.
 
@@ -173,13 +173,13 @@ Four questions, always all four. Fill the bracketed values from Step 2.
   group holding every file. The user still confirms it — a one-option question
   is a confirmation, not a skipped question.
 
-### 3c. Body options — one `AskUserQuestion` call, `Full flow` only
+### 3c. Body options — `Full flow` only
 
-Load `pr-body` and ask its formatting questions: writing
-style, sections, changed-files table, demo video, and a Mermaid diagram only
-when Step 2 found architecture or flow changes. Its `references/template.md`
-renders the body; the Motivation section carries 3a's answer in the user's
-words.
+Load `pr-body` and ask its formatting questions (one or two `AskUserQuestion`
+calls per that skill's schema limits): writing style, sections, changed-files
+table, demo video, and a Mermaid diagram only when Step 2 found architecture or
+flow changes. Its `references/template.md` renders the body; the Motivation
+section carries 3a's answer in the user's words.
 
 ## Step 4 — Present the plan
 

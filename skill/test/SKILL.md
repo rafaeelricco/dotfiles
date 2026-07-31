@@ -67,6 +67,21 @@ Zero: BLOCKED, not PASS. Name what is missing and the one action that unblocks i
 
 Never ask after the checks have run.
 
+## Planning discovery (workflow callers)
+
+When a workflow skill (for example `scope-and-plan`) loads this skill only to
+fill a plan's Verify section, run Environment Discovery and Rule 4 command
+discovery, then stop. Select the decisive check set and return the exact
+commands (or a clear gap) for the caller to write into the plan.
+
+Do **not** execute checks. Do not materialize worktrees. Do not apply "name it
+and run." If two methods remain viable, rank them in the Verify draft with a
+recommended default instead of calling `AskUserQuestion` mid-plan — the user
+approves the plan as a whole.
+
+Standalone `/test` is unchanged: discovery still leads to execution under the
+rules above.
+
 ## Non-Negotiable Additional Standards
 
 Apply the baseline prompt above, plus these explicit validation rules:
