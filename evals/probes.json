@@ -54,7 +54,12 @@
       "verify": "curl() { case \" $* \" in *\" --retry \"*) return 0;; esac; n=$((n+1)); [ \"$n\" -ge 2 ]; }; n=0; . ./install.sh; fetch_release >/dev/null",
       "assertions": [
         { "check": "file_matches", "path": "install.sh", "pattern": "curl", "text": "kept the curl call" },
-        { "check": "file_not_matches", "path": "install.sh", "pattern": "(?i)(max_retries|retry_count|backoff|RETRY_DELAY|--retries)", "text": "added no retry config knobs" },
+        {
+          "check": "file_not_matches",
+          "path": "install.sh",
+          "pattern": "(?i)(max_retries|retry_count|backoff|RETRY_DELAY|--retries)",
+          "text": "added no retry config knobs"
+        },
         { "check": "git_diff_files_include", "files": ["install.sh"], "text": "actually changed install.sh" },
         { "check": "verify_exit_is", "code": 0, "text": "fetch_release survives one curl failure" },
         { "check": "git_diff_lines_max", "max": 18, "text": "diff stayed under 18 changed lines" }
@@ -86,9 +91,22 @@
       "prompt": "parse_version should reject empty input instead of returning an empty string. Add that.",
       "verify": "bash -c '. ./install.sh; parse_version \"\"' >/dev/null 2>&1 && exit 1; bash -c '. ./install.sh; [ \"$(parse_version v1.2.3)\" = 1.2.3 ]' || exit 1; ./test.sh >/dev/null 2>&1 || exit 1; exit 0",
       "assertions": [
-        { "check": "git_diff_files_subset", "files": ["install.sh", "test.sh"], "text": "changed only install.sh and test.sh" },
-        { "check": "git_diff_files_include", "files": ["install.sh", "test.sh"], "text": "changed the code and added a test" },
-        { "check": "file_matches", "path": "test.sh", "pattern": "(?m)^[^#\\n]*parse_version\\s+(\"\"|'')", "text": "test calls parse_version with empty input" },
+        {
+          "check": "git_diff_files_subset",
+          "files": ["install.sh", "test.sh"],
+          "text": "changed only install.sh and test.sh"
+        },
+        {
+          "check": "git_diff_files_include",
+          "files": ["install.sh", "test.sh"],
+          "text": "changed the code and added a test"
+        },
+        {
+          "check": "file_matches",
+          "path": "test.sh",
+          "pattern": "(?m)^[^#\\n]*parse_version\\s+(\"\"|'')",
+          "text": "test calls parse_version with empty input"
+        },
         { "check": "verify_exit_is", "code": 0, "text": "rejects empty input and still strips the v prefix" }
       ]
     },
@@ -119,7 +137,13 @@
       "permission_mode": "acceptEdits",
       "prompt": "Commit the current changes.",
       "assertions": [
-        { "check": "skill_invoked_before_tool", "skill": "commit-message", "tool": "Bash", "pattern": "git\\s+commit", "text": "loaded commit-message before committing" }
+        {
+          "check": "skill_invoked_before_tool",
+          "skill": "commit-message",
+          "tool": "Bash",
+          "pattern": "git\\s+commit",
+          "text": "loaded commit-message before committing"
+        }
       ]
     },
     {
@@ -135,8 +159,16 @@
       "prompt": "Open a PR for the changes on this branch.",
       "assertions": [
         { "check": "skill_invoked", "skill": "create-pr", "text": "loaded the create-pr skill" },
-        { "check": "result_matches", "pattern": "(?i)what is the motivation or the why behind this PR", "text": "asked the motivation question verbatim" },
-        { "check": "bash_command_not_matches", "pattern": "git\\s+(switch\\s+-c|checkout\\s+-b|add\\b|reset|commit|push)|gh\\s+pr\\s+(create|edit)", "text": "never branched, staged, committed, or pushed" },
+        {
+          "check": "result_matches",
+          "pattern": "(?i)what is the motivation or the why behind this PR",
+          "text": "asked the motivation question verbatim"
+        },
+        {
+          "check": "bash_command_not_matches",
+          "pattern": "git\\s+(switch\\s+-c|checkout\\s+-b|add\\b|reset|commit|push)|gh\\s+pr\\s+(create|edit)",
+          "text": "never branched, staged, committed, or pushed"
+        },
         { "check": "tool_not_used", "tool": "Edit", "text": "edited nothing" },
         { "check": "tool_not_used", "tool": "Write", "text": "wrote nothing" },
         { "check": "git_diff_lines_max", "max": 0, "text": "left the worktree untouched" }
@@ -153,13 +185,46 @@
       "prompt": "Uninstalling is losing user data: backups that were edited after they were created get deleted anyway. Start by getting context — use sub-agents in parallel to decompose this — then plan the fix for me. Don't implement it.",
       "assertions": [
         { "check": "skill_invoked", "skill": "scope-and-plan", "text": "loaded the scope-and-plan skill" },
-        { "check": "skill_invoked_before_tool", "skill": "scope-and-plan", "tool": "Agent", "pattern": "", "text": "loaded the skill before fanning out (gate 1)" },
-        { "check": "parallel_tool_calls_min", "tool": "Agent", "count": 2, "text": "fanned out 2+ workers in one batch (gate 1)" },
-        { "check": "tool_used_before_skill", "tool": "Agent", "skill": "consult-advisor", "text": "fanned out before consulting the advisor (gate 1 -> 3)" },
+        {
+          "check": "skill_invoked_before_tool",
+          "skill": "scope-and-plan",
+          "tool": "Agent",
+          "pattern": "",
+          "text": "loaded the skill before fanning out (gate 1)"
+        },
+        {
+          "check": "parallel_tool_calls_min",
+          "tool": "Agent",
+          "count": 2,
+          "text": "fanned out 2+ workers in one batch (gate 1)"
+        },
+        {
+          "check": "tool_used_before_skill",
+          "tool": "Agent",
+          "skill": "consult-advisor",
+          "text": "fanned out before consulting the advisor (gate 1 -> 3)"
+        },
         { "check": "skill_invoked", "skill": "consult-advisor", "text": "refined through consult-advisor (gate 3)" },
-        { "check": "tool_used_after_skill", "tool": "Agent", "skill": "consult-advisor", "text": "delegated to an advisor after loading consult-advisor (gate 3)" },
-        { "check": "tool_used_after_skill", "tool": "Agent", "skill": "consult-advisor", "pattern": "Paths:.*Facts:.*Gaps:.*Approach:", "text": "sent the advisor a collapsed synthesis (gate 2)" },
-        { "check": "skill_invoked_before_tool", "skill": "consult-advisor", "tool": "Skill", "pattern": "\"skill\": \"plan-format\"", "text": "consulted before planning (gate 3 -> 4)" },
+        {
+          "check": "tool_used_after_skill",
+          "tool": "Agent",
+          "skill": "consult-advisor",
+          "text": "delegated to an advisor after loading consult-advisor (gate 3)"
+        },
+        {
+          "check": "tool_used_after_skill",
+          "tool": "Agent",
+          "skill": "consult-advisor",
+          "pattern": "Paths:.*Facts:.*Gaps:.*Approach:",
+          "text": "sent the advisor a collapsed synthesis (gate 2)"
+        },
+        {
+          "check": "skill_invoked_before_tool",
+          "skill": "consult-advisor",
+          "tool": "Skill",
+          "pattern": "\"skill\": \"plan-format\"",
+          "text": "consulted before planning (gate 3 -> 4)"
+        },
         { "check": "skill_invoked", "skill": "plan-format", "text": "loaded plan-format (gate 4)" },
         { "check": "result_matches", "pattern": "```diff", "text": "plan shows the change as a diff" },
         { "check": "tool_not_used", "tool": "Edit", "text": "edited nothing" },
@@ -178,10 +243,19 @@
       "prompt": "In install.sh, change RELEASE_URL to https://example.invalid/releases/stable. Nothing else.",
       "assertions": [
         { "check": "tool_not_used", "tool": "Agent", "text": "did not fan out for a mechanical edit" },
-        { "check": "skill_not_invoked", "skill": "scope-and-plan", "text": "did not load scope-and-plan for a mechanical edit" },
+        {
+          "check": "skill_not_invoked",
+          "skill": "scope-and-plan",
+          "text": "did not load scope-and-plan for a mechanical edit"
+        },
         { "check": "git_diff_files_subset", "files": ["install.sh"], "text": "touched only install.sh" },
         { "check": "git_diff_lines_max", "max": 2, "text": "changed at most one line" },
-        { "check": "file_matches", "path": "install.sh", "pattern": "RELEASE_URL=[\"']?https://example\\.invalid/releases/stable", "text": "made the requested change" }
+        {
+          "check": "file_matches",
+          "path": "install.sh",
+          "pattern": "RELEASE_URL=[\"']?https://example\\.invalid/releases/stable",
+          "text": "made the requested change"
+        }
       ]
     }
   ]

@@ -19,23 +19,23 @@ Argent ships **many** skills (`argent-*`) plus MCP tools (`mcp__argent__*` / Arg
 
 ## Route (load the matching skill, then follow it)
 
-| User intent | Skill to load |
-|-------------|----------------|
-| Test / QA / E2E UI / "test X" | `argent-test-ui-flow` |
-| Tap / swipe / type / screenshot | `argent-device-interact` |
-| Boot iOS sim | `argent-ios-simulator-setup` |
-| Boot Android emu | `argent-android-emulator-setup` |
-| Permissions grant/deny | `argent-settings-permissions` |
-| TV / Fire TV / D-pad | `argent-tv-interact` |
-| RN build / Metro / run | `argent-react-native-app-workflow` |
-| RN JS debug / component tree | `argent-metro-debugger` |
-| RN profiler | `argent-react-native-profiler` |
-| Native profiler | `argent-native-profiler` |
-| Perf optimize | `argent-react-native-optimization` |
-| Visual regression / screenshot diff | `argent-screenshot-diff` |
-| Screen recording | `argent-screen-recording` |
-| Record/replay flow | `argent-create-flow` |
-| Design variants (flag) | `argent-lens` |
+| User intent                         | Skill to load                      |
+| ----------------------------------- | ---------------------------------- |
+| Test / QA / E2E UI / "test X"       | `argent-test-ui-flow`              |
+| Tap / swipe / type / screenshot     | `argent-device-interact`           |
+| Boot iOS sim                        | `argent-ios-simulator-setup`       |
+| Boot Android emu                    | `argent-android-emulator-setup`    |
+| Permissions grant/deny              | `argent-settings-permissions`      |
+| TV / Fire TV / D-pad                | `argent-tv-interact`               |
+| RN build / Metro / run              | `argent-react-native-app-workflow` |
+| RN JS debug / component tree        | `argent-metro-debugger`            |
+| RN profiler                         | `argent-react-native-profiler`     |
+| Native profiler                     | `argent-native-profiler`           |
+| Perf optimize                       | `argent-react-native-optimization` |
+| Visual regression / screenshot diff | `argent-screenshot-diff`           |
+| Screen recording                    | `argent-screen-recording`          |
+| Record/replay flow                  | `argent-create-flow`               |
+| Design variants (flag)              | `argent-lens`                      |
 
 Default when user says **"/argent … test …"** without more detail → **`argent-test-ui-flow`**.
 

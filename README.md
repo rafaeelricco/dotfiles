@@ -140,11 +140,11 @@ and not explicitly skipped. Existing managed links remain untouched otherwise.
 
 ### Windows terminal (`install.ps1` only; skip with `-SkipTerminal`)
 
-| Source | Destination |
-| ------ | ----------- |
+| Source                                        | Destination                                                                           |
+| --------------------------------------------- | ------------------------------------------------------------------------------------- |
 | `powershell/Microsoft.PowerShell_profile.ps1` | `$PROFILE` (**copy**, not symlink; re-install skips existing file unless `-Override`) |
-| `powershell/themes/robbyrussell.omp.json` | `<profile-dir>/themes/robbyrussell.omp.json` |
-| managed WT keys | live `settings.json` (Store package or unpackaged path) |
+| `powershell/themes/robbyrussell.omp.json`     | `<profile-dir>/themes/robbyrussell.omp.json`                                          |
+| managed WT keys                               | live `settings.json` (Store package or unpackaged path)                               |
 
 Managed Windows Terminal keys only:
 
@@ -220,6 +220,6 @@ Run the installer as your normal user, not with `sudo`.
   `skill/argent`) or `/argent-test-ui-flow`. After adding the router skill,
   re-run `install.ps1` / `update.ps1` so it links into `~/.grok/skills`.
   `codex-cc` runs `claude plugin marketplace add
-  openai/codex-plugin-cc` and `claude plugin install codex@openai-codex -s user`
+openai/codex-plugin-cc` and `claude plugin install codex@openai-codex -s user`
   (Claude-only; not an MCP). Optional Codex runtime: `npm i -g @openai/codex`.
   Not hooked into the main installer.
