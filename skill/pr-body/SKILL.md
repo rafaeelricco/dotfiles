@@ -56,21 +56,21 @@ Then `AskUserQuestion` — at most four questions per call (tool schema limit):
 
 **Call 1 (always):**
 
-- Demo Video — none / `[video_url]` placeholder / user supplies a URL. Ask for
-  the URL if they pick the third.
-- Changed Files Table — off by default.
-- Writing Style — concise (terse bullets, one line each) / standard (one or two
-  sentences with context) / verbose (rationale and tradeoffs).
-- Sections — multi-select of optional sections only. Motivation, What's New, and
-  Testing & Feedback are always on and never listed. At most four options:
+- Sections — multi-select, and the only control over which optional sections
+  appear. Motivation, What's New, and Testing & Feedback are always on and never
+  listed. At most four options:
   - Demo Video
   - Architecture Flow
   - Changed Files
   - Additional for Run Locally
+- Writing Style — concise (terse bullets, one line each) / standard (one or two
+  sentences with context) / verbose (rationale and tradeoffs).
+- Video Source — `[video_url]` placeholder, or a URL the user supplies. Ignored
+  unless Sections includes Demo Video; ask for the URL if they pick the second.
 
-**Call 2 (only when the diff changed a flow or architecture):**
+**Call 2 (only when Sections includes Architecture Flow):**
 
-- Mermaid Diagram — include a flow diagram or skip it.
+- Diagram Scope — which flow the diagram should show.
 
 ## Write
 
@@ -83,7 +83,7 @@ Render `references/template.md`. Read `references/categories.md` for grouping,
   env var, or local setup step.
 - Testing & Feedback: always present, with concrete reviewer focus areas, ending
   on the template's closing sentence verbatim.
-- Every other section: only when the user opted in.
+- Every other section: only when Sections includes it.
 - `##` headings, backticks for identifiers, tables only for structured data.
 - No horizontal rules, no watermarks, no generated-by footers, no emoji.
 - Write in the language of the codebase. Default to English.

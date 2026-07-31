@@ -176,10 +176,10 @@ Four questions, always all four. Fill the bracketed values from Step 2.
 ### 3c. Body options — `Full flow` only
 
 Load `pr-body` and ask its formatting questions (one or two `AskUserQuestion`
-calls per that skill's schema limits): writing style, sections, changed-files
-table, demo video, and a Mermaid diagram only when Step 2 found architecture or
-flow changes. Its `references/template.md` renders the body; the Motivation
-section carries 3a's answer in the user's words.
+calls per that skill's schema limits): sections, writing style, the demo-video
+source, and a diagram question only when Sections includes Architecture Flow.
+Its `references/template.md` renders the body; the Motivation section carries
+3a's answer in the user's words.
 
 ## Step 4 — Present the plan
 
