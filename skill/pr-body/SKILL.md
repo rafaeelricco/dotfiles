@@ -61,8 +61,12 @@ Then `AskUserQuestion` — at most four questions per call (tool schema limit):
 - Changed Files Table — off by default.
 - Writing Style — concise (terse bullets, one line each) / standard (one or two
   sentences with context) / verbose (rationale and tradeoffs).
-- Sections — Motivation, Demo Video, What's New, Architecture Flow, Changed
-  Files, Additional for Run Locally, Testing & Feedback.
+- Sections — multi-select of optional sections only. Motivation, What's New, and
+  Testing & Feedback are always on and never listed. At most four options:
+  - Demo Video
+  - Architecture Flow
+  - Changed Files
+  - Additional for Run Locally
 
 **Call 2 (only when the diff changed a flow or architecture):**
 
