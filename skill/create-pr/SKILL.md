@@ -114,9 +114,18 @@ Four questions, always all four. Fill the bracketed values from Step 2.
     "question": "Which branch should this PR come from?",
     "multiSelect": false,
     "options": [
-      {"label": "<current-branch>", "description": "Open from the branch you are on. <n> commits ahead of <default>."},
-      {"label": "rafaeelricco/<slug-from-diff>", "description": "Create this branch from the current HEAD, then open the PR from it."},
-      {"label": "rafaeelricco/<alt-slug>", "description": "Create this branch from the current HEAD, then open the PR from it."}
+      {
+        "label": "<current-branch>",
+        "description": "Open from the branch you are on. <n> commits ahead of <default>."
+      },
+      {
+        "label": "rafaeelricco/<slug-from-diff>",
+        "description": "Create this branch from the current HEAD, then open the PR from it."
+      },
+      {
+        "label": "rafaeelricco/<alt-slug>",
+        "description": "Create this branch from the current HEAD, then open the PR from it."
+      }
     ]
   },
   {
@@ -124,9 +133,12 @@ Four questions, always all four. Fill the bracketed values from Step 2.
     "question": "How far should I take this?",
     "multiSelect": false,
     "options": [
-      {"label": "Full flow", "description": "Create the branch if needed, commit, push, and open the PR."},
-      {"label": "Branch only", "description": "Create the approved branch and stop. No commits, no push, no PR."},
-      {"label": "You handle commits", "description": "Stop after inspection. I report findings and a suggested split; you commit."}
+      { "label": "Full flow", "description": "Create the branch if needed, commit, push, and open the PR." },
+      { "label": "Branch only", "description": "Create the approved branch and stop. No commits, no push, no PR." },
+      {
+        "label": "You handle commits",
+        "description": "Stop after inspection. I report findings and a suggested split; you commit."
+      }
     ]
   },
   {
@@ -134,8 +146,8 @@ Four questions, always all four. Fill the bracketed values from Step 2.
     "question": "Which changes belong in this PR?",
     "multiSelect": true,
     "options": [
-      {"label": "<group-1>", "description": "<files in group 1>"},
-      {"label": "<group-2>", "description": "<files in group 2>"}
+      { "label": "<group-1>", "description": "<files in group 1>" },
+      { "label": "<group-2>", "description": "<files in group 2>" }
     ]
   },
   {
@@ -143,9 +155,9 @@ Four questions, always all four. Fill the bracketed values from Step 2.
     "question": "How should the PR be opened?",
     "multiSelect": false,
     "options": [
-      {"label": "Draft, no assignee (Recommended)", "description": "gh pr create --draft, nobody assigned."},
-      {"label": "Draft, assign me", "description": "gh pr create --draft --assignee @me."},
-      {"label": "Ready for review", "description": "gh pr create --assignee @me. Reviewers are notified immediately."}
+      { "label": "Draft, no assignee (Recommended)", "description": "gh pr create --draft, nobody assigned." },
+      { "label": "Draft, assign me", "description": "gh pr create --draft --assignee @me." },
+      { "label": "Ready for review", "description": "gh pr create --assignee @me. Reviewers are notified immediately." }
     ]
   }
 ]
@@ -163,7 +175,7 @@ Four questions, always all four. Fill the bracketed values from Step 2.
 
 ### 3c. Body options — one `AskUserQuestion` call, `Full flow` only
 
-Load `pr-generate-description` and ask its formatting questions: writing
+Load `pr-body` and ask its formatting questions: writing
 style, sections, changed-files table, demo video, and a Mermaid diagram only
 when Step 2 found architecture or flow changes. Its `references/template.md`
 renders the body; the Motivation section carries 3a's answer in the user's
@@ -254,7 +266,7 @@ Assistant: What is the motivation or the why behind this PR? Briefly describe th
 User: Sessions dropped an hour early — the expiry check used `<` instead of `<=`.
 Assistant: *one AskUserQuestion call: Branch / Path / Scope / State*
 User: *answers*
-Assistant: *loads pr-generate-description, asks body options, presents the plan, ExitPlanMode*
+Assistant: *loads pr-body, asks body options, presents the plan, ExitPlanMode*
 
 <reasoning>
 The branch was already a feature branch and the worktree was clean, so both
