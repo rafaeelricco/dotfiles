@@ -15,10 +15,10 @@ branched, staged, committed, pushed, or opened before every answer is in.
 
 ## Order of operations
 
-1. `EnterPlanMode` — before any other tool call.
+1. Enter plan/approval mode if the harness has one — before any other tool call.
 2. Inspect — read-only.
 3. Ask — one prose question, then the `AskUserQuestion` calls in 3b–3c.
-4. Present the plan, then `ExitPlanMode`.
+4. Present the plan (leave plan/approval mode if used).
 5. Execute exactly what was approved.
 
 Until the user approves the Step 4 plan these commands are forbidden:
@@ -54,14 +54,14 @@ neither of those.
 
 ## Step 1 — Enter plan mode
 
-If the session is not already in plan mode, call `EnterPlanMode` now, before
-anything else. Inspection happens read-only inside plan mode; the plan you
-present in Step 4 is the approval artifact for every mutation in Step 5.
+If the harness has a plan/approval mode and the session is not already in it,
+enter it now, before anything else. Inspection stays read-only either way; the
+plan you present in Step 4 is the approval artifact for every mutation in Step 5.
 
-If plan mode does not exist in this harness (e.g. Codex), follow the same
-steps and post the Step 4 plan as a normal message instead. Execute only after
-a user message approves it — see the second item under "When NOT to ask", which
-covers both this case and a run with no user at all.
+If the harness has no plan mode, follow the same steps and post the Step 4 plan
+as a normal message. Execute only after a user message approves it — see the
+second item under "When NOT to ask", which covers both this case and a run with
+no user at all.
 
 ## Step 2 — Inspect (read-only)
 
@@ -197,7 +197,7 @@ Load `plan-format`. State concretely:
 Files that must move together (an API change and its consumer) stay in one
 commit. A single-category diff is one commit — say so.
 
-`ExitPlanMode`. Approval of this plan is the gate for Step 5.
+Approval of this plan is the gate for Step 5. Leave plan/approval mode if the harness uses one.
 
 ## Step 5 — Execute
 
@@ -261,12 +261,12 @@ assignee.
 
 <example>
 User: /create-pr
-Assistant: *EnterPlanMode, then the Step 2 block: branch `fix-token-expiry`, 3 commits ahead of `main`, 4 files, clean worktree, no open PR*
+Assistant: *enter plan/approval mode if available, then the Step 2 block: branch `fix-token-expiry`, 3 commits ahead of `main`, 4 files, clean worktree, no open PR*
 Assistant: What is the motivation or the why behind this PR? Briefly describe the problem it solves or the goal it achieves.
 User: Sessions dropped an hour early — the expiry check used `<` instead of `<=`.
 Assistant: *one AskUserQuestion call: Branch / Path / Scope / State*
 User: *answers*
-Assistant: *loads pr-body, asks body options, presents the plan, ExitPlanMode*
+Assistant: *loads pr-body, asks body options, presents the plan, leaves plan mode if used*
 
 <reasoning>
 The branch was already a feature branch and the worktree was clean, so both
@@ -278,7 +278,7 @@ assumes.
 
 <example>
 User: /create-pr
-Assistant: *EnterPlanMode, inspects, reads a motivation off the commit messages, presents a full plan with title, body, and commit split*
+Assistant: *enters plan mode if available, inspects, reads a motivation off the commit messages, presents a full plan with title, body, and commit split*
 
 <reasoning>
 Non-compliant, and the exact failure this skill exists to prevent. Reading

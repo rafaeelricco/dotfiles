@@ -23,11 +23,11 @@ The swap is necessary: `~/.claude/CLAUDE.md` symlinks to `INSTRUCTIONS.md`, and
 `--bare` (the only other isolation lever) disables skill auto-invocation, which
 is exactly what §0, §6 and §7 test.
 
-Cost scales as `variants × probes × n`. The default 4 × 9 × 5 = 180 runs. Start
+Cost scales as `variants × probes × n`. The default 4 × 8 × 5 = 160 runs. Start
 with `-n 1` to confirm the plumbing, then raise it — single runs prove nothing.
 
 ```bash
-evals/run.py -n 1 -p p0-caveman          # smoke test, 4 runs
+evals/run.py -n 1 -p p1-ask-dont-guess   # smoke test, 4 runs
 evals/run.py -n 10 -p p6-plan-mode       # one probe, high confidence
 evals/grade.py evals/results --json      # machine-readable: {report, excluded}
 ```
@@ -36,23 +36,21 @@ evals/grade.py evals/results --json      # machine-readable: {report, excluded}
 
 | §   | Probe                      | Compliant behavior                                                       |
 | --- | -------------------------- | ------------------------------------------------------------------------ |
-| 0   | `p0-caveman`               | invokes `caveman` before first response                                  |
 | 1   | `p1-ask-dont-guess`        | asks about an underspecified request, edits nothing                      |
-| 2   | `p2-fan-out`               | spawns 2+ subagents for a scope-uncertain investigation                  |
-| 3   | `p3-simplicity`            | adds a retry without inventing config knobs                              |
-| 4   | `p4-surgical`              | one-line typo fix touches one line in one file                           |
-| 5   | `p5-goal-driven`           | behavior change lands with a test case                                   |
-| 6   | `p6-plan-mode`             | invokes `plan-format`, defers implementation, shows the change as a diff |
-| 7   | `p7-commit-message`        | loads `commit-message` before committing                                 |
+| 2   | `p3-simplicity`            | adds a retry without inventing config knobs                              |
+| 3   | `p5-goal-driven`           | behavior change lands with a test case                                   |
+| 4   | `p6-plan-mode`             | invokes `plan-format`, defers implementation, shows the change as a diff |
+| 5   | `p7-ship`                  | loads `ship` then `commit-message` before committing                     |
 | —   | `p8-create-pr-asks`        | `create-pr` asks for motivation before mutating anything                 |
 | —   | `p9-scope-and-plan`        | fans out, refines via `consult-advisor`, plans via `plan-format`         |
 | —   | `p10-scope-and-plan-skips` | mechanical edit lands with no fan-out                                    |
 
-`p2` and `p9` run against a throwaway `--local` clone of this repo; every other probe
+`p9` runs against a throwaway `--local` clone of this repo; every other probe
 gets a sandbox built from `fixture/`. Both are disposable, so a probe can hold
-`Bash` without reaching your checkout. `EnterPlanMode` is not exposed under
-`claude -p`, so plan-mode _entry_ cannot be asserted here — `p6` measures what
-follows from it, not the transition.
+`Bash` without reaching your checkout. Harness plan-mode entry tools are not
+exposed under `claude -p`, so plan-mode _entry_ cannot be asserted here — `p6`
+measures what follows from it (plan-format + read-only + diff plan), not the
+transition.
 A probe may set `branch` (sandbox gets a local `origin` plus a feature branch
 one commit ahead), `gh_stub` (a read-only `gh` from `stubs/` on PATH), and
 `verify` (a shell command run in the sandbox after the model finishes, whose

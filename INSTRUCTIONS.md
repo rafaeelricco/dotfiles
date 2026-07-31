@@ -1,7 +1,3 @@
-## 0. Communication
-
-Invoke the `caveman` skill before your first response of the session and adopt it as your default style. It persists per its own rules — don't re-invoke. If the skill isn't available in this harness, stay terse anyway.
-
 ## 1. Think Before Acting
 
 Ask before you build when the request is underspecified. If you cannot restate the task in one sentence without inventing a value — what to cache, which field, which threshold, which file — stop and ask. An underspecified request is not permission to pick: asking costs one turn, a wrong guess costs the whole change.
@@ -12,17 +8,7 @@ Then, before any tool call, edit, or subagent:
 - If readings differ materially, name them and ask. If the question has one obvious answer, give it — don't manufacture ambiguity or hedge.
 - If a simpler approach exists, say so. Push back when warranted.
 
-## 2. Fan Out Before Deciding
-
-Skip when you can already name the files and the approach, or when one search answers it. Otherwise:
-
-1. Decompose into independent concerns — files, layers, behaviors.
-2. Spawn one read-only worker per concern. Brief each with objective, boundaries, and expected output (paths, findings, gaps). Sharp, non-overlapping scopes. Worker count follows the concerns found — don't pad to a number.
-3. Synthesize: key paths, facts, gaps, provisional approach.
-
-No parallel workers → explore with normal tools. `consult-advisor` applies on its own criteria either way.
-
-## 3. Simplicity
+## 2. Simplicity
 
 Ship the minimum that fully solves the problem. Minimum = no speculative features, abstractions, or config — not a thinner or partial solution. Never drop required behavior to look simple.
 
@@ -33,16 +19,7 @@ Ship the minimum that fully solves the problem. Minimum = no speculative feature
 - No error handling for impossible states.
 - 200 lines that could be 50 → rewrite it.
 
-## 4. Surgical Changes
-
-Every changed line traces to the request.
-
-- Don't improve adjacent code, comments, or formatting. Don't refactor what isn't broken.
-- Match existing style even when you'd do it differently.
-- Remove imports, variables, and functions your change orphaned.
-- Leave pre-existing dead code — mention it instead of deleting it.
-
-## 5. Goal-Driven Execution
+## 3. Goal-Driven Execution
 
 Turn the task into a verifiable goal before starting:
 
@@ -52,26 +29,17 @@ Turn the task into a verifiable goal before starting:
 
 No assertable behavior (comment typos, formatting, copy) or no test suite → skip the test and state in one line what you checked instead.
 
-Multi-step tasks get a plan first:
-
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-```
-
-## 6. Make Changes Reviewable
+## 4. Make Changes Reviewable
 
 Plans are approved as diffs, not prose.
 
-Load `plan-format` and follow it before writing any plan text for a code change — full plan, sketch, outline, or a plan posted alongside an open question. Unresolved decisions don't defer it: the question and the formatted plan ship in the same response. §5's numbered-step format doesn't substitute for it.
+Load `plan-format` and follow it before writing any plan text for a code change — full plan, sketch, outline, or a plan posted alongside an open question. Unresolved decisions don't defer it: the question and the formatted plan ship in the same response.
 
 Then, while planning:
 
-- Enter plan mode before inspecting: call `EnterPlanMode`, present the plan, then `ExitPlanMode`. Inspection stays read-only until approval.
-- `EnterPlanMode`/`ExitPlanMode` are often deferred, not absent — load them with `ToolSearch "select:EnterPlanMode,ExitPlanMode"` before concluding the harness has no plan mode. Only if that returns neither, post the plan as a normal message and wait for explicit approval.
-- Fan out (§2) first when it applies — context before the plan.
+- Prefer the harness plan/approval workflow when one exists; otherwise present the plan as a normal message. Either way: inspection stays read-only until the user explicitly approves.
 - Stress-test with the user until decisions resolve. One question at a time, hardest first.
 
-## 7. Commits
+## 5. Ship
 
-Load `commit-message` and follow it before drafting or running any commit — including commits incidental to another task, and when the harness would otherwise supply its own message or trailer.
+Before commit, PR body, or opening a PR — load `ship` and follow it (incidental work and harness-supplied messages count).

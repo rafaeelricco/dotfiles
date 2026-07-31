@@ -37,16 +37,11 @@ run one search first — if it resolves the request, this skill was not needed.
 
 ## Gate 0 — Plan mode
 
-Call `EnterPlanMode` now, before spawning a worker or reading a file. Gates 1-3
-are read-only, so nothing in them needs plan mode off.
+Enter the harness plan/approval workflow now if one exists, before spawning a
+worker or reading a file. Gates 1–3 stay read-only either way.
 
-`EnterPlanMode` and `ExitPlanMode` may be deferred — absent from the tool list
-until loaded. Load both before concluding they do not exist:
-`ToolSearch "select:EnterPlanMode,ExitPlanMode"`.
-
-Only if that search returns neither does the harness lack plan mode (e.g.
-Codex). Then run every gate the same way and post the Gate 4 plan as a normal
-message.
+If the harness has no plan mode, run every gate the same way and post the Gate 4
+plan as a normal message. Wait for explicit user approval before any mutation.
 
 ## Gate 1 — Fan out
 
@@ -105,9 +100,9 @@ plan says so — it does not scaffold a suite to manufacture a pass.
 `/test` for work this skill planned. Execution of the selected checks happens
 after plan approval, when implementation is verified — not during Gate 4.
 
-Present the plan, then call `ExitPlanMode`. Approval of that plan is the gate for
-implementation, and approves those checks as its definition of done. Inspection
-stays read-only until then.
+Present the plan (and leave plan/approval mode if the harness uses one). Approval
+of that plan is the gate for implementation, and approves those checks as its
+definition of done. Inspection stays read-only until then.
 
 Unresolved decisions do not defer the plan: the open question and the formatted
 plan ship in the same response.
@@ -124,5 +119,5 @@ plan ship in the same response.
   not fan out a second round to close it.
 - **`test` finds no runnable check** → the Verify section states that gap
   verbatim. A plan with no proof is honest; a fabricated command is not.
-- **`EnterPlanMode` not in the tool list** → deferred, not absent. Run the Gate 0
-  `ToolSearch` before falling back to a plain message.
+- **No plan mode in this harness** → post the Gate 4 plan as a normal message;
+  wait for explicit approval. Same read-only rules.

@@ -2,8 +2,8 @@
 name: plan-format
 description: >
   The shape of a plan document — show every change as a real before/after diff, not prose.
-  Use when entering plan mode, starting to plan a code change, writing or editing a plan file,
-  or before calling ExitPlanMode.
+  Use when entering plan/approval mode, starting to plan a code change, writing or
+  editing a plan file, or before presenting a plan for approval.
 disable-model-invocation: false
 ---
 

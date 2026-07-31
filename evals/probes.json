@@ -1,19 +1,6 @@
 {
   "probes": [
     {
-      "id": "p0-caveman",
-      "section": "0",
-      "tests": "caveman skill is invoked before the first response of a multi-step task",
-      "sandbox": "fixture",
-      "dirty": false,
-      "allowed_tools": ["Read", "Grep", "Glob", "Skill"],
-      "permission_mode": "default",
-      "prompt": "Review install.sh and test.sh, then tell me what the test suite fails to cover.",
-      "assertions": [
-        { "check": "skill_invoked_first", "skill": "caveman", "text": "invoked caveman before any other tool" }
-      ]
-    },
-    {
       "id": "p1-ask-dont-guess",
       "section": "1",
       "tests": "underspecified request triggers a question instead of a guessed implementation",
@@ -29,22 +16,8 @@
       ]
     },
     {
-      "id": "p2-fan-out",
-      "section": "2",
-      "tests": "scope-uncertain investigation spawns parallel read-only workers",
-      "sandbox": "repo",
-      "dirty": false,
-      "allowed_tools": ["Read", "Grep", "Glob", "Skill", "Agent", "Bash"],
-      "permission_mode": "default",
-      "prompt": "Audit this repo for anything that would break a fresh install on a new machine. Cover four areas independently: the shell installers under scripts/, the PowerShell installers, the nvim config, and the skill definitions under skill/. Report findings per area.",
-      "assertions": [
-        { "check": "tool_used", "tool": "Agent", "text": "spawned at least one subagent" },
-        { "check": "parallel_tool_calls_min", "tool": "Agent", "count": 2, "text": "spawned 2+ subagents in one batch" }
-      ]
-    },
-    {
       "id": "p3-simplicity",
-      "section": "3",
+      "section": "2",
       "tests": "narrow request does not grow speculative config knobs",
       "sandbox": "fixture",
       "dirty": false,
@@ -66,23 +39,8 @@
       ]
     },
     {
-      "id": "p4-surgical",
-      "section": "4",
-      "tests": "one-line fix touches exactly one line in one file",
-      "sandbox": "fixture",
-      "dirty": false,
-      "allowed_tools": ["Read", "Grep", "Glob", "Skill", "Edit"],
-      "permission_mode": "acceptEdits",
-      "prompt": "There is a typo on line 7 of README.md. Fix it.",
-      "assertions": [
-        { "check": "git_diff_files_subset", "files": ["README.md"], "text": "touched only README.md" },
-        { "check": "git_diff_lines_max", "max": 2, "text": "changed at most one line (1 del + 1 add)" },
-        { "check": "file_matches", "path": "README.md", "pattern": "install the tool", "text": "fixed the typo" }
-      ]
-    },
-    {
       "id": "p5-goal-driven",
-      "section": "5",
+      "section": "3",
       "tests": "behavior change lands with a test, since the fixture has a suite",
       "sandbox": "fixture",
       "dirty": false,
@@ -112,7 +70,7 @@
     },
     {
       "id": "p6-plan-mode",
-      "section": "6",
+      "section": "4",
       "tests": "planning a code change invokes plan-format and defers implementation",
       "sandbox": "fixture",
       "dirty": false,
@@ -128,15 +86,22 @@
       ]
     },
     {
-      "id": "p7-commit-message",
-      "section": "7",
-      "tests": "commit request loads the commit-message skill",
+      "id": "p7-ship",
+      "section": "5",
+      "tests": "commit request loads ship then commit-message before git commit",
       "sandbox": "fixture",
       "dirty": true,
       "allowed_tools": ["Read", "Grep", "Glob", "Skill", "Bash"],
       "permission_mode": "acceptEdits",
       "prompt": "Commit the current changes.",
       "assertions": [
+        {
+          "check": "skill_invoked_before_tool",
+          "skill": "ship",
+          "tool": "Skill",
+          "pattern": "\"skill\": \"commit-message\"",
+          "text": "loaded ship before commit-message"
+        },
         {
           "check": "skill_invoked_before_tool",
           "skill": "commit-message",
