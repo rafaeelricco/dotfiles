@@ -1,7 +1,9 @@
 # Mermaid Diagrams
 
-Draw one for a multi-step flow, branching logic, a cross-boundary interaction,
-or an event chain. Not for CRUD, formatting, single-file refactors, or docs.
+A diagram earns its place on a multi-step flow, branching logic, a
+cross-boundary interaction, or an event chain — not on CRUD, formatting,
+single-file refactors, or docs. That judgement decides whether `pr-body` offers
+the Architecture Flow option, not whether the section renders once chosen.
 
 ```mermaid
 graph TD

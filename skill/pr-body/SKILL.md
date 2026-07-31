@@ -56,13 +56,19 @@ Then `AskUserQuestion` — at most four questions per call (tool schema limit):
 
 **Call 1 (always):**
 
-- Sections — multi-select, and the only control over which optional sections
-  appear. Motivation, What's New, and Testing & Feedback are always on and never
-  listed. At most four options:
+- Sections — multi-select, and the only control over which of the offered
+  sections appear. Motivation, What's New, and Testing & Feedback are always on
+  and never listed. At most four options:
   - Demo Video
-  - Architecture Flow
+  - Architecture Flow — offer only when the diff changed a multi-step flow,
+    branching logic, a cross-boundary interaction, or an event chain
   - Changed Files
-  - Additional for Run Locally
+  - Additional for Run Locally — offer only when the diff adds a dependency,
+    service, env var, or local setup step
+
+  Offer conditions decide which options appear. Once an option is offered and
+  chosen, no downstream rule may suppress the section.
+
 - Writing Style — concise (terse bullets, one line each) / standard (one or two
   sentences with context) / verbose (rationale and tradeoffs).
 - Video Source — `[video_url]` placeholder, or a URL the user supplies. Ignored
@@ -79,11 +85,11 @@ Render `references/template.md`. Read `references/categories.md` for grouping,
 
 - Motivation: the user's words. Grammar cleanup only — do not rewrite the intent.
 - What's New: bold category headings, bullets underneath.
-- Additional for Run Locally: only when the diff adds a dependency, service,
-  env var, or local setup step.
+- Additional for Run Locally: name the dependency, service, env var, or setup
+  step the diff adds.
 - Testing & Feedback: always present, with concrete reviewer focus areas, ending
   on the template's closing sentence verbatim.
-- Every other section: only when Sections includes it.
+- Every optional section: only when Sections includes it.
 - `##` headings, backticks for identifiers, tables only for structured data.
 - No horizontal rules, no watermarks, no generated-by footers, no emoji.
 - Write in the language of the codebase. Default to English.

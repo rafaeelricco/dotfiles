@@ -28,7 +28,7 @@ Watch this video for a demonstration of {{ FEATURE_DESCRIPTION }}:
 - {{ TECHNICAL_DETAIL }}
 - {{ TECHNICAL_DETAIL }}
 
-<!-- optional; architecture change only -->
+<!-- optional -->
 
 ## {{ SYSTEM_NAME }} Flow
 
@@ -44,7 +44,7 @@ Watch this video for a demonstration of {{ FEATURE_DESCRIPTION }}:
 | -------------- | ---------------------- | ----------------- |
 | `path/to/file` | Added/Modified/Deleted | Brief description |
 
-<!-- only when the diff adds a dependency, service, or env var -->
+<!-- optional -->
 
 ## Additional for Run Locally
 
