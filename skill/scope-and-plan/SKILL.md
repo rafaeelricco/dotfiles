@@ -2,7 +2,8 @@
 name: scope-and-plan
 description: >
   Build context before deciding — fan out read-only workers over independent
-  concerns, refine once through consult-advisor, then present a plan as diffs.
+  concerns, refine once through consult-advisor, then present a plan as diffs
+  whose verification comes from the test skill.
   Use when a request touches files you cannot yet name, spans layers, or the
   user asks to "get context first", "explore then plan", or "use sub-agents".
   Do NOT use when you can already name the files and the approach, when one
@@ -36,16 +37,11 @@ run one search first — if it resolves the request, this skill was not needed.
 
 ## Gate 0 — Plan mode
 
-Call `EnterPlanMode` now, before spawning a worker or reading a file. Gates 1-3
-are read-only, so nothing in them needs plan mode off.
+Enter the harness plan/approval workflow now if one exists, before spawning a
+worker or reading a file. Gates 1–3 stay read-only either way.
 
-`EnterPlanMode` and `ExitPlanMode` may be deferred — absent from the tool list
-until loaded. Load both before concluding they do not exist:
-`ToolSearch "select:EnterPlanMode,ExitPlanMode"`.
-
-Only if that search returns neither does the harness lack plan mode (e.g.
-Codex). Then run every gate the same way and post the Gate 4 plan as a normal
-message.
+If the harness has no plan mode, run every gate the same way and post the Gate 4
+plan as a normal message. Wait for explicit user approval before any mutation.
 
 ## Gate 1 — Fan out
 
@@ -90,9 +86,23 @@ Skip only when `consult-advisor`'s own "When NOT to call" applies.
 
 ## Gate 4 — Plan
 
-Load `plan-format` and follow it before writing any plan text. Present the plan,
-then call `ExitPlanMode`. Approval of that plan is the gate for implementation.
-Inspection stays read-only until then.
+Load `plan-format` and follow it before writing any plan text.
+
+Then load `test` in its **Planning discovery** mode and follow that section only
+to fill the plan's Verify section. Select and name the repo's own commands,
+narrowed to the checks that would fail if this change were wrong — do not run
+them, do not materialize worktrees, and do not treat "name it and run" as in
+scope. No invented rituals, no "run the tests" placeholder, no green typecheck
+standing in for a behavior change. Where the repo defines no runnable check, the
+plan says so — it does not scaffold a suite to manufacture a pass.
+
+`scope-and-plan` is the only caller of `test` in this flow. The user never types
+`/test` for work this skill planned. Execution of the selected checks happens
+after plan approval, when implementation is verified — not during Gate 4.
+
+Present the plan (and leave plan/approval mode if the harness uses one). Approval
+of that plan is the gate for implementation, and approves those checks as its
+definition of done. Inspection stays read-only until then.
 
 Unresolved decisions do not defer the plan: the open question and the formatted
 plan ship in the same response.
@@ -107,5 +117,7 @@ plan ship in the same response.
   and re-scope before planning.
 - **Gaps block the plan** → name the gap as an open question inside the plan. Do
   not fan out a second round to close it.
-- **`EnterPlanMode` not in the tool list** → deferred, not absent. Run the Gate 0
-  `ToolSearch` before falling back to a plain message.
+- **`test` finds no runnable check** → the Verify section states that gap
+  verbatim. A plan with no proof is honest; a fabricated command is not.
+- **No plan mode in this harness** → post the Gate 4 plan as a normal message;
+  wait for explicit approval. Same read-only rules.

@@ -3,8 +3,8 @@
 Terminal / WSL pieces live here and in `powershell/Microsoft.PowerShell_profile.ps1`
 (copied by `install.ps1` → `$PROFILE`; re-install keeps the existing file unless `-Override`).
 
-| Topic | Goal |
-| ----- | ---- |
+| Topic                                                       | Goal                                                                 |
+| ----------------------------------------------------------- | -------------------------------------------------------------------- |
 | [Node / pnpm via WSL](#node--pnpm-via-wsl-pc-reset-runbook) | `bash …` from PowerShell uses **Linux** node/pnpm, not Windows shims |
 
 **Docker:** install **Docker Desktop** on Windows. This repo no longer installs or
@@ -43,26 +43,26 @@ Node/pnpm live) never enters `PATH`, and the Windows shim wins.
 
 **Rejected alternatives:**
 
-| Idea | Why not |
-| ---- | ------- |
-| Patch each project `utils.sh` | Not portable; forgotten on every new repo |
-| PowerShell `pnpm` wrapper with silent WSL retry | Never runs for `pnpm` *inside* a bash script |
-| Uninstall Windows Node | Optional; Windows tooling can keep its own Node |
-| Filter Windows paths out of WSL `PATH` | Breaks on spaces (`Program Files`); brew-first is enough |
-| Rely on Windows User env alone for tokens | Still missing in WSL unless listed on `WSLENV` |
+| Idea                                            | Why not                                                  |
+| ----------------------------------------------- | -------------------------------------------------------- |
+| Patch each project `utils.sh`                   | Not portable; forgotten on every new repo                |
+| PowerShell `pnpm` wrapper with silent WSL retry | Never runs for `pnpm` _inside_ a bash script             |
+| Uninstall Windows Node                          | Optional; Windows tooling can keep its own Node          |
+| Filter Windows paths out of WSL `PATH`          | Breaks on spaces (`Program Files`); brew-first is enough |
+| Rely on Windows User env alone for tokens       | Still missing in WSL unless listed on `WSLENV`           |
 
 Windows `pnpm` / `node` in a pure PowerShell session stay unchanged. Only bash
 launched from Windows is steered toward Linux toolchain.
 
 ### Assumptions (match current profile)
 
-| Item | Value |
-| ---- | ----- |
-| Distro | `Ubuntu-24.04` |
-| Linux user home | `/home/administrator` |
-| `BASH_ENV` in profile | `/home/administrator/.wsl_dev_env` |
-| `WSLENV` extras | `BASH_ENV/u`, `GITHUB_TOKEN`, `GH_TOKEN` |
-| Homebrew | `/home/linuxbrew/.linuxbrew` |
+| Item                  | Value                                    |
+| --------------------- | ---------------------------------------- |
+| Distro                | `Ubuntu-24.04`                           |
+| Linux user home       | `/home/administrator`                    |
+| `BASH_ENV` in profile | `/home/administrator/.wsl_dev_env`       |
+| `WSLENV` extras       | `BASH_ENV/u`, `GITHUB_TOKEN`, `GH_TOKEN` |
+| Homebrew              | `/home/linuxbrew/.linuxbrew`             |
 
 If the Linux username differs after a reset, change `$env:BASH_ENV` in
 `powershell/Microsoft.PowerShell_profile.ps1` to match `$HOME/.wsl_dev_env`.
@@ -103,8 +103,8 @@ If the Linux username differs after a reset, change `$env:BASH_ENV` in
 
 ### Files
 
-| Path | Role |
-|------|------|
-| `setup-wsl-node.sh` | Install/wire Linux node+pnpm + `~/.wsl_dev_env` |
-| `wsl_dev_env` | Template sourced via `BASH_ENV` |
-| `system-cleanup.bat` | Unrelated disk/DISM cleanup |
+| Path                 | Role                                            |
+| -------------------- | ----------------------------------------------- |
+| `setup-wsl-node.sh`  | Install/wire Linux node+pnpm + `~/.wsl_dev_env` |
+| `wsl_dev_env`        | Template sourced via `BASH_ENV`                 |
+| `system-cleanup.bat` | Unrelated disk/DISM cleanup                     |

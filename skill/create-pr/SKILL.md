@@ -15,10 +15,10 @@ branched, staged, committed, pushed, or opened before every answer is in.
 
 ## Order of operations
 
-1. `EnterPlanMode` — before any other tool call.
+1. Enter plan/approval mode if the harness has one — before any other tool call.
 2. Inspect — read-only.
-3. Ask — one prose question, then one or two `AskUserQuestion` calls.
-4. Present the plan, then `ExitPlanMode`.
+3. Ask — one prose question, then the `AskUserQuestion` calls in 3b–3c.
+4. Present the plan (leave plan/approval mode if used).
 5. Execute exactly what was approved.
 
 Until the user approves the Step 4 plan these commands are forbidden:
@@ -54,14 +54,14 @@ neither of those.
 
 ## Step 1 — Enter plan mode
 
-If the session is not already in plan mode, call `EnterPlanMode` now, before
-anything else. Inspection happens read-only inside plan mode; the plan you
-present in Step 4 is the approval artifact for every mutation in Step 5.
+If the harness has a plan/approval mode and the session is not already in it,
+enter it now, before anything else. Inspection stays read-only either way; the
+plan you present in Step 4 is the approval artifact for every mutation in Step 5.
 
-If plan mode does not exist in this harness (e.g. Codex), follow the same
-steps and post the Step 4 plan as a normal message instead. Execute only after
-a user message approves it — see the second item under "When NOT to ask", which
-covers both this case and a run with no user at all.
+If the harness has no plan mode, follow the same steps and post the Step 4 plan
+as a normal message. Execute only after a user message approves it — see the
+second item under "When NOT to ask", which covers both this case and a run with
+no user at all.
 
 ## Step 2 — Inspect (read-only)
 
@@ -114,9 +114,18 @@ Four questions, always all four. Fill the bracketed values from Step 2.
     "question": "Which branch should this PR come from?",
     "multiSelect": false,
     "options": [
-      {"label": "<current-branch>", "description": "Open from the branch you are on. <n> commits ahead of <default>."},
-      {"label": "rafaeelricco/<slug-from-diff>", "description": "Create this branch from the current HEAD, then open the PR from it."},
-      {"label": "rafaeelricco/<alt-slug>", "description": "Create this branch from the current HEAD, then open the PR from it."}
+      {
+        "label": "<current-branch>",
+        "description": "Open from the branch you are on. <n> commits ahead of <default>."
+      },
+      {
+        "label": "rafaeelricco/<slug-from-diff>",
+        "description": "Create this branch from the current HEAD, then open the PR from it."
+      },
+      {
+        "label": "rafaeelricco/<alt-slug>",
+        "description": "Create this branch from the current HEAD, then open the PR from it."
+      }
     ]
   },
   {
@@ -124,9 +133,12 @@ Four questions, always all four. Fill the bracketed values from Step 2.
     "question": "How far should I take this?",
     "multiSelect": false,
     "options": [
-      {"label": "Full flow", "description": "Create the branch if needed, commit, push, and open the PR."},
-      {"label": "Branch only", "description": "Create the approved branch and stop. No commits, no push, no PR."},
-      {"label": "You handle commits", "description": "Stop after inspection. I report findings and a suggested split; you commit."}
+      { "label": "Full flow", "description": "Create the branch if needed, commit, push, and open the PR." },
+      { "label": "Branch only", "description": "Create the approved branch and stop. No commits, no push, no PR." },
+      {
+        "label": "You handle commits",
+        "description": "Stop after inspection. I report findings and a suggested split; you commit."
+      }
     ]
   },
   {
@@ -134,8 +146,8 @@ Four questions, always all four. Fill the bracketed values from Step 2.
     "question": "Which changes belong in this PR?",
     "multiSelect": true,
     "options": [
-      {"label": "<group-1>", "description": "<files in group 1>"},
-      {"label": "<group-2>", "description": "<files in group 2>"}
+      { "label": "<group-1>", "description": "<files in group 1>" },
+      { "label": "<group-2>", "description": "<files in group 2>" }
     ]
   },
   {
@@ -143,9 +155,9 @@ Four questions, always all four. Fill the bracketed values from Step 2.
     "question": "How should the PR be opened?",
     "multiSelect": false,
     "options": [
-      {"label": "Draft, no assignee (Recommended)", "description": "gh pr create --draft, nobody assigned."},
-      {"label": "Draft, assign me", "description": "gh pr create --draft --assignee @me."},
-      {"label": "Ready for review", "description": "gh pr create --assignee @me. Reviewers are notified immediately."}
+      { "label": "Draft, no assignee (Recommended)", "description": "gh pr create --draft, nobody assigned." },
+      { "label": "Draft, assign me", "description": "gh pr create --draft --assignee @me." },
+      { "label": "Ready for review", "description": "gh pr create --assignee @me. Reviewers are notified immediately." }
     ]
   }
 ]
@@ -161,17 +173,18 @@ Four questions, always all four. Fill the bracketed values from Step 2.
   group holding every file. The user still confirms it — a one-option question
   is a confirmation, not a skipped question.
 
-### 3c. Body options — one `AskUserQuestion` call, `Full flow` only
+### 3c. Body options — `Full flow` only
 
-Load `pr-generate-description` and ask its formatting questions: writing
-style, sections, changed-files table, demo video, and a Mermaid diagram only
-when Step 2 found architecture or flow changes. Its `references/template.md`
-renders the body; the Motivation section carries 3a's answer in the user's
-words.
+Load `pr-body` and ask its formatting questions (one or two `AskUserQuestion`
+calls per that skill's schema limits): sections, writing style, the demo-video
+source, and a diagram question only when Sections includes Architecture Flow.
+Its `references/template.md` renders the body; the Motivation section carries
+3a's answer in the user's words.
 
 ## Step 4 — Present the plan
 
-Load `plan-format`. State concretely:
+Load `plan-format` for diff and prose style. This plan names its own sections,
+overriding that skill's Shape list. State concretely:
 
 - **Branch only** — approved branch name and base, or "already on it, nothing
   to create" when the approved branch is the current one. Nothing else.
@@ -185,7 +198,7 @@ Load `plan-format`. State concretely:
 Files that must move together (an API change and its consumer) stay in one
 commit. A single-category diff is one commit — say so.
 
-`ExitPlanMode`. Approval of this plan is the gate for Step 5.
+Approval of this plan is the gate for Step 5. Leave plan/approval mode if the harness uses one.
 
 ## Step 5 — Execute
 
@@ -249,12 +262,12 @@ assignee.
 
 <example>
 User: /create-pr
-Assistant: *EnterPlanMode, then the Step 2 block: branch `fix-token-expiry`, 3 commits ahead of `main`, 4 files, clean worktree, no open PR*
+Assistant: *enter plan/approval mode if available, then the Step 2 block: branch `fix-token-expiry`, 3 commits ahead of `main`, 4 files, clean worktree, no open PR*
 Assistant: What is the motivation or the why behind this PR? Briefly describe the problem it solves or the goal it achieves.
 User: Sessions dropped an hour early — the expiry check used `<` instead of `<=`.
 Assistant: *one AskUserQuestion call: Branch / Path / Scope / State*
 User: *answers*
-Assistant: *loads pr-generate-description, asks body options, presents the plan, ExitPlanMode*
+Assistant: *loads pr-body, asks body options, presents the plan, leaves plan mode if used*
 
 <reasoning>
 The branch was already a feature branch and the worktree was clean, so both
@@ -266,7 +279,7 @@ assumes.
 
 <example>
 User: /create-pr
-Assistant: *EnterPlanMode, inspects, reads a motivation off the commit messages, presents a full plan with title, body, and commit split*
+Assistant: *enters plan mode if available, inspects, reads a motivation off the commit messages, presents a full plan with title, body, and commit split*
 
 <reasoning>
 Non-compliant, and the exact failure this skill exists to prevent. Reading
