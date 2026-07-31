@@ -12,11 +12,11 @@ description: >
 
 Dispatch only. Load exactly one leaf and follow it. Do not restate leaf rules.
 
-| Intent | Load |
-| --- | --- |
-| Commit message or `git commit` | `commit-message` |
-| PR body only (`gh pr create/edit --body`, draft/refresh body) | `pr-body` |
-| Open / ship full PR (branch, commits, push, `gh pr create`) | `create-pr` |
+| Intent                                                        | Load             |
+| ------------------------------------------------------------- | ---------------- |
+| Commit message or `git commit`                                | `commit-message` |
+| PR body only (`gh pr create/edit --body`, draft/refresh body) | `pr-body`        |
+| Open / ship full PR (branch, commits, push, `gh pr create`)   | `create-pr`      |
 
 - Mixed ("commit then open PR") → `create-pr` (it loads the others).
 - PR title only → `commit-message` (PR title style section).
