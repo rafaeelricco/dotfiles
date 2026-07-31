@@ -44,6 +44,8 @@ evals/grade.py evals/results --json      # machine-readable: {report, excluded}
 | —   | `p8-create-pr-asks`        | `create-pr` asks for motivation before mutating anything                 |
 | —   | `p9-scope-and-plan`        | fans out, refines via `consult-advisor`, plans via `plan-format`         |
 | —   | `p10-scope-and-plan-skips` | mechanical edit lands with no fan-out                                    |
+| —   | `p11-linkedin-triggers`    | an off-profile LinkedIn ask still loads `linkedin`                       |
+| —   | `p12-linkedin-routes`      | a headline ask reads `references/headline.md` and emits the pipe format  |
 
 `p9` runs against a throwaway `--local` clone of this repo; every other probe
 gets a sandbox built from `fixture/`. Both are disposable, so a probe can hold

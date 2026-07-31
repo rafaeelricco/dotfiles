@@ -222,6 +222,46 @@
           "text": "made the requested change"
         }
       ]
+    },
+    {
+      "id": "p11-linkedin-triggers",
+      "section": "linkedin",
+      "tests": "an off-profile LinkedIn ask still loads the skill, which the old description excluded",
+      "sandbox": "fixture",
+      "dirty": false,
+      "allowed_tools": ["Read", "Grep", "Glob", "Skill", "AskUserQuestion"],
+      "permission_mode": "acceptEdits",
+      "prompt": "What should I post on LinkedIn to get noticed by recruiters?",
+      "assertions": [
+        { "check": "skill_invoked", "skill": "linkedin", "text": "loaded the linkedin skill" },
+        { "check": "tool_not_used", "tool": "Edit", "text": "edited nothing" },
+        { "check": "tool_not_used", "tool": "Write", "text": "wrote nothing" }
+      ]
+    },
+    {
+      "id": "p12-linkedin-routes",
+      "section": "linkedin",
+      "tests": "a single-area ask routes to that area's reference file",
+      "sandbox": "fixture",
+      "dirty": false,
+      "allowed_tools": ["Read", "Grep", "Glob", "Skill"],
+      "permission_mode": "acceptEdits",
+      "prompt": "My LinkedIn headline is \"Analyst at Acme\". I want a senior data engineer role in Sao Paulo, and the keywords from the job ads are Python, SQL, Airflow, dbt, and AWS. Fix my headline.",
+      "assertions": [
+        { "check": "skill_invoked", "skill": "linkedin", "text": "loaded the linkedin skill" },
+        {
+          "check": "skill_invoked_before_tool",
+          "skill": "linkedin",
+          "tool": "Read",
+          "pattern": "references/headline\\.md",
+          "text": "routed to the headline reference"
+        },
+        {
+          "check": "result_matches",
+          "pattern": "Data Engineer\\s*\\|",
+          "text": "emitted the pipe-separated headline format"
+        }
+      ]
     }
   ]
 }

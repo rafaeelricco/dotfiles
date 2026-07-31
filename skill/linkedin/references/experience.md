@@ -20,7 +20,8 @@ Results / Impact:
 - [Result 4 — qualitative, when there is no number]
 ```
 
-Four bullets each is the target, not a hard cap. Fewer real ones beat padded ones.
+4 to 6 responsibilities, chosen as the ones job ads ask for most — not the full duty list. Fewer
+real ones beat padded ones. Blank line between the two blocks, always.
 
 ## Worked example
 
@@ -48,9 +49,9 @@ Results / Impact:
 - Include competencies
 - Always list every title held inside the same company, so progression is visible
 
-## Audit mode
+## Checklist
 
-When asked to review rather than write, check in this order: the two sections exist and are
-labeled, responsibilities open with a noun or gerund, results carry impact rather than restated
-duties, the most recent role is the most detailed, and every title inside one company is listed.
-Then the 3 prioritized fixes.
+The two sections exist and are labeled. 4-6 responsibilities, opening with a noun or gerund.
+Results carry impact rather than restated duties. Job titles use market naming, not the internal
+one. The most recent role is the most detailed. Every title held inside one company is listed.
+Companies linked to their LinkedIn pages.

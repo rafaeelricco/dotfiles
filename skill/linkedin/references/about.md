@@ -8,7 +8,7 @@ Six blocks, in order. Cap 2600 characters.
 | 2 Scope of work          | Scale, and the type of problem solved     | areas, project types, strategic or technical context                  |
 | 3 Results and impact     | Authority, proof of value                 | measurable results, business impact, achievements. **Bullet points.** |
 | 4 Skills and specialties | Technical capability, reinforces keywords | hard skills, specialties, differentiators                             |
-| 5 Career direction       | Orients the next step                     | target area or role, type of challenge sought                         |
+| 5 Career direction       | Orients the next step                     | target area or role, type of challenge sought. **Employed → omit.**   |
 | 6 Closing + CTA          | Opens contact                             | invitation, topics of interest, contact details (optional)            |
 
 Block 1 is where a recruiter confirms alignment with the vacancy, so a wrong opening costs the whole
@@ -17,9 +17,22 @@ is where trust is won or lost, because a recruiter believes a result, not an adj
 what LinkedIn search matches against. Block 5 exists so nobody has to guess what the person wants
 next. Block 6 humanizes the profile and gives the reader a reason to send the message.
 
-The 5 keywords from the headline appear here too. Same 5, no substitutes.
+The headline's keywords appear here too. Same terms, no substitutes.
+
+Block 5 is skipped entirely when the user is currently employed — a colleague reads this page.
+The Interview already captured employment status; do not ask again.
+
+Block 3 caps at 3-4 results. More stops being read.
+
+Soft skills stay out of every block. `Passionate about people`, `proactive`, `love working in a
+team` — a recruiter uses LinkedIn for technical screening and assesses behavior in the interview,
+so these displace the terms that decide whether the profile is returned at all.
+
+Blank line between every block. The recruiter scans; a wall of text is skipped, not read slowly.
 
 ## Worked example — experienced
+
+Written for someone not currently employed. Drop the "Interested in…" paragraph if they are.
 
 ```text
 Financial Planning Specialist (FP&A) with over 10 years of experience across the financial and healthcare sectors. Work spans matrix budgeting, mergers and acquisitions, and organizational transformation, focused on efficiency and strategic impact.
@@ -127,11 +140,9 @@ Open to connections and conversations about [professional topics of interest].
 Contact: [your email] | [your phone]
 ```
 
-## Generation rules
+## Checklist
 
-- No generic or subjective phrases.
-- Direct and scannable.
-- Market language, written for recruiters.
-- Never invent information or experiences.
-- Do not exceed what each block needs.
-- Transition and first-job variants: never inflate seniority or experience.
+Under 2600 characters. Block 1 names role, seniority, and sector. Blank line between blocks.
+Block 3 is 3-4 bulleted results, not duties. Block 4 carries the densest keyword concentration.
+Block 5 present only if unemployed. Block 6 has a contact route. No soft skills, no motivational
+phrasing. Transition and first-job variants never inflate seniority.
