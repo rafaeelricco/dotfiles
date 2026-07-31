@@ -1,9 +1,9 @@
 ---
 name: test
-description: Run an extremely strict validation of a change set (local, branch, or PR) by discovering this repo's verify commands, selecting checks that would fail if the change were wrong, executing them, and refusing to pass without evidence. Invoke only via the explicit `/test` slash command (model auto-invocation is disabled).
-when-to-use: "Use when the user explicitly invokes `/test` (with optional --local, --branch, or --pr flags)."
+description: Run an extremely strict validation of a change set (local, branch, or PR) by discovering this repo's verify commands, selecting checks that would fail if the change were wrong, executing them, and refusing to pass without evidence. Invoked by the explicit `/test` slash command, or loaded by a workflow skill that needs the checks a change set actually requires.
+when-to-use: "Use when the user explicitly invokes `/test` (with optional --local, --branch, or --pr flags), or when a workflow skill such as `scope-and-plan` loads this skill to select the checks for a change set. Do not self-trigger on conversation that merely mentions tests."
 argument-hint: "[--local | --branch <name> | --pr <number-or-url>]"
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # Strict Change Validation
@@ -35,6 +35,38 @@ Start from this baseline:
 
 This skill is not `/review` (maintainability of the code) and not `/check-work` (whether this session finished the user's request). It does not scaffold new test suites unless the user separately asks for that.
 
+## Environment Discovery
+
+Tool rosters differ per environment. Discover at run time. Never assume a fixed
+set; never call a capability missing because an expected name is absent.
+
+Probe once per session, cheapest first, stop when settled:
+
+1. **Tools** — anything in the current surface that drives a runtime rather than
+   a file: device or simulator control, browser automation, containers, remote
+   sessions. Absent from the surface = unavailable. Do not shell out to prove it.
+2. **Live targets** — ask each candidate what is already running. Reuse is free;
+   a cold start is a cost the user decides to pay.
+3. **PATH** — `type -P` for the CLIs this project implies. Project-local runners
+   live under the package manager's bin dir — read the manifest for those.
+4. **Repo commands** — Rule 4 below.
+
+Overlapping harnesses: take the one covering more of the changed surface, or the
+one the repo already opts into. Say which and why. If the environment ships a
+subagent that inventories project tooling, delegate rather than re-derive; reuse
+its result if it ran this session.
+
+### Ask which method
+
+Two or more methods could decisively cover the change → one `AskUserQuestion`
+before running anything. One option per method, best match first and labelled
+`(Recommended)`, each stating its cost and what it cannot prove.
+
+One method: name it and run — an option list of one wastes a turn.
+Zero: BLOCKED, not PASS. Name what is missing and the one action that unblocks it.
+
+Never ask after the checks have run.
+
 ## Non-Negotiable Additional Standards
 
 Apply the baseline prompt above, plus these explicit validation rules:
@@ -62,13 +94,14 @@ Apply the baseline prompt above, plus these explicit validation rules:
 
 4. **Prefer this repo's real commands over invented ones.**
    - Discover `test`, `typecheck`, `lint`, `check`, `build` (and language defaults like `dotnet test`, `go test`, `cargo test`, `pytest`, `make test`) from package manifests, Makefiles, and CI only when those CI steps are runnable locally.
+   - A harness driving a live target is a real command surface, not an invented ritual.
    - Treat invented one-off command lines as a quality problem when the repo already has a canonical script.
    - Be skeptical of generic "just run everything" approaches that hide which package actually matters.
 
 5. **Push hard on matching the check to the change.**
    - Logic/domain change → tests for that module or package.
    - CLI change → invoke the affected subcommand with an expected exit code or output fragment when cheap.
-   - Platform-specific paths (`android`, `ios`, OS-only projects) → do not proxy with another platform.
+   - Platform-specific paths (`android`, `ios`, OS-only projects) → do not proxy with another platform. Harness available and target live → drive it, not typecheck.
    - Docs-only change → report that no behavioral verification is required; do not invent a PASS theater.
 
 6. **Keep validation in the canonical layer the repo already uses.**
@@ -79,7 +112,8 @@ Apply the baseline prompt above, plus these explicit validation rules:
 7. **Treat missing environment as a blocker, not a pass.**
    - If a selected check cannot start (toolchain, auth, secrets, device), mark it blocked with the single next action required.
    - Do not skip a failed product test and still claim overall success.
-   - Do not over-index on elaborate runtime setups in v1; if the decisive check needs a device/browser and tools are absent, state the gap instead of building a framework.
+   - Absent tools are a gap to state, not a framework to build.
+   - Present tools are an obligation. "The target was already running" is a reason to use it, never a reason to stop at typecheck.
 
 8. **Materialize non-local targets; gate untrusted PR execution.**
    - For `--branch` (and approved `--pr` execution): discovery + checks run at the target revision (temp worktree at tip SHA), not only as a file-list over the user's current tree.
@@ -108,6 +142,8 @@ Escalate when you see:
 - A failed test reclassified as "probably fine" or "flaky" without a re-run.
 - Invented commands the repo does not define when a canonical script exists.
 - Validation of the wrong package for the files that changed.
+- An available harness left idle while a weaker static check stood in.
+- A method chosen for the user when two were viable.
 - Android-only (or iOS-only) changes "validated" on the other platform.
 - Empty or docs-only diffs padded with unrelated green checks.
 - Residual risk omitted when an obvious decisive check was available and skipped.
@@ -173,6 +209,7 @@ Report shape:
 ## Target
 
 - Mode / ref
+- Method / harness — user-chosen, or sole viable
 - Changed files (count; list if small)
 
 ## Results
