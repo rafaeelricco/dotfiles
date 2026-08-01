@@ -36,7 +36,8 @@ Fails: motivational quotes, stock imagery unrelated to the work, logo collages, 
 information, anything with more than a short line of text.
 
 Output is a written brief — subject, palette, text if any, and where to source it. This
-skill does not generate the image.
+skill does not generate the image. Open to Work photo badge policy lives in `sections` —
+do not invent badge advice here.
 
 ## Checklist
 

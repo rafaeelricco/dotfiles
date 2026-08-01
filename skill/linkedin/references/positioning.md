@@ -16,18 +16,20 @@ The 5-second test: open the profile cold and name the area, the target role, and
 seniority. Any one of the three unreadable → the positioning failed, whatever else is good.
 
 Nothing here is permanent. Run one framing for ~15 days, read the search-appearance metric
-(`references/ssi.md`), and change it if the wrong job titles are finding you.
+in LinkedIn Analytics (search appearances → job titles). If you only need that read, stay
+on search appearances; do not expand into full SSI growth advice. Change framing if the
+wrong titles are finding you.
 
 ## Six errors
 
 - Confusing profile — several areas at once
 - Generic or inflated headline
 - Long, empty text
-- Excessive focus on tasks
-- Internal company language the market does not parse
+- Excessive focus on tasks or vanity volume metrics (PR/LOC/commits without outcome)
+- Internal company jargon the market does not parse
 - A profile trying to please everyone
 
-Raises perceived value: clear positioning, objective language, the right keywords, a
+Raises perceived value: clear positioning, objective wording, the right keywords, a
 coherent history, demonstrated impact.
 
 ## The keyword list
@@ -49,12 +51,14 @@ Four passes, in order. Pass 2 is the one that matters.
 4. **An LLM pass** for gaps, seeded with the target role and the output of passes 1-3.
 
 Output is a **ranked** list, not a fixed count. Consumers own their own counts: the headline
-takes 3-5, About distributes them across blocks, `sections` takes all of them plus
-translations.
+takes 3-5, About distributes them across blocks, `sections` takes all of them.
 
 Draw candidates from the target role's job ads, never from the current job title. A term
 that does not describe real work is dropped, not padded — it costs ranking and credibility
 at the same time.
+
+Career transition: build the list from **target-role** job ads; do not pad with past-role
+terms that do not describe the work you want next.
 
 ## Where the list lands
 

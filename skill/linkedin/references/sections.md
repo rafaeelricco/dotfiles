@@ -12,19 +12,7 @@ instruction is "fill it", not a number.
 Technical before behavioral. `Proactive` and `team player` are not search terms — nobody
 queries them, and they displace terms that are queried.
 
-Every term in **both** Portuguese and English. LinkedIn's profile-language versions cover
-only the headline, About, and experience — the Skills field is not translated, so a
-recruiter searching `sales` never reaches a profile that only says `vendas`. This is the
-reason, and it is why the en-US output rule does not apply to this field.
-
 Take the whole ranked list from `positioning`, not a subset.
-
-## Languages — also a filter
-
-Include Portuguese as native, even when it feels obvious. International roles filter for
-native Portuguese, and an unfilled field is invisible to that filter rather than assumed.
-
-Add every language with an honest level. An overstated level surfaces in the first call.
 
 ## Recommendations
 
@@ -55,18 +43,12 @@ Do **not** turn on the photo badge. Use the recruiters-only setting instead:
 `Jobs → Preferences → Open to work → visibility: Recruiters only`
 
 Colleagues at the current employer do not see it, which is what makes it usable while
-employed. Employment status came from the Interview — do not ask again.
+employed. If employment status is known, do not re-ask; if unknown, bracket and ask at the
+end. Career transition: preferred titles = **target** role from positioning, not legacy
+titles.
 
 > Course claim, unverified: the public badge correlates with fewer recruiter contacts. The
 > recruiters-only setting is the better default regardless, because it works while employed.
-
-## Profile language versions
-
-Only the headline, About, and experience are translatable. Everything else stays as
-written, which is the whole reason the Skills field carries both languages.
-
-Worth doing even without an international target: Brazilian recruiters increasingly search
-English job titles (`product manager`, not `gerente de produto`).
 
 ## Premium
 
@@ -75,8 +57,7 @@ allowance is the only real benefit. A free trial is the only version worth takin
 
 ## Checklist
 
-Skills field filled to the cap, technical first, every term in both languages. Languages
-includes Portuguese as native. 5+ recommendations requested, one sent first. Degrees under
-education, short courses under courses in `Name - Institution (year)` form. URL shortened
-to a name. Open to Work set to recruiters-only, badge off. An English profile version
-exists with headline, About, and experience translated.
+Skills field filled to the cap, technical first. 5+ recommendations requested, one sent
+first. Degrees under education, short courses under courses in
+`Name - Institution (year)` form. URL shortened to a name. Open to Work recruiters-only,
+badge off; transition titles = target role.

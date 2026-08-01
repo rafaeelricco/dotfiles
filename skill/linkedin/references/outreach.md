@@ -21,7 +21,8 @@ This skill drafts. The user sends.
 
 Pick by the user's situation. Each needs an employed and an unemployed framing — the
 unemployed version can state availability directly; the employed version cannot, because
-the message may be forwarded.
+the message may be forwarded. If employment framing is unknown, draft with
+`[employed|open]` or offer both short framings; do not block on a full Interview.
 
 **Job posted, applied** — one message to the recruiter, one to the hiring manager. Say
 which role, say the one qualification that maps to it, offer to answer questions.
@@ -54,6 +55,6 @@ three rewordings of one message.
 ## Checklist
 
 Reason stated in the first line. No resume, no interview request. Something specific to
-that person or company. Under about 80 words. Employed framing chosen correctly from the
-Interview. Follow-up drafted separately and adds new information. User sends it, not this
-skill.
+that person or company. Under about 80 words. Employed framing chosen correctly when known,
+or bracketed when not. Follow-up drafted separately and adds new information. User sends
+it, not this skill.

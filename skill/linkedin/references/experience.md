@@ -2,7 +2,8 @@
 
 Recruiters read fast, compare profiles side by side, and look for delivery signals. Three questions
 run in their head: what problem does this person solve, at what level of impact, and would they work
-here. A description that answers none of the three is a list of duties.
+here. A description that answers none of the three is a list of duties. Central shift:
+from “how much work I touched” to “what I owned, shipped, and made possible.”
 
 Fixed two-section shape, per role:
 
@@ -21,7 +22,8 @@ Results / Impact:
 ```
 
 4 to 6 responsibilities, chosen as the ones job ads ask for most — not the full duty list. Fewer
-real ones beat padded ones. Blank line between the two blocks, always.
+real ones beat padded ones. Blank line between the two blocks, always. Draft-first: unknown
+bullets stay as `[brackets]`; do not interview every field before drafting.
 
 ## Worked example
 
@@ -46,12 +48,24 @@ Results / Impact:
 - Recent experiences described in more detail than old ones
 - Only relevant experiences; an unrelated role that adds nothing can be a single line
 - Link the experience to the company page when the page exists
-- Include competencies
+- Include hard competencies and tools job ads name — not soft traits
 - Always list every title held inside the same company, so progression is visible
+- Responsibilities = ownership and scope; Results = production delivery and product or
+  business outcomes. Drop task inventories that only restate the job description.
+- **Vanity metrics out.** Never use PR counts/%, commit share, lines of code, files
+  changed, or ticket volume without a user/business outcome. Bad:
+  `58 PRs and ~+17k LOC in three months`. Good: what shipped (release, feature, offline
+  mode, workflow) and what it enabled.
+- Technical detail only when it supports a recognizable result for an external reader.
+  Drop internal mechanism stories that do not communicate value.
+- Career transition / first job: same two-section shape; Results may be projects,
+  learnings, or academic work. At most 1–2 credibility traits, and only when Results has
+  no hard proof.
 
 ## Checklist
 
 The two sections exist and are labeled. 4-6 responsibilities, opening with a noun or gerund.
-Results carry impact rather than restated duties. Job titles use market naming, not the internal
-one. The most recent role is the most detailed. Every title held inside one company is listed.
-Companies linked to their LinkedIn pages.
+Results carry ownership and outcomes, not restated duties or vanity volume metrics. Job
+titles use market naming, not the internal one. The most recent role is the most detailed.
+Every title held inside one company is listed. Companies linked to their LinkedIn pages.
+No soft-skill padding on experienced roles.

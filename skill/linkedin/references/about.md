@@ -13,24 +13,26 @@ Six blocks, in order. Cap 2600 characters.
 
 Block 1 is where a recruiter confirms alignment with the vacancy, so a wrong opening costs the whole
 read. Block 2 is what separates someone who executes from someone who operates strategically. Block 3
-is where trust is won or lost, because a recruiter believes a result, not an adjective. Block 4 is
+is where trust is won or lost, because a recruiter believes a shipped outcome, not an adjective or
+a volume metric. Prefer three representative achievements over a career dump. Same vanity ban as
+Writing rules (no PR/LOC/commit-share theater). Block 4 is
 what LinkedIn search matches against. Block 5 exists so nobody has to guess what the person wants
 next. Block 6 humanizes the profile and gives the reader a reason to send the message.
 
 The headline's keywords appear here too. Same terms, no substitutes.
 
 Block 5 is skipped entirely when the user is currently employed — a colleague reads this page.
-The Interview already captured employment status; do not ask again.
+If employment is known, do not re-ask; if unknown, omit Block 5 or bracket and ask at the end.
 
 Block 3 caps at 3-4 results. More stops being read.
 
-Soft skills stay out of every block. `Passionate about people`, `proactive`, `love working in a
-team` — a recruiter uses LinkedIn for technical screening and assesses behavior in the interview,
-so these displace the terms that decide whether the profile is returned at all.
+**Soft skills.** Experienced: out of every block (`passionate`, `proactive`, `team player`,
+`expert`, `highly skilled`). Career transition and first job: at most 1–2 credibility traits,
+and only when Block 3 lacks hard projects or results — never instead of keywords.
 
 Blank line between every block. The recruiter scans; a wall of text is skipped, not read slowly.
 
-## Worked example — experienced
+## Worked example — established career
 
 Written for someone not currently employed. Drop the "Interested in…" paragraph if they are.
 
@@ -67,7 +69,7 @@ Main recent learnings and deliveries:
 - Analysis and organization of databases to generate insights
 - Dashboards built for indicator tracking
 
-Knowledge of Excel, SQL, Power BI, and data analysis, with ease of learning, analytical thinking, and problem solving.
+Knowledge of Excel, SQL, Power BI, and data analysis.
 
 Interested in junior or entry-level opportunities in data, in environments that value continuous learning, technical development, and the use of data for business decisions.
 
@@ -84,11 +86,11 @@ not.
 ```text
 Business administration student, interested in starting a career in commercial and administrative areas, seeking a first professional opportunity to apply academic knowledge and develop hands-on skills.
 
-Experience in academic projects focused on process organization, basic data analysis, and teamwork, with ease of learning, a sense of responsibility, and clear communication.
+Experience in academic projects focused on process organization, basic data analysis, and Office-suite work.
 
-Knowledge of the Office suite, administrative routine organization, and support for operational activities, with willingness to learn and grow professionally.
+Knowledge of the Office suite, administrative routine organization, and support for operational activities.
 
-Interested in internship opportunities or entry-level positions, in environments that value development, continuous learning, and collaboration.
+Interested in internship opportunities or entry-level positions, in environments that value development and continuous learning.
 
 Open to connections and conversations about career, internships, and professional development.
 Contact: [your email]
@@ -96,7 +98,8 @@ Contact: [your email]
 
 ## Facts to gather
 
-Ask only for what the source did not answer:
+Not a pre-draft questionnaire. Draft with `[brackets]` for missing items; ask only at the
+end (or if the user refuses brackets). Optional gap checklist:
 
 - Current role/area, and the role/area to attract
 - Years of experience
@@ -115,7 +118,8 @@ First job adds: degree program, academic projects, extracurriculars, volunteerin
 
 ## Template
 
-Emit this only when the user asks for the blank template by name. Otherwise fill it and return prose.
+Emit the blank template only when the user asks for it by name. Normal output is filled
+prose that may still contain `[brackets]` for unknown fields.
 
 ```text
 Block 1 — Professional identity
@@ -143,6 +147,7 @@ Contact: [your email] | [your phone]
 ## Checklist
 
 Under 2600 characters. Block 1 names role, seniority, and sector. Blank line between blocks.
-Block 3 is 3-4 bulleted results, not duties. Block 4 carries the densest keyword concentration.
-Block 5 present only if unemployed. Block 6 has a contact route. No soft skills, no motivational
-phrasing. Transition and first-job variants never inflate seniority.
+Block 3 is 3-4 bulleted outcomes (not duties, not vanity volume metrics). Block 4 carries the
+densest keyword concentration. Block 5 present only if unemployed. Block 6 has a contact
+route. Soft skills: none for established careers; ≤2 for transition/first job only when
+proof is thin. Transition and first-job variants never inflate seniority.
