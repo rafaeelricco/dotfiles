@@ -41,13 +41,16 @@ reference when it has any.
 
 Before the table, in this order:
 
-- **Excluded deliverable.** Not covered; say so and stop. Two kinds: anything under **When
-  NOT to use** (the generated image itself, an SSI score estimate, a resume, interview prep,
-  sending on the user's behalf), and any LinkedIn surface other than the user's own personal
-  profile (company page, ads, groups, Learning, Recruiter). This wins over everything below,
-  including a table signal in the same words (`about`, `cover`, `post`, `SSI`, `message`)
-  and a continuation reply mid-chain. The in-scope neighbour — cover brief, SSI guidance,
-  post draft, personal-profile About — runs only when the user asks for that instead.
+- **Excluded deliverable.** Not covered; say so and stop. Three kinds: (1) anything under
+  **When NOT to use** (the generated image itself, an SSI score estimate, a resume,
+  interview prep, sending on the user's behalf); (2) any LinkedIn surface other than the
+  user's own personal profile (company page, ads, groups, Learning, Recruiter); (3) a
+  non-LinkedIn deliverable even when a table signal word appears (cover letter, website
+  bio, portfolio site copy, non-LinkedIn messaging). This wins over everything below,
+  including a table signal in the same words (`about`, `cover`, `bio`, `post`, `SSI`,
+  `message`) and a continuation reply mid-chain. The in-scope neighbour — LinkedIn cover
+  brief, personal-profile About, SSI guidance, post draft — runs only when the user asks
+  for that LinkedIn deliverable instead.
 - **Continuation.** A `continue` / `next` / `yes` reply while an `all` chain is active, or
   while an area is held from rule 2, skips this table: run the next area in the `all` order,
   or the next held area. An active `all` chain keeps the Output mode the chain started in —
