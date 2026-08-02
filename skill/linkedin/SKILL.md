@@ -123,7 +123,9 @@ What role do you want this profile to attract, and what is the one problem you s
 
 - Role known, problem missing:
   - `positioning` or `about` → ask once for the problem only (one short message); wait.
-  - `headline`, `experience`, or `outreach` → draft; put problem in `[brackets]`.
+  - `experience` or `outreach` → draft; put problem in `[brackets]`.
+  - `headline` → draft; the format has no problem slot — only `[Keyword]`, per the
+    reference.
 - Problem known, role missing → ask once for the target role only; wait.
 
 Never an option list for these answers. Never re-ask a found fact.
