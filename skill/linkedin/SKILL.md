@@ -178,15 +178,19 @@ Pick **one** mode for the turn:
    once for whatever is still missing and wait; do not invent a checklist read. Then
    checklist + exactly 3 prioritized fixes. No Interview. References carry checklist items
    only.
-2. **Paste, no write/audit verb** — profile/section paste without “rewrite” / “audit” /
+2. **Audit and rewrite** — user asked to audit/review **and** rewrite/improve the same
+   area in one request → require the current state as in mode 1, emit the mode-1 checklist
+   + exactly 3 prioritized fixes, then the generative or advisory form for that area. Do
+   not skip either half. Interview follows the rewrite half's gate, not pure Audit.
+3. **Paste, no write/audit verb** — profile/section paste without “rewrite” / “audit” /
    “review” → one turn: up to 3 prioritized fixes, then generative or advisory form for
    that area. Do not stop at audit-only unless the user said review-only.
-3. **Write / rewrite / improve / fix** (with or without paste), other than a `plan` schedule
-   request (mode 4) → generative or advisory form for the area. With paste, optional short
-   fix list then the normal form — not audit-only.
-4. **`plan` schedule** — user wants the 21-day routine → deliver the schedule from
+4. **Write / rewrite / improve / fix** (with or without paste), other than a `plan` schedule
+   request (mode 5) → generative or advisory form for the area. With paste, optional short
+   fix list then the normal form — not audit-only. Not used when mode 2 already applies.
+5. **`plan` schedule** — user wants the 21-day routine → deliver the schedule from
    `references/plan.md`. Use advisory “3 fixes” only when reviewing an existing routine.
-5. Otherwise by area class (below).
+6. Otherwise by area class (below).
 
 **Exception — metrics-only diagnosis** (overrides whichever mode was picked): any request
 the **Metrics read** pre-rule sent to `Reading the metrics` needs the analytics readings
