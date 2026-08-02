@@ -26,7 +26,7 @@ Match the user's request against this table.
 | title, headline, tagline                                                           | `headline`    | `references/headline.md`    |
 | about, summary, bio                                                                | `about`       | `references/about.md`       |
 | experience, job description, bullets, responsibilities                             | `experience`  | `references/experience.md`  |
-| skills, education, courses, recommendations, URL, open to work, premium            | `sections`    | `references/sections.md`    |
+| skills, languages, education, courses, recommendations, URL, open to work, premium | `sections`    | `references/sections.md`    |
 | photo, headshot, banner, cover, header image                                       | `visuals`     | `references/visuals.md`     |
 | SSI, score, social selling index, connections, network                             | `ssi`         | `references/ssi.md`         |
 | post, content, what to publish, comments, engagement                               | `content`     | `references/content.md`     |

@@ -12,7 +12,18 @@ instruction is "fill it", not a number.
 Technical before behavioral. `Proactive` and `team player` are not search terms — nobody
 queries them, and they displace terms that are queried.
 
+Second-language terms are opt-in — add them only when Source or the user names a second
+market. LinkedIn's profile-language versions cover only the headline, About, and
+experience; the Skills field is not translated, so a recruiter searching that market's
+language never reaches a profile that omits its terms.
+
 Take the whole ranked list from `positioning`, not a subset.
+
+## Languages — also a filter
+
+List every language with an honest level, including the native one. Recruiters filter on
+this field, and an unfilled field is invisible to that filter rather than assumed. An
+overstated level surfaces in the first call.
 
 ## Recommendations
 
@@ -57,7 +68,8 @@ allowance is the only real benefit. A free trial is the only version worth takin
 
 ## Checklist
 
-Skills field filled to the cap, technical first. 5+ recommendations requested, one sent
-first. Degrees under education, short courses under courses in
+Skills field filled to the cap, technical first; second-language terms only when a second
+market is named. Languages listed with honest levels. 5+ recommendations requested, one
+sent first. Degrees under education, short courses under courses in
 `Name - Institution (year)` form. URL shortened to a name. Open to Work recruiters-only,
 badge off; transition titles = target role.
