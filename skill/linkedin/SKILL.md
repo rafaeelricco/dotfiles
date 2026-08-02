@@ -170,7 +170,10 @@ invent numbers, employers, or skills to fill a slot.
 **Advisory areas** (`positioning`, `visuals`, `sections`, `ssi`; and `plan` only when not
 delivering the schedule) → if current state is known, read it, then exactly 3 prioritized
 fixes each with a ready-to-use example. If current state is unknown: say so (or ask once);
-give 3 generic prioritized fixes — never invent “your profile currently…”.
+give 3 generic prioritized fixes — never invent “your profile currently…”. **Exception —
+metrics-only diagnosis:** a search-appearance / job-title read (the 15-day loop, `Reading
+the metrics` only) returns just the fixes the data supports — zero to three — never padded
+to three.
 
 **Close** (only after an area deliverable — variants, advisory fixes, audit-then-rewrite,
 or a full `plan` schedule — not after a chooser or the Interview question alone):
