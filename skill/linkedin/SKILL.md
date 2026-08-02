@@ -153,10 +153,13 @@ One `AskUserQuestion` (≤4 options, recommended first) **only if** the user ref
 Pick **one** mode for the turn:
 
 1. **Audit** — user asked to review/audit only → the area's current state required (paste,
-   image, or Source path): text for copy areas, the photo or cover for `visuals`, the score
-   and analytics readings for `ssi`, the existing routine for `plan`. Missing → ask once for
-   that artifact and wait; do not invent a checklist read. Then checklist + exactly 3
-   prioritized fixes. No Interview. References carry checklist items only.
+   image, or Source path): text for copy areas, the photo or cover for `visuals`, the
+   existing routine for `plan`. For `ssi`, the readings the audited subtopic rests on and
+   that subtopic's checklist items alone — a connections / network audit takes the
+   connection count and target-field composition; a whole-`ssi` audit takes the score and
+   the analytics readings. Missing → ask once for that artifact and wait; do not invent a
+   checklist read. Then checklist + exactly 3 prioritized fixes. No Interview. References
+   carry checklist items only.
 2. **Paste, no write/audit verb** — profile/section paste without “rewrite” / “audit” /
    “review” → one turn: up to 3 prioritized fixes, then generative or advisory form for
    that area. Do not stop at audit-only unless the user said review-only.
