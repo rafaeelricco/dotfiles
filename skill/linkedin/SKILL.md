@@ -53,12 +53,14 @@ Before the table, in this order:
   or the held area, in the Output mode that chain or hold started in — an audit of the full
   profile stays an audit at every step. A new in-scope instruction in the same reply ("now
   rewrite it") replaces the mode.
-- **Metrics read.** A request to read, interpret, or diagnose the profile's own search
-  appearances or profile views — including "which job titles are finding me" and why a
-  title appears there — routes to `ssi`, **Reading the metrics** only. The `title` signal
-  does not win here. Post and engagement analytics are `content`, not this route. Asking how
-  to raise those numbers is not a read: alone or alongside a read ("views dropped, how do I
-  fix it"), it falls through to the table.
+- **Metrics read.** A request that asks **only** to read, interpret, or diagnose the
+  profile's own search appearances or profile views — including "which job titles are
+  finding me" and why a title appears there — routes to `ssi`, **Reading the metrics** only.
+  The `title` signal does not win here. If the same ask also wants the SSI score, pillars,
+  connections, or network ("interpret my SSI score and profile views"), it is not
+  metrics-only: fall through to the table. Post and engagement analytics are `content`, not
+  this route. Asking how to raise those numbers is not a read: alone or alongside a read
+  ("views dropped, how do I fix it"), it falls through to the table.
 
 Then apply the rules below in order; the first that fits wins. Do not invent areas or rules.
 
