@@ -66,10 +66,13 @@ Before the table, in this order:
   connections, or network ("interpret my SSI score and profile views"), it is not
   metrics-only: fall through to the table. If it pairs a metrics diagnosis with another
   supported area ("interpret my profile views and rewrite my headline"), count `ssi` as a
-  table match for the metrics portion so multi-match can hold both, then fall through. Post
-  and engagement analytics are `content`, not this route. Asking how to raise those numbers
-  is not a read: alone or alongside a read ("views dropped, how do I fix it"), it falls
-  through to the table.
+  table match for the metrics portion so multi-match can hold both, and when that `ssi`
+  turn runs (now or on resume) use **Reading the metrics** with the metrics-only Output
+  exception; then fall through. Post and engagement analytics are `content`, not this
+  route. Asking how to raise those numbers is not a read: alone or alongside a read
+  ("views dropped, how do I fix it"), count `ssi` as a table match for growth guidance
+  (full `ssi`, not **Reading the metrics**), then fall through so multi-match can hold any
+  other area too.
 
 Then apply the rules below in order; the first that fits wins. Do not invent areas or rules.
 
@@ -196,9 +199,10 @@ Pick **one** mode for the turn:
 6. Otherwise by area class (below).
 
 **Exception — metrics-only diagnosis** (overrides whichever mode was picked): any request
-the **Metrics read** pre-rule sent to `Reading the metrics` needs the analytics readings
-alone — never the SSI score — and returns just the fixes the data supports, zero to three,
-with no SSI checklist and never padded to three.
+the **Metrics read** pre-rule sent to `Reading the metrics` — including the metrics portion
+of a mixed ask that counted `ssi` for multi-match — needs the analytics readings alone —
+never the SSI score — and returns just the fixes the data supports, zero to three, with no
+SSI checklist and never padded to three.
 
 **Variant labels:** `Variant 1 — <emphasis>`, `Variant 2 — <emphasis>`, `Variant 3 — <emphasis>`.
 Each in its own fenced block. Paste blocks are full prose, never session shorthand.
