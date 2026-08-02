@@ -187,16 +187,17 @@ with no SSI checklist and never padded to three.
 **Variant labels:** `Variant 1 — <emphasis>`, `Variant 2 — <emphasis>`, `Variant 3 — <emphasis>`.
 Each in its own fenced block. Paste blocks are full prose, never session shorthand.
 
-**Generative areas** (`headline`, `about`, `experience`, `content`, `outreach`) → exactly 3
-labeled variants. LinkedIn caps: headline 220 characters, About 2600; check before
-emitting. Prefer shorter headlines — several surfaces truncate well before 220. Experience:
-4–6 responsibilities and a Results block per role. Outreach: ~80 words. Content comments:
-2–4 lines.
+**Generative areas** (`headline`, `about`, `experience`, `outreach`; and `content` when the
+user wants a post or comment drafted) → exactly 3 labeled variants. LinkedIn caps: headline
+220 characters, About 2600; check before emitting. Prefer shorter headlines — several
+surfaces truncate well before 220. Experience: 4–6 responsibilities and a Results block per
+role. Outreach: ~80 words. Content comments: 2–4 lines.
 
 **Draft-first:** missing optional details appear as `[brackets]` in the paste blocks. Never
 invent numbers, employers, or skills to fill a slot.
 
-**Advisory areas** (`positioning`, `visuals`, `sections`, `ssi`; and `plan` only when not
+**Advisory areas** (`positioning`, `visuals`, `sections`, `ssi`; `content` when the ask is
+cadence, engagement, algorithm, or strategy rather than a draft; and `plan` only when not
 delivering the schedule) → if current state is known, read it, then exactly 3 prioritized
 fixes each with a ready-to-use example. If current state is unknown: say so (or ask once);
 give 3 generic prioritized fixes — never invent “your profile currently…”.
