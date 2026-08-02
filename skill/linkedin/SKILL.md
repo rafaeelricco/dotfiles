@@ -158,9 +158,9 @@ Pick **one** mode for the turn:
 2. **Paste, no write/audit verb** — profile/section paste without “rewrite” / “audit” /
    “review” → one turn: up to 3 prioritized fixes, then generative or advisory form for
    that area. Do not stop at audit-only unless the user said review-only.
-3. **Write / rewrite / improve / fix** (with or without paste) → generative or advisory
-   form for the area. With paste, optional short fix list then the normal form — not
-   audit-only.
+3. **Write / rewrite / improve / fix** (with or without paste), other than a `plan` schedule
+   request (mode 4) → generative or advisory form for the area. With paste, optional short
+   fix list then the normal form — not audit-only.
 4. **`plan` schedule** — user wants the 21-day routine → deliver the schedule from
    `references/plan.md`. Use advisory “3 fixes” only when reviewing an existing routine.
 5. Otherwise by area class (below).
