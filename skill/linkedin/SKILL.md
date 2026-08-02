@@ -43,11 +43,15 @@ A continuation reply (`continue`, `next`, `yes`) while an `all` chain is active,
 an area is held from rule 2, skips this table: run the next area in the `all` order, or the
 held area.
 
+Apply in order; the first rule that fits wins.
+
 1. One row matches → that area only.
 2. Multiple rows match and one is clearly named (`rewrite my about`, `fix my headline`,
    `open to work`) → that area only this turn. Hold the rest for **Output → Close**.
-3. Zero matches, no argument, or no clear lead → staged area chooser, below.
-4. Topic outside the table → not covered; stop. Do not invent areas or rules.
+3. Topic outside this skill (see **When NOT to use**) → not covered; stop. Do not invent
+   areas or rules.
+4. Zero matches, no argument, or no clear lead, but still a LinkedIn deliverable this skill
+   covers → staged area chooser, below.
 
 ### Staged area chooser
 
