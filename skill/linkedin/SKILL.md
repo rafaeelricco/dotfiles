@@ -39,6 +39,10 @@ first LinkedIn, internship, or no experience yet never match the table and never
 area ID — after selection, apply that area’s transition / first-job guidance from its
 reference when it has any.
 
+A continuation reply (`continue`, `next`, `yes`) while an `all` chain is active, or while
+an area is held from rule 2, skips this table: run the next area in the `all` order, or the
+held area.
+
 1. One row matches → that area only.
 2. Multiple rows match and one is clearly named (`rewrite my about`, `fix my headline`,
    `open to work`) → that area only this turn. Hold the rest for **Output → Close**.
