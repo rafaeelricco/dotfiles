@@ -13,8 +13,8 @@ A recruiter spends 5 seconds and must leave with three facts: the area, the targ
 seniority. Every area below serves that.
 
 **Turn order** (per area, including each step of `all`): select area → Source → if Audit,
-require current text → Interview only if gated → load the area reference → Output mode →
-draft → Close.
+require the current state → Interview only if gated → load the area reference → Output
+mode → draft → Close.
 
 ## Area selection
 
@@ -88,8 +88,8 @@ alone.
 Use what is already known. Put the rest in `[brackets]` with a clear label (e.g.
 `[target company]`) in the draft and list questions at the end. Same placeholder vocabulary
 everywhere in this skill.
-Interview is **not** always next — see **Interview** (area-gated). Audit/review needs
-current text first — see **Output**.
+Interview is **not** always next — see **Interview** (area-gated). Audit/review needs the
+current state first — see **Output**.
 
 Lookup order:
 
@@ -140,9 +140,11 @@ One `AskUserQuestion` (≤4 options, recommended first) **only if** the user ref
 
 Pick **one** mode for the turn:
 
-1. **Audit** — user asked to review/audit only → current text required (paste or Source
-   path). Missing → ask once and wait; do not invent a checklist read. Then checklist +
-   exactly 3 prioritized fixes. No Interview. References carry checklist items only.
+1. **Audit** — user asked to review/audit only → the area's current state required (paste,
+   image, or Source path): text for copy areas, the photo or cover for `visuals`, the score
+   and analytics readings for `ssi`, the existing routine for `plan`. Missing → ask once for
+   that artifact and wait; do not invent a checklist read. Then checklist + exactly 3
+   prioritized fixes. No Interview. References carry checklist items only.
 2. **Paste, no write/audit verb** — profile/section paste without “rewrite” / “audit” /
    “review” → one turn: up to 3 prioritized fixes, then generative or advisory form for
    that area. Do not stop at audit-only unless the user said review-only.
