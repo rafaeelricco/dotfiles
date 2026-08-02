@@ -39,18 +39,23 @@ first LinkedIn, internship, or no experience yet never match the table and never
 area ID — after selection, apply that area’s transition / first-job guidance from its
 reference when it has any.
 
-A continuation reply (`continue`, `next`, `yes`) while an `all` chain is active, or while
-an area is held from rule 2, skips this table: run the next area in the `all` order, or the
-held area.
+Before the table, in this order:
 
-Apply in order; the first rule that fits wins.
+- **Continuation.** A `continue` / `next` / `yes` reply while an `all` chain is active, or
+  while an area is held from rule 2, skips this table: run the next area in the `all` order,
+  or the held area.
+- **Excluded deliverable.** A request for something under **When NOT to use** — the
+  generated image itself, an SSI score estimate, a resume, interview prep, or sending on the
+  user's behalf — is not covered; say so and stop, even when the wording carries a table
+  signal (`cover`, `SSI`, `score`, `post`, `message`). The in-scope neighbour (cover brief,
+  SSI guidance, post draft) runs only when the user asks for it.
+
+Then apply the rules below in order; the first that fits wins. Do not invent areas or rules.
 
 1. One row matches → that area only.
 2. Multiple rows match and one is clearly named (`rewrite my about`, `fix my headline`,
    `open to work`) → that area only this turn. Hold the rest for **Output → Close**.
-3. Topic outside this skill (see **When NOT to use**) → not covered; stop. Do not invent
-   areas or rules.
-4. Zero matches, no argument, or no clear lead, but still a LinkedIn deliverable this skill
+3. Zero matches, no argument, or no clear lead, but still a LinkedIn deliverable this skill
    covers → staged area chooser, below.
 
 ### Staged area chooser
