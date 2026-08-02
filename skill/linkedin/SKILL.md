@@ -41,16 +41,18 @@ reference when it has any.
 
 Before the table, in this order:
 
+- **Excluded deliverable.** Not covered; say so and stop. Two kinds: anything under **When
+  NOT to use** (the generated image itself, an SSI score estimate, a resume, interview prep,
+  sending on the user's behalf), and any LinkedIn surface other than the user's own personal
+  profile (company page, ads, groups, Learning, Recruiter). This wins over everything below,
+  including a table signal in the same words (`about`, `cover`, `post`, `SSI`, `message`)
+  and a continuation reply mid-chain. The in-scope neighbour — cover brief, SSI guidance,
+  post draft, personal-profile About — runs only when the user asks for that instead.
 - **Continuation.** A `continue` / `next` / `yes` reply while an `all` chain is active, or
   while an area is held from rule 2, skips this table: run the next area in the `all` order,
   or the held area, in the Output mode that chain or hold started in — an audit of the full
-  profile stays an audit at every step. A new instruction in the same reply ("now rewrite
-  it") replaces the mode.
-- **Excluded deliverable.** A request for something under **When NOT to use** — the
-  generated image itself, an SSI score estimate, a resume, interview prep, or sending on the
-  user's behalf — is not covered; say so and stop, even when the wording carries a table
-  signal (`cover`, `SSI`, `score`, `post`, `message`). The in-scope neighbour (cover brief,
-  SSI guidance, post draft) runs only when the user asks for it.
+  profile stays an audit at every step. A new in-scope instruction in the same reply ("now
+  rewrite it") replaces the mode.
 - **Metrics read.** A request to read, interpret, or diagnose the profile's own search
   appearances or profile views — including "which job titles are finding me" and why a
   title appears there — routes to `ssi`, **Reading the metrics** only. The `title` signal
@@ -65,8 +67,7 @@ Then apply the rules below in order; the first that fits wins. Do not invent are
    `open to work`) → that area only this turn. Hold the rest for **Output → Close**.
 3. Zero matches, no argument, or no clear lead, but still a LinkedIn deliverable this skill
    covers → staged area chooser, below.
-4. Anything else — a LinkedIn deliverable this skill does not cover, such as a company page
-   or an ads campaign → say so and stop.
+4. Anything else → not covered (see **Excluded deliverable**); say so and stop.
 
 ### Staged area chooser
 
