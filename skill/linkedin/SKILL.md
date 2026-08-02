@@ -189,12 +189,14 @@ content, SSI, or outreach by default.
 Apply to every area.
 
 **Do**
+
 - Direct, scannable, market wording — no buzzwords or generic/subjective filler.
 - Prefer ownership, production delivery, and product outcomes over duty lists.
 - Results without numbers still count when they name a recognizable outcome.
 - Missing facts → `[brackets]` in the draft and questions at the end.
 
 **Do not**
+
 - Invent numbers, employers, skills, or other facts.
 - Exceed what the block needs.
 - Use vanity volume metrics: PR counts/%, commit share, LOC, files changed, ticket
