@@ -186,8 +186,10 @@ Pick **one** mode for the turn:
    only.
 2. **Audit and rewrite** — user asked to audit/review **and** rewrite/improve the same
    area in one request → require the current state as in mode 1, emit the mode-1 checklist
-   + exactly 3 prioritized fixes, then the generative or advisory form for that area. Do
-   not skip either half. Interview follows the rewrite half's gate, not pure Audit.
+   + exactly 3 prioritized fixes, then the rewrite form for that area: generative or
+   advisory for most areas; for `plan`, the full schedule from mode 5 after the audit
+   (not a second advisory-only pass). Do not skip either half. Interview follows the
+   rewrite half's gate, not pure Audit.
 3. **Paste, no write/audit verb** — profile/section paste without “rewrite” / “audit” /
    “review” → one turn: up to 3 prioritized fixes, then generative or advisory form for
    that area. Do not stop at audit-only unless the user said review-only.
