@@ -50,9 +50,12 @@ Before the table, in this order:
   post draft, personal-profile About — runs only when the user asks for that instead.
 - **Continuation.** A `continue` / `next` / `yes` reply while an `all` chain is active, or
   while an area is held from rule 2, skips this table: run the next area in the `all` order,
-  or the held area, in the Output mode that chain or hold started in — an audit of the full
-  profile stays an audit at every step. A new in-scope instruction in the same reply ("now
-  rewrite it") replaces the mode.
+  or the next held area. An active `all` chain keeps the Output mode the chain started in —
+  an audit of the full profile stays an audit at every step. A rule-2 hold keeps the Output
+  mode each held area's own wording implied when it was held — do not inherit the first
+  area's mode ("audit my headline and give me a 21-day plan" audits the headline, then
+  delivers the plan schedule). A new in-scope instruction in the same reply ("now rewrite
+  it") replaces the mode for that turn.
 - **Metrics read.** A request that asks **only** to read, interpret, or diagnose the
   profile's own search appearances or profile views — including "which job titles are
   finding me" and why a title appears there — routes to `ssi`, **Reading the metrics** only.
@@ -67,7 +70,8 @@ Then apply the rules below in order; the first that fits wins. Do not invent are
 1. One row matches → that area only.
 2. Two or more rows match → run the one clearly led on (`rewrite my about`, `fix my
    headline`, `open to work`), or the first named when there is no lead. Either way, one
-   area this turn; hold every other matched area for **Output → Close**.
+   area this turn; hold every other matched area with the Output mode its own wording
+   implies for **Output → Close**.
 3. Zero matches, no argument, or no clear lead, but still a personal-profile deliverable
    this skill covers → staged area chooser, below.
 4. Anything else → not covered (see **Excluded deliverable**); say so and stop.
