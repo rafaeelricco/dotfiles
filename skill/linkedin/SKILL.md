@@ -63,10 +63,11 @@ Before the table, in this order:
 Then apply the rules below in order; the first that fits wins. Do not invent areas or rules.
 
 1. One row matches → that area only.
-2. Multiple rows match and one is clearly named (`rewrite my about`, `fix my headline`,
-   `open to work`) → that area only this turn. Hold the rest for **Output → Close**.
-3. Zero matches, no argument, or no clear lead, but still a LinkedIn deliverable this skill
-   covers → staged area chooser, below.
+2. Two or more rows match → run the one clearly led on (`rewrite my about`, `fix my
+   headline`, `open to work`), or the first named when there is no lead. Either way, one
+   area this turn; hold every other matched area for **Output → Close**.
+3. Zero matches, no argument, or no clear lead, but still a personal-profile deliverable
+   this skill covers → staged area chooser, below.
 4. Anything else → not covered (see **Excluded deliverable**); say so and stop.
 
 ### Staged area chooser
