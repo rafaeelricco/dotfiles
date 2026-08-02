@@ -52,13 +52,17 @@ Before the table, in this order:
   brief, personal-profile About, SSI guidance, post draft — runs only when the user asks
   for that LinkedIn deliverable instead.
 - **Continuation.** A `continue` / `next` / `yes` reply while an `all` chain is active, or
-  while an area is held from rule 2, skips this table: run the next area in the `all` order,
-  or the next held area. An active `all` chain keeps the Output mode the chain started in —
-  an audit of the full profile stays an audit at every step. A rule-2 hold keeps the Output
-  mode each held area's own wording implied when it was held — do not inherit the first
-  area's mode ("audit my headline and give me a 21-day plan" audits the headline, then
-  delivers the plan schedule). A new in-scope instruction in the same reply ("now rewrite
-  it") replaces the mode for that turn.
+  while an area is held from rule 2, skips this table **only when the reply does not name a
+  different supported area**: run the next area in the `all` order, or the next held area.
+  An active `all` chain keeps the Output mode the chain started in — an audit of the full
+  profile stays an audit at every step. A rule-2 hold keeps the Output mode each held
+  area's own wording implied when it was held — do not inherit the first area's mode
+  ("audit my headline and give me a 21-day plan" audits the headline, then delivers the
+  plan schedule). A new in-scope instruction that only changes mode ("now rewrite it")
+  replaces the mode for that turn. If the same reply names a different supported area
+  ("yes, skip About and audit my SSI"), do **not** run the next chained/held area — fall
+  through and re-run area selection on that instruction (chain/hold may be abandoned or
+  updated to match).
 - **Metrics read.** A request that asks **only** to read, interpret, or diagnose the
   profile's own search appearances or profile views — including "which job titles are
   finding me" and why a title appears there — routes to `ssi`, **Reading the metrics** only.
