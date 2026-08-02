@@ -49,6 +49,9 @@ Before the table, in this order:
   user's behalf — is not covered; say so and stop, even when the wording carries a table
   signal (`cover`, `SSI`, `score`, `post`, `message`). The in-scope neighbour (cover brief,
   SSI guidance, post draft) runs only when the user asks for it.
+- **Metrics read.** A search-appearances / profile-views / LinkedIn Analytics question —
+  including "which job titles are finding me" — routes to `ssi`, **Reading the metrics**
+  only. The `title` signal does not win here.
 
 Then apply the rules below in order; the first that fits wins. Do not invent areas or rules.
 
