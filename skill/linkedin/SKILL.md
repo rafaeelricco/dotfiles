@@ -49,11 +49,12 @@ Before the table, in this order:
   user's behalf — is not covered; say so and stop, even when the wording carries a table
   signal (`cover`, `SSI`, `score`, `post`, `message`). The in-scope neighbour (cover brief,
   SSI guidance, post draft) runs only when the user asks for it.
-- **Metrics read.** A request to read, interpret, or diagnose search appearances, profile
-  views, or LinkedIn Analytics — including "which job titles are finding me" and why a
+- **Metrics read.** A request to read, interpret, or diagnose the profile's own search
+  appearances or profile views — including "which job titles are finding me" and why a
   title appears there — routes to `ssi`, **Reading the metrics** only. The `title` signal
-  does not win here. Asking how to raise those numbers is not a read: alone or alongside a
-  read ("views dropped, how do I fix it"), it falls through to the table.
+  does not win here. Post and engagement analytics are `content`, not this route. Asking how
+  to raise those numbers is not a read: alone or alongside a read ("views dropped, how do I
+  fix it"), it falls through to the table.
 
 Then apply the rules below in order; the first that fits wins. Do not invent areas or rules.
 
