@@ -61,9 +61,12 @@ Before the table, in this order:
   finding me" and why a title appears there — routes to `ssi`, **Reading the metrics** only.
   The `title` signal does not win here. If the same ask also wants the SSI score, pillars,
   connections, or network ("interpret my SSI score and profile views"), it is not
-  metrics-only: fall through to the table. Post and engagement analytics are `content`, not
-  this route. Asking how to raise those numbers is not a read: alone or alongside a read
-  ("views dropped, how do I fix it"), it falls through to the table.
+  metrics-only: fall through to the table. If it pairs a metrics diagnosis with another
+  supported area ("interpret my profile views and rewrite my headline"), count `ssi` as a
+  table match for the metrics portion so multi-match can hold both, then fall through. Post
+  and engagement analytics are `content`, not this route. Asking how to raise those numbers
+  is not a read: alone or alongside a read ("views dropped, how do I fix it"), it falls
+  through to the table.
 
 Then apply the rules below in order; the first that fits wins. Do not invent areas or rules.
 
