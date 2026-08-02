@@ -43,8 +43,8 @@ Before the table, in this order:
 
 - **Continuation.** A `continue` / `next` / `yes` reply while an `all` chain is active, or
   while an area is held from rule 2, skips this table: run the next area in the `all` order,
-  or the held area, in the Output mode that chain or hold started in — `audit my full
-  profile` stays an audit at every step. A new instruction in the same reply ("now rewrite
+  or the held area, in the Output mode that chain or hold started in — an audit of the full
+  profile stays an audit at every step. A new instruction in the same reply ("now rewrite
   it") replaces the mode.
 - **Excluded deliverable.** A request for something under **When NOT to use** — the
   generated image itself, an SSI score estimate, a resume, interview prep, or sending on the
