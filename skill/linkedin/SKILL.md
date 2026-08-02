@@ -167,10 +167,10 @@ Pick **one** mode for the turn:
    `references/plan.md`. Use advisory “3 fixes” only when reviewing an existing routine.
 5. Otherwise by area class (below).
 
-**Exception — metrics-only diagnosis** (overrides whichever mode was picked): a
-search-appearance / job-title read (the 15-day loop, `Reading the metrics` only) needs the
-analytics readings alone — never the SSI score — and returns just the fixes the data
-supports, zero to three, with no SSI checklist and never padded to three.
+**Exception — metrics-only diagnosis** (overrides whichever mode was picked): any request
+the **Metrics read** pre-rule sent to `Reading the metrics` needs the analytics readings
+alone — never the SSI score — and returns just the fixes the data supports, zero to three,
+with no SSI checklist and never padded to three.
 
 **Variant labels:** `Variant 1 — <emphasis>`, `Variant 2 — <emphasis>`, `Variant 3 — <emphasis>`.
 Each in its own fenced block. Paste blocks are full prose, never session shorthand.

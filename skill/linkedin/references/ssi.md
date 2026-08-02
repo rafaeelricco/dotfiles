@@ -5,9 +5,10 @@ used, not how much it is used. Four pillars, 25 points each. **Target: above 60.
 
 The user reads their own score at `linkedin.com/sales/ssi`. Never estimate it for them.
 
-If the user only needs search-appearance / job-title diagnosis (15-day loop from
-positioning), use **Reading the metrics** only. Do not prescribe content, outreach, or
-connection volume unless they asked for SSI growth (or accepted a next step into `ssi`).
+If the user only needs a metrics read — search appearances, profile views, or which job
+titles are finding them; the 15-day loop from positioning is the search-appearance case —
+use **Reading the metrics** only. Do not prescribe content, outreach, or connection volume
+unless they asked for SSI growth (or accepted a next step into `ssi`).
 
 | Pillar                              | Measures                                                                          | Most common error                              |
 | ----------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------- |
