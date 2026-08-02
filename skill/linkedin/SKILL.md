@@ -209,7 +209,10 @@ Pick **one** mode for the turn:
 the **Metrics read** pre-rule sent to `Reading the metrics` — including the metrics portion
 of a mixed ask that counted `ssi` for multi-match — needs the analytics readings alone —
 never the SSI score — and returns just the fixes the data supports, zero to three, with no
-SSI checklist and never padded to three.
+SSI checklist and never padded to three. When the diagnosis checks which job titles are
+finding the profile (or whether the target role appears in search appearances), the target
+role is also required: Source when known; else ask once for the target role and wait —
+still never ask for or use the SSI score.
 
 **Variant labels:** `Variant 1 — <emphasis>`, `Variant 2 — <emphasis>`, `Variant 3 — <emphasis>`.
 Each in its own fenced block. Paste blocks are full prose, never session shorthand.
