@@ -65,6 +65,8 @@ Then apply the rules below in order; the first that fits wins. Do not invent are
    `open to work`) → that area only this turn. Hold the rest for **Output → Close**.
 3. Zero matches, no argument, or no clear lead, but still a LinkedIn deliverable this skill
    covers → staged area chooser, below.
+4. Anything else — a LinkedIn deliverable this skill does not cover, such as a company page
+   or an ads campaign → say so and stop.
 
 ### Staged area chooser
 
