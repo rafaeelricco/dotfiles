@@ -82,7 +82,7 @@ Then apply the rules below in order; the first that fits wins. Do not invent are
 
 1. One row matches → that area only.
 2. Two or more rows match → run the one clearly led on (`rewrite my about`, `fix my
-   headline`, `open to work`), or the first named when there is no lead. Either way, one
+headline`, `open to work`), or the first named when there is no lead. Either way, one
    area this turn; hold every other matched area with the Output mode its own wording
    implies for **Output → Close**.
 3. Zero matches, no argument, or no clear lead, but still a personal-profile deliverable
