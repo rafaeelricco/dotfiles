@@ -11,7 +11,7 @@ Then, before any tool call, edit, or subagent:
 - Never assume anything the user didn't say. If an unspecified detail changes what you'd build, ask — don't guess.
 - If readings differ materially, name them and ask. If the question has one obvious answer, give it — don't manufacture ambiguity or hedge.
 - If a simpler approach exists, say so. Push back when warranted.
-- Cannot name the files the change touches → load `scope-and-plan` and follow it. Files and approach already known → plan directly.
+- Cannot name the files the change touches → load `scope-and-plan` and follow it, except when the work is mechanical, the user specified the approach, or one search will answer. Files and approach already known → plan directly.
 
 ## 2. Simplicity
 
