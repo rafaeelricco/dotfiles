@@ -3,7 +3,7 @@ name: scope-and-plan
 description: >
   Build context before deciding — fan out read-only workers over independent
   concerns, refine once through consult-advisor, then present a plan as diffs
-  whose verification comes from the test skill.
+  whose verification comes from the verify skill.
   Use when a request touches files you cannot yet name, spans layers, or the
   user asks to "get context first", "explore then plan", or "use sub-agents".
   Do NOT use when you can already name the files and the approach, when one
@@ -55,7 +55,7 @@ Spawn all workers in one message so they run concurrently. Brief each with:
 ```
 Objective: <the one question this worker answers>
 Boundaries: <paths in scope; paths explicitly out of scope>
-Return: file paths with line numbers, findings, gaps left unresolved
+Return: every claim anchored to `file:line`; findings; gaps left unresolved
 Do not: edit files, run builds, answer another worker's question
 ```
 
@@ -74,6 +74,10 @@ Gaps:     <what no worker resolved>
 Approach: <provisional, one paragraph — advisor input, not plan text>
 ```
 
+Drop any claim a worker did not anchor to `file:line`, and any anchor whose path
+or line does not exist. An unanchored claim is not a finding — it never reaches
+the advisor or the plan. Record what it failed to answer under Gaps.
+
 Never forward raw worker transcripts. The advisor and the plan need the
 conclusion, not the search.
 
@@ -86,10 +90,11 @@ Skip only when `consult-advisor`'s own "When NOT to call" applies.
 
 ## Gate 4 — Plan
 
-Load `plan-format` and follow it before writing any plan text.
+Load `plan-format` and `verify` (its **Planning discovery** section only) in the
+same batch — neither consumes the other's output. `plan-format` shapes the
+diffs; `verify` selects checks from the Gate 2 synthesis, not from plan prose.
 
-Then load `verify` in its **Planning discovery** mode and follow that section only
-to fill the plan's Verify section. Select and name the repo's own commands,
+`verify` fills the plan's Verify section. Select and name the repo's own commands,
 narrowed to the checks that would fail if this change were wrong — do not run
 them, do not materialize worktrees, and do not treat "name it and run" as in
 scope. No invented rituals, no "run the tests" placeholder, no green typecheck
