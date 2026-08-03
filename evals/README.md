@@ -23,11 +23,11 @@ The swap is necessary: `~/.claude/CLAUDE.md` symlinks to `INSTRUCTIONS.md`, and
 `--bare` (the only other isolation lever) disables skill auto-invocation, which
 is exactly what §0, §6 and §7 test.
 
-Cost scales as `variants × probes × n`. The default 4 × 8 × 5 = 160 runs. Start
+Cost scales as `variants × probes × n`. The default 5 × 10 × 5 = 250 runs. Start
 with `-n 1` to confirm the plumbing, then raise it — single runs prove nothing.
 
 ```bash
-evals/run.py -n 1 -p p1-ask-dont-guess   # smoke test, 4 runs
+evals/run.py -n 1 -p p1-ask-dont-guess   # smoke test, 5 runs
 evals/run.py -n 10 -p p6-plan-mode       # one probe, high confidence
 evals/grade.py evals/results --json      # machine-readable: {report, excluded}
 ```

@@ -1,7 +1,7 @@
 ---
-name: test
-description: Run an extremely strict validation of a change set (local, branch, or PR) by discovering this repo's verify commands, selecting checks that would fail if the change were wrong, executing them, and refusing to pass without evidence. Invoked by the explicit `/test` slash command, or loaded by a workflow skill that needs the checks a change set actually requires.
-when-to-use: "Use when the user explicitly invokes `/test` (with optional --local, --branch, or --pr flags), or when a workflow skill such as `scope-and-plan` loads this skill to select the checks for a change set. Do not self-trigger on conversation that merely mentions tests."
+name: verify
+description: Run an extremely strict validation of a change set (local, branch, or PR) by discovering this repo's verify commands, selecting checks that would fail if the change were wrong, executing them, and refusing to pass without evidence. Invoked by the explicit `/verify` slash command, or loaded by a workflow skill that needs the checks a change set actually requires.
+when-to-use: "Use when the user explicitly invokes `/verify` (with optional --local, --branch, or --pr flags), or when a workflow skill such as `scope-and-plan` loads this skill to select the checks for a change set."
 argument-hint: "[--local | --branch <name> | --pr <number-or-url>]"
 disable-model-invocation: false
 ---
@@ -25,7 +25,7 @@ Start from this baseline:
 ## Invocation
 
 ```
-/test [--local | --branch <name> | --pr <number-or-url>]
+/verify [--local | --branch <name> | --pr <number-or-url>]
 ```
 
 - Default target: local changes (staged, unstaged, untracked) when no mode flag is given.
@@ -79,7 +79,7 @@ and run." If two methods remain viable, rank them in the Verify draft with a
 recommended default instead of calling `AskUserQuestion` mid-plan — the user
 approves the plan as a whole.
 
-Standalone `/test` is unchanged: discovery still leads to execution under the
+Standalone `/verify` is unchanged: discovery still leads to execution under the
 rules above.
 
 ## Non-Negotiable Additional Standards

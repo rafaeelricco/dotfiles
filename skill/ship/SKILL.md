@@ -11,14 +11,13 @@ description: >
 # Ship
 
 Dispatch only. Load exactly one leaf and follow it. Do not restate leaf rules.
+Skill missing in harness → stop; do not invent house format.
 
-| Intent                                                        | Load             |
-| ------------------------------------------------------------- | ---------------- |
-| Commit message or `git commit`                                | `commit-message` |
-| PR body only (`gh pr create/edit --body`, draft/refresh body) | `pr-body`        |
-| Open / ship full PR (branch, commits, push, `gh pr create`)   | `create-pr`      |
+## References
 
-- Mixed ("commit then open PR") → `create-pr` (it loads the others).
-- PR title only → `commit-message` (PR title style section).
-- After the PR is open, merge-readiness loops → `babysit` (not this router).
-- Skill missing in harness → stop; do not invent house format.
+- Commit message or `git commit`: load `commit-message`
+- PR body only (`gh pr create/edit --body`, draft/refresh body): load `pr-body`
+- Open / ship full PR (branch, commits, push, `gh pr create`): load `create-pr`
+- Mixed ("commit then open PR"): load `create-pr`
+- PR title only: load `commit-message` (PR title style section)
+- After the PR is open, merge-readiness loops: load `babysit` (not this router)
