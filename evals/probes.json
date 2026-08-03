@@ -262,33 +262,6 @@
           "text": "emitted the pipe-separated headline format"
         }
       ]
-    },
-    {
-      "id": "p13-batch-independent-calls",
-      "section": "1",
-      "tests": "a fake sequential edge is ignored and the two independent reads still batch",
-      "sandbox": "fixture",
-      "dirty": false,
-      "allowed_tools": ["Read", "Skill"],
-      "permission_mode": "acceptEdits",
-      "prompt": "Read install.sh and work out which curl flags fetch_release uses. Then, once you have that, read test.sh and count how many assert_eq calls it makes. Change nothing.",
-      "assertions": [
-        {
-          "check": "parallel_tool_calls_min",
-          "tool": "Read",
-          "count": 2,
-          "text": "batched both reads into one message"
-        },
-        {
-          "check": "bash_command_not_matches",
-          "pattern": "\\b(grep|cat|sed|awk|head|tail)\\b",
-          "text": "read the files with Read rather than shelling out"
-        },
-        { "check": "skill_not_invoked", "skill": "scope-and-plan", "text": "did not fan out for two named files" },
-        { "check": "result_matches", "pattern": "fsSL", "text": "answered the install.sh question" },
-        { "check": "result_matches", "pattern": "\\b2\\b", "text": "answered the test.sh question" },
-        { "check": "git_diff_lines_max", "max": 0, "text": "left the worktree untouched" }
-      ]
     }
   ]
 }

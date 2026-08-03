@@ -12,7 +12,6 @@ Then, before any tool call, edit, or subagent:
 - If readings differ materially, name them and ask. If the question has one obvious answer, give it — don't manufacture ambiguity or hedge.
 - If a simpler approach exists, say so. Push back when warranted.
 - Cannot name the files the change touches → load `scope-and-plan` and follow it. Files and approach already known → plan directly.
-- A step that does not consume the previous step's output has no dependency on it. Issue those calls together in one message instead of one at a time.
 
 ## 2. Simplicity
 

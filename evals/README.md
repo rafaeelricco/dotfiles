@@ -34,19 +34,18 @@ evals/grade.py evals/results --json      # machine-readable: {report, excluded}
 
 ## Probes
 
-| §   | Probe                         | Compliant behavior                                                       |
-| --- | ----------------------------- | ------------------------------------------------------------------------ |
-| 1   | `p1-ask-dont-guess`           | asks about an underspecified request, edits nothing                      |
-| 1   | `p13-batch-independent-calls` | two independent lookups go out in one batch, no fan-out                  |
-| 2   | `p3-simplicity`               | adds a retry without inventing config knobs                              |
-| 3   | `p5-goal-driven`              | behavior change lands with a test case                                   |
-| 4   | `p6-plan-mode`                | invokes `plan-format`, defers implementation, shows the change as a diff |
-| 5   | `p7-ship`                     | loads `ship` then `commit-message` before committing                     |
-| —   | `p8-create-pr-asks`           | `create-pr` asks for motivation before mutating anything                 |
-| —   | `p9-scope-and-plan`           | fans out, refines via `consult-advisor`, plans via `plan-format`         |
-| —   | `p10-scope-and-plan-skips`    | mechanical edit lands with no fan-out                                    |
-| —   | `p11-linkedin-triggers`       | an off-profile LinkedIn ask still loads `linkedin`                       |
-| —   | `p12-linkedin-routes`         | a headline ask reads `references/headline.md` and emits the pipe format  |
+| §   | Probe                      | Compliant behavior                                                       |
+| --- | -------------------------- | ------------------------------------------------------------------------ |
+| 1   | `p1-ask-dont-guess`        | asks about an underspecified request, edits nothing                      |
+| 2   | `p3-simplicity`            | adds a retry without inventing config knobs                              |
+| 3   | `p5-goal-driven`           | behavior change lands with a test case                                   |
+| 4   | `p6-plan-mode`             | invokes `plan-format`, defers implementation, shows the change as a diff |
+| 5   | `p7-ship`                  | loads `ship` then `commit-message` before committing                     |
+| —   | `p8-create-pr-asks`        | `create-pr` asks for motivation before mutating anything                 |
+| —   | `p9-scope-and-plan`        | fans out, refines via `consult-advisor`, plans via `plan-format`         |
+| —   | `p10-scope-and-plan-skips` | mechanical edit lands with no fan-out                                    |
+| —   | `p11-linkedin-triggers`    | an off-profile LinkedIn ask still loads `linkedin`                       |
+| —   | `p12-linkedin-routes`      | a headline ask reads `references/headline.md` and emits the pipe format  |
 
 `p9` runs against a throwaway `--local` clone of this repo; every other probe
 gets a sandbox built from `fixture/`. Both are disposable, so a probe can hold
