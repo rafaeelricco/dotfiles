@@ -266,18 +266,23 @@
     {
       "id": "p13-batch-independent-calls",
       "section": "1",
-      "tests": "two independent lookups are issued in one batch, with no fan-out",
+      "tests": "two independent file reads are issued in one batch, with no fan-out",
       "sandbox": "fixture",
       "dirty": false,
       "allowed_tools": ["Read", "Skill"],
       "permission_mode": "acceptEdits",
-      "prompt": "Two questions, no changes to anything: which curl flags does fetch_release use in install.sh, and how many assert_eq calls does test.sh make?",
+      "prompt": "Read install.sh and test.sh, then answer both, changing nothing: which curl flags does fetch_release use, and how many assert_eq calls does test.sh make?",
       "assertions": [
         {
           "check": "parallel_tool_calls_min",
           "tool": "Read",
           "count": 2,
           "text": "batched both reads into one message"
+        },
+        {
+          "check": "bash_command_not_matches",
+          "pattern": "\\b(grep|cat|sed|awk|head|tail)\\b",
+          "text": "read the files with Read rather than shelling out"
         },
         { "check": "skill_not_invoked", "skill": "scope-and-plan", "text": "did not fan out for two named files" },
         { "check": "result_matches", "pattern": "fsSL", "text": "answered the install.sh question" },
