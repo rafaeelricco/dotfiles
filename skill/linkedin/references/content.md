@@ -5,6 +5,7 @@ with no activity has no reach, however well it is written.
 
 Every post must be legible as coming from the person the profile describes. Content
 disconnected from the stated positioning trains the algorithm on the wrong audience.
+Missing company/result/topic → `[brackets]` in the post draft; no pre-post questionnaire.
 
 ## Five post types
 

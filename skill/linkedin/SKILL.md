@@ -1,70 +1,131 @@
 ---
 name: linkedin
 description: >
-  Audit and rewrite a LinkedIn presence end to end: positioning, keywords, photo, cover,
-  headline, About, experience, the sections below the fold, SSI score, post strategy,
-  recruiter outreach, and a 21-day execution plan. Use when the user wants to write or
-  improve any part of their LinkedIn profile, asks why recruiters are not responding, wants
-  to know what to post, how to approach a recruiter, or how to raise their SSI — including
-  "optimize my LinkedIn", "improve my profile", "rewrite my about section", "my headline is
-  generic", "what should I post on LinkedIn", "how do I message a recruiter", "my SSI is
-  low". Do NOT use for resume or CV writing, and never post, message, or connect on the
-  user's behalf.
+  Draft and audit LinkedIn profile copy and growth plans: positioning, headline, About,
+  experience, below-the-fold sections, visuals, SSI, posts, recruiter outreach, and a
+  21-day plan. Drafts only. Never post, message, or connect on the user's behalf. Not for
+  resumes, interview prep, SSI score estimates, or cover image generation.
 ---
 
 # LinkedIn
 
 A recruiter spends 5 seconds and must leave with three facts: the area, the target role, the
-seniority. Every area below serves that. Output is en-US.
+seniority. Every area below serves that.
 
-## Routing
+**Turn order** (per area, including each step of `all`): select area → Source → if Audit,
+require the current state → Interview only if gated → load the area reference → Output
+mode → draft → Close.
 
-Match the user's free text against this table.
+## Area selection
+
+Match the user's request against this table.
 
 | Signal                                                                             | Area          | Read                        |
 | ---------------------------------------------------------------------------------- | ------------- | --------------------------- |
 | positioning, focus, niche, target role, keywords, SEO, discoverability             | `positioning` | `references/positioning.md` |
 | title, headline, tagline                                                           | `headline`    | `references/headline.md`    |
 | about, summary, bio                                                                | `about`       | `references/about.md`       |
-| experience, role, job description, bullets                                         | `experience`  | `references/experience.md`  |
+| experience, job description, bullets, responsibilities                             | `experience`  | `references/experience.md`  |
 | skills, languages, education, courses, recommendations, URL, open to work, premium | `sections`    | `references/sections.md`    |
 | photo, headshot, banner, cover, header image                                       | `visuals`     | `references/visuals.md`     |
 | SSI, score, social selling index, connections, network                             | `ssi`         | `references/ssi.md`         |
 | post, content, what to publish, comments, engagement                               | `content`     | `references/content.md`     |
 | connection request, DM, message, InMail, approach a recruiter                      | `outreach`    | `references/outreach.md`    |
-| plan, routine, where do I start, 21 days                                           | `plan`        | `references/plan.md`        |
-| full profile, everything, whole thing                                              | `all`         | profile areas, in order     |
+| plan, routine, where do I start, 21 days, optimize everything, grow my LinkedIn    | `plan`        | `references/plan.md`        |
+| full profile, whole profile, rewrite my profile                                    | `all`         | profile areas, in order     |
 
-1. Exactly one row matches → run that area. Do not offer the others.
-2. Two or more rows match, zero rows match, or no argument at all → staged area chooser, below.
-3. Named area is outside this table → say so plainly and stop. Do not improvise doctrine.
+Select the area with the rules below. Career transition, career change, pivot, first job,
+first LinkedIn, internship, or no experience yet never match the table and never create an
+area ID — after selection, apply that area’s transition / first-job guidance from its
+reference when it has any.
+
+Before the table, in this order:
+
+- **Excluded deliverable.** Not covered; say so and stop. Three kinds: (1) anything under
+  **When NOT to use** (the generated image itself, an SSI score estimate, a resume,
+  interview prep, sending on the user's behalf); (2) any LinkedIn surface other than the
+  user's own personal profile (company page, ads, groups, Learning, Recruiter); (3) a
+  non-LinkedIn deliverable even when a table signal word appears (cover letter, website
+  bio, portfolio site copy, non-LinkedIn messaging). This wins over everything below,
+  including a table signal in the same words (`about`, `cover`, `bio`, `post`, `SSI`,
+  `message`) and a continuation reply mid-chain. The in-scope neighbour — LinkedIn cover
+  brief, personal-profile About, SSI guidance, post draft — runs only when the user asks
+  for that LinkedIn deliverable instead.
+- **Continuation.** A `continue` / `next` / `yes` reply while an `all` chain is active, or
+  while an area is held from rule 2, skips this table **only when the reply does not name a
+  different supported area**: run the next area in the `all` order, or the next held area.
+  An active `all` chain keeps the Output mode the chain started in — an audit of the full
+  profile stays an audit at every step. A rule-2 hold keeps the Output mode each held
+  area's own wording implied when it was held — do not inherit the first area's mode
+  ("audit my headline and give me a 21-day plan" audits the headline, then delivers the
+  plan schedule). A new in-scope instruction that only changes mode ("now rewrite it")
+  replaces the mode for that turn. If the same reply names a different supported area
+  ("yes, skip About and audit my SSI"), do **not** run the next chained/held area — fall
+  through and re-run area selection on that instruction (chain/hold may be abandoned or
+  updated to match).
+- **Metrics read.** A request that asks **only** to read, interpret, or diagnose the
+  profile's own search appearances or profile views — including "which job titles are
+  finding me" and why a title appears there — routes to `ssi`, **Reading the metrics** only.
+  The `title` signal does not win here. If the same ask also wants the SSI score, pillars,
+  connections, or network ("interpret my SSI score and profile views"), it is not
+  metrics-only: fall through to the table. If it pairs a metrics diagnosis with another
+  supported area ("interpret my profile views and rewrite my headline"), count `ssi` as a
+  table match for the metrics portion so multi-match can hold both, and when that `ssi`
+  turn runs (now or on resume) use **Reading the metrics** with the metrics-only Output
+  exception; then fall through. Post and engagement analytics are `content`, not this
+  route. Asking how to raise those numbers is not a read: alone or alongside a read
+  ("views dropped, how do I fix it"), count `ssi` as a table match for growth guidance
+  (full `ssi`, not **Reading the metrics**), then fall through so multi-match can hold any
+  other area too.
+
+Then apply the rules below in order; the first that fits wins. Do not invent areas or rules.
+
+1. One row matches → that area only.
+2. Two or more rows match → run the one clearly led on (`rewrite my about`, `fix my
+   headline`, `open to work`), or the first named when there is no lead. Either way, one
+   area this turn; hold every other matched area with the Output mode its own wording
+   implies for **Output → Close**.
+3. Zero matches, no argument, or no clear lead, but still a personal-profile deliverable
+   this skill covers → staged area chooser, below.
+4. Anything else → not covered (see **Excluded deliverable**); say so and stop.
 
 ### Staged area chooser
 
 The only place a menu appears. Never more than four options per `AskUserQuestion` (tool schema
-limit), so it runs in two calls. Most likely option first, `(Recommended)` appended to its label.
+limit), so it runs in two calls. Most likely option first, `(Recommended)` appended to its
+label. If `AskUserQuestion` is unavailable, ask the same choices as a short numbered list
+in one message; never treat silence as approval.
 
 **Call 1 — group:**
 
 - Profile copy (`positioning` / `headline` / `about` / `experience`)
 - Profile setup (`visuals` / `sections`)
 - Off-profile growth (`ssi` / `content` / `outreach`)
-- Full program (`all` / `plan`)
+- Full profile or 21-day plan (`all` / `plan`) — different products; Call 2 always picks
 
 **Call 2 — the areas inside the chosen group.** Skip it when the group holds one area.
+When the group is Full profile or 21-day plan, Call 2 options are exactly:
+
+- Full profile (`all`) — section-by-section profile only `(Recommended)` when intent is vague
+- 21-day plan (`plan`) — schedule including growth weeks
 
 `all` means the profile, not everything this skill knows: `positioning` → `headline` →
 `about` → `experience` → `sections` → `visuals`, in that order. Visuals last — the cover is
-the least load-bearing artifact on the page. Off-profile growth is `plan`'s job; say so
-rather than silently widening.
+the least load-bearing artifact on the page. One area per turn; wait for continue before
+the next. Never dump the full chain in one response. Content, SSI, and outreach belong to
+`plan` (or a separate ask), not to `all`.
 
-Read only the reference the routed area names. One named area → one file. `all` is the sole
-multi-file route. `plan` loads `references/plan.md` and nothing else.
+Use only the reference file named for the chosen area. One area → one file. `all` is the
+only case that uses more than one file, in order. For `plan`, use `references/plan.md`
+alone.
 
 ## Source
 
-Facts needed before writing: target role and adjacent titles; the ranked keyword list;
-employment status; current profile text; past roles with what was done and what came of it.
+Use what is already known. Put the rest in `[brackets]` with a clear label (e.g.
+`[target company]`) in the draft and list questions at the end. Same placeholder vocabulary
+everywhere in this skill.
+Interview is **not** always next — see **Interview** (area-gated). Audit/review needs the
+current state first — see **Output**.
 
 Lookup order:
 
@@ -73,80 +134,148 @@ Lookup order:
    that plausibly carry those facts — structured data (`*.yaml`, `*.json`), a resume
    (`*.tex`, `*.md`, `*.pdf`), a LinkedIn export, achievement notes. Never assume filenames.
    Read-only: never write into the source.
-3. Ask, once, batched — only for what steps 1-2 left missing. Do not re-ask a found fact.
+3. Continue to Interview **only if** that section’s gate says so. Do not re-ask a found fact.
+   Do not run a full questionnaire for optional details before drafting.
 
-No path given and nothing in conversation → skip to step 3.
-
-Source files may be in any language. Extract the facts, write the output in en-US.
+No path given and nothing in conversation → step 3 (Interview gate may still skip).
 
 ## Interview
 
-Skip this whole section when Source already yielded both the target role and the problem solved.
-`## Source` forbids re-asking a found fact, and that rule wins here: a user who opened with their
-target role and keywords wants copy back, not the questionnaire.
+**May Interview:** `positioning`, `headline`, `about`, `experience`, `outreach`, and those
+steps under `all` (once at the start of the profile chain is enough — do not re-interview
+each step).
 
-Otherwise ask this verbatim, as a message, and wait:
+**Never Interview:** `visuals`, `sections`, `ssi`, `content`, `plan`, pure Audit mode, or
+non-copy steps of `all`.
+
+For gated areas only, after Source — ask only what is still missing:
+
+- Target role **and** problem solved known → skip; draft.
+- Neither known → ask this verbatim and wait:
 
 ```text
 What role do you want this profile to attract, and what is the one problem you solve for an employer? A couple of sentences is enough.
 ```
 
-Never an option list — the answer is the user's own prose, and it feeds every area.
+- Role known, problem missing:
+  - `positioning` or `about` → ask once for the problem only (one short message); wait.
+  - `experience` or `outreach` → draft; put problem in `[brackets]`.
+  - `headline` → draft; the format has no problem slot — only `[Keyword]`, per the
+    reference.
+- Problem known, role missing → ask once for the target role only; wait.
 
-Then one `AskUserQuestion`, at most four questions, only for facts still missing after Source:
+Never an option list for these answers. Never re-ask a found fact.
 
-- **Keywords** — the terms recruiters search, ranked, pre-filled from the source when found.
-  `positioning` owns the list; each consuming area owns its own count.
-- **Employment status** — currently employed or not. Gates About block 5 and Open to Work,
-  and is asked here so no reference asks it twice.
-- **Seniority framing** — how the target level should read.
-- **Target market** — where the roles are, since role naming differs by region.
+After any answer (or skip), **draft**. Keywords, employment status, seniority framing, and
+target market: Source when present; else `[brackets]` and questions at the end.
+`positioning` owns the ranked keyword list when that area runs; other areas use their own
+counts from the reference.
 
-Recommended option first, `(Recommended)` appended to its label.
+One `AskUserQuestion` (≤4 options, recommended first) **only if** the user refuses
+`[brackets]` and insists on filling facts before any draft — never as the default path.
 
 ## Output
 
-**Generative areas** (`headline`, `about`, `experience`, `content`, `outreach`) → exactly 3
-labeled variants, each in its own fenced block. Paste blocks are full prose, never the
-session's shorthand. LinkedIn caps the headline at 220 characters and About at 2600; check
-before emitting.
+Pick **one** mode for the turn:
 
-**Advisory areas** (`positioning`, `visuals`, `sections`, `ssi`, `plan`) → current-state
-read, then exactly 3 prioritized fixes, each with a ready-to-use example.
+1. **Audit** — user asked to review/audit only → the area's current state required (paste,
+   image, or Source path): text for copy areas, the photo or cover for `visuals`, the
+   existing routine for `plan`. For `ssi`, the readings the audited subtopic rests on and
+   that subtopic's checklist items alone — a connections / network audit takes the
+   connection count and target-field composition; a whole-`ssi` audit takes those, the
+   overall score **and all four pillar scores**, the analytics readings, and the current
+   profile sections needed to name the weakest pillar and trace pillar 1. Missing → ask
+   once for whatever is still missing and wait; do not invent a checklist read. Then
+   checklist + exactly 3 prioritized fixes. No Interview. References carry checklist items
+   only.
+2. **Audit and rewrite** — user asked to audit/review **and** write/rewrite/improve/fix
+   the same area in one request → require the current state as in mode 1, emit the mode-1
+   checklist + exactly 3 prioritized fixes, then the rewrite form for that area: generative
+   or advisory for most areas; for `plan`, the full schedule from mode 5 after the audit
+   (not a second advisory-only pass). Do not skip either half. Interview follows the
+   rewrite half's gate, not pure Audit. Wins over mode 4 whenever both an audit verb and a
+   write verb appear.
+3. **Paste, no write/audit verb** — profile/section paste without “rewrite” / “audit” /
+   “review” → one turn: up to 3 prioritized fixes, then generative or advisory form for
+   that area. Do not stop at audit-only unless the user said review-only.
+4. **Write / rewrite / improve / fix** (with or without paste), other than a `plan` schedule
+   request (mode 5) → generative or advisory form for the area. With paste, optional short
+   fix list then the normal form — not audit-only. Not used when mode 2 already applies.
+5. **`plan` schedule** — user wants the 21-day routine → deliver the schedule from
+   `references/plan.md`. Use advisory “3 fixes” only when reviewing an existing routine.
+6. Otherwise by area class (below).
 
-**Audit mode** — any area, when asked to review rather than write: read the current state
-against that reference's checklist, then the same 3 prioritized fixes. References carry
-checklist items only; they do not restate this contract.
+**Exception — metrics-only diagnosis** (overrides whichever mode was picked): any request
+the **Metrics read** pre-rule sent to `Reading the metrics` — including the metrics portion
+of a mixed ask that counted `ssi` for multi-match — needs the analytics readings alone —
+never the SSI score — and returns just the fixes the data supports, zero to three, with no
+SSI checklist and never padded to three. When the diagnosis checks which job titles are
+finding the profile (or whether the target role appears in search appearances), the target
+role is also required: Source when known; else ask once for the target role and wait —
+still never ask for or use the SSI score.
 
-Close with a short list of what changed, and a question list for anything the source left
-blank.
+**Variant labels:** `Variant 1 — <emphasis>`, `Variant 2 — <emphasis>`, `Variant 3 — <emphasis>`.
+Each in its own fenced block. Paste blocks are full prose, never session shorthand.
+
+**Generative areas** (`headline`, `about`, `experience`, `outreach`; and `content` when the
+user wants a post or comment drafted) → exactly 3 labeled variants. LinkedIn caps: headline
+220 characters, About 2600; check before emitting. Prefer shorter headlines — several
+surfaces truncate well before 220. Experience: 4–6 responsibilities and a Results block per
+role. Outreach: ~80 words. Content comments: 2–4 lines.
+
+**Draft-first:** missing optional details appear as `[brackets]` in the paste blocks. Never
+invent numbers, employers, or skills to fill a slot.
+
+**Advisory areas** (`positioning`, `visuals`, `sections`, `ssi`; `content` when the ask is
+cadence, engagement, algorithm, or strategy rather than a draft; and `plan` only when not
+delivering the schedule) → if current state is known, read it, then exactly 3 prioritized
+fixes each with a ready-to-use example. If current state is unknown: say so (or ask once);
+give 3 generic prioritized fixes — never invent “your profile currently…”.
+
+**Close** (only after an area deliverable — variants, advisory fixes, audit-then-rewrite,
+or a full `plan` schedule — not after a chooser or the Interview question alone):
+(1) short list of what changed, (2) questions for blank source facts, (3) exactly one
+next-step offer only if: other areas were held from selection rule 2, or this is `all` and
+the next chain step remains, or the user already accepted a next-step. Do **not** upsell
+content, SSI, or outreach by default.
 
 ## Writing rules
 
-Apply to every area:
+Apply to every area.
 
-- No generic or subjective phrases.
-- Direct and scannable.
-- Market language, no buzzwords.
-- Never invent information. A missing fact is a question at the end, not a guess in the copy.
-- Do not exceed what each block needs.
-- Impact, not tasks. Results without numbers still count.
-- Technical over behavioral. LinkedIn is technical screening; behavior is assessed in the
-  interview.
+**Do**
+
+- Direct, scannable, market wording — no buzzwords or generic/subjective filler.
+- Prefer ownership, production delivery, and product outcomes over duty lists.
+- Results without numbers still count when they name a recognizable outcome.
+- Missing facts → `[brackets]` in the draft and questions at the end.
+
+**Do not**
+
+- Invent numbers, employers, skills, or other facts.
+- Exceed what the block needs.
+- Use vanity volume metrics: PR counts/%, commit share, LOC, files changed, ticket
+  counts without outcome, or similar “how much I touched” stats. Prefer what was
+  owned, shipped, or made possible.
+- Soft/behavioral framing on experienced profiles (`passionate`, `proactive`,
+  `team player`, `highly skilled`). Career transition / first job: at most 1–2
+  credibility traits, only when hard proof is missing — never instead of keywords
+  or results. LinkedIn screens skills; behavior is for the interview.
 
 ## When NOT to use
 
-- Resume or CV writing — this is LinkedIn copy only
-- Posting, messaging, or connecting on the user's behalf — this skill drafts, the user sends
-- Generating the cover image itself — briefs only
-- Estimating an SSI score — the user reads it at `linkedin.com/sales/ssi`
+- Resume / CV writing
+- Posting, messaging, or connecting on the user’s behalf (draft only; user sends)
+- Generating the cover image (briefs only)
+- Estimating SSI (user reads `linkedin.com/sales/ssi`)
 - Interview preparation
 
 ## Source material
 
-Transcribed from a LinkedIn course, 31 lessons. Where the course is silent, say so rather
-than improvising. Where the course contradicts the live platform, the platform wins — say
-that out loud.
+Rules live by deliverable under `references/`. Where the original course is silent, say so
+rather than improvising. Where the course contradicts the live platform, the platform wins —
+say so plainly. Product contracts in this file (turn order, area selection, Interview gate,
+Output modes, draft-first, vanity ban, soft-skill seniority) override course silence.
 
 Course outcome statistics ("21x more views", "9x more contacts") are motivation, not
 evidence: keep the action, drop the number. Never present one as the reason for a

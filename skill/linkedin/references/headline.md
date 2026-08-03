@@ -10,6 +10,7 @@ Order the slots by search value, highest first. LinkedIn truncates the headline 
 characters on several surfaces, and the tail is what gets cut.
 
 3 keywords minimum, 5 maximum. Past 5 the headline reads as padding and nobody finishes it.
+Unknown keyword slots: `[Keyword]`, never invent a skill the source does not support.
 
 One role. Two only when the market genuinely uses two names for the same job —
 `Logistics Coordinator | Logistics Supervisor`, to appear in both searches. A third is a focus

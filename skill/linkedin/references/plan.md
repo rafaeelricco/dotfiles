@@ -1,10 +1,15 @@
 # 21-day plan
 
-A schedule, not doctrine. This file names areas and sequences them; it never restates their
-rules. When a step says run an area, that is a fresh route into this skill on a later turn,
-loading that one reference then.
+A schedule, not a rewrite of other areas’ rules. This file names areas and sequences them;
+it never restates their rules. Emitting the plan does **not** auto-run other areas in this
+session. Each later step is a fresh user ask into that area. `all` is not this file: `all`
+stops after profile (positioning→…→visuals); this file adds weeks 2–3 growth.
 
-Load this file alone. Do not pre-load the area files it names.
+Use this file alone for the `plan` area. Do not pre-read the other area files it names.
+
+Mid-plan checkpoint (~day 14–15): Analytics search appearances → job titles (same 15-day
+loop as positioning), optional SSI score (same as the Day 14 row) — full `ssi` growth
+read stays day 18 unless the user asked for SSI earlier.
 
 Every step is marked **[artifact]** — this skill produces it — or **[action]** — only the
 user can do it. Most of weeks 2 and 3 is action. That is the point: the profile is finished
@@ -42,7 +47,7 @@ The daily rhythm starts and does not stop. Nothing here is a one-off.
 | 3×/week | Publish on the fixed days — run `content` for drafts     | [artifact] + [action] |
 | Once    | List 20 target companies; connect inside each            | [action]              |
 | Once    | Join active groups in the field and comment in them      | [action]              |
-| Day 14  | Re-read the SSI score and all four pillars               | [action]              |
+| Day 14  | Analytics search appearances → titles; optional SSI read | [action]              |
 
 Done when: connection count is climbing toward 1500 in-field and every accepted connection
 has been messaged.
