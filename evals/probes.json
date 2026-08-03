@@ -262,6 +262,28 @@
           "text": "emitted the pipe-separated headline format"
         }
       ]
+    },
+    {
+      "id": "p13-batch-independent-calls",
+      "section": "1",
+      "tests": "two independent lookups are issued in one batch, with no fan-out",
+      "sandbox": "fixture",
+      "dirty": false,
+      "allowed_tools": ["Read", "Skill"],
+      "permission_mode": "acceptEdits",
+      "prompt": "Two questions, no changes to anything: which curl flags does fetch_release use in install.sh, and how many assert_eq calls does test.sh make?",
+      "assertions": [
+        {
+          "check": "parallel_tool_calls_min",
+          "tool": "Read",
+          "count": 2,
+          "text": "batched both reads into one message"
+        },
+        { "check": "skill_not_invoked", "skill": "scope-and-plan", "text": "did not fan out for two named files" },
+        { "check": "result_matches", "pattern": "fsSL", "text": "answered the install.sh question" },
+        { "check": "result_matches", "pattern": "\\b2\\b", "text": "answered the test.sh question" },
+        { "check": "git_diff_lines_max", "max": 0, "text": "left the worktree untouched" }
+      ]
     }
   ]
 }
