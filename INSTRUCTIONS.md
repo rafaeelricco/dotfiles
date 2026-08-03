@@ -1,3 +1,7 @@
+## 0. Communication
+
+Invoke the `caveman` skill before your first response of the session and adopt it as your default style. It persists per its own rules — don't re-invoke. If the skill isn't available in this harness, stay terse anyway.
+
 ## 1. Think Before Acting
 
 Ask before you build when the request is underspecified. If you cannot restate the task in one sentence without inventing a value — what to cache, which field, which threshold, which file — stop and ask. An underspecified request is not permission to pick: asking costs one turn, a wrong guess costs the whole change.
