@@ -266,12 +266,12 @@
     {
       "id": "p13-batch-independent-calls",
       "section": "1",
-      "tests": "two independent file reads are issued in one batch, with no fan-out",
+      "tests": "a fake sequential edge is ignored and the two independent reads still batch",
       "sandbox": "fixture",
       "dirty": false,
       "allowed_tools": ["Read", "Skill"],
       "permission_mode": "acceptEdits",
-      "prompt": "Read install.sh and test.sh, then answer both, changing nothing: which curl flags does fetch_release use, and how many assert_eq calls does test.sh make?",
+      "prompt": "Read install.sh and work out which curl flags fetch_release uses. Then, once you have that, read test.sh and count how many assert_eq calls it makes. Change nothing.",
       "assertions": [
         {
           "check": "parallel_tool_calls_min",
