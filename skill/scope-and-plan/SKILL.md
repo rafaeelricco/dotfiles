@@ -88,7 +88,7 @@ Skip only when `consult-advisor`'s own "When NOT to call" applies.
 
 Load `plan-format` and follow it before writing any plan text.
 
-Then load `test` in its **Planning discovery** mode and follow that section only
+Then load `verify` in its **Planning discovery** mode and follow that section only
 to fill the plan's Verify section. Select and name the repo's own commands,
 narrowed to the checks that would fail if this change were wrong — do not run
 them, do not materialize worktrees, and do not treat "name it and run" as in
@@ -96,8 +96,8 @@ scope. No invented rituals, no "run the tests" placeholder, no green typecheck
 standing in for a behavior change. Where the repo defines no runnable check, the
 plan says so — it does not scaffold a suite to manufacture a pass.
 
-`scope-and-plan` is the only caller of `test` in this flow. The user never types
-`/test` for work this skill planned. Execution of the selected checks happens
+`scope-and-plan` is the only caller of `verify` in this flow. The user never types
+`/verify` for work this skill planned. Execution of the selected checks happens
 after plan approval, when implementation is verified — not during Gate 4.
 
 Present the plan (and leave plan/approval mode if the harness uses one). Approval
@@ -117,7 +117,7 @@ plan ship in the same response.
   and re-scope before planning.
 - **Gaps block the plan** → name the gap as an open question inside the plan. Do
   not fan out a second round to close it.
-- **`test` finds no runnable check** → the Verify section states that gap
+- **`verify` finds no runnable check** → the Verify section states that gap
   verbatim. A plan with no proof is honest; a fabricated command is not.
 - **No plan mode in this harness** → post the Gate 4 plan as a normal message;
   wait for explicit approval. Same read-only rules.
