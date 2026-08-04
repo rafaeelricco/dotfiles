@@ -6,6 +6,7 @@ Terminal / WSL pieces live here and in `powershell/Microsoft.PowerShell_profile.
 | Topic                                                       | Goal                                                                 |
 | ----------------------------------------------------------- | -------------------------------------------------------------------- |
 | [Node / pnpm via WSL](#node--pnpm-via-wsl-pc-reset-runbook) | `bash …` from PowerShell uses **Linux** node/pnpm, not Windows shims |
+| [Maestro CLI](#maestro-cli-native-windows)                  | Mobile/web E2E CLI (`maestro`) on native Windows                     |
 
 **Docker:** install **Docker Desktop** on Windows. This repo no longer installs or
 shims docker-ce inside WSL.
@@ -103,8 +104,87 @@ If the Linux username differs after a reset, change `$env:BASH_ENV` in
 
 ### Files
 
-| Path                 | Role                                            |
-| -------------------- | ----------------------------------------------- |
-| `setup-wsl-node.sh`  | Install/wire Linux node+pnpm + `~/.wsl_dev_env` |
-| `wsl_dev_env`        | Template sourced via `BASH_ENV`                 |
-| `system-cleanup.bat` | Unrelated disk/DISM cleanup                     |
+| Path                    | Role                                            |
+| ----------------------- | ----------------------------------------------- |
+| `setup-wsl-node.sh`     | Install/wire Linux node+pnpm + `~/.wsl_dev_env` |
+| `wsl_dev_env`           | Template sourced via `BASH_ENV`                 |
+| `system-cleanup.bat`    | Unrelated disk/DISM cleanup                     |
+| `setup-maestro.ps1`     | Download Maestro CLI + User PATH                |
+| `uninstall-maestro.ps1` | Remove install dir + User PATH entry            |
+
+---
+
+## Maestro CLI (native Windows)
+
+[Maestro](https://github.com/mobile-dev-inc/maestro) E2E CLI. **Native Windows only** — do not use the WSL install path unless required.
+
+### Prerequisites (not installed by the script)
+
+| Need                | Check                                 |
+| ------------------- | ------------------------------------- |
+| Java 17+            | `java -version`, `JAVA_HOME` set      |
+| Android SDK + `adb` | `adb version`                         |
+| Emulator or device  | `emulator -list-avds` / `adb devices` |
+
+Supported emulator API levels (Maestro docs): **29, 30, 31, 33, 34**. API 35/36 support is not yet guaranteed.
+
+### Install
+
+```powershell
+.\scripts\windows\setup-maestro.ps1
+# optional:
+# .\scripts\windows\setup-maestro.ps1 -InstallDir D:\tools\maestro
+```
+
+Open a **new** PowerShell if `maestro` is not found in an already-open session.
+
+```powershell
+maestro --help
+```
+
+### Uninstall
+
+```powershell
+.\scripts\windows\uninstall-maestro.ps1 -Yes
+# match custom install:
+# .\scripts\windows\uninstall-maestro.ps1 -InstallDir D:\tools\maestro -Yes
+```
+
+Does **not** remove Android Studio, SDK, Java, or AVDs.
+
+### First run (this machine)
+
+1. Boot AVD (try existing API 36 first):
+
+   ```powershell
+   emulator -avd Pixel_8_API_36
+   adb wait-for-device
+   ```
+
+2. Smoke flow:
+
+   ```powershell
+   @'
+   appId: com.google.android.contacts
+   ---
+   - launchApp:
+       clearState: true
+   '@ | Set-Content $env:TEMP\maestro-contacts.yaml -Encoding utf8
+   maestro test $env:TEMP\maestro-contacts.yaml
+   ```
+
+3. **If Maestro fails on API 36** (driver/API unsupported — not mere UI assert flakiness), create API 34 and re-run:
+
+   ```powershell
+   $sdk = $env:ANDROID_HOME
+   & "$sdk\cmdline-tools\latest\bin\sdkmanager.bat" --install "system-images;android-34;google_apis;x86_64"
+   echo no | & "$sdk\cmdline-tools\latest\bin\avdmanager.bat" create avd `
+     -n Pixel_8_API_34 `
+     -k "system-images;android-34;google_apis;x86_64" `
+     -d pixel_8 --force
+   adb emu kill 2>$null
+   emulator -avd Pixel_8_API_34
+   maestro test $env:TEMP\maestro-contacts.yaml
+   ```
+
+   Adjust the system-image package for host arch if `sdkmanager` rejects `x86_64` (list: `sdkmanager --list | findstr android-34`).
