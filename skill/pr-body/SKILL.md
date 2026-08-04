@@ -5,7 +5,7 @@ description: >
   creating, opening, or updating any PR body — `gh pr create`, `gh pr edit
   --body`, "create a PR", "ship this branch", "describe my changes", "write the
   PR body", "refresh the PR description". Ask the user for motivation first.
-  Loads commit-message for PR title style.
+  Pairs with commit-message for PR title style.
 ---
 
 # PR Body
@@ -105,5 +105,7 @@ Standalone only — a caller delivers its own body.
 
 ## Titles
 
-Load `commit-message` and follow its **PR title style** (Title rules) before
-drafting any PR title. Suggest 2 or 3 titles, under 72 characters each.
+Standalone only — a caller supplies its own title.
+
+Follow `commit-message` **PR title style** (its Title rules) when drafting a PR
+title. Suggest 2 or 3 titles, under 72 characters each.

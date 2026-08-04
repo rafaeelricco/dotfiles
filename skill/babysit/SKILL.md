@@ -27,7 +27,7 @@ task). This skill owns one cycle, not the cadence.
   code to make a check pass.
 - Not a code reviewer (`/review`), not a change validator (`verify` — load it,
   do not reimplement), not a PR body writer (`pr-body`), not the create path
-  (`create-pr`/`ship`), not a recap poster (`visual-recap`). Commit format
+  (`create-pr`), not a recap poster (`visual-recap`). Commit format
   belongs to `commit-message`.
 - Not a scheduler. Not multi-PR orchestration — stacked-PR sequencing and
   project-specific verification belong in the invoking prompt.
@@ -53,14 +53,16 @@ scope grant: report instead of asking, and stop rather than guess.
 
 1. **Gather** — read-only, always first. No writes in this phase.
 2. **Scope Gate** — present findings and the commit plan. One approval covers
-   the cycle. Nothing actionable → say so; do not invent work.
+   the cycle. Nothing actionable → say so and end the cycle; do not invent work.
 3. **Fix** the validated, in-scope items. One commit per comment or coherent
    cluster, staged narrowly.
-4. **Verify** before each push — load `verify` and run the checks it selects.
+4. **Verify** once, before the cycle's push — run `verify` over the whole batch,
+   not once per commit.
 5. **Push, reply, resolve** — reply with the 7-char commit hash and the specific
    solution, then resolve the thread.
 6. **Re-request** only reviewers whose feedback this batch addressed.
-7. **Repeat** from 1 until a stop condition. Report only what changed.
+7. **Report** what changed, then end the cycle. Repetition belongs to the
+   caller — `/loop` or a scheduled task, per the header.
 
 ## Gather
 
@@ -143,7 +145,7 @@ reviewer's review is still outstanding.
 
 ## Stop conditions
 
-Stop when the PR is merged or closed, or when a blocker needs a human:
+Every cycle ends. It ends early when a blocker needs a human:
 
 - A finding is a bug-vs-intent judgement call
 - A fix would broaden scope, change CI workflows, or alter tests just to green
@@ -153,9 +155,11 @@ Stop when the PR is merged or closed, or when a blocker needs a human:
 - `gh` auth/permission failure, or the branch cannot be pushed
 - Verification fails in a way that needs a human call
 
-Green + mergeable is a milestone, not a stop: report it and keep going while the
-PR is open, since review comments still arrive. "Green" requires at least one
-**completed** check — a PR with zero checks is not green.
+Green + mergeable ends the cycle: report it and stop. Review comments still
+arrive — the next scheduled cycle picks them up. Waiting here for one is the
+caller's cadence spent in the wrong place. "Green" requires at least one
+**completed** check; a PR with zero checks is not green, so report that state and
+stop rather than wait for a check to appear.
 
 ## Report
 

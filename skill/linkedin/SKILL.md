@@ -5,6 +5,7 @@ description: >
   experience, below-the-fold sections, visuals, SSI, posts, recruiter outreach, and a
   21-day plan. Drafts only. Never post, message, or connect on the user's behalf. Not for
   resumes, interview prep, SSI score estimates, or cover image generation.
+disable-model-invocation: true
 ---
 
 # LinkedIn

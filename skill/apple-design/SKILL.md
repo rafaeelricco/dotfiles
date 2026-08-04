@@ -1,6 +1,7 @@
 ---
 name: apple-design
 description: Apply Apple's human-interface design principles to web interfaces. Use when building or reviewing interaction feedback, gesture-driven controls, interruptible motion, spatial transitions, typography, translucent materials, responsive layouts, or accessibility for polished web UI.
+disable-model-invocation: true
 ---
 
 # Apple Design for the Web

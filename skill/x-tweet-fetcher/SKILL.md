@@ -8,6 +8,7 @@ description: >
   schema across all backends; machine-readable error_code for agent branching.
   Field reports and agent-use questions: Agent Waystation #22 Teahouse:
   https://github.com/ythx-101/openclaw-qa/discussions/22
+disable-model-invocation: true
 ---
 
 # X Tweet Fetcher

@@ -5,7 +5,10 @@ the same AI instructions in several vendor-specific trees.
 
 This repository is the source of truth for my Neovim, PowerShell, shell,
 Claude Code, Codex, and Grok setup. AI tools share one generic `INSTRUCTIONS.md` and
-one `skill/` tree, installed through safe, repeatable symlinks.
+one `skill/` tree, installed through safe, repeatable symlinks. A skill's body never
+loads until it is invoked, so the tree is cheap to keep whole; skills that should
+never fire on their own carry `disable-model-invocation: true`, which keeps them out
+of the model's listing while leaving `/<name>` available to me.
 
 - **One source of truth:** no generated skill or plugin copies.
 - **Safe re-runs:** exact links are no-ops and conflicts can be backed up or
@@ -209,16 +212,11 @@ Run the installer as your normal user, not with `sudo`.
   (`setup-wsl-node.sh`, `wsl_dev_env` + profile `BASH_ENV`), and system cleanup.
 - [`.zshrc`](.zshrc) — Zsh configuration.
 - [`scripts/mcp/`](scripts/mcp/) — `install-mcp.sh` / `install-mcp.ps1` register
-  selected tools (Exa, Argent MCP servers, and the OpenAI Codex Claude Code
-  plugin) with every detected agent CLI. Run by hand. Interactive mode shows a
+  selected tools (Exa MCP server and the OpenAI Codex Claude Code plugin) with
+  every detected agent CLI. Run by hand. Interactive mode shows a
   checkbox list (toggle by number, Enter to confirm). Non-interactive:
-  `--mcp exa,argent,codex-cc` / `-Mcp all`. Exa prompts for an optional API key
-  (or `--exa-key` / `-ExaKey`); blank = free tier. Argent installs
-  `@swmansion/argent` globally via npm (Node ≥ 20.11), registers a stdio MCP
-  (`argent mcp`), and installs upstream `argent-*` skills via `npx skills -g`
-  for Grok / Claude Code / Codex. Invoke UI tests with `/argent` (router in
-  `skill/argent`) or `/argent-test-ui-flow`. After adding the router skill,
-  re-run `install.ps1` / `update.ps1` so it links into `~/.grok/skills`.
+  `--mcp exa,codex-cc` / `-Mcp all`. Exa prompts for an optional API key
+  (or `--exa-key` / `-ExaKey`); blank = free tier.
   `codex-cc` runs `claude plugin marketplace add
 openai/codex-plugin-cc` and `claude plugin install codex@openai-codex -s user`
   (Claude-only; not an MCP). Optional Codex runtime: `npm i -g @openai/codex`.
