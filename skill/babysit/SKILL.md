@@ -27,8 +27,9 @@ task). This skill owns one cycle, not the cadence.
   code to make a check pass.
 - Not a code reviewer (`/review`), not a change validator (`verify` — load it,
   do not reimplement), not a PR body writer (`pr-body`), not the create path
-  (`create-pr`), not a recap poster (`visual-recap`). Commit format
-  belongs to `commit-message`.
+  (`create-pr`), not a recap poster (`visual-recap`). Commit format belongs to
+  `commit-message`. Thread-reply and bot re-request shape for babysit live in
+  **Comment routing** and `references/` — not in those skills.
 - Not a scheduler. Not multi-PR orchestration — stacked-PR sequencing and
   project-specific verification belong in the invoking prompt.
 
@@ -49,6 +50,28 @@ Never treat your own message, a timeout, or the end of a run as approval. When
 invoked non-interactively (scheduled task, `/loop`), the invoking prompt is the
 scope grant: report instead of asking, and stop rather than guess.
 
+## Comment routing
+
+Every outbound PR comment (thread reply or re-request) is high-signal. Match
+**author class × action**, load the ref before drafting, post only that shape.
+No template → do not invent one; surface at Scope Gate or stop.
+
+| Author class        | Action                               | Ref / body                                  | Autonomy         |
+| ------------------- | ------------------------------------ | ------------------------------------------- | ---------------- |
+| Codex               | thread reply — fixed                 | `references/codex-reply.md` → Fixed         | auto after scope |
+| Codex               | thread reply — disagree / wontfix    | `references/codex-reply.md` → Disagree      | auto after scope |
+| Codex               | thread reply — already fixed on HEAD | `references/codex-reply.md` → Already fixed | auto after scope |
+| Codex               | re-request after push batch          | `references/codex-review-prompt.md`         | auto after scope |
+| human               | any reply or re-request              | confirm exact text with user; no ref yet    | always gated     |
+| other bot / unknown | any                                  | report; do not invent a trigger or template | stop / ask       |
+
+Author class: login is the Codex review bot (or the repo's documented Codex
+identity) → Codex row. Repo owner / member / collaborator human → human row.
+Named review bots without a row → other bot.
+
+Bans on every reply: thanks, LGTM, "as discussed", status theater ("pushed,
+verifying…"), pasted diffs, restating the reviewer's full comment.
+
 ## Workflow
 
 1. **Gather** — read-only, always first. No writes in this phase.
@@ -58,9 +81,11 @@ scope grant: report instead of asking, and stop rather than guess.
    cluster, staged narrowly.
 4. **Verify** once, before the cycle's push — run `verify` over the whole batch,
    not once per commit.
-5. **Push, reply, resolve** — reply with the 7-char commit hash and the specific
-   solution, then resolve the thread.
-6. **Re-request** only reviewers whose feedback this batch addressed.
+5. **Push, reply, resolve** — route each thread through **Comment routing**,
+   load the matched ref, draft from its template, post, then resolve when the
+   template says to (disagree leaves open unless the user said otherwise).
+6. **Re-request** only reviewers whose feedback this batch addressed — same
+   route table, re-request row.
 7. **Report** what changed, then end the cycle. Repetition belongs to the
    caller — `/loop` or a scheduled task, per the header.
 
@@ -95,8 +120,9 @@ Present, then act on approval:
 - Failing checks, classified branch-related vs flaky/infra.
 - Conflicts or behind-base state.
 - The commit plan: one `Commit N: <title>` per comment or coherent cluster, with
-  files touched, the message per `commit-message`, planned reply text, and the
-  verification for that commit. Reply-only threads listed separately, no commit.
+  files touched, the message per `commit-message`, planned reply text **copied
+  from the routed template** (author × action), and the verification for that
+  commit. Reply-only threads listed separately, no commit — still routed.
 
 ## CI classification
 
@@ -134,11 +160,11 @@ Treat non-GitHub-Actions providers as report-only unless asked.
 
 ## Re-request
 
-After a push that addressed a reviewer's feedback, re-trigger that reviewer with
-its documented trigger — `@codex review` for the Codex bot (body in
-`references/codex-review-prompt.md`), `gh pr edit --add-reviewer` for a human,
-**only with explicit confirmation**. Never invent a re-trigger for a human or an
-unknown bot; if you do not know one, say so and let the user decide.
+After a push that addressed a reviewer's feedback, re-trigger via **Comment
+routing**. Codex → post `references/codex-review-prompt.md` with `gh pr comment`.
+Human → `gh pr edit --add-reviewer`, **only with explicit confirmation**. Never
+invent a re-trigger for a human or an unknown bot; if you do not know one, say
+so and let the user decide.
 
 At most one re-request per reviewer per push batch. Never re-request while that
 reviewer's review is still outstanding.
