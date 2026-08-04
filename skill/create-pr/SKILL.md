@@ -17,8 +17,8 @@ branched, staged, committed, pushed, or opened before every answer is in.
 
 1. Enter plan/approval mode if the harness has one — before any other tool call.
 2. Inspect — read-only.
-3. Ask — one prose question, then the `AskUserQuestion` calls in 3b–3c.
-4. Present the plan (leave plan/approval mode if used).
+3. Ask — the prose question and the `AskUserQuestion` call in one message. One turn.
+4. Present the plan (leave plan/approval mode if used). One turn.
 5. Execute exactly what was approved.
 
 Until the user approves the Step 4 plan these commands are forbidden:
@@ -27,7 +27,9 @@ Until the user approves the Step 4 plan these commands are forbidden:
 
 ## When NOT to ask
 
-Never. Step 3 has no conditional branches — every question fires on every run.
+Never. Step 3 has no conditional branches — every question fires on every run,
+and they all fire in the same message. Merging them into one turn is not skipping
+them; asking them across four turns is not asking them harder.
 A question whose answer you can already guess is still asked; you put that
 answer first and append "(Recommended)" to its label.
 
@@ -35,7 +37,7 @@ Two situations change how Step 3 runs. Neither authorizes a mutation, and
 neither skips the Step 4 plan:
 
 1. The user waives the questions in their own words ("don't ask, just ship
-   it"). Skip 3a–3c and continue. For each waived question take the answer you
+   it"). Skip 3a and 3b and continue. For each waived question take the answer you
    would have marked "(Recommended)", write the body from the diff, and present
    the Step 4 plan as usual so the user sees those defaults before approving.
    The waiver covers the questions, not the approval gate. The
@@ -90,9 +92,12 @@ commits ahead of base, and whether the worktree mixes unrelated changes.
 
 ## Step 3 — Ask
 
+One message, both parts: the prose question is the message body, the
+`AskUserQuestion` call ships alongside it. Wait once.
+
 ### 3a. Motivation — prose, free text
 
-Ask this verbatim, as a message, and wait:
+Put this verbatim in the message body:
 
 ```text
 What is the motivation or the why behind this PR? Briefly describe the problem it solves or the goal it achieves.
@@ -173,17 +178,24 @@ Four questions, always all four. Fill the bracketed values from Step 2.
   group holding every file. The user still confirms it — a one-option question
   is a confirmation, not a skipped question.
 
-### 3c. Body options — `Full flow` only
+### 3c. Body options — derived, never asked
 
-Load `pr-body` and ask its formatting questions (one or two `AskUserQuestion`
-calls per that skill's schema limits): sections, writing style, the demo-video
-source, and a diagram question only when Sections includes Architecture Flow.
+`Full flow` only. Do not ask `pr-body`'s formatting questions. Derive them, and
+let the Step 4 plan carry the result to the approval gate the user was reaching
+anyway — a rendered body they can edit beats four options they must imagine:
+
+- Sections — every option `pr-body` would offer for this diff.
+- Writing Style — `standard`.
+- Video Source — the `[video_url]` placeholder.
+- Diagram Scope — the flow that made Architecture Flow eligible.
+
 Its `references/template.md` renders the body; the Motivation section carries
-3a's answer in the user's words.
+3a's answer in the user's words. Name the four derived choices beside the body in
+the plan, so rejecting one costs a sentence.
 
 ## Step 4 — Present the plan
 
-Load `plan-format` for diff and prose style. This plan names its own sections,
+Follow `plan-format` for diff and prose style. This plan names its own sections,
 overriding that skill's Shape list. State concretely:
 
 - **Branch only** — approved branch name and base, or "already on it, nothing
@@ -193,7 +205,8 @@ overriding that skill's Shape list. State concretely:
   commit per category (feature, refactor, formatting, tests, config), ordered
   foundational-first, each with its exact file list and its full message per
   `commit-message`; one PR title in `commit-message` title style, ≤72 chars;
-  the rendered PR body; draft state and assignee.
+  the rendered PR body and the four derived 3c choices beside it; draft state and
+  assignee.
 
 Files that must move together (an API change and its consumer) stay in one
 commit. A single-category diff is one commit — say so.
@@ -233,8 +246,8 @@ git diff --cached
 ```
 
 Confirm the cached diff matches the approved commit, then create the commit via
-`commit-message` using the approved title/body (load that skill; do not restate
-format rules here).
+`commit-message` using the approved title/body (already loaded at Step 4; do not
+restate format rules here).
 
 After all approved commits are created, write the approved PR body to a temp
 file, push once, and create the PR once:
@@ -263,17 +276,15 @@ assignee.
 <example>
 User: /create-pr
 Assistant: *enter plan/approval mode if available, then the Step 2 block: branch `fix-token-expiry`, 3 commits ahead of `main`, 4 files, clean worktree, no open PR*
-Assistant: What is the motivation or the why behind this PR? Briefly describe the problem it solves or the goal it achieves.
-User: Sessions dropped an hour early — the expiry check used `<` instead of `<=`.
-Assistant: *one AskUserQuestion call: Branch / Path / Scope / State*
-User: *answers*
-Assistant: *loads pr-body, asks body options, presents the plan, leaves plan mode if used*
+Assistant: What is the motivation or the why behind this PR? Briefly describe the problem it solves or the goal it achieves. *and, in the same message, one AskUserQuestion call: Branch / Path / Scope / State*
+User: Sessions dropped an hour early — the expiry check used `<` instead of `<=`. *and answers the four*
+Assistant: *derives the body options, presents the plan with the rendered body, leaves plan mode if used*
 
 <reasoning>
 The branch was already a feature branch and the worktree was clean, so both
 conditions that once gated Branch and Scope were false. They fire anyway —
 "keep `fix-token-expiry`" is an answer the user gives, not one the agent
-assumes.
+assumes. Two turns, not four: every question was still asked.
 </reasoning>
 </example>
 

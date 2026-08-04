@@ -2,127 +2,88 @@
 name: scope-and-plan
 description: >
   Build context before deciding — fan out read-only workers over independent
-  concerns, refine once through consult-advisor, then present a plan as diffs
-  whose verification comes from the verify skill.
+  concerns, then present a plan as diffs.
   Use when a request touches files you cannot yet name, spans layers, or the
   user asks to "get context first", "explore then plan", or "use sub-agents".
-  Do NOT use when you can already name the files and the approach, when one
-  search answers it, or when the user asked for a direct edit.
+  Do NOT use when one search answers it, or when the user asked for a direct
+  edit. Being able to name the files does not exclude it — and fanning out alone
+  needs no skill, so do not load this one just to spawn a worker.
 ---
 
-# Scope and Plan
+# Scope and plan
 
-Gather context in parallel, refine it once, then present a plan as diffs.
+Five steps, in order. Steps 1–4 stay read-only until the user approves; step 5 is
+the only one that writes.
 
-Five gates, Gate 0 through Gate 4, in order. Each gate feeds the next — a plan
-built on thin context gets rejected, and the rejection costs more than the
-fan-out saved.
+Enter the harness plan/approval workflow first if one exists. If there is none,
+post the plan as a normal message and wait for explicit approval.
 
-## When to use
+## 1. Fan out
 
-- Request names a behavior but not the files ("fix the flaky login")
-- Change spans 3+ files, or crosses layers (API + store + UI)
-- Unfamiliar area of the codebase
-- User says "get context", "explore first", "use sub-agents", "then plan"
+Decompose into independent concerns — two workers must answer without reading
+each other's output. Spawn them all in one message. Worker count follows the
+concerns found; do not pad to a number.
 
-## When NOT to use
+Load `plan-format` in that same message — it reads no worker output, so waiting
+for one is a wait for nothing.
 
-- You can already name every file and the approach → plan directly
-- One search answers the whole question → run it instead
-- User specified the approach → proceed directly
-- Mechanical work: rename, format, dependency bump, typo
+Brief each worker per `./worker-brief.md`.
 
-N workers burn tokens and add latency before the first useful output. In doubt,
-run one search first — if it resolves the request, this skill was not needed.
+Read the briefs against each other before spawning: an Objective that needs a path
+outside its own Boundaries cannot be answered, and an unanswerable worker is a full
+spend dropped at step 2. Fix the brief, then spawn. It is the only check that costs
+nothing.
 
-## Gate 0 — Plan mode
+## 2. Check
 
-Enter the harness plan/approval workflow now if one exists, before spawning a
-worker or reading a file. Gates 1–3 stay read-only either way.
+Before merging anything, judge each worker's return on its own:
 
-If the harness has no plan mode, run every gate the same way and post the Gate 4
-plan as a normal message. Wait for explicit user approval before any mutation.
+- Returned nothing, or nothing on its Objective → drop it.
+- Claims carry no `file:line` anchor → drop those claims.
+- An anchor does not resolve → drop that claim.
+- Answered a different question than its brief → drop it.
 
-## Gate 1 — Fan out
+Everything dropped goes under Gaps in step 3, named. A worker that survives with
+part of its output dropped passes through with the remainder.
 
-Decompose into independent concerns: files, layers, behaviors. Independent means
-two workers answer without reading each other's output; overlapping scopes
-return the same file twice at double cost. Worker count follows the concerns
-found — do not pad to a number.
+## 3. Synthesize
 
-Spawn all workers in one message so they run concurrently. Brief each with:
+Collapse worker output into these four labels, verbatim, posted in the response:
 
-```
-Objective: <the one question this worker answers>
-Boundaries: <paths in scope; paths explicitly out of scope>
-Return: every claim anchored to `file:line`; findings; gaps left unresolved
-Do not: edit files, run builds, answer another worker's question
-```
+    Paths:    <file:line — what lives there>
+    Facts:    <what the code does today, verified>
+    Gaps:     <what no worker resolved>
+    Approach: <provisional, one paragraph>
 
-Workers are read-only. A worker that edits invalidates every other worker's
-snapshot.
+Never forward raw worker transcripts.
 
-## Gate 2 — Synthesize
+## 4. Plan
 
-Collapse worker output before anything downstream reads it. Use these four
-labels verbatim — Gate 3 and the eval harness both key on them:
+Follow `plan-format`, already loaded at step 1.
 
-```
-Paths:    <file:line — what lives there>
-Facts:    <what the code does today, verified>
-Gaps:     <what no worker resolved>
-Approach: <provisional, one paragraph — advisor input, not plan text>
-```
-
-Drop any claim a worker did not anchor to `file:line`, and any anchor whose path
-or line does not exist. An unanchored claim is not a finding — it never reaches
-the advisor or the plan. Record what it failed to answer under Gaps.
-
-Never forward raw worker transcripts. The advisor and the plan need the
-conclusion, not the search.
-
-## Gate 3 — Refine
-
-Load `consult-advisor` and follow it. Send the Gate 2 synthesis, not the raw
-output — the advisor answers the tradeoff, it does not re-read the codebase.
-
-Skip only when `consult-advisor`'s own "When NOT to call" applies.
-
-## Gate 4 — Plan
-
-Load `plan-format` and `verify` (its **Planning discovery** section only) in the
-same batch — neither consumes the other's output. `plan-format` shapes the
-diffs; `verify` selects checks from the Gate 2 synthesis, not from plan prose.
-
-`verify` fills the plan's Verify section. Select and name the repo's own commands,
-narrowed to the checks that would fail if this change were wrong — do not run
-them, do not materialize worktrees, and do not treat "name it and run" as in
-scope. No invented rituals, no "run the tests" placeholder, no green typecheck
-standing in for a behavior change. Where the repo defines no runnable check, the
-plan says so — it does not scaffold a suite to manufacture a pass.
-
-`scope-and-plan` is the only caller of `verify` in this flow. The user never types
-`/verify` for work this skill planned. Execution of the selected checks happens
-after plan approval, when implementation is verified — not during Gate 4.
-
-Present the plan (and leave plan/approval mode if the harness uses one). Approval
-of that plan is the gate for implementation, and approves those checks as its
-definition of done. Inspection stays read-only until then.
+Fill the Verify section from the synthesis: name the repo's own commands,
+narrowed to the checks that would fail if this change were wrong. Do not run
+them. Where the repo defines no runnable check, say so — do not scaffold a suite
+to manufacture a pass.
 
 Unresolved decisions do not defer the plan: the open question and the formatted
 plan ship in the same response.
 
-## Recovery
+## 5. Execute
 
-- **Workers returned overlapping findings** → scopes were not independent.
-  Dedupe in the synthesis; do not re-run.
-- **A worker returned nothing** → its concern was not real, or its boundary
-  excluded the answer. Record it under Gaps; do not respawn blind.
-- **Advisor contradicts worker findings** → the code wins. Surface the mismatch
-  and re-scope before planning.
-- **Gaps block the plan** → name the gap as an open question inside the plan. Do
-  not fan out a second round to close it.
-- **`verify` finds no runnable check** → the Verify section states that gap
-  verbatim. A plan with no proof is honest; a fabricated command is not.
-- **No plan mode in this harness** → post the Gate 4 plan as a normal message;
-  wait for explicit approval. Same read-only rules.
+After approval, fan out again — writers this time. The read-only rule in
+`./worker-brief.md` protects a live snapshot; once the plan is approved no reader
+is running, so there is no snapshot left to protect.
+
+Group by the plan's own diffs: files one diff touches together are one writer.
+`plan-format` orders diffs by apply order, so a group whose diffs depend on an
+earlier group is not a second writer — it waits. Brief each per
+`./worker-brief.md`.
+
+A writer that stops without applying its diffs → read `./recovery.md` before
+touching the tree again.
+
+## References
+
+- Worker brief template: read `./worker-brief.md`
+- When a step goes wrong: read `./recovery.md`
