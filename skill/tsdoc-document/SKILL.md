@@ -7,6 +7,7 @@ description: >
   facts types cannot express. Use when the user asks to document TypeScript,
   add JSDoc/TSDoc, improve API comments, write @param/@returns/@example,
   deprecate an API, or runs /tsdoc-document.
+disable-model-invocation: true
 ---
 
 # TSDoc Document

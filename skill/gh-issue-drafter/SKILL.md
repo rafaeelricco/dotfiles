@@ -8,6 +8,7 @@ description: >
   this skill for requests such as create an issue, structure this issue, turn
   notes into an issue, write acceptance criteria, write validation steps, or
   make an issue body clearer and objectively verifiable.
+disable-model-invocation: true
 ---
 
 # GitHub Issue Drafter

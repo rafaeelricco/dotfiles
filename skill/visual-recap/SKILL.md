@@ -1,6 +1,7 @@
 ---
 name: visual-recap
 description: Create concise reviewer-facing visual recaps for pull requests and branches by re-reading the final diff and drafting copy-ready Markdown with Mermaid, lifecycle summaries, access tables, and key behavior. Use when asked for a visual PR recap, reviewer overview, architecture-flow comment, or to post an approved recap to a PR. Always preview before any GitHub write.
+disable-model-invocation: true
 ---
 
 # Visual Recap

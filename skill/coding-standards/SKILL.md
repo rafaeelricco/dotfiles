@@ -7,6 +7,7 @@ description: >
   trade-offs. Use when implementation style, maintainability, state modeling,
   side-effect boundaries, or options-before-implementation materially affect
   the result.
+disable-model-invocation: true
 ---
 
 # Coding Standards Review
