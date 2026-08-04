@@ -1,7 +1,19 @@
 $env:PATH += ";C:\Users\Rafael\scoop\apps\git\current\usr\bin"
 
-# GitHub PAT for private deps. Set it in the Windows User env when needed:
-#   setx GITHUB_TOKEN <token>
+# GitHub PAT for private deps (npm.pkg.github.com / docker build args).
+#
+# gh auth login only updates the keyring — it does NOT set GITHUB_TOKEN.
+# Prefer scopes that include read:packages for @org packages, e.g.:
+#   gh auth login -h github.com -s read:packages,repo,read:org,workflow -p https -w
+#
+# This shell (process env):
+#   $env:GITHUB_TOKEN = (gh auth token).Trim()
+#   $env:GH_TOKEN = $env:GITHUB_TOKEN
+#
+# Optional persist (survives new terminals without re-exporting):
+#   setx GITHUB_TOKEN (gh auth token)
+# Then open a new PowerShell (or re-run the $env: lines above in this one).
+#
 # Precedence: existing process env > User Windows env. Left unset when neither has
 # one, so `gh` falls back to the credentials from `gh auth login`.
 if (-not $env:GITHUB_TOKEN) {
