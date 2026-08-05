@@ -4,7 +4,7 @@ description: >
   The shape of a plan document — show every change as a real before/after diff, not prose.
   Use when entering plan/approval mode, starting to plan a code change, writing or
   editing a plan file, or before presenting a plan for approval.
-disable-model-invocation: false
+disable-model-invocation: true
 ---
 
 # Plan Format
@@ -28,8 +28,7 @@ Open questions go inline at the decision they block, never in a section of their
 - Moved files: `rename from` / `rename to`, plus diffs for reference updates.
 - Repeated edits: show the pattern once, then `Same pattern: path:line`.
 - Cleanup the change forces — removed imports, dead functions, obsolete tests — appears as a deletion diff too, never a prose note or a deferred "delete if…".
-- Never return prose-only plans, bare file lists, or `path:line — change X to Y` summaries. If a literal diff is infeasible (generated/binary/huge), give each such file its own representative excerpt of the transformation — never a prose "regenerated" summary.
-- Cut, never a diff: prose restating a change, "this will…" narration, rationale essays, alternatives you rejected, risk and rollout sections, per-step recaps. The diff is the explanation.
+- Never return prose-only plans, bare file lists, `path:line — change X to Y` summaries, "this will…" narration, rationale essays, alternatives you rejected, risk/rollout sections, or per-step recaps. If a literal diff is infeasible (generated/binary/huge), give each such file its own representative excerpt of the transformation — never a prose "regenerated" summary. The diff is the explanation.
 
 ## Patterns
 
@@ -43,10 +42,4 @@ Open questions go inline at the decision they block, never in a section of their
 
 ```ts
 export const value = true;
-```
-
-```diff
-# old.md -> docs/new.md
-rename from old.md
-rename to docs/new.md
 ```
