@@ -13,11 +13,10 @@ Six blocks, in order. Cap 2600 characters.
 
 Block 1 is where a recruiter confirms alignment with the vacancy, so a wrong opening costs the whole
 read. Block 2 is what separates someone who executes from someone who operates strategically. Block 3
-is where trust is won or lost, because a recruiter believes a shipped outcome, not an adjective or
-a volume metric. Prefer three representative achievements over a career dump. Same vanity ban as
-Writing rules (no PR/LOC/commit-share theater). Block 4 is
-what LinkedIn search matches against. Block 5 exists so nobody has to guess what the person wants
-next. Block 6 humanizes the profile and gives the reader a reason to send the message.
+is where trust is won or lost, because a recruiter believes a shipped outcome, not an adjective.
+Prefer three representative achievements over a career dump. Block 4 is what LinkedIn search matches
+against. Block 5 exists so nobody has to guess what the person wants next. Block 6 humanizes the
+profile and gives the reader a reason to send the message.
 
 The headline's keywords appear here too. Same terms, no substitutes.
 
@@ -26,11 +25,9 @@ If employment is known, do not re-ask; if unknown, omit Block 5 or bracket and a
 
 Block 3 caps at 3-4 results. More stops being read.
 
-**Soft skills.** Experienced: out of every block (`passionate`, `proactive`, `team player`,
-`expert`, `highly skilled`). Career transition and first job: at most 1–2 credibility traits,
-and only when Block 3 lacks hard projects or results — never instead of keywords.
-
 Blank line between every block. The recruiter scans; a wall of text is skipped, not read slowly.
+
+If the user asks for a blank template by name, emit six unlabeled blocks with `[brackets]`.
 
 ## Worked example — established career
 
@@ -96,58 +93,9 @@ Open to connections and conversations about career, internships, and professiona
 Contact: [your email]
 ```
 
-## Facts to gather
-
-Not a pre-draft questionnaire. Draft with `[brackets]` for missing items; ask only at the
-end (or if the user refuses brackets). Optional gap checklist:
-
-- Current role/area, and the role/area to attract
-- Years of experience
-- Sectors and markets worked in
-- Main activities and projects
-- Relevant results or achievements
-- Main hard skills
-- Specialties and differentiators
-- Type of opportunity sought
-- Professional topics of interest
-
-Transition adds: origin area, transferable skills, recent courses and projects, hard skills in the
-new area, target level (internship / junior / entry).
-
-First job adds: degree program, academic projects, extracurriculars, volunteering, main learnings.
-
-## Template
-
-Emit the blank template only when the user asks for it by name. Normal output is filled
-prose that may still contain `[brackets]` for unknown fields.
-
-```text
-Block 1 — Professional identity
-[Main role / area], with [X years] of experience in [sectors, markets, or relevant contexts].
-
-Block 2 — Scope of work
-Work in [main activities, projects, or responsibilities], focused on [impact, result, or type of problem solved].
-
-Block 3 — Main results and deliveries
-- [Relevant result or achievement 1]
-- [Relevant result or achievement 2]
-- [Impact generated, improvement, optimization, or strategic decision supported]
-
-Block 4 — Skills and specialties
-Solid experience in [main hard skills], with emphasis on [technical specialties or professional differentiators].
-
-Block 5 — Career direction
-Interested in opportunities in [target role / area], working in contexts that demand [type of challenge, scope, or contribution sought].
-
-Block 6 — Closing + CTA
-Open to connections and conversations about [professional topics of interest].
-Contact: [your email] | [your phone]
-```
-
 ## Checklist
 
 Under 2600 characters. Block 1 names role, seniority, and sector. Blank line between blocks.
-Block 3 is 3-4 bulleted outcomes (not duties, not vanity volume metrics). Block 4 carries the
-densest keyword concentration. Block 5 present only if unemployed. Block 6 has a contact
-route. Soft skills: none for established careers; ≤2 for transition/first job only when
-proof is thin. Transition and first-job variants never inflate seniority.
+Block 3 is 3-4 bulleted outcomes, not duties. Block 4 carries the densest keyword concentration.
+Block 5 present only if unemployed. Block 6 has a contact route. Transition and first-job
+variants never inflate seniority.

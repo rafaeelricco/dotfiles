@@ -1,13 +1,13 @@
 ---
 name: scope-and-plan
 description: >
-  Build context before deciding — fan out read-only workers over independent
-  concerns, then present a plan as diffs.
-  Use when a request touches files you cannot yet name, spans layers, or the
-  user asks to "get context first", "explore then plan", or "use sub-agents".
-  Do NOT use when one search answers it, or when the user asked for a direct
-  edit. Being able to name the files does not exclude it — and fanning out alone
-  needs no skill, so do not load this one just to spawn a worker.
+  Five-step diamond before write: fan-out readers → checker → synthesize →
+  plan-as-diffs → approve → writers. Use when paths are not yet nameable and
+  the change is large enough that synthesize + plan + explicit approve must
+  gate edits — or the user names this skill (`scope-and-plan`). Do NOT use when
+  paths (or one search) answer the where, when the user asked for a direct edit,
+  for explore/"get context first" phrasing alone, or only to spawn parallel
+  workers — fan-out alone needs no skill; that is Direct.
 ---
 
 # Scope and plan
@@ -36,15 +36,18 @@ nothing.
 
 ## 2. Check
 
-Before merging anything, judge each worker's return on its own:
+Checker gate — do not enter Synthesize until every surviving claim passes.
+Judge each worker's return on its own:
 
 - Returned nothing, or nothing on its Objective → drop it.
 - Claims carry no `file:line` anchor → drop those claims.
-- An anchor does not resolve → drop that claim.
+- An anchor does not resolve (path missing, or line out of range when read) → drop that claim.
 - Answered a different question than its brief → drop it.
 
 Everything dropped goes under Gaps in step 3, named. A worker that survives with
 part of its output dropped passes through with the remainder.
+All workers fully dropped → Gaps only; still produce Plan with Approach = blocked
+on missing context — do not invent Paths/Facts.
 
 ## 3. Synthesize
 
@@ -71,9 +74,7 @@ plan ship in the same response.
 
 ## 5. Execute
 
-After approval, fan out again — writers this time. The read-only rule in
-`./worker-brief.md` protects a live snapshot; once the plan is approved no reader
-is running, so there is no snapshot left to protect.
+After approval, fan out again — writers this time.
 
 Group by the plan's own diffs: files one diff touches together are one writer.
 `plan-format` orders diffs by apply order, so a group whose diffs depend on an
@@ -82,8 +83,3 @@ earlier group is not a second writer — it waits. Brief each per
 
 A writer that stops without applying its diffs → read `./recovery.md` before
 touching the tree again.
-
-## References
-
-- Worker brief template: read `./worker-brief.md`
-- When a step goes wrong: read `./recovery.md`

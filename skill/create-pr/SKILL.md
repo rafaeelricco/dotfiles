@@ -4,8 +4,9 @@ description: >
   Open a GitHub pull request from local repository changes. Use when the user
   asks to create PR, open PR, abrir PR, criar pull request, ship this branch,
   ready for review, publish local changes as a pull request, or invokes
-  /create-pr. Asks the user for motivation, branch, path, scope, PR state, and
-  body options before any branch, stage, commit, push, or mutating gh call.
+  /create-pr. Asks the user for motivation, branch, path, scope, and PR state
+  before any branch, stage, commit, push, or mutating gh call. Full flow derives
+  body options.
 ---
 
 # Create PR
@@ -25,62 +26,50 @@ Until the user approves the Step 4 plan these commands are forbidden:
 `git switch -c`, `git checkout -b`, `git add`, `git reset`, `git commit`,
 `git push`, `gh pr create`, `gh pr edit`.
 
-## When NOT to ask
+## Step 3 exceptions
 
-Never. Step 3 has no conditional branches — every question fires on every run,
-and they all fire in the same message. Merging them into one turn is not skipping
-them; asking them across four turns is not asking them harder.
-A question whose answer you can already guess is still asked; you put that
-answer first and append "(Recommended)" to its label.
+Neither authorizes a mutation, and neither skips the Step 4 plan:
 
-Two situations change how Step 3 runs. Neither authorizes a mutation, and
-neither skips the Step 4 plan:
-
-1. The user waives the questions in their own words ("don't ask, just ship
-   it"). Skip 3a and 3b and continue. For each waived question take the answer you
-   would have marked "(Recommended)", write the body from the diff, and present
-   the Step 4 plan as usual so the user sees those defaults before approving.
-   The waiver covers the questions, not the approval gate. The
-   invented-motivation ban survives it: state that no motivation was provided.
-2. No `AskUserQuestion` and no plan mode. Do not try to infer whether a user is
-   present — you cannot observe that, and Codex-style harnesses lack both tools
-   while a user is very much there. Degrade to prose: in one message, ask the
-   Step 3a question verbatim, report the Step 2 findings and the plan you would
-   propose, and end your turn. Mutate nothing until a user message approves it.
-   If someone is there they answer and the run continues from Step 3; if nobody
-   answers, the run ends having mutated nothing, which is the correct outcome.
-   Never treat your own message, a timeout, or the end of the run as approval.
+1. **Waiver** — user waives questions in their own words ("don't ask, just ship
+   it"). Skip 3a and 3b. Use each "(Recommended)" answer; Scope = all listed
+   groups. Write body from the diff, present Step 4 plan with those defaults.
+   Invented-motivation ban survives: state that no motivation was provided.
+2. **No AskUI** — no `AskUserQuestion` and no plan mode. Degrade to prose: in
+   one message, ask 3a verbatim, report Step 2 findings and the plan you would
+   propose, end turn. Mutate nothing until a user message approves. Never treat
+   your own message, a timeout, or end of run as approval.
 
 Accept-edits, autonomous mode, and "proceed without asking" guidance are
-neither of those.
+neither of those. A guessable answer is still asked — put it first with
+"(Recommended)".
 
-## Step 1 — Enter plan mode
+## Step 1 — Plan mode
 
-If the harness has a plan/approval mode and the session is not already in it,
-enter it now, before anything else. Inspection stays read-only either way; the
-plan you present in Step 4 is the approval artifact for every mutation in Step 5.
-
-If the harness has no plan mode, follow the same steps and post the Step 4 plan
-as a normal message. Execute only after a user message approves it — see the
-second item under "When NOT to ask", which covers both this case and a run with
-no user at all.
+If the harness has plan/approval mode and the session is not already in it,
+enter it before anything else. Inspection stays read-only; Step 4 plan is the
+approval artifact for every Step 5 mutation. No plan mode → same steps, post
+Step 4 as a normal message; execute only after user approval (see No AskUI).
 
 ## Step 2 — Inspect (read-only)
 
 ```bash
+DB=$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name) || { echo "gh missing or unauthenticated"; exit 1; }
 gh repo view --json defaultBranchRef,nameWithOwner
 git status -sb
 git branch --show-current
-git diff --stat "origin/<default-branch>...HEAD" && git diff "origin/<default-branch>...HEAD"
-git diff --cached --stat && git diff --cached
-git diff --stat && git diff
-git log --oneline --decorate "origin/<default-branch>..HEAD"
-gh pr view --json number,url,state
+if git rev-parse --verify "origin/$DB" >/dev/null 2>&1; then
+  BASE="origin/$DB"
+else
+  BASE="$DB"
+fi
+git diff --stat "$BASE...HEAD"; git diff "$BASE...HEAD"
+git diff --cached --stat; git diff --cached
+git diff --stat; git diff
+git log --oneline --decorate "$BASE..HEAD"
+gh pr view --json number,url,state 2>/dev/null || true
 ```
 
-- Replace `<default-branch>` with `defaultBranchRef.name` from `gh repo view`.
-- Branch never pushed → if `origin/<default-branch>` does not resolve, fall
-  back to `<default-branch>...HEAD`.
+- `DB` is the default branch; `BASE` is `origin/$DB` when it exists, else `$DB`.
 - Open PR already exists for this branch → report its URL and stop, unless
   the user asked to update it.
 - No base diff, no commits ahead of base, and no staged or unstaged local
@@ -120,12 +109,12 @@ Four questions, always all four. Fill the bracketed values from Step 2.
     "multiSelect": false,
     "options": [
       {
-        "label": "<current-branch>",
+        "label": "<current-branch> (Recommended)",
         "description": "Open from the branch you are on. <n> commits ahead of <default>."
       },
       {
-        "label": "rafaeelricco/<slug-from-diff>",
-        "description": "Create this branch from the current HEAD, then open the PR from it."
+        "label": "rafaeelricco/<slug-from-diff> (Recommended)",
+        "description": "Create this branch from the current HEAD, then open the PR from it. First option when on default."
       },
       {
         "label": "rafaeelricco/<alt-slug>",
@@ -138,7 +127,7 @@ Four questions, always all four. Fill the bracketed values from Step 2.
     "question": "How far should I take this?",
     "multiSelect": false,
     "options": [
-      { "label": "Full flow", "description": "Create the branch if needed, commit, push, and open the PR." },
+      { "label": "Full flow (Recommended)", "description": "Create the branch if needed, commit, push, and open the PR." },
       { "label": "Branch only", "description": "Create the approved branch and stop. No commits, no push, no PR." },
       {
         "label": "You handle commits",
@@ -171,26 +160,24 @@ Four questions, always all four. Fill the bracketed values from Step 2.
 - Branch: offer the current branch only when it differs from the default. Head
   and base cannot be the same branch, and `Full flow` would commit and push to
   the default branch before `gh pr create` failed. On the default branch, offer
-  three `rafaeelricco/` names instead. When the current branch is a usable
-  feature branch, put it first and append "(Recommended)". Derive the
-  alternatives from the diff.
+  three `rafaeelricco/` names instead; put the first slug first and append
+  "(Recommended)". When the current branch is a usable feature branch, put it
+  first and append "(Recommended)". Derive the alternatives from the diff.
+  Only one Branch option carries "(Recommended)" in the rendered list.
 - Scope: when the whole worktree is one coherent change, the list is a single
   group holding every file. The user still confirms it — a one-option question
-  is a confirmation, not a skipped question.
+  is a confirmation, not a skipped question. Waiver selects every listed group.
 
 ### 3c. Body options — derived, never asked
 
-`Full flow` only. Do not ask `pr-body`'s formatting questions. Derive them, and
-let the Step 4 plan carry the result to the approval gate the user was reaching
-anyway — a rendered body they can edit beats four options they must imagine:
+`Full flow` only. Do not ask `pr-body`'s formatting questions. Derive:
 
 - Sections — every option `pr-body` would offer for this diff.
 - Writing Style — `standard`.
 - Diagram Scope — the flow that made Architecture Flow eligible.
 
-Its `references/template.md` renders the body; the Motivation section carries
-3a's answer in the user's words. Name the three derived choices beside the body in
-the plan, so rejecting one costs a sentence.
+Render via `pr-body` `references/template.md`; Motivation = 3a in the user's
+words. Name the three derived choices beside the body in the Step 4 plan.
 
 ## Step 4 — Present the plan
 
@@ -272,43 +259,16 @@ assignee.
 
 ## Examples
 
-<example>
-User: /create-pr
-Assistant: *enter plan/approval mode if available, then the Step 2 block: branch `fix-token-expiry`, 3 commits ahead of `main`, 4 files, clean worktree, no open PR*
-Assistant: What is the motivation or the why behind this PR? Briefly describe the problem it solves or the goal it achieves. *and, in the same message, one AskUserQuestion call: Branch / Path / Scope / State*
-User: Sessions dropped an hour early — the expiry check used `<` instead of `<=`. *and answers the four*
-Assistant: *derives the body options, presents the plan with the rendered body, leaves plan mode if used*
+**Compliant.** Inspect → ask 3a + 3b in one message (even when branch/scope look
+obvious) → derive body options → present plan with rendered body → execute on
+approval. Two turns of questions, not four of assumptions.
 
-<reasoning>
-The branch was already a feature branch and the worktree was clean, so both
-conditions that once gated Branch and Scope were false. They fire anyway —
-"keep `fix-token-expiry`" is an answer the user gives, not one the agent
-assumes. Two turns, not four: every question was still asked.
-</reasoning>
-</example>
+**Non-compliant.** Reading motivation from commit messages, or skipping Branch /
+Path / Scope / State because answers looked obvious. That is the failure this
+skill exists to prevent.
 
-<example>
-User: /create-pr
-Assistant: *enters plan mode if available, inspects, reads a motivation off the commit messages, presents a full plan with title, body, and commit split*
-
-<reasoning>
-Non-compliant, and the exact failure this skill exists to prevent. Reading
-motivation from commit messages is the auto-generation 3a forbids, and Branch,
-Path, Scope, and State were skipped because their answers looked obvious.
-Obvious answers are still asked — ranked first, labelled "(Recommended)".
-</reasoning>
-</example>
-
-<example>
-User: create a PR for this, don't ask me anything, just ship it
-Assistant: *inspects, writes the body from the diff, states in it that no motivation was provided, presents the plan, executes on approval*
-
-<reasoning>
-Compliant. That is the user's own opt-out, so 3a and 3b are waived. The
-invented-motivation ban is not waived — the body says motivation was not
-provided instead of guessing one.
-</reasoning>
-</example>
+**Waiver.** "Don't ask, just ship it" → skip 3a/3b, use Recommended defaults,
+body states no motivation was provided, present plan, execute on approval.
 
 ## Codex
 

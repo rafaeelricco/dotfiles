@@ -35,9 +35,3 @@ mark BLOCKED — not PASS.
 
 Prefer materializing the PR head in a temporary worktree (or equivalent
 isolation) the same way as `--branch` when execution is approved.
-
-## Phrases
-
-- `branch tip materialized in temp worktree <path>; primary checkout unchanged`
-- `gh is not authenticated; stop and run gh auth login before PR validation`
-- `PR author is external fork; blocked until user trusts execution or we restrict to base-revision scripts`

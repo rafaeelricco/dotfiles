@@ -19,8 +19,7 @@ failure, not a wider net.
 Always the **desired** role, never the current one. An analyst who wants a coordinator role who
 writes `Senior Analyst` is found for analyst vacancies, which is the opposite of the goal.
 
-Nothing here is permanent: run one framing for ~15 days, read the search-appearance metric, and
-change it if the wrong job titles are finding you.
+Framing iteration (~15 days, search appearances): see `references/positioning.md`.
 
 All 3 suggestions are fillings of this one format — different keyword emphasis and seniority
 framing, never three competing formats. If the user says the pipe format feels wrong, offer one

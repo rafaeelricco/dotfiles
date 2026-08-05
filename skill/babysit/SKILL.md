@@ -26,7 +26,7 @@ task). This skill owns one cycle, not the cadence.
 - Never edit CI workflow files, loosen test expectations, or change unrelated
   code to make a check pass.
 - Not a code reviewer (`/review`), not a change validator (`verify` — load it,
-  do not reimplement), not a PR body writer (`pr-body`), not the create path
+  do not reimplement; always **STRICT**), not a PR body writer (`pr-body`), not the create path
   (`create-pr`), not a recap poster (`visual-recap`). Commit format belongs to
   `commit-message`. Thread-reply and bot re-request shape for babysit live in
   **Comment routing** and `references/` — not in those skills.
@@ -74,20 +74,9 @@ verifying…"), pasted diffs, restating the reviewer's full comment.
 
 ## Workflow
 
-1. **Gather** — read-only, always first. No writes in this phase.
-2. **Scope Gate** — present findings and the commit plan. One approval covers
-   the cycle. Nothing actionable → say so and end the cycle; do not invent work.
-3. **Fix** the validated, in-scope items. One commit per comment or coherent
-   cluster, staged narrowly.
-4. **Verify** once, before the cycle's push — run `verify` over the whole batch,
-   not once per commit.
-5. **Push, reply, resolve** — route each thread through **Comment routing**,
-   load the matched ref, draft from its template, post, then resolve when the
-   template says to (disagree leaves open unless the user said otherwise).
-6. **Re-request** only reviewers whose feedback this batch addressed — same
-   route table, re-request row.
-7. **Report** what changed, then end the cycle. Repetition belongs to the
-   caller — `/loop` or a scheduled task, per the header.
+1. **Gather** → **Scope Gate** → **Fix** → **Verify** (`verify` **STRICT**, once per push batch) → **Push, reply, resolve** (Comment routing) → **Re-request** → **Report**.
+2. Nothing actionable at Scope Gate → end the cycle; do not invent work.
+3. One commit per comment or coherent cluster. Run **STRICT** once per push batch: after the last fix cluster in that batch **and** after any merge-conflict resolution that lands in the same batch, then push. Not once forever; not once per commit unless each commit is its own push.
 
 ## Gather
 
@@ -154,20 +143,15 @@ Treat non-GitHub-Actions providers as report-only unless asked.
 - Prefer the repo's normal update path; otherwise ask before merging base in.
 - Resolve only when both branch and base intent are clear. Intents genuinely
   conflict → stop and ask.
-- Re-run verification after resolving.
+- After resolving, include that work in the same push batch and run the batch’s **STRICT** verify before push (do not skip verify because an earlier cluster already passed).
 - Never rebase, reset, or force-push without explicit approval of that exact
   operation.
 
 ## Re-request
 
-After a push that addressed a reviewer's feedback, re-trigger via **Comment
-routing**. Codex → post `references/codex-review-prompt.md` with `gh pr comment`.
-Human → `gh pr edit --add-reviewer`, **only with explicit confirmation**. Never
-invent a re-trigger for a human or an unknown bot; if you do not know one, say
-so and let the user decide.
-
-At most one re-request per reviewer per push batch. Never re-request while that
-reviewer's review is still outstanding.
+Via **Comment routing** table only. Policy: at most one re-request per reviewer
+per push batch; never while that reviewer's review is outstanding; never invent
+a human or unknown-bot trigger.
 
 ## Stop conditions
 

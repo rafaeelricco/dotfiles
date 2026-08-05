@@ -22,8 +22,7 @@ Results / Impact:
 ```
 
 4 to 6 responsibilities, chosen as the ones job ads ask for most — not the full duty list. Fewer
-real ones beat padded ones. Blank line between the two blocks, always. Draft-first: unknown
-bullets stay as `[brackets]`; do not interview every field before drafting.
+real ones beat padded ones. Blank line between the two blocks, always.
 
 ## Worked example
 
@@ -52,20 +51,14 @@ Results / Impact:
 - Always list every title held inside the same company, so progression is visible
 - Responsibilities = ownership and scope; Results = production delivery and product or
   business outcomes. Drop task inventories that only restate the job description.
-- **Vanity metrics out.** Never use PR counts/%, commit share, lines of code, files
-  changed, or ticket volume without a user/business outcome. Bad:
-  `58 PRs and ~+17k LOC in three months`. Good: what shipped (release, feature, offline
-  mode, workflow) and what it enabled.
 - Technical detail only when it supports a recognizable result for an external reader.
   Drop internal mechanism stories that do not communicate value.
 - Career transition / first job: same two-section shape; Results may be projects,
-  learnings, or academic work. At most 1–2 credibility traits, and only when Results has
-  no hard proof.
+  learnings, or academic work.
 
 ## Checklist
 
 The two sections exist and are labeled. 4-6 responsibilities, opening with a noun or gerund.
-Results carry ownership and outcomes, not restated duties or vanity volume metrics. Job
-titles use market naming, not the internal one. The most recent role is the most detailed.
-Every title held inside one company is listed. Companies linked to their LinkedIn pages.
-No soft-skill padding on experienced roles.
+Results carry ownership and outcomes, not restated duties. Job titles use market naming, not
+the internal one. The most recent role is the most detailed. Every title held inside one
+company is listed. Companies linked to their LinkedIn pages.

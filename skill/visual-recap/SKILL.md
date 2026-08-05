@@ -10,12 +10,9 @@ Produce a compact PR comment from current code, not PR prose or commit messages 
 
 ## Workflow
 
-1. Resolve the explicit PR or branch; otherwise discover the current branch, PR, and base.
-2. Record base and head SHA. Prefer the remote PR diff when local HEAD differs; never summarize stale code silently.
-3. Read repository instructions, commits, stat/name-status, complete final diff by subsystem, complex final files, config, and tests.
-4. Extract only diff-backed architecture, lifecycle, authorization, side effects, projections, deployment, tests, and explicit non-changes.
-5. Cross-check counts, labels, permissions, and transitions against code. Final state wins over superseded commits.
-6. Draft the preview. Do not post.
+- Resolve target and SHAs (prefer remote PR when local and remote diverge).
+- Final-state diff only — ignore superseded commits.
+- Draft preview; never post until separate confirmation.
 
 ## Visual Rules
 

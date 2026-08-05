@@ -30,15 +30,6 @@ completion criteria objectively testable.
 
 ## Operating Rules
 
-- Do not invent references, links, file paths, reviewers, or source material.
-- Return `Title:` metadata followed by `Body:` using `references/template.md`.
-- Make the issue body start at `## Situation`.
-- Do not wrap the final output or issue body in a code fence unless the user
-  explicitly asks for a fenced snippet.
-- Treat `Acceptance Criteria` as final-state truths.
-- Treat `Validation` as explicit test scenarios that prove those truths.
-- Do not add extra output sections such as `Suggested Approach`, `Target Shape`,
-  `Preview`, or `Tradeoffs`.
 - If the user already supplied enough detail, do not ask follow-up questions.
 - If material information is missing, ask one short round of questions and then
   draft the issue.
@@ -72,13 +63,3 @@ Always return:
 2. `Body:` followed by the Markdown issue body using `references/template.md`.
 
 Include `References` in the body only when the user supplied references.
-
-## Quality Bar
-
-- Prefer language that can be pasted into GitHub with minimal edits.
-- Keep the issue specific enough that another engineer can understand what done
-  looks like.
-- Do not smuggle implementation decisions into `Acceptance Criteria`.
-- If the request is conceptual or structural, keep validation objective by
-  checking the resulting state of the artifact, not by prescribing
-  implementation steps.

@@ -17,7 +17,13 @@ supplies what changed; only the user supplies why.
 
 `create-pr` and other workflow skills already hold the git context, the
 motivation, and the title. Skip "Read the diff", skip the motivation question,
-ask only the formatting questions, and return the rendered body.
+and skip the formatting questions. Derive:
+
+- Sections — every option standalone would offer for this diff
+- Writing Style — `standard`
+- Diagram Scope — from `references/mermaid-guide.md` eligibility
+
+Return the rendered body only.
 
 ## Read the diff
 
