@@ -27,7 +27,6 @@ that TypeDoc and TSDoc-aware tools can parse. Do not turn the file into an essay
 - Prose docs outside source (README, ADRs, design docs).
 - Generating a full TypeDoc site unless the user explicitly asks.
 - Documenting React components/hooks (out of scope for this skill).
-- Changing runtime behavior, public signatures, or unrelated style.
 
 ## Core principles
 
@@ -82,28 +81,6 @@ examples/see → modifiers (`@deprecated`, etc.).
 
 ## Templates
 
-### Function / method
-
-````ts
-/**
- * Calculates the discounted price of a product.
- *
- * @param price - Original price of the product.
- * @param discount - Discount percentage (0–100).
- * @returns Final price after applying the discount.
- *
- * @throws {@link RangeError} If discount is outside the 0–100 range.
- *
- * @example
- * ```ts
- * applyDiscount(100, 20); // → 80
- * ```
- */
-function applyDiscount(price: number, discount: number): number {
-  // ...
-}
-````
-
 ### Module / file
 
 Place as the **first** comment in the file, before imports. TypeDoc treats a
@@ -133,19 +110,6 @@ interface PaymentConfig {
   apiKey: string;
   /** Timeout in milliseconds. Default: 5000. */
   timeout?: number;
-}
-```
-
-### Generics
-
-```ts
-/**
- * Returns the first item, or `undefined` if empty.
- *
- * @typeParam T - Type of items in the collection.
- */
-function first<T>(items: readonly T[]): T | undefined {
-  // ...
 }
 ```
 
@@ -181,19 +145,6 @@ function createClient() {
 Never invent APIs, links, or behaviors not present in code. If intent is
 unclear, ask one short question or document only what the code proves.
 
-## Workflow
-
-1. Read the target symbol and its callers (enough to know the real contract).
-2. Prefer clearer local/private types or names only when that removes the need
-   for a comment and does not change exported public signatures. On a docs-only
-   request, do not rename symbols or narrow public types unless the user
-   explicitly asks; use the extract-named-type exception in principle 6 only.
-3. Decide doc depth: none / one-line / full block.
-4. Write or rewrite TSDoc using the templates above.
-5. Strip redundant `@param {Type}` and “what the code already says”.
-6. Show the user the edited regions (diff-style) unless they asked to apply
-   silently; then apply surgical edits.
-
 ## Output contract
 
 When documenting:
@@ -205,16 +156,9 @@ When documenting:
 
 Keep output short. No lecture on documentation theory.
 
-## Quality bar
-
-- First sentence works as a hover summary in the editor.
-- Tags match real params, returns, throws, and generics in the signature.
-- Examples compile against the real API shape.
-- No classic JSDoc type braces on `@param` or `@throws` (use `{@link ErrorType}` for throws).
-- Markdown in comments is fine; keep it scannable.
-
 ## Out of scope (do not expand unless user upgrades the skill)
 
 - React component / hook documentation patterns
 - TypeDoc / API Extractor project setup
 - `@public` / `@beta` / `@alpha` / `@internal` release-tag workflows
+- Changing runtime behavior, public signatures, or unrelated style
