@@ -108,7 +108,8 @@ remove_mcp() {
     echo "not detected: codex"
   fi
   if [ "${SKIP_GROK}" -eq 0 ] && cli_is_present grok; then
-    grok mcp remove -s user maestro >/dev/null 2>&1 || true
+    # Omit --scope so remove searches user and project configs.
+    grok mcp remove maestro >/dev/null 2>&1 || true
     echo "removed: grok maestro"
   elif [ "${SKIP_GROK}" -eq 1 ]; then
     echo "skipped: grok"

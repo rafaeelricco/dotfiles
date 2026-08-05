@@ -200,8 +200,10 @@ register_codex_maestro() {
 }
 
 register_grok_maestro() {
-  grok mcp remove -s user maestro >/dev/null 2>&1 || true
-  grok mcp add -s user maestro -- maestro mcp
+  # Grok: default scope is user; no Claude-style -s user required.
+  # Docs/examples: grok mcp add <name> -- <command>
+  grok mcp remove maestro >/dev/null 2>&1 || true
+  grok mcp add maestro -- maestro mcp
 }
 
 register_mcp() {
