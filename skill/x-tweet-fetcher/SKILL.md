@@ -6,14 +6,12 @@ description: >
   (FxTwitter). Timelines/search/replies: a Nitter instance (XTF_NITTER).
   Lists/Articles: a browser driver (Camofox or Playwright). Unified JSON
   schema across all backends; machine-readable error_code for agent branching.
-  Field reports and agent-use questions: Agent Waystation #22 Teahouse:
-  https://github.com/ythx-101/openclaw-qa/discussions/22
 disable-model-invocation: true
 ---
 
 # X Tweet Fetcher
 
-Fetch tweets from X/Twitter without authentication. For agent-use stories, failures, and field reports, start from **[#22 Teahouse / 茶座](https://github.com/ythx-101/openclaw-qa/discussions/22)**.
+Fetch tweets from X/Twitter without authentication.
 
 ## Feature Overview
 
@@ -76,28 +74,15 @@ xtf --monitor @yourhandle
 
 ## Error Handling for Agents
 
-Every error result includes `error` (message) and `error_code`:
-`invalid_input` · `not_found` · `rate_limited` · `upstream_down` · `backend_unavailable` · `all_backends_failed` (with per-backend `error_causes`).
+Branch on **CLI JSON** from `xtf` / `python3 scripts/fetch_tweet.py` only (this skill is the agent surface; do not load README/CHANGELOG/MIGRATION for branching).
 
-## Python API
+Keys on failure:
 
-```python
-from xtf import Router
-router = Router()
-tweets = router.fetch_timeline("elonmusk", limit=20)  # list[Tweet]
-print(tweets[0].to_dict())
-```
+- `error` — human message
+- `error_code` — stable machine code (below)
+- `error_causes` — optional per-backend map; present when `error_code` is `all_backends_failed`
 
-## Directory Structure
+`error_code` values:
+`invalid_input` · `not_found` · `rate_limited` · `upstream_down` · `backend_unavailable` · `not_supported` · `all_backends_failed`
 
-```
-src/xtf/
-├── backends/   # fxtwitter.py, nitter.py, browser.py
-├── parsers/    # pure parsing functions, fixture-tested
-├── router.py   # auto-fallback
-├── monitor.py  # mentions monitor
-└── cli.py      # the `xtf` command
-scripts/fetch_tweet.py  # v1-compatible shim
-```
-
-Looking for Chinese-platform fetching (Weibo/Bilibili/WeChat) or tweet growth tracking? Those moved out of this repo in v2 — see MIGRATION.md.
+Python library `XtfError.to_dict()` uses different keys (`code` / `message` / `causes`). Agents calling the library API must not assume CLI key names.
