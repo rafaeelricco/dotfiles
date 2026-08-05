@@ -26,21 +26,26 @@ Then, when choosing an approach — not before every tool call:
 
 Route before loading anything:
 
-| Lane   | When                                    | Do                     |
-| ------ | --------------------------------------- | ---------------------- |
-| Direct | Default. Files and approach both known  | Act. §5 still applies. |
-| Plan   | Approach open, or the diff wants review | Plan directly per §4.  |
-| Scope  | Independent concerns, synthesize first  | Load `scope-and-plan`. |
+| Lane   | When                                                                                                                   | Do                                       |
+| ------ | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| Direct | Can name the paths (or one search will) and approach is clear — default                                                | Act. §5 still applies. Cheap fan-out OK. |
+| Plan   | Exactly one open approach question                                                                                     | Plan directly per §4.                    |
+| Scope  | Cannot yet name the paths **and** the change is large enough to need synthesize → plan-as-diffs → approve before write | Load `scope-and-plan`.                   |
 
-Two lanes fit → take the cheaper one. File count is not a lane signal.
+Pick the first matching row top-to-bottom. File count is not a lane signal.
+"Thorough" is not Scope. "Use sub-agents" / explore phrasing is not Scope.
+Diff review alone is not Plan — that is Direct plus §5.
+≥2 independent concerns is free Direct fan-out, not a Scope trigger.
+Approve only on Plan/Scope — never invent an approval gate on Direct.
 
 In every lane: work that does not consume another's output ships in one message.
 That covers reads and read-only sub-agents equally — two independent concerns are
 two workers whether the lane is Direct or Scope. A second read that never uses the
 first's result is not a later step, it is the same step typed twice.
 
-Fanning out is not a lane. `scope-and-plan` owns the five-step protocol, not
-permission to spawn a worker.
+Fanning out is not a lane. `scope-and-plan` owns the five-step diamond
+(fan-out → check → synthesize → plan → approve → writers), not permission
+to spawn a worker. Parallel reads/sub-agents on Direct never load it.
 
 Writing in parallel is the same rule one step later. Once the change is decided —
 an approved plan, or a Direct-lane edit you have already stated — one writer per
@@ -72,8 +77,7 @@ No assertable behavior (comment typos, formatting, copy) or no test suite → sk
 
 ## 4. Make Changes Reviewable
 
-Plans are approved as diffs, not prose.
-Load `plan-format` in the Plan and Scope lanes, before writing the plan. The Direct lane does not load it — say what the edit is in a sentence, then make it. Unresolved decisions don't defer a plan: the question and the formatted plan ship in the same response.
+Plan lane: load `plan-format` before writing the plan. Scope lane: `scope-and-plan` step 1 owns that load — do not double-load here. Direct: do not load — one sentence, then edit. Unresolved decisions don't defer a plan: the question and the formatted plan ship in the same response.
 Then, while planning:
 
 - Prefer the harness plan/approval workflow when one exists; otherwise present the plan as a normal message. Either way: inspection stays read-only until the user explicitly approves.
@@ -84,13 +88,20 @@ Then, while planning:
 
 Load a skill at the step that needs it, not ahead of it. Each one names what it hands off to.
 
-- Commit message or `git commit` → `commit-message`
-- PR body only → `pr-body`
-- Open a PR, or commit-then-PR → `create-pr`
-- PR title only → `commit-message` (PR title style)
-- PR already open, merge-readiness → `babysit`
+Ship order after Edit (do not invent steps the user did not ask for):
+
+1. **behavior?**
+   - Docs, comments, formatting, config-only → skip verify.
+   - Behavior change → load `verify` in **FAST** (one package-level decisive check).
+2. **commit** → `commit-message` (and PR title style when only a title is needed).
+3. **done** — stop. Do not open a PR or babysit unless the user asked.
+
+User-asked only (never by lifecycle inference):
+
+- Open / create PR, or commit-then-PR → `create-pr` (loads `pr-body` / `commit-message` as it needs).
+- PR body only → `pr-body`.
+- Babysit / merge-ready an open PR → `babysit` (uses `verify` **STRICT** once per batch).
 
 Skill missing in the harness → stop. Never invent the house format.
 
-Behavior change → load `verify` and run the checks it selects before that commit.
-Docs, comments, formatting, and config-only diffs skip it.
+One quality gate per ship: do not stack `verify` with `check-work`, `/review`, or a second verify pass on the same commit batch unless the user asked for that second pass.
