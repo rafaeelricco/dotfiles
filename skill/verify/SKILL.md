@@ -1,29 +1,31 @@
 ---
 name: verify
-description: Run an extremely strict validation of a change set (local, branch, or PR) by discovering this repo's verify commands, selecting checks that would fail if the change were wrong, executing them, and refusing to pass without evidence. Invoked by the explicit `/verify` slash command, and before any commit that lands a behavior change.
-when-to-use: "Use when the user explicitly invokes `/verify` (with optional --local, --branch, or --pr flags), or before committing a behavior change."
+description: >
+  Validate a change set before commit. Default mode is FAST (one package-level
+  decisive check from the diff). STRICT mode runs the full discovery ladder —
+  use on `/verify`, when babysit loads this skill, or when the user says strict.
+when-to-use: "Use before committing a behavior change (FAST), on /verify, or when babysit requests STRICT."
 argument-hint: "[--local | --branch <name> | --pr <number-or-url>]"
-disable-model-invocation: false
+disable-model-invocation: true
 ---
 
-# Strict Change Validation
+# Change Validation
 
-Be ambitious about _decisive_ verification. Do not run a convenient typecheck and
-stop. Search for the smallest set of checks that would fail if the change were
-wrong or reverted, and prefer proofs the repo already defines over invented
-rituals.
+Prefer proofs the repo already defines. Mode selects ambition:
+
+- **FAST** (default on pre-commit from INSTRUCTIONS §5): one decisive check for
+  the package(s) the diff touches; then stop.
+- **STRICT** (`/verify`, babysit, user says "strict", or `--branch`/`--pr`):
+  full Discovery ladder and strict PASS rules below.
 
 This skill is not `/review` (maintainability) and not `/check-work` (whether the
 session finished the request). It does not scaffold new test suites unless the
 user separately asks for that.
 
-## Core Prompt
+## Mode select
 
-> Validate the current change set (local working tree, named branch, or GitHub PR).
-> Discover how this repository actually verifies itself.
-> Select and run the checks that cover the changed behavior.
-> Be extremely thorough and rigorous about evidence. Measure twice, cut once.
-> If a required check cannot be run, say so clearly—do not invent a pass.
+STRICT when any of: slash `/verify`; caller is `babysit`; user said "strict";
+target is `--branch` or `--pr`. Otherwise FAST.
 
 Default target when no flag is given: local changes — staged, unstaged,
 untracked. Empty change set: stop, there is nothing to validate. For `--branch`
@@ -32,11 +34,26 @@ and `--pr`, read `references/targets.md` before anything else.
 One exit fires before Discovery, off the diff alone: a docs-only diff. Report
 that no behavioral verification is required and do not probe. That is not PASS.
 
-Everything else runs the ladder. A repo with no manifest is not a repo with no
-runnable check — the PATH probe is what settles that, and it is one call. Never
-infer BLOCKED from a glob.
+### FAST path
+
+From the diff alone (no Tools/Live multi-step probe):
+
+1. Map changed paths → package or repo root.
+2. Name **one** decisive check for that surface (prefer package `test` / language
+   default over lint or typecheck alone).
+3. Run it once. Verdict from that single result.
+4. If no check can be named → BLOCKED with the one unblock action — never invent PASS.
+5. State residual risk in one line when Tools/Live/full ladder were skipped.
+
+### STRICT path
+
+Everything else below (Discovery → Rules → full PASS clauses). A repo with no
+manifest is not a repo with no runnable check — the PATH probe settles that.
+Never infer BLOCKED from a glob alone.
 
 ## Discovery
+
+STRICT only. FAST must not enter this section.
 
 Tool rosters differ per environment. Discover at run time; never assume a fixed
 set, never call a capability missing because an expected name is absent. Probe
@@ -69,25 +86,34 @@ one action that unblocks it. Never ask after the checks have run.
 
 0. Be ambitious about decisive proofs — the smallest set that would fail if this
    change were wrong.
-1. Never rubber-stamp a green typecheck as proof of behavior.
+1. Never rubber-stamp a green typecheck as proof of behavior. Typecheck/lint
+   alone is insufficient for non-trivial behavior changes unless the diff is
+   truly types-only or a pure mechanical rename — and say so explicitly.
 2. Never run the whole monorepo when one package moved.
 3. Bias toward evidence, not "it looks fine."
-4. Prefer this repo's real commands over invented ones.
+4. Prefer this repo's real commands over invented ones. Discover `test`,
+   `typecheck`, `lint`, `check`, `build` from manifests, Makefiles, and
+   locally-runnable CI; when no script exists, fall back to language CLI
+   defaults (`dotnet test`, `go test`, `cargo test`, `pytest`, `make test`).
 5. Match the check to the change — platform-specific paths get their own
-   platform.
+   platform. CLI change → invoke the affected subcommand with an expected exit
+   code or output fragment when cheap.
 6. Keep validation in the canonical layer the repo already uses.
-7. Missing environment is a blocker, not a pass. A present harness is an
-   obligation.
+7. Missing environment is a blocker, not a pass. In **STRICT**, a present
+   harness is an obligation (run covering checks; do not skip an available
+   decisive harness). **FAST** stays one package-level check; name residual
+   risk when Tools/Live/full ladder were skipped — do not expand FAST into
+   the harness ladder under this rule.
 8. Materialize non-local targets; gate untrusted PR execution.
-
-Each rule's specifics, and what to escalate when one is violated, live in
-`references/escalation.md`.
 
 ## Verdict
 
 `PASS` · `FAIL` · `PARTIAL` · `BLOCKED`
 
-PASS requires all four:
+**FAST PASS:** the one selected check ran successfully and targets the package
+(or root) of the changed files; residual risk named if the full ladder was skipped.
+
+**STRICT PASS** requires all four:
 
 - every selected decisive check ran and exited successfully
 - the selected set covers the changed behavior, or residual risk is explicit and
@@ -104,8 +130,7 @@ untrusted `--pr` scripts run without a trust decision.
 
 ## Load on demand
 
-| Read                       | When                                 |
-| -------------------------- | ------------------------------------ |
-| `references/targets.md`    | `--branch` or `--pr`                 |
-| `references/report.md`     | writing the verdict                  |
-| `references/escalation.md` | verdict is FAIL, PARTIAL, or BLOCKED |
+| Read                    | When                 |
+| ----------------------- | -------------------- |
+| `references/targets.md` | `--branch` or `--pr` |
+| `references/report.md`  | writing the verdict  |
