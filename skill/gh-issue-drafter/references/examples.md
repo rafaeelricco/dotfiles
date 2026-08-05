@@ -14,9 +14,9 @@ from a specific location quickly.
 
 ## Direction
 
-Add city as a first-class filter that behaves consistently with the existing name and status
-filters. It should combine with existing filters, clear independently, and use the current empty
-state when no customers match.
+Ship city filtering on the customer list that matches the behavior of existing name and status
+filters: combinable, independently clearable, and showing the current empty state when nothing
+matches. Prefer the product’s existing filter patterns over a one-off control.
 
 ## Acceptance Criteria
 
@@ -26,11 +26,11 @@ state when no customers match.
 
 ## Validation
 
-- [ ] When city = `Sao Paulo`, the list must show only customers whose city is `Sao Paulo`.
-- [ ] When city = `Campinas`, the list must show only customers whose city is `Campinas`.
-- [ ] When city = `Sao Paulo` and status = `Active`, the list must show only customers that match both filters.
-- [ ] When the city filter is cleared, the list must return to the unfiltered result set.
-- [ ] When no customer matches the selected city, the expected empty state must appear.
+- [ ] When city filter `São Paulo` is applied, only customers in São Paulo are shown.
+- [ ] When city filter changes from `São Paulo` to `Recife`, previous results are replaced by Recife matches.
+- [ ] When city `São Paulo` is combined with status `Active`, results satisfy both filters.
+- [ ] When the city filter is cleared, the list returns to the unfiltered eligible set.
+- [ ] When no customer matches city `Nowhere`, the current empty state appears.
 ```
 
 ## Example 2: Standardize duplicated model content
@@ -86,8 +86,9 @@ Portal models
 
 ## Validation
 
-- [ ] Shared password-policy rules must appear in one canonical model instead of being restated independently across portals.
-- [ ] Portal-specific models must reference the shared source for common auth and account-management behavior.
-- [ ] Portal-specific models must preserve only deviations that are unique to that portal or platform.
-- [ ] Terminology for profile and password-management behavior must remain consistent across all affected models.
+- [ ] Shared authentication rules appear in exactly one canonical model document.
+- [ ] Shared account-management rules appear in exactly one canonical model document.
+- [ ] Each portal model retains only role- or platform-specific deviations (no duplicated password/profile rules).
+- [ ] Cross-references from portal models point to the shared source of truth where applicable.
+- [ ] Terminology for password and profile management is consistent across the shared model and portals.
 ````

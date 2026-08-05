@@ -5,9 +5,6 @@
 - Keep it short and GitHub-friendly.
 - Prefer a direct verb or outcome.
 - Avoid implementation detail in the title unless the user already framed it that way.
-- Return it as separate metadata before `Body:`.
-- Do not include it in the Markdown issue body.
-- Do not wrap the final output or issue body in a code fence.
 
 ## Situation
 
