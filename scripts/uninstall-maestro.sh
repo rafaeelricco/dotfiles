@@ -120,8 +120,18 @@ remove_mcp() {
 # Official curl installer appends: export PATH=$PATH:$HOME/.maestro/bin
 # Match that pattern only (no free-form rewrites of unrelated PATH lines).
 scrub_path_rc() {
-  local f="$1" tmp
+  local f="$1" tmp mode link parent
   [ -f "${f}" ] || return 0
+  # Follow one symlink hop so managed rc links (e.g. ~/.zshrc → checkout) stay links.
+  if [ -L "${f}" ]; then
+    link="$(readlink "${f}")"
+    parent="$(dirname "${f}")"
+    case "${link}" in
+      /*) f="${link}" ;;
+      *)  f="${parent}/${link}" ;;
+    esac
+    [ -f "${f}" ] || return 0
+  fi
   if ! grep -qF '.maestro/bin' "${f}" 2>/dev/null; then return 0; fi
   tmp="${f}.tmp.$$"
   if ! grep -vE 'export PATH=.*(\$HOME|~)/\.maestro/bin' "${f}" > "${tmp}"; then
@@ -133,6 +143,8 @@ scrub_path_rc() {
     rm -f "${tmp}"
     return 0
   fi
+  mode="$(stat -f '%OLp' "${f}" 2>/dev/null || stat -c '%a' "${f}" 2>/dev/null || true)"
+  [ -n "${mode}" ] && chmod "${mode}" "${tmp}" 2>/dev/null || true
   mv "${tmp}" "${f}"
   echo "scrubbed PATH: ${f}"
 }
@@ -147,18 +159,24 @@ uninstall_cli() {
 
   if cli_is_present brew; then
     if [ -n "${path}" ] && is_brew_maestro "${path}"; then
-      brew uninstall --formula mobile-dev-inc/tap/maestro 2>/dev/null \
-        || brew uninstall maestro 2>/dev/null \
-        || true
-      brew_done=1
-      echo "uninstalled: brew maestro (${path})"
+      if brew uninstall --formula mobile-dev-inc/tap/maestro 2>/dev/null \
+        || brew uninstall maestro 2>/dev/null; then
+        brew_done=1
+        echo "uninstalled: brew maestro (${path})"
+      else
+        echo "error: brew uninstall maestro failed (${path})" >&2
+        exit 1
+      fi
     elif brew list --formula mobile-dev-inc/tap/maestro >/dev/null 2>&1 \
       || brew list --formula maestro >/dev/null 2>&1; then
-      brew uninstall --formula mobile-dev-inc/tap/maestro 2>/dev/null \
-        || brew uninstall maestro 2>/dev/null \
-        || true
-      brew_done=1
-      echo "uninstalled: brew maestro"
+      if brew uninstall --formula mobile-dev-inc/tap/maestro 2>/dev/null \
+        || brew uninstall maestro 2>/dev/null; then
+        brew_done=1
+        echo "uninstalled: brew maestro"
+      else
+        echo "error: brew uninstall maestro failed" >&2
+        exit 1
+      fi
     fi
   fi
 
@@ -177,6 +195,7 @@ uninstall_cli() {
 
   if cli_is_present maestro; then
     echo "warning: maestro still on PATH at $(command -v maestro)" >&2
+    exit 1
   else
     echo "ok: maestro not on PATH"
   fi
