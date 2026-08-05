@@ -8,6 +8,7 @@ description: >
   no conventional-commit prefix). Invokes on /commit-message, "commit this",
   "write a commit message", "format this commit". Does not own staging split,
   approval gates, push, or PR bodies.
+disable-model-invocation: true
 ---
 
 # Commit Message
@@ -15,12 +16,6 @@ description: >
 Single source of truth for commit message shape and how to pass it to `git commit`.
 Callers own _when_ to commit, _what_ files belong in the commit, and _how_ to split
 work. This skill owns _how the message looks_ and _how to invoke git commit_.
-
-## Mandatory use
-
-Load and follow this skill before drafting or running any commit message, and
-before suggesting PR titles that share commit title style, unless the user or
-repo explicitly requires a different convention.
 
 ## Owns / does not own
 
@@ -32,10 +27,19 @@ repo explicitly requires a different convention.
 
 **Does not own**
 
-- Staging for workflow callers (`babysit`, `create-pr`). Standalone commit may
-  stage only an unambiguous or user-confirmed scope before `git commit`.
 - Commit split policy (by review cluster vs by change category)
 - Approval gates, push, PR body, rebase/amend policy
+
+**Staging (single rule)**
+
+- Workflow callers (`babysit`, `create-pr`, etc.) own the index — assume it is
+  already the intended tree; never invent a split or stage for them.
+- Empty index, mixed index, or index beyond approved scope → stop and report;
+  never `git commit` on an empty index.
+- Standalone commit only (`commit this` / clear ask, not a workflow skill): if
+  nothing is staged and scope is unclear, ask once; if scope is unambiguous or
+  the user just confirmed it, stage that scope then commit. Never silently
+  stage the whole worktree.
 
 ## Message format
 
@@ -48,26 +52,22 @@ Present-tense imperative verb first (`Add`, `Fix`, `Update`, `Refactor`,
 Commits prefix — never `feat:`, `fix:`, `chore:`, `docs:`, etc. Start directly
 with the verb. No ticket IDs, no `WIP`, no noise words.
 
-### Size (internal only — never print the label)
+### Body (title-only vs bullets)
 
-- **SMALL** — one file, minor change (a few lines, typo, log tweak, single function).
-- **MEDIUM** — multiple files, or a substantial change in one file.
-- **LARGE** — many files and/or broad impact.
-
-### Body by size
-
-- **SMALL** → single title line, no body.
-- **MEDIUM / LARGE** → title, one blank line, then `- ` bullets. Each bullet is a
+- **Title only** → single title line, no body. Use when the title fully states the
+  change.
+- **With body** → title, one blank line, then `- ` bullets. Each bullet is a
   complete imperative sentence ending with a period, describing what the change
   does (and often where). Put code symbols, paths, and types in backticks
   (`resolveReviewThread`, `src/middleware/rateLimit.ts`). When behavior changed,
   the final bullet covers tests ("Cover the new flow with unit tests for ...").
+  One discrete edit per bullet.
 
 ### Rules
 
-1. One logical change per commit; one discrete edit per bullet.
-2. Version bumps, formatting-only changes, and renames each get their own commit
-   (renames stated literally as old → new, noting imports were updated).
+1. Commit split is caller-owned — this skill does not decide one-logical-change
+   policy, or when to separate renames, version bumps, or formatting-only work.
+2. Staging follows **Staging (single rule)** above — no second policy here.
 3. Titles never end with a period and never carry a prefix; body bullets always
    end with a period.
 4. No multiline code fences anywhere in the message.
@@ -82,13 +82,10 @@ the PR skills, not here.
 
 ## Run `git commit`
 
-Assume the index already contains exactly the intended tree (caller staged it).
-If the index is empty or mixed beyond the approved scope, stop and report — do
-not invent a split or stage on behalf of a workflow skill unless the user only
-asked to commit and scope is unambiguous.
+Apply **Staging (single rule)** first, then invoke:
 
-**MEDIUM / LARGE** — write the message to a temp file, then `git commit -F`
-(portable on Bash and PowerShell; keeps backticks literal without shell heredoc):
+**With body** — write the message to a temp file, then `git commit -F`
+(keeps backticks literal without shell heredoc):
 
 ```bash
 msg="$(mktemp)"
@@ -103,20 +100,7 @@ git commit -F "$msg"
 rm -f "$msg"
 ```
 
-```powershell
-$msg = [System.IO.Path]::GetTempFileName()
-@'
-Imperative title, capitalized, no period, no prefix
-
-- Imperative sentence describing one change, with `symbols` in backticks.
-- One discrete edit per bullet; describe what the change does and where.
-- Tests assert the corrected behavior.
-'@ | Set-Content -Path $msg -Encoding utf8NoBOM
-git commit -F $msg
-Remove-Item $msg
-```
-
-**SMALL**:
+**Title only**:
 
 ```bash
 git commit -m "Imperative title, capitalized, no period, no prefix"
@@ -136,10 +120,6 @@ Branch intent from the user phrasing:
 **Commit** (`commit this`, or a clear ask to create a commit):
 
 1. Inspect `git status` and `git diff --cached` (and unstaged if needed).
-2. If nothing is staged and scope is unclear, ask once what to include — do not
-   silently stage the whole worktree.
-3. If nothing is staged and scope is unambiguous (or the user just confirmed
-   scope), stage that confirmed scope, then continue. If the index is still
-   empty, stop and report — never run `git commit` on an empty index.
-4. Draft the message per Message format; run `git commit` per recipes above.
-5. Do not push, open a PR, or rewrite history unless asked.
+2. Apply **Staging (single rule)**; stop if still empty/mixed beyond scope.
+3. Draft the message per Message format; run `git commit` per recipes above.
+4. Do not push, open a PR, or rewrite history unless asked.
