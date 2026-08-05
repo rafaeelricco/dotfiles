@@ -11,44 +11,19 @@ adding motion for its own sake. Preserve the conventions of the product,
 framework, and target platform. Treat clarity, control, and accessibility as
 requirements rather than finishing work.
 
-## Workflow
-
-1. Identify the user's goal, primary task, input methods, device constraints,
-   and accessibility needs.
-2. Inspect the existing design language, component behavior, and platform
-   conventions before proposing changes.
-3. Define visible states, transitions, cancellation paths, and recovery
-   behavior before selecting animation techniques.
-4. Implement the smallest behavior that gives immediate and continuous
-   feedback.
-5. Test interruption, reversal, keyboard use, reduced motion, zoom, resizing,
-   and each supported pointer type.
-
 ## Design Principles
 
 Use these principles together. Resolve conflicts according to the user's goal
 and context instead of treating any one principle as an absolute.
 
-- **Purpose:** Make every element support a real user goal. Remove work and
-  decoration that compete with the primary task.
-- **Agency:** Keep people in control. Provide clear choices, cancellation,
-  escape routes, and recovery from mistakes. Reserve confirmation for actions
-  whose consequences justify interruption.
-- **Responsibility:** Protect privacy, safety, attention, and data. Ask for
-  permissions in context, explain their purpose, and collect only what the
-  feature needs.
-- **Familiarity:** Prefer established web and product conventions. Keep the
-  appearance, location, and behavior of repeated controls consistent.
-- **Flexibility:** Support different viewports, input methods, languages,
-  abilities, and user preferences without losing task or navigation context.
-- **Simplicity:** Make the next useful action clear. Use hierarchy and concise
-  language; do not confuse visual emptiness with ease of use.
-- **Craft:** Make spacing, type, alignment, wording, feedback, and motion feel
-  intentional. Verify details under real content and interaction, not only in
-  a static ideal state.
-- **Delight:** Choose an appropriate emotional quality, such as calm or
-  confidence, and earn it through the other principles. Do not bolt decorative
-  effects onto an unresolved experience.
+- **Purpose:** Every element supports a real user goal; remove competing work and decoration.
+- **Agency:** Clear choices, cancellation, escape, and recovery; confirm only when consequences justify it.
+- **Responsibility:** Protect privacy, safety, attention, and data; ask permissions in context and collect only what the feature needs.
+- **Familiarity:** Prefer established web and product conventions; keep repeated controls consistent in appearance, location, and behavior.
+- **Flexibility:** Support viewports, input methods, languages, abilities, and preferences without losing task or navigation context.
+- **Simplicity:** Make the next useful action clear via hierarchy and concise language — not visual emptiness.
+- **Craft:** Spacing, type, alignment, wording, feedback, and motion feel intentional under real content and interaction.
+- **Delight:** Earn an appropriate emotional quality through the other principles; never bolt decoration onto an unresolved experience.
 
 ## Fluid Interaction
 
@@ -57,8 +32,6 @@ and context instead of treating any one principle as an absolute.
 - Show a visible pressed, selected, or active state as soon as input begins.
 - Keep feedback synchronized with the action that causes it.
 - Avoid artificial delays and animation queues on the direct input path.
-- Preserve feedback when motion is reduced; substitute color, opacity, shape,
-  or another calm state change when necessary.
 
 ### Track manipulation continuously
 
@@ -74,8 +47,6 @@ and context instead of treating any one principle as an absolute.
 
 - Let new input take control from the element's current rendered position.
 - Cancel or retarget in-flight motion without waiting for completion.
-- Carry current velocity into a retargeted physical animation when the chosen
-  animation system supports it.
 - Model meaningful states such as idle, pressed, dragging, settling, open, and
   closed explicitly. Prevent state changes from producing visual jumps.
 - Test rapid reversal and repeated input; do not disable controls merely to
@@ -128,25 +99,14 @@ and context instead of treating any one principle as an absolute.
   oscillation delays comprehension and can create discomfort.
 - Animate `transform` and `opacity` for frequent frame updates where possible.
   Measure layout outside the animation loop and avoid forced layout per frame.
-- Use `requestAnimationFrame` for manual display-synchronized updates. Prefer
-  a framework or browser primitive that supports cancellation and retargeting
-  over building a general animation engine for one interaction.
 
 ## Typography
 
 - Start with `system-ui` unless brand or content needs justify another family.
-- Use optical sizing when the selected variable font supports it.
-- Establish hierarchy through size, weight, spacing, and position as a system;
-  do not rely on size alone.
-- Tune tracking by text size and role. Large display text can tolerate tighter
-  spacing; small or dense text needs enough space to remain legible.
-- Tune line height to size, measure, language, and content density. Avoid one
-  line-height value across the entire type scale.
-- Express scalable type and surrounding spacing with relative units. Verify
-  browser zoom and enlarged default text without clipped controls or lost
-  content.
-- Keep labels concise and specific. Do not trade clarity for visual symmetry
-  or force important text into a fixed single line.
+- Hierarchy via size, weight, spacing, position — not size alone.
+- Relative units for type and spacing; verify zoom and enlarged defaults without
+  clipped controls.
+- Labels concise and specific; never force important text into a fixed single line.
 
 ## Materials and Depth
 
@@ -166,13 +126,6 @@ and context instead of treating any one principle as an absolute.
 
 ## Accessibility and Adaptation
 
-- Use semantic HTML and native controls before recreating their behavior.
-- Preserve a visible focus indicator and logical focus order. Move and restore
-  focus deliberately when opening and closing modal UI.
-- Make controls large enough for their input context and do not require precise
-  pointer movement for common actions.
-- Never rely on motion, color, sound, or haptics as the only signal for status,
-  completion, warning, or error.
 - Under `prefers-reduced-motion: reduce`, replace large translations, zooms,
   parallax, repeated motion, and elastic settling with a calm state change such
   as a short cross-fade or an immediate update.
