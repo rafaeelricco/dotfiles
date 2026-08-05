@@ -144,7 +144,18 @@ scrub_path_rc() {
     rm -f "${tmp}"
     return 0
   fi
-  mode="$(stat -f '%OLp' "${f}" 2>/dev/null || stat -c '%a' "${f}" 2>/dev/null || true)"
+  # GNU `stat -f` is --file-system and can still print to stdout on failure, so
+  # `a || b` would glue the FS report to the mode. Accept only octal digits.
+  mode=""
+  if m="$(stat -f '%OLp' "${f}" 2>/dev/null)" && case "${m}" in
+    [0-7][0-7][0-7]|[0-7][0-7][0-7][0-7]) true ;; *) false ;;
+  esac; then
+    mode="${m}"
+  elif m="$(stat -c '%a' "${f}" 2>/dev/null)" && case "${m}" in
+    [0-7][0-7][0-7]|[0-7][0-7][0-7][0-7]) true ;; *) false ;;
+  esac; then
+    mode="${m}"
+  fi
   [ -n "${mode}" ] && chmod "${mode}" "${tmp}" 2>/dev/null || true
   mv "${tmp}" "${f}"
   echo "scrubbed PATH: ${f}"
