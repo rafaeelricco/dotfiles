@@ -127,7 +127,10 @@ Four questions, always all four. Fill the bracketed values from Step 2.
     "question": "How far should I take this?",
     "multiSelect": false,
     "options": [
-      { "label": "Full flow (Recommended)", "description": "Create the branch if needed, commit, push, and open the PR." },
+      {
+        "label": "Full flow (Recommended)",
+        "description": "Create the branch if needed, commit, push, and open the PR."
+      },
       { "label": "Branch only", "description": "Create the approved branch and stop. No commits, no push, no PR." },
       {
         "label": "You handle commits",

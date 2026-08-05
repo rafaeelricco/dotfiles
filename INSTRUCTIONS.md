@@ -29,7 +29,7 @@ Route before loading anything:
 | Lane   | When                                                                                                                   | Do                                       |
 | ------ | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
 | Direct | Can name the paths (or one search will) and approach is clear — default                                                | Act. §5 still applies. Cheap fan-out OK. |
-| Plan   | One or more open approach questions                                                                                    | Plan directly per §4.                    |
+| Plan   | Can name the paths (or one search will) **and** one or more open approach questions                                    | Plan directly per §4.                    |
 | Scope  | Cannot yet name the paths **and** the change is large enough to need synthesize → plan-as-diffs → approve before write | Load `scope-and-plan`.                   |
 
 Pick the first matching row top-to-bottom. File count is not a lane signal.
