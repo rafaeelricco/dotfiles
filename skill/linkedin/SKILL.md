@@ -52,32 +52,18 @@ Before the table, in this order:
   `message`) and a continuation reply mid-chain. The in-scope neighbour — LinkedIn cover
   brief, personal-profile About, SSI guidance, post draft — runs only when the user asks
   for that LinkedIn deliverable instead.
-- **Continuation.** A `continue` / `next` / `yes` reply while an `all` chain is active, or
-  while an area is held from rule 2, skips this table **only when the reply does not name a
-  different supported area**: run the next area in the `all` order, or the next held area.
-  An active `all` chain keeps the Output mode the chain started in — an audit of the full
-  profile stays an audit at every step. A rule-2 hold keeps the Output mode each held
-  area's own wording implied when it was held — do not inherit the first area's mode
-  ("audit my headline and give me a 21-day plan" audits the headline, then delivers the
-  plan schedule). A new in-scope instruction that only changes mode ("now rewrite it")
-  replaces the mode for that turn. If the same reply names a different supported area
-  ("yes, skip About and audit my SSI"), do **not** run the next chained/held area — fall
-  through and re-run area selection on that instruction (chain/hold may be abandoned or
-  updated to match).
-- **Metrics read.** A request that asks **only** to read, interpret, or diagnose the
-  profile's own search appearances or profile views — including "which job titles are
-  finding me" and why a title appears there — routes to `ssi`, **Reading the metrics** only.
-  The `title` signal does not win here. If the same ask also wants the SSI score, pillars,
-  connections, or network ("interpret my SSI score and profile views"), it is not
-  metrics-only: fall through to the table. If it pairs a metrics diagnosis with another
-  supported area ("interpret my profile views and rewrite my headline"), count `ssi` as a
-  table match for the metrics portion so multi-match can hold both, and when that `ssi`
-  turn runs (now or on resume) use **Reading the metrics** with the metrics-only Output
-  exception; then fall through. Post and engagement analytics are `content`, not this
-  route. Asking how to raise those numbers is not a read: alone or alongside a read
-  ("views dropped, how do I fix it"), count `ssi` as a table match for growth guidance
-  (full `ssi`, not **Reading the metrics**), then fall through so multi-match can hold any
-  other area too.
+- **Continuation.** `continue` / `next` / `yes` while an `all` chain or rule-2 hold is
+  active skips this table only when the reply names no different supported area: run the
+  next `all` step or next held area. `all` keeps the chain's starting Output mode; a
+  rule-2 hold keeps each area's own implied mode (do not inherit the first). Mode-only
+  rewrite ("now rewrite it") replaces mode for that turn. Naming a different supported
+  area falls through to re-selection (chain/hold may abandon or update).
+- **Metrics read.** Ask **only** to read/interpret/diagnose search appearances or profile
+  views (incl. which titles find you) → `ssi`, **Reading the metrics** only; `title` does
+  not win. SSI score/pillars/network in the same ask → not metrics-only; fall through.
+  Metrics plus another area → count `ssi` for multi-match; that `ssi` turn uses **Reading
+  the metrics** + metrics-only Output exception. Post analytics → `content`. How to raise
+  the numbers → full `ssi` table match (not **Reading the metrics**), then fall through.
 
 Then apply the rules below in order; the first that fits wins. Do not invent areas or rules.
 

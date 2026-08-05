@@ -12,25 +12,15 @@ Three steps, in order:
    focus before committing. A focus nobody is hiring for is a hobby, not a position.
 3. **Pick one** role, one area, one seniority level. Not two.
 
-The 5-second test: open the profile cold and name the area, the target role, and the
-seniority. Any one of the three unreadable → the positioning failed, whatever else is good.
-
 Nothing here is permanent. Run one framing for ~15 days, read the search-appearance metric
 in LinkedIn Analytics (search appearances → job titles). If you only need that read, stay
 on search appearances; do not expand into full SSI growth advice. Change framing if the
 wrong titles are finding you.
 
-## Six errors
+## Errors
 
 - Confusing profile — several areas at once
-- Generic or inflated headline
-- Long, empty text
-- Excessive focus on tasks or vanity volume metrics (PR/LOC/commits without outcome)
 - Internal company jargon the market does not parse
-- A profile trying to please everyone
-
-Raises perceived value: clear positioning, objective wording, the right keywords, a
-coherent history, demonstrated impact.
 
 ## The keyword list
 

@@ -55,24 +55,8 @@ in front of their audience, which is the cheapest reach available.
 
 Fixed days matter more than the specific days. Choose two or three and hold them.
 
-## Course claims about the algorithm
-
-Treat as hypotheses and verify against the live product. These are one instructor's
-observations from early 2026, not LinkedIn documentation, and they date quickly.
-
-- Saves weigh more than likes; heavily-saved posts keep circulating for weeks.
-- Consistency beats posting time; there is no magic hour.
-- The account's stated expertise is checked against the post's topic before distribution.
-- Interacting with the topic for 10-15 minutes before publishing signals where to deliver.
-- Hashtags have lost weight; topic is read from the text.
-- Links can sit in the post body rather than the first comment.
-
-No rule above this section depends on any of these. The posting rhythm, the comment
-standard, and the never-post list stand on their own.
-
 ## Checklist
 
 Topics match the positioning in the headline and About. Post type named for each draft.
 Fixed publishing days chosen. Comment drafts carry an opinion, experience, or question, and
-run 2-4 lines. Nothing in the never-post categories. Any algorithm claim marked as
-unverified when it reaches the user.
+run 2-4 lines. Nothing in the never-post categories.
