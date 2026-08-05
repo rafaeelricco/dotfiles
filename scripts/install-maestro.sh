@@ -125,9 +125,27 @@ ensure_path_has_maestro() {
   fi
 }
 
+# True only for mobile-dev Maestro (bundled MCP subcommand).
+is_mobile_maestro() {
+  cli_is_present maestro || return 1
+  maestro mcp --help >/dev/null 2>&1
+}
+
+require_mobile_maestro() {
+  if is_mobile_maestro; then
+    return 0
+  fi
+  if cli_is_present maestro; then
+    echo "error: $(command -v maestro) is not mobile-dev Maestro (no working mcp subcommand)" >&2
+  else
+    echo "error: maestro not on PATH" >&2
+  fi
+  exit 1
+}
+
 install_maestro_brew() {
   echo "== Maestro CLI (homebrew) =="
-  if cli_is_present maestro; then
+  if is_mobile_maestro; then
     echo "up to date: $(command -v maestro) ($(maestro --version 2>/dev/null || echo version-unknown))"
     return 0
   fi
@@ -138,10 +156,16 @@ install_maestro_brew() {
 
 install_maestro_curl() {
   echo "== Maestro CLI (curl installer) =="
-  if cli_is_present maestro || [ -x "${HOME}/.maestro/bin/maestro" ]; then
-    ensure_path_has_maestro
+  if is_mobile_maestro; then
     echo "up to date: $(command -v maestro) ($(maestro --version 2>/dev/null || echo version-unknown))"
     return 0
+  fi
+  if [ -x "${HOME}/.maestro/bin/maestro" ]; then
+    ensure_path_has_maestro
+    if is_mobile_maestro; then
+      echo "up to date: $(command -v maestro) ($(maestro --version 2>/dev/null || echo version-unknown))"
+      return 0
+    fi
   fi
   cli_is_present curl || { echo "error: curl required" >&2; exit 1; }
   cli_is_present unzip || { echo "error: unzip required" >&2; exit 1; }
@@ -160,7 +184,7 @@ install_cli() {
     curl) install_maestro_curl ;;
   esac
   ensure_path_has_maestro
-  maestro --help >/dev/null
+  require_mobile_maestro
   echo "ok: maestro $(maestro --version 2>/dev/null || echo installed) via ${method}"
 }
 
@@ -237,10 +261,7 @@ main() {
   if [ "${SKIP_CLI}" -eq 0 ]; then
     install_cli
   else
-    ensure_path_has_maestro || {
-      echo "error: --skip-cli but maestro not found" >&2
-      exit 1
-    }
+    require_mobile_maestro
   fi
   if [ "${SKIP_MCP}" -eq 0 ]; then
     register_mcp
