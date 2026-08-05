@@ -68,13 +68,16 @@ Note: full X Article text requires X login; without it you get title + public pr
 
 ```bash
 xtf --monitor @yourhandle
-# exit 0 = no new mentions, 1 = new mentions found, 2 = setup error
+# exit 0 = no new mentions, 1 = new mentions found
+# exit 2 = setup/backend error → stderr only, not CLI JSON (see Error Handling)
 # First run builds a baseline silently; later runs report only new URLs.
 ```
 
 ## Error Handling for Agents
 
 Branch on **CLI JSON** from `xtf` / `python3 scripts/fetch_tweet.py` only (this skill is the agent surface; do not load README/CHANGELOG/MIGRATION for branching).
+
+**Exception — `--monitor` setup/backend failure:** exit `2`, human message on stderr, **no** JSON envelope (no `error` / `error_code`). Branch on exit code + stderr for that path only. Baseline / new-mentions success still emit JSON when not `--text-only` (exit 0 / 1).
 
 Keys on failure:
 
@@ -83,6 +86,6 @@ Keys on failure:
 - `error_causes` — optional per-backend map; present when `error_code` is `all_backends_failed`
 
 `error_code` values:
-`invalid_input` · `not_found` · `rate_limited` · `upstream_down` · `backend_unavailable` · `not_supported` · `all_backends_failed`
+`invalid_input` · `not_found` · `rate_limited` · `upstream_down` · `backend_unavailable` · `all_backends_failed`
 
 Python library `XtfError.to_dict()` uses different keys (`code` / `message` / `causes`). Agents calling the library API must not assume CLI key names.

@@ -4,10 +4,10 @@ description: >
   Five-step diamond before write: fan-out readers → checker → synthesize →
   plan-as-diffs → approve → writers. Use when paths are not yet nameable and
   the change is large enough that synthesize + plan + explicit approve must
-  gate edits — or the user asks to "get context first" / "explore then plan"
-  / "scope-and-plan". Do NOT use when paths (or one search) answer the where,
-  when the user asked for a direct edit, or only to spawn parallel workers —
-  fan-out alone needs no skill; that is Direct.
+  gate edits — or the user names this skill (`scope-and-plan`). Do NOT use when
+  paths (or one search) answer the where, when the user asked for a direct edit,
+  for explore/"get context first" phrasing alone, or only to spawn parallel
+  workers — fan-out alone needs no skill; that is Direct.
 ---
 
 # Scope and plan

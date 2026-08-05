@@ -8,7 +8,6 @@ description: >
   no conventional-commit prefix). Invokes on /commit-message, "commit this",
   "write a commit message", "format this commit". Does not own staging split,
   approval gates, push, or PR bodies.
-disable-model-invocation: true
 ---
 
 # Commit Message

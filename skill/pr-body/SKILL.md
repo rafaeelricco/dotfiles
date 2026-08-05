@@ -6,7 +6,6 @@ description: >
   --body`, "create a PR", "ship this branch", "describe my changes", "write the
   PR body", "refresh the PR description". Ask the user for motivation first.
   Pairs with commit-message for PR title style.
-disable-model-invocation: true
 ---
 
 # PR Body

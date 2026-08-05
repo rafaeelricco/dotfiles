@@ -6,7 +6,6 @@ description: >
   use on `/verify`, when babysit loads this skill, or when the user says strict.
 when-to-use: "Use before committing a behavior change (FAST), on /verify, or when babysit requests STRICT."
 argument-hint: "[--local | --branch <name> | --pr <number-or-url>]"
-disable-model-invocation: true
 ---
 
 # Change Validation

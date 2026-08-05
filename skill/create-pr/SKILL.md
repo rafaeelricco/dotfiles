@@ -31,9 +31,9 @@ Until the user approves the Step 4 plan these commands are forbidden:
 Neither authorizes a mutation, and neither skips the Step 4 plan:
 
 1. **Waiver** — user waives questions in their own words ("don't ask, just ship
-   it"). Skip 3a and 3b. Use each "(Recommended)" answer, write body from the
-   diff, present Step 4 plan with those defaults. Invented-motivation ban
-   survives: state that no motivation was provided.
+   it"). Skip 3a and 3b. Use each "(Recommended)" answer; Scope = all listed
+   groups. Write body from the diff, present Step 4 plan with those defaults.
+   Invented-motivation ban survives: state that no motivation was provided.
 2. **No AskUI** — no `AskUserQuestion` and no plan mode. Degrade to prose: in
    one message, ask 3a verbatim, report Step 2 findings and the plan you would
    propose, end turn. Mutate nothing until a user message approves. Never treat
@@ -109,12 +109,12 @@ Four questions, always all four. Fill the bracketed values from Step 2.
     "multiSelect": false,
     "options": [
       {
-        "label": "<current-branch>",
+        "label": "<current-branch> (Recommended)",
         "description": "Open from the branch you are on. <n> commits ahead of <default>."
       },
       {
-        "label": "rafaeelricco/<slug-from-diff>",
-        "description": "Create this branch from the current HEAD, then open the PR from it."
+        "label": "rafaeelricco/<slug-from-diff> (Recommended)",
+        "description": "Create this branch from the current HEAD, then open the PR from it. First option when on default."
       },
       {
         "label": "rafaeelricco/<alt-slug>",
@@ -127,7 +127,7 @@ Four questions, always all four. Fill the bracketed values from Step 2.
     "question": "How far should I take this?",
     "multiSelect": false,
     "options": [
-      { "label": "Full flow", "description": "Create the branch if needed, commit, push, and open the PR." },
+      { "label": "Full flow (Recommended)", "description": "Create the branch if needed, commit, push, and open the PR." },
       { "label": "Branch only", "description": "Create the approved branch and stop. No commits, no push, no PR." },
       {
         "label": "You handle commits",
@@ -160,12 +160,13 @@ Four questions, always all four. Fill the bracketed values from Step 2.
 - Branch: offer the current branch only when it differs from the default. Head
   and base cannot be the same branch, and `Full flow` would commit and push to
   the default branch before `gh pr create` failed. On the default branch, offer
-  three `rafaeelricco/` names instead. When the current branch is a usable
-  feature branch, put it first and append "(Recommended)". Derive the
-  alternatives from the diff.
+  three `rafaeelricco/` names instead; put the first slug first and append
+  "(Recommended)". When the current branch is a usable feature branch, put it
+  first and append "(Recommended)". Derive the alternatives from the diff.
+  Only one Branch option carries "(Recommended)" in the rendered list.
 - Scope: when the whole worktree is one coherent change, the list is a single
   group holding every file. The user still confirms it — a one-option question
-  is a confirmation, not a skipped question.
+  is a confirmation, not a skipped question. Waiver selects every listed group.
 
 ### 3c. Body options — derived, never asked
 
