@@ -58,8 +58,7 @@ Then `AskUserQuestion` — at most four questions per call (tool schema limit):
 
 - Sections — multi-select, and the only control over which of the offered
   sections appear. Motivation, What's New, and Testing & Feedback are always on
-  and never listed. At most four options:
-  - Demo Video
+  and never listed. At most three options:
   - Architecture Flow — offer only when the diff changed a multi-step flow,
     branching logic, a cross-boundary interaction, or an event chain
   - Changed Files
@@ -71,8 +70,6 @@ Then `AskUserQuestion` — at most four questions per call (tool schema limit):
 
 - Writing Style — concise (terse bullets, one line each) / standard (one or two
   sentences with context) / verbose (rationale and tradeoffs).
-- Video Source — `[video_url]` placeholder, or a URL the user supplies. Ignored
-  unless Sections includes Demo Video; ask for the URL if they pick the second.
 
 **Call 2 (only when Sections includes Architecture Flow):**
 
