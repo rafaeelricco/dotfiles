@@ -186,11 +186,10 @@ anyway — a rendered body they can edit beats four options they must imagine:
 
 - Sections — every option `pr-body` would offer for this diff.
 - Writing Style — `standard`.
-- Video Source — the `[video_url]` placeholder.
 - Diagram Scope — the flow that made Architecture Flow eligible.
 
 Its `references/template.md` renders the body; the Motivation section carries
-3a's answer in the user's words. Name the four derived choices beside the body in
+3a's answer in the user's words. Name the three derived choices beside the body in
 the plan, so rejecting one costs a sentence.
 
 ## Step 4 — Present the plan
@@ -205,7 +204,7 @@ overriding that skill's Shape list. State concretely:
   commit per category (feature, refactor, formatting, tests, config), ordered
   foundational-first, each with its exact file list and its full message per
   `commit-message`; one PR title in `commit-message` title style, ≤72 chars;
-  the rendered PR body and the four derived 3c choices beside it; draft state and
+  the rendered PR body and the three derived 3c choices beside it; draft state and
   assignee.
 
 Files that must move together (an API change and its consumer) stay in one

@@ -211,6 +211,10 @@ Run the installer as your normal user, not with `sudo`.
 - [`scripts/windows/`](scripts/windows/) — Windows helpers: Node/pnpm-via-WSL
   (`setup-wsl-node.sh`, `wsl_dev_env` + profile `BASH_ENV`), and system cleanup.
 - [`.zshrc`](.zshrc) — Zsh configuration.
+- [`scripts/install-maestro.sh`](scripts/install-maestro.sh) /
+  [`scripts/uninstall-maestro.sh`](scripts/uninstall-maestro.sh) — Maestro CLI +
+  Maestro MCP (Java 17+ required; brew or curl; registers/removes on detected
+  claude/codex/grok). Hand-run. Not hooked into the main installer.
 - [`scripts/mcp/`](scripts/mcp/) — `install-mcp.sh` / `install-mcp.ps1` register
   selected tools (Exa MCP server and the OpenAI Codex Claude Code plugin) with
   every detected agent CLI. Run by hand. Interactive mode shows a

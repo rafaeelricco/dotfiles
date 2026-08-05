@@ -8,14 +8,6 @@ marked optional appear only when the user opted in.
 
 {{ USER_MOTIVATION }}
 
-<!-- optional -->
-
-## Demo Video
-
-Watch this video for a demonstration of {{ FEATURE_DESCRIPTION }}:
-
-{{ VIDEO_URL_OR_PLACEHOLDER }}
-
 ## What's New
 
 **{{ CATEGORY_NAME_1 }}**
