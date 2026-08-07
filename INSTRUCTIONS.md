@@ -93,8 +93,10 @@ Ship order after Edit (do not invent steps the user did not ask for):
 1. **behavior?**
    - Docs, comments, formatting, config-only → skip verify.
    - Behavior change → load `verify` in **FAST** (one package-level decisive check).
-2. **commit** → `commit-message` (and PR title style when only a title is needed).
-3. **done** — stop. Do not open a PR or babysit unless the user asked.
+2. **commit?**
+   - User asked for a commit → `commit-message` (and PR title style when only a title is needed).
+   - No ask → skip. Finishing an edit is not an ask: report what changed and stop.
+3. **done** — stop. Do not commit, open a PR, or babysit unless the user asked.
 
 User-asked only (never by lifecycle inference):
 
