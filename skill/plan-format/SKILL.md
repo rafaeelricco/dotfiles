@@ -10,6 +10,17 @@ description: >
 
 A plan is approved as diffs, not prose. Show every change as a real before/after diff.
 
+## Mode
+
+Before writing the plan, enter the harness plan/approval mode if it has one and
+the session is not already in it. Inspection stays read-only until the user
+approves.
+
+Leave the mode as it stands when the harness has none, or when the skill that
+loaded this one owns its own mode step. Then post the plan as a normal message
+and wait — never treat your own message, a timeout, or the end of a run as
+approval.
+
 ## Shape
 
 Sections, in order — nothing else:
