@@ -68,15 +68,16 @@ text). No map entry and not human → do not invent; surface at Scope Gate or st
 | human        | any reply or re-request              | confirm exact text; reply shape may follow thread-reply.md | always gated     |
 | unknown bot  | any                                  | report; do not invent a trigger or template                | stop / ask       |
 
-**Author class** from the reviewer login (GraphQL thread: `author.login`; REST
-reviews / issue comments: `user.login`). Normalize first: strip a trailing
-`[bot]` suffix, then match.
+**Author class** from reviewer login + account type (GraphQL thread:
+`author.login` + `author.__typename`; REST reviews / issue comments:
+`user.login` + `user.type`). Gather both fields — see `references/gh-recipes.md`.
+Normalize first: strip a trailing `[bot]` suffix, then match.
 
 1. Normalized login matches a **known bots** row (or the repo's documented
    alias for that bot) → known bot.
-2. Account is human (`type`/`__typename` is User, not Bot/App) → human.
-   Always confirmation-gated for reply/re-request — association does not
-   change the class.
+2. Account is human (`user.type` / `author.__typename` is User, not Bot/App)
+   → human. Always confirmation-gated for reply/re-request — association does
+   not change the class.
 3. Else → unknown bot (stop / ask; do not invent a trigger).
 
 | Bot   | login (match)              | `<mention-line>` for re-request |
