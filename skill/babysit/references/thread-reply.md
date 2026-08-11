@@ -1,4 +1,6 @@
-# High-signal Codex thread reply
+# High-signal thread reply
+
+Same shape for any reviewer. Fill slots; do not change structure.
 
 Post as a pull-request review-comment reply (`gh api .../replies`). 2–4 lines.
 No thanks, no process theater, no full diffs, no restating the reviewer's paragraph.

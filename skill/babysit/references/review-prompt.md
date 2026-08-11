@@ -1,9 +1,11 @@
-# High-signal Codex re-request
+# High-signal bot re-request
 
-Post with `gh pr comment`. Its job is preventing review-noise ping-pong.
+Post with `gh pr comment`, once per bot reviewer in the re-request set.
+Fill `<mention-line>` from the known-bot map in SKILL.md.
+Human re-request is not this file — confirm text + `gh pr edit --add-reviewer`.
 
 ```text
-@codex review
+<mention-line>
 
 Review this PR at HEAD (`<sha>` and later if pushed).
 
@@ -20,3 +22,8 @@ Since last review:
 If you find no major issues, say so in a clear line
 (e.g. "Didn't find any major issues").
 ```
+
+`<mention-line>` examples (from the map, not freeform):
+
+- Codex → `@codex review`
+- Cubic → `@cubic-dev-ai review this PR`

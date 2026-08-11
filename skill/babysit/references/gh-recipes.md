@@ -90,6 +90,9 @@ gh api graphql -f query='mutation($id:ID!){resolveReviewThread(input:{threadId:$
 ## Re-request a reviewer
 
 ```bash
-gh pr comment N --body-file /tmp/codex-review.md   # Codex bot
-gh pr edit N --add-reviewer LOGIN                  # human — confirmed only
+gh pr comment N --body-file /tmp/review-rerequest.md  # known bot — filled review-prompt.md
+gh pr edit N --add-reviewer LOGIN                     # human — confirmed only
 ```
+
+One comment per bot in the re-request set (distinct logins). Do not batch
+multiple @mentions into one comment unless the user asked.
