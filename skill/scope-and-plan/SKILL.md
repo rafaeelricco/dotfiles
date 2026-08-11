@@ -8,8 +8,8 @@ description: >
   paths (or one search) answer the where, when the user asked for a direct edit,
   for explore/"get context first" phrasing alone, or only to spawn parallel
   workers — fan-out alone needs no skill; that is Direct.
-  Every invocation enters the harness plan/approval mode at step 4, before the
-  plan is written.
+  When the harness has one, every invocation enters the harness plan/approval
+  mode at step 4, before the plan is written.
 ---
 
 # Scope and plan
@@ -62,10 +62,10 @@ Never forward raw worker transcripts.
 
 ## 4. Plan
 
-Enter the harness plan/approval mode before writing anything here — every
-invocation, no exception. Steps 1–3 exist to earn the context this mode is
-entered with; nothing about their result makes the mode skippable. Already in
-that mode → stay; do not re-enter.
+Enter the harness plan/approval mode before writing anything here, when the
+harness has one. Steps 1–3 exist to earn the context that mode is entered with;
+nothing about their result makes approval skippable. Already in that mode →
+stay; do not re-enter.
 
 Approval is the only thing that leaves it — never your own message, a timeout,
 or the end of a run. "Accept edits", autonomous mode, and standing "proceed
