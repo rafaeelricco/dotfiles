@@ -231,6 +231,7 @@ function Get-Candidates {
     Add-SkillCandidates (Join-Path $HOME '.agents\skills') $candidates $known
     Add-SkillCandidates (Join-Path $defaultGrok 'skills') $candidates $known
     Add-SkillCandidates (Join-Path $grokHome 'skills') $candidates $known
+    Add-SkillCandidates (Join-Path $HOME '.cursor\skills') $candidates $known
     [pscustomobject]@{ All = $candidates; Known = $known }
 }
 

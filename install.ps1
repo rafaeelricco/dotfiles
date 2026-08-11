@@ -8,6 +8,7 @@ param(
     [switch]$SkipClaude,
     [switch]$SkipCodex,
     [switch]$SkipGrok,
+    [switch]$SkipCursor,
     [switch]$SkipTerminal
 )
 
@@ -788,11 +789,13 @@ function Invoke-DotfilesInstall {
     $codexHome = if ($env:CODEX_HOME) { [System.IO.Path]::GetFullPath($env:CODEX_HOME) } else { $defaultCodexHome }
     $defaultGrokHome = Join-Path $HOME '.grok'
     $grokHome = if ($env:GROK_HOME) { [System.IO.Path]::GetFullPath($env:GROK_HOME) } else { $defaultGrokHome }
+    $cursorHome = Join-Path $HOME '.cursor'
     $installClaude = -not $SkipClaude.IsPresent -and (Test-CliPresent 'claude')
     $installCodex = -not $SkipCodex.IsPresent -and (Test-CliPresent 'codex')
     $installGrok = -not $SkipGrok.IsPresent -and (Test-CliPresent 'grok')
+    $installCursor = -not $SkipCursor.IsPresent -and (Test-Path -LiteralPath $cursorHome -PathType Container)
     $installTerminal = $IsWindows -and -not $SkipTerminal.IsPresent
-    if ($installClaude -or $installCodex -or $installGrok -or $installTerminal) {
+    if ($installClaude -or $installCodex -or $installGrok -or $installCursor -or $installTerminal) {
         Test-SymlinkCapability
     }
     if ($installCodex) {
@@ -844,6 +847,15 @@ function Invoke-DotfilesInstall {
         Sync-SkillSet -Destination (Join-Path $grokHome 'skills') -Label 'Grok'
     } else {
         Write-Host 'Grok: not detected on PATH; skipping.'
+    }
+
+    if ($SkipCursor.IsPresent) {
+        Write-Host 'Cursor: skipped (-SkipCursor).'
+    } elseif ($installCursor) {
+        Write-Host '== Cursor =='
+        Sync-SkillSet -Destination (Join-Path $cursorHome 'skills') -Label 'Cursor'
+    } else {
+        Write-Host "Cursor: $cursorHome not found; skipping."
     }
 
     Install-WindowsTerminalDotfiles -RepoDir $repoDir

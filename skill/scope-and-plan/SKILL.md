@@ -8,15 +8,15 @@ description: >
   paths (or one search) answer the where, when the user asked for a direct edit,
   for explore/"get context first" phrasing alone, or only to spawn parallel
   workers — fan-out alone needs no skill; that is Direct.
+  When the harness has one, every invocation enters the harness plan/approval
+  mode at step 4, before the plan is written.
 ---
 
 # Scope and plan
 
-Five steps, in order. Steps 1–4 stay read-only until the user approves; step 5 is
-the only one that writes.
-
-Enter the harness plan/approval workflow first if one exists. If there is none,
-post the plan as a normal message and wait for explicit approval.
+Five steps, in order. Steps 1–3 gather context, read-only. Step 4 enters
+plan/approval mode and writes the plan there; step 5 is the only one that writes
+to the tree, and only after the user approves.
 
 ## 1. Fan out
 
@@ -62,7 +62,20 @@ Never forward raw worker transcripts.
 
 ## 4. Plan
 
-Follow `plan-format`, already loaded at step 1.
+Enter the harness plan/approval mode before writing anything here, when the
+harness has one. Steps 1–3 exist to earn the context that mode is entered with;
+nothing about their result makes approval skippable. Already in that mode →
+stay; do not re-enter.
+
+Approval is the only thing that leaves it — never your own message, a timeout,
+or the end of a run. "Accept edits", autonomous mode, and standing "proceed
+without asking" guidance are not approval.
+
+No such mode in the harness → the five steps do not change. Post the plan as a
+normal message and wait for a user message that approves it.
+
+Follow `plan-format`, already loaded at step 1. Its Mode section defers to the
+three paragraphs above — do not re-check the mode there.
 
 Fill the Verify section from the synthesis: name the repo's own commands,
 narrowed to the checks that would fail if this change were wrong. Do not run

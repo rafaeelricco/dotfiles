@@ -8,6 +8,7 @@ param(
     [switch]$SkipClaude,
     [switch]$SkipCodex,
     [switch]$SkipGrok,
+    [switch]$SkipCursor,
     [switch]$SkipTerminal
 )
 
@@ -142,6 +143,7 @@ try {
         if ($SkipClaude.IsPresent) { $arguments['SkipClaude'] = $true }
         if ($SkipCodex.IsPresent) { $arguments['SkipCodex'] = $true }
         if ($SkipGrok.IsPresent) { $arguments['SkipGrok'] = $true }
+        if ($SkipCursor.IsPresent) { $arguments['SkipCursor'] = $true }
         if ($SkipTerminal.IsPresent) { $arguments['SkipTerminal'] = $true }
         & (Join-Path $repoDir 'install.ps1') @arguments
         if ($LASTEXITCODE -ne 0) { throw "install.ps1 failed with exit code $LASTEXITCODE." }
@@ -190,6 +192,7 @@ try {
     if ($SkipClaude.IsPresent) { $arguments['SkipClaude'] = $true }
     if ($SkipCodex.IsPresent) { $arguments['SkipCodex'] = $true }
     if ($SkipGrok.IsPresent) { $arguments['SkipGrok'] = $true }
+    if ($SkipCursor.IsPresent) { $arguments['SkipCursor'] = $true }
     if ($SkipTerminal.IsPresent) { $arguments['SkipTerminal'] = $true }
     & $installer @arguments
     if ($LASTEXITCODE -ne 0) { throw "install.ps1 failed with exit code $LASTEXITCODE." }
