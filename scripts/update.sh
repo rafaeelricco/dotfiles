@@ -12,6 +12,7 @@ Options:
       --skip-claude Do not configure Claude Code.
       --skip-codex  Do not configure Codex.
       --skip-grok   Do not configure Grok.
+      --skip-cursor Do not configure Cursor.
       --local       Reconcile links without changing Git state.
       --dir PATH    Override $DOTFILES_DIR / ~/.dotfiles.
   -h, --help        Show this help.
@@ -102,7 +103,7 @@ run_git() {
 }
 
 main() {
-  local local_mode=0 assume_yes=0 override=0 skip_claude=0 skip_codex=0 skip_grok=0 dir_override="" dir installer repo
+  local local_mode=0 assume_yes=0 override=0 skip_claude=0 skip_codex=0 skip_grok=0 skip_cursor=0 dir_override="" dir installer repo
   while [ "$#" -gt 0 ]; do
     case "$1" in
       -y|--yes) assume_yes=1 ;;
@@ -110,6 +111,7 @@ main() {
       --skip-claude) skip_claude=1 ;;
       --skip-codex) skip_codex=1 ;;
       --skip-grok) skip_grok=1 ;;
+      --skip-cursor) skip_cursor=1 ;;
       --local) local_mode=1 ;;
       --dir)
         shift
@@ -141,6 +143,7 @@ main() {
     [ "${skip_claude}" -eq 0 ] || local_args+=(--skip-claude)
     [ "${skip_codex}" -eq 0 ] || local_args+=(--skip-codex)
     [ "${skip_grok}" -eq 0 ] || local_args+=(--skip-grok)
+    [ "${skip_cursor}" -eq 0 ] || local_args+=(--skip-cursor)
     bash "${repo}/scripts/install.sh" "${local_args[@]}"
     exit 0
   fi
@@ -194,6 +197,7 @@ main() {
   [ "${skip_claude}" -eq 0 ] || forwarded_args+=(--skip-claude)
   [ "${skip_codex}" -eq 0 ] || forwarded_args+=(--skip-codex)
   [ "${skip_grok}" -eq 0 ] || forwarded_args+=(--skip-grok)
+  [ "${skip_cursor}" -eq 0 ] || forwarded_args+=(--skip-cursor)
   bash "${installer}" "${forwarded_args[@]}"
 }
 

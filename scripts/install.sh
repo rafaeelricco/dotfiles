@@ -5,7 +5,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Install agent instructions and skills for detected Claude Code, Codex, and Grok CLIs.
+Install agent instructions and skills for detected Claude Code, Codex, Grok, and Cursor.
 Uses repository INSTRUCTIONS.md for vendor CLAUDE.md and AGENTS.md destinations.
 
 Usage: install.sh [options]
@@ -16,6 +16,7 @@ Options:
       --skip-claude Do not configure Claude Code.
       --skip-codex  Do not configure Codex.
       --skip-grok   Do not configure Grok.
+      --skip-cursor Do not configure Cursor.
       --local       Use this checkout without cloning or changing Git state.
       --dir PATH    Override $DOTFILES_DIR / ~/.dotfiles.
   -h, --help        Show this help.
@@ -227,6 +228,7 @@ parse_args() {
       --skip-claude) SKIP_CLAUDE=1 ;;
       --skip-codex) SKIP_CODEX=1 ;;
       --skip-grok) SKIP_GROK=1 ;;
+      --skip-cursor) SKIP_CURSOR=1 ;;
       --local) LOCAL_MODE=1 ;;
       --dir)
         shift
@@ -582,6 +584,10 @@ cli_is_present() {
   type -P "$1" >/dev/null 2>&1
 }
 
+cursor_is_present() {
+  [ -d "${CURSOR_HOME_DIR}" ]
+}
+
 validate_codex_skill_destination() {
   local dir="${HOME}/.agents/skills" probe parent
   if [ -d "${dir}" ] && [ ! -L "${dir}" ]; then
@@ -638,12 +644,17 @@ install_grok() {
   link_skill_set "${GROK_HOME_DIR}/skills" "Grok"
 }
 
+install_cursor() {
+  link_skill_set "${CURSOR_HOME_DIR}/skills" "Cursor"
+}
+
 main() {
   ASSUME_YES=0
   OVERRIDE=0
   SKIP_CLAUDE=0
   SKIP_CODEX=0
   SKIP_GROK=0
+  SKIP_CURSOR=0
   DIR_OVERRIDE=""
   LOCAL_MODE=0
   LOCAL_STATE_SOURCE=""
@@ -697,6 +708,7 @@ main() {
   CLAUDE_HOME="$(absolute_path "${CLAUDE_CONFIG_DIR:-${HOME}/.claude}")"
   CODEX_HOME_DIR="$(absolute_path "${CODEX_HOME:-${HOME}/.codex}")"
   GROK_HOME_DIR="$(absolute_path "${GROK_HOME:-${HOME}/.grok}")"
+  CURSOR_HOME_DIR="${HOME}/.cursor"
   validate_sources
   if [ "${SKIP_CODEX}" -eq 0 ] && cli_is_present codex; then
     validate_codex_skill_destination
@@ -728,6 +740,15 @@ main() {
     install_grok
   else
     echo "Grok: not detected on PATH; skipping."
+  fi
+
+  if [ "${SKIP_CURSOR}" -eq 1 ]; then
+    echo "Cursor: skipped (--skip-cursor)."
+  elif cursor_is_present; then
+    echo "== Cursor =="
+    install_cursor
+  else
+    echo "Cursor: ${CURSOR_HOME_DIR} not found; skipping."
   fi
 
   echo "Dotfiles setup completed from ${DOTFILES_DIR}"

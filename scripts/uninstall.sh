@@ -266,6 +266,7 @@ discover_candidates() {
   add_skill_candidates "${HOME}/.agents/skills"
   add_skill_candidates "${default_grok}/skills"
   add_skill_candidates "${grok_home}/skills"
+  add_skill_candidates "${HOME}/.cursor/skills"
 }
 
 link_target_path() {
