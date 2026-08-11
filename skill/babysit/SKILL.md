@@ -68,16 +68,21 @@ text). No map entry and not human → do not invent; surface at Scope Gate or st
 | human        | any reply or re-request              | confirm exact text; reply shape may follow thread-reply.md | always gated     |
 | unknown bot  | any                                  | report; do not invent a trigger or template                | stop / ask       |
 
-**Author class** from thread/review `author.login`:
+**Author class** from the reviewer login (GraphQL thread: `author.login`; REST
+reviews / issue comments: `user.login`). Normalize first: strip a trailing
+`[bot]` suffix, then match.
 
-1. Login matches a **known bots** row (or the repo's documented alias for that bot) → known bot.
-2. Repo owner / member / collaborator human → human.
-3. Else → unknown bot.
+1. Normalized login matches a **known bots** row (or the repo's documented
+   alias for that bot) → known bot.
+2. Account is human (`type`/`__typename` is User, not Bot/App) → human.
+   Always confirmation-gated for reply/re-request — association does not
+   change the class.
+3. Else → unknown bot (stop / ask; do not invent a trigger).
 
-| Bot   | login (match)                         | `<mention-line>` for re-request |
-| ----- | ------------------------------------- | ------------------------------- |
-| Codex | Codex review bot / repo-documented ID | `@codex review`                 |
-| Cubic | `cubic-dev-ai`                        | `@cubic-dev-ai review this PR`  |
+| Bot   | login (match)              | `<mention-line>` for re-request |
+| ----- | -------------------------- | ------------------------------- |
+| Codex | `chatgpt-codex-connector`  | `@codex review`                 |
+| Cubic | `cubic-dev-ai`             | `@cubic-dev-ai review this PR`  |
 
 Bans on every reply: thanks, LGTM, "as discussed", status theater ("pushed,
 verifying…"), pasted diffs, restating the reviewer's full comment.
@@ -125,7 +130,8 @@ Present, then act on approval:
   commit — still routed.
 - **Re-request set:** distinct logins whose feedback this cycle addresses
   (known bots + humans). Omit anyone who left no feedback. Planned re-request
-  body per login (bot: filled `review-prompt.md`; human: draft text to confirm).
+  per login (bot: filled `review-prompt.md` comment; human: confirm the
+  `--add-reviewer LOGIN` action only — no request text, no extra comment).
 
 ## CI classification
 

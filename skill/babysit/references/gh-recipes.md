@@ -94,5 +94,5 @@ gh pr comment N --body-file /tmp/review-rerequest.md  # known bot — filled rev
 gh pr edit N --add-reviewer LOGIN                     # human — confirmed only
 ```
 
-One comment per bot in the re-request set (distinct logins). Do not batch
-multiple @mentions into one comment unless the user asked.
+One comment per bot in the re-request set (distinct logins). Never batch
+multiple @mentions into one comment — the rule is unconditional.
