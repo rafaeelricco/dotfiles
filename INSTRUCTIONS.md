@@ -105,4 +105,4 @@ User-asked only (never by lifecycle inference):
 
 Skill missing in the harness → stop. Never invent the house format.
 
-One quality gate per ship: do not stack `verify` with `check-work`, `/review`, or a second verify pass on the same commit batch unless the user asked for that second pass.
+One quality gate per ship: do not stack `verify` with `/code-review` or a second verify pass on the same commit batch unless the user asked for that second pass.
