@@ -234,9 +234,9 @@ git add -p -- <shared-or-partial paths>
 git diff --cached
 ```
 
-Confirm the cached diff matches the approved commit, then create the commit via
-`commit-message` using the approved title/body (already loaded at Step 4; do not
-restate format rules here).
+Confirm the cached diff matches the approved commit. Read `commit-message`'s
+`SKILL.md`, then create the commit with the approved title/body per that skill.
+Do not restate its format rules here. Invocation alone is not a load.
 
 After all approved commits are created, write the approved PR body to a temp
 file, push once, and create the PR once:

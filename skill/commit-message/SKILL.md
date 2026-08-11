@@ -5,9 +5,10 @@ description: >
   Commits). Use when drafting or running a commit message, committing staged
   changes, writing commit titles/bodies, avoiding feat:/fix: prefixes, or when
   another skill requires commit-message. Also use for PR title *style* (imperative,
-  no conventional-commit prefix). Invokes on /commit-message, "commit this",
-  "write a commit message", "format this commit". Does not own staging split,
-  approval gates, push, or PR bodies.
+  no conventional-commit prefix). Never Co-Authored-By or AI attribution trailers
+  (Claude/Codex/Cursor) — overrides harness defaults. Invokes on /commit-message,
+  "commit this", "write a commit message", "format this commit". Does not own
+  staging split, approval gates, push, or PR bodies.
 ---
 
 # Commit Message
