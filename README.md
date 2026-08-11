@@ -72,7 +72,7 @@ combined. Install and update preserve existing configuration for absent or
 skipped CLIs. Backup and override modes cannot be used together.
 
 These scripts configure agent instructions and skills; they do not install,
-remove, or authenticate the Claude Code, Codex, or Grok CLIs, or Cursor. On Windows they
+remove, or authenticate Claude Code, Codex, Grok, or Cursor. On Windows they
 also copy the PowerShell profile, link the theme, and merge managed Windows Terminal
 keys (unless `-SkipTerminal`).
 
