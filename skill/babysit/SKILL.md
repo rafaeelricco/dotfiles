@@ -7,7 +7,7 @@ description: >
   merge-ready, triage PR comments and CI, resolve review feedback, watch CI
   until mergeable, or get a PR ready to merge. Do NOT use for opening a PR
   (use create-pr), writing a PR body (use pr-body), reviewing code (use
-  /review), or merging.
+  /code-review), or merging.
 ---
 
 # Babysit PR
@@ -25,7 +25,7 @@ task). This skill owns one cycle, not the cadence.
 - Never merge, force-push, rebase, rewrite history, or touch branch protection.
 - Never edit CI workflow files, loosen test expectations, or change unrelated
   code to make a check pass.
-- Not a code reviewer (`/review`), not a change validator (`verify` — load it,
+- Not a code reviewer (`/code-review`), not a change validator (`verify` — load it,
   do not reimplement; always **STRICT**), not a PR body writer (`pr-body`), not the create path
   (`create-pr`), not a recap poster (`visual-recap`). Commit format belongs to
   `commit-message`. Before every commit, read `commit-message`'s `SKILL.md`.
@@ -80,10 +80,10 @@ Normalize first: strip a trailing `[bot]` suffix, then match.
    not change the class.
 3. Else → unknown bot (stop / ask; do not invent a trigger).
 
-| Bot   | login (match)              | `<mention-line>` for re-request |
-| ----- | -------------------------- | ------------------------------- |
-| Codex | `chatgpt-codex-connector`  | `@codex review`                 |
-| Cubic | `cubic-dev-ai`             | `@cubic-dev-ai review this PR`  |
+| Bot   | login (match)             | `<mention-line>` for re-request |
+| ----- | ------------------------- | ------------------------------- |
+| Codex | `chatgpt-codex-connector` | `@codex review`                 |
+| Cubic | `cubic-dev-ai`            | `@cubic-dev-ai review this PR`  |
 
 Bans on every reply: thanks, LGTM, "as discussed", status theater ("pushed,
 verifying…"), pasted diffs, restating the reviewer's full comment.

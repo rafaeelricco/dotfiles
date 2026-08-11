@@ -4,8 +4,7 @@ description: >
   Validate a change set before commit. Default mode is FAST (one package-level
   decisive check from the diff). STRICT mode runs the full discovery ladder —
   use on `/verify`, when babysit loads this skill, or when the user says strict.
-when-to-use: "Use before committing a behavior change (FAST), on /verify, or when babysit requests STRICT."
-argument-hint: "[--local | --branch <name> | --pr <number-or-url>]"
+argument-hint: "[--branch <name> | --pr <number-or-url>]"
 ---
 
 # Change Validation
@@ -17,9 +16,9 @@ Prefer proofs the repo already defines. Mode selects ambition:
 - **STRICT** (`/verify`, babysit, user says "strict", or `--branch`/`--pr`):
   full Discovery ladder and strict PASS rules below.
 
-This skill is not `/review` (maintainability) and not `/check-work` (whether the
-session finished the request). It does not scaffold new test suites unless the
-user separately asks for that.
+This skill is not `/code-review` (maintainability) and not a completeness check
+on whether the session finished the request. It does not scaffold new test
+suites unless the user separately asks for that.
 
 ## Mode select
 
