@@ -110,5 +110,5 @@ Standalone only — a caller delivers its own body.
 
 Standalone only — a caller supplies its own title.
 
-Follow `commit-message` **PR title style** (its Title rules) when drafting a PR
-title. Suggest 2 or 3 titles, under 72 characters each.
+Read `commit-message`'s `SKILL.md`, then draft the PR title from its Title rules.
+Suggest 2 or 3 titles, under 72 characters each. Invocation alone is not a load.

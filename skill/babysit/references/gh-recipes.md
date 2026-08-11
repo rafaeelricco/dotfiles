@@ -25,7 +25,7 @@ query($owner:String!,$repo:String!,$pr:Int!){
         nodes{
           id isResolved isOutdated
           comments(first:20){nodes{
-            databaseId author{login} authorAssociation path line originalLine body url
+            databaseId author{login __typename} authorAssociation path line originalLine body url
           }}
         }
       }
@@ -35,14 +35,19 @@ query($owner:String!,$repo:String!,$pr:Int!){
   --jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved==false and .isOutdated==false)'
 ```
 
+`author.__typename` is required for **Author class** step 2 (User vs Bot/App).
+Do not drop it from the gather query.
+
 ## Review submissions and PR issue comments
 
 ```bash
-gh api repos/OWNER/REPO/pulls/N/reviews --paginate --jq '.[] | select(.state != "PENDING")'
-gh api repos/OWNER/REPO/issues/N/comments --paginate
+gh api repos/OWNER/REPO/pulls/N/reviews --paginate --jq '.[] | select(.state != "PENDING") | {login: .user.login, type: .user.type, state, body, commit_id, submitted_at}'
+gh api repos/OWNER/REPO/issues/N/comments --paginate --jq '.[] | {login: .user.login, type: .user.type, body, created_at}'
 ```
 
-`PENDING` reviews are unpublished drafts — drop them and their inline comments.
+REST exposes account type under `user.type` (`User` / `Bot`) and login under
+`user.login` — both are required for classification. `PENDING` reviews are
+unpublished drafts — drop them and their inline comments.
 
 ## Checks
 
@@ -90,6 +95,9 @@ gh api graphql -f query='mutation($id:ID!){resolveReviewThread(input:{threadId:$
 ## Re-request a reviewer
 
 ```bash
-gh pr comment N --body-file /tmp/codex-review.md   # Codex bot
-gh pr edit N --add-reviewer LOGIN                  # human — confirmed only
+gh pr comment N --body-file /tmp/review-rerequest.md  # known bot — filled review-prompt.md
+gh pr edit N --add-reviewer LOGIN                     # human — confirmed only
 ```
+
+One comment per bot in the re-request set (distinct logins). Never batch
+multiple @mentions into one comment — the rule is unconditional.

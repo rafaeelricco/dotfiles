@@ -192,10 +192,11 @@ overriding that skill's Shape list. State concretely:
 - **You handle commits** — Step 2 findings and the suggested split. No commands.
 - **Full flow** — branch (new or current) and base; the commit split, one
   commit per category (feature, refactor, formatting, tests, config), ordered
-  foundational-first, each with its exact file list and its full message per
-  `commit-message`; one PR title in `commit-message` title style, ≤72 chars;
-  the rendered PR body and the three derived 3c choices beside it; draft state and
-  assignee.
+  foundational-first. Before drafting any commit message or PR title, read
+  `commit-message`'s `SKILL.md` (invocation alone is not a load). Then each
+  commit gets its exact file list and its full message per that skill; one PR
+  title in `commit-message` title style, ≤72 chars; the rendered PR body and
+  the three derived 3c choices beside it; draft state and assignee.
 
 Files that must move together (an API change and its consumer) stay in one
 commit. A single-category diff is one commit — say so.
@@ -234,9 +235,9 @@ git add -p -- <shared-or-partial paths>
 git diff --cached
 ```
 
-Confirm the cached diff matches the approved commit, then create the commit via
-`commit-message` using the approved title/body (already loaded at Step 4; do not
-restate format rules here).
+Confirm the cached diff matches the approved commit, then create the commit
+with the approved title/body (already validated against `commit-message` at
+Step 4). Do not restate format rules here.
 
 After all approved commits are created, write the approved PR body to a temp
 file, push once, and create the PR once:

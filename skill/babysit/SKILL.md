@@ -28,8 +28,10 @@ task). This skill owns one cycle, not the cadence.
 - Not a code reviewer (`/review`), not a change validator (`verify` — load it,
   do not reimplement; always **STRICT**), not a PR body writer (`pr-body`), not the create path
   (`create-pr`), not a recap poster (`visual-recap`). Commit format belongs to
-  `commit-message`. Thread-reply and bot re-request shape for babysit live in
-  **Comment routing** and `references/` — not in those skills.
+  `commit-message`. Before every commit, read `commit-message`'s `SKILL.md`.
+  Invocation alone is not a load. Thread-reply and re-request shape for
+  babysit live in **Comment routing** and `references/thread-reply.md` /
+  `references/review-prompt.md` — not in those skills.
 - Not a scheduler. Not multi-PR orchestration — stacked-PR sequencing and
   project-specific verification belong in the invoking prompt.
 
@@ -54,20 +56,34 @@ scope grant: report instead of asking, and stop rather than guess.
 
 Every outbound PR comment (thread reply or re-request) is high-signal. Match
 **author class × action**, load the ref before drafting, post only that shape.
-No template → do not invent one; surface at Scope Gate or stop.
+Fill reviewer-specific slots from the **known bots** map (or confirmed human
+text). No map entry and not human → do not invent; surface at Scope Gate or stop.
 
-| Author class        | Action                               | Ref / body                                  | Autonomy         |
-| ------------------- | ------------------------------------ | ------------------------------------------- | ---------------- |
-| Codex               | thread reply — fixed                 | `references/codex-reply.md` → Fixed         | auto after scope |
-| Codex               | thread reply — disagree / wontfix    | `references/codex-reply.md` → Disagree      | auto after scope |
-| Codex               | thread reply — already fixed on HEAD | `references/codex-reply.md` → Already fixed | auto after scope |
-| Codex               | re-request after push batch          | `references/codex-review-prompt.md`         | auto after scope |
-| human               | any reply or re-request              | confirm exact text with user; no ref yet    | always gated     |
-| other bot / unknown | any                                  | report; do not invent a trigger or template | stop / ask       |
+| Author class | Action                               | Ref / body                                                 | Autonomy         |
+| ------------ | ------------------------------------ | ---------------------------------------------------------- | ---------------- |
+| known bot    | thread reply — fixed                 | `references/thread-reply.md` → Fixed                       | auto after scope |
+| known bot    | thread reply — disagree / wontfix    | `references/thread-reply.md` → Disagree                    | auto after scope |
+| known bot    | thread reply — already fixed on HEAD | `references/thread-reply.md` → Already fixed               | auto after scope |
+| known bot    | re-request after push batch          | `references/review-prompt.md`                              | auto after scope |
+| human        | any reply or re-request              | confirm exact text; reply shape may follow thread-reply.md | always gated     |
+| unknown bot  | any                                  | report; do not invent a trigger or template                | stop / ask       |
 
-Author class: login is the Codex review bot (or the repo's documented Codex
-identity) → Codex row. Repo owner / member / collaborator human → human row.
-Named review bots without a row → other bot.
+**Author class** from reviewer login + account type (GraphQL thread:
+`author.login` + `author.__typename`; REST reviews / issue comments:
+`user.login` + `user.type`). Gather both fields — see `references/gh-recipes.md`.
+Normalize first: strip a trailing `[bot]` suffix, then match.
+
+1. Normalized login matches a **known bots** row (or the repo's documented
+   alias for that bot) → known bot.
+2. Account is human (`user.type` / `author.__typename` is User, not Bot/App)
+   → human. Always confirmation-gated for reply/re-request — association does
+   not change the class.
+3. Else → unknown bot (stop / ask; do not invent a trigger).
+
+| Bot   | login (match)              | `<mention-line>` for re-request |
+| ----- | -------------------------- | ------------------------------- |
+| Codex | `chatgpt-codex-connector`  | `@codex review`                 |
+| Cubic | `cubic-dev-ai`             | `@cubic-dev-ai review this PR`  |
 
 Bans on every reply: thanks, LGTM, "as discussed", status theater ("pushed,
 verifying…"), pasted diffs, restating the reviewer's full comment.
@@ -109,9 +125,14 @@ Present, then act on approval:
 - Failing checks, classified branch-related vs flaky/infra.
 - Conflicts or behind-base state.
 - The commit plan: one `Commit N: <title>` per comment or coherent cluster, with
-  files touched, the message per `commit-message`, planned reply text **copied
-  from the routed template** (author × action), and the verification for that
-  commit. Reply-only threads listed separately, no commit — still routed.
+  files touched, the message per `commit-message` after reading its `SKILL.md`,
+  planned reply text **copied from the routed template** (author × action), and
+  the verification for that commit. Reply-only threads listed separately, no
+  commit — still routed.
+- **Re-request set:** distinct logins whose feedback this cycle addresses
+  (known bots + humans). Omit anyone who left no feedback. Planned re-request
+  per login (bot: filled `review-prompt.md` comment; human: confirm the
+  `--add-reviewer LOGIN` action only — no request text, no extra comment).
 
 ## CI classification
 
@@ -149,9 +170,13 @@ Treat non-GitHub-Actions providers as report-only unless asked.
 
 ## Re-request
 
-Via **Comment routing** table only. Policy: at most one re-request per reviewer
-per push batch; never while that reviewer's review is outstanding; never invent
-a human or unknown-bot trigger.
+Via **Comment routing** and the Scope Gate **re-request set** only — reviewers
+who already left feedback this cycle, not every installed bot.
+
+Policy: at most one re-request per reviewer per push batch; never while that
+reviewer's review is outstanding; never invent a human or unknown-bot trigger;
+never re-request a known bot that is not in the set (e.g. Cubic-only feedback →
+Cubic only, not Codex).
 
 ## Stop conditions
 

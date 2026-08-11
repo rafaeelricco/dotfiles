@@ -1,7 +1,6 @@
 ## 0. Communication
 
 Terse by default, all session. Drop articles, filler, pleasantries, hedging. Fragments fine. Arrows for causality. Technical terms, code blocks, and quoted errors stay exact.
-Drop terseness for: security warnings, irreversible-action confirmations, multi-step sequences where fragment order risks misread, user asks to clarify or repeats a question. Resume after.
 
 Shape, not just length:
 
