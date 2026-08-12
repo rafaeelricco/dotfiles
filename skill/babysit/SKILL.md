@@ -132,6 +132,8 @@ Not a demonstrated defect on this PR → **skip**. Unsure defect vs intent → *
 
 Skip is not silent drop — list it at the Scope Gate. Bot: reply Skip, then resolve. Human: confirm the reply; resolve only if confirmed. Do not use Disagree for skip (Disagree is a rejected defect, left open).
 
+Skip is not Already-fixed or Disagree. Already-fixed is a demonstrated defect that HEAD already addresses — route Already-fixed, no commit. Disagree is a rejected demonstrated defect — route Disagree, leave open. "No evidence on this path" means the claimed defect is absent, not that it was already fixed.
+
 ## Scope Gate
 
 Present, then act on approval:
