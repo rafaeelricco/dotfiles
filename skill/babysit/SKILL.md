@@ -92,7 +92,7 @@ verifying…"), pasted diffs, restating the reviewer's full comment.
 ## Workflow
 
 1. **Gather** → **Scope Gate** → **Fix** → **Verify** (`verify` **STRICT**, once per push batch) → **Push, reply, resolve** (Comment routing) → **Re-request** → **Report**.
-2. No fix-class work and no skip-replies to post → end the cycle; do not invent work.
+2. No fix-class work, no skip-replies to post, no already-fixed/reply-only routing, no actionable CI failure/flaky rerun, and no merge conflict → end the cycle; do not invent work.
 3. One commit per **fix-class** comment or coherent fix cluster. Skip-class never gets a commit. Run **STRICT** once per push batch: after the last fix cluster in that batch **and** after any merge-conflict resolution that lands in the same batch, then push. Not once forever; not once per commit unless each commit is its own push.
 
 ## Gather
