@@ -37,3 +37,15 @@ Already addressed on HEAD (`<hash>`). <one line pointing at the existing fix>.
 
 If the fixing commit is unknown, drop the parenthetical hash and name the
 symbol or behavior instead.
+
+## Skip
+
+No commit. Finding is not a demonstrated defect (style, nit, formatting,
+wording, optional refactor, hypothetical, or no evidence on this path).
+Bot: resolve after reply. Human: resolve only if the user confirmed that.
+
+```text
+Skipping. <one line: style / nit / hypothetical / no defect on this path>.
+```
+
+Do not use Disagree here. Disagree is a rejected defect, left open.

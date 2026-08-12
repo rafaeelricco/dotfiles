@@ -38,7 +38,7 @@ task). This skill owns one cycle, not the cadence.
 ## Autonomy
 
 One scope gate, then run. The split is reversibility, not read-vs-write: every
-change here is anchored to a reviewer's written request, on a feature branch,
+change here is anchored to a reviewer's written **fix-class** request, on a feature branch,
 undoable by another push.
 
 | Autonomous once scope is approved                      | Always gated on explicit confirmation                   |
@@ -64,6 +64,7 @@ text). No map entry and not human → do not invent; surface at Scope Gate or st
 | known bot    | thread reply — fixed                 | `references/thread-reply.md` → Fixed                       | auto after scope |
 | known bot    | thread reply — disagree / wontfix    | `references/thread-reply.md` → Disagree                    | auto after scope |
 | known bot    | thread reply — already fixed on HEAD | `references/thread-reply.md` → Already fixed               | auto after scope |
+| known bot    | thread reply — skip                  | `references/thread-reply.md` → Skip                        | auto after scope |
 | known bot    | re-request after push batch          | `references/review-prompt.md`                              | auto after scope |
 | human        | any reply or re-request              | confirm exact text; reply shape may follow thread-reply.md | always gated     |
 | unknown bot  | any                                  | report; do not invent a trigger or template                | stop / ask       |
@@ -91,8 +92,8 @@ verifying…"), pasted diffs, restating the reviewer's full comment.
 ## Workflow
 
 1. **Gather** → **Scope Gate** → **Fix** → **Verify** (`verify` **STRICT**, once per push batch) → **Push, reply, resolve** (Comment routing) → **Re-request** → **Report**.
-2. Nothing actionable at Scope Gate → end the cycle; do not invent work.
-3. One commit per comment or coherent cluster. Run **STRICT** once per push batch: after the last fix cluster in that batch **and** after any merge-conflict resolution that lands in the same batch, then push. Not once forever; not once per commit unless each commit is its own push.
+2. No fix-class work and no skip-replies to post → end the cycle; do not invent work.
+3. One commit per **fix-class** comment or coherent fix cluster. Skip-class never gets a commit. Run **STRICT** once per push batch: after the last fix cluster in that batch **and** after any merge-conflict resolution that lands in the same batch, then push. Not once forever; not once per commit unless each commit is its own push.
 
 ## Gather
 
@@ -110,29 +111,48 @@ verifying…"), pasted diffs, restating the reviewer's full comment.
   Ignore other bot noise.
 - Read checks. The moment one job fails, fetch **that job's** logs — do not wait
   for the whole workflow run to finish.
-- Validate every unresolved comment before proposing a fix: is it real, does it
-  apply to this PR, is it worth fixing. Spawn one read-only sub-agent per
-  comment and run them concurrently. Unsure whether a report is a bug or
-  intended → surface it at the Scope Gate rather than guessing.
+- Classify every unresolved comment (**Finding class**) before proposing a fix.
+  Spawn one read-only sub-agent per comment and run them concurrently. Each
+  returns `{class, evidence}` — not “validated.” Unsure → **ask**, never guess
+  **fix** or **skip**.
 
 Commands: `references/gh-recipes.md`.
+
+## Finding class
+
+Every unresolved comment gets one class before it can enter the commit plan.
+Not a demonstrated defect on this PR → **skip**. Unsure defect vs intent → **ask**.
+
+| Signal                                                                                                         | Class | Action                |
+| -------------------------------------------------------------------------------------------------------------- | ----- | --------------------- |
+| Demonstrated defect on this PR: correctness, security, data loss, broken contract or install, clear regression | fix   | commit                |
+| Style, nit, formatting, wording, optional refactor                                                             | skip  | no commit; Skip reply |
+| Hypothetical, speculative, or no evidence on this path                                                         | skip  | no commit; Skip reply |
+| Bug-vs-intent, product/design, or a fix that would broaden scope                                               | ask   | Scope Gate / stop     |
+
+Skip is not silent drop — list it at the Scope Gate. Bot: reply Skip, then resolve. Human: confirm the reply; resolve only if confirmed. Do not use Disagree for skip (Disagree is a rejected defect, left open).
 
 ## Scope Gate
 
 Present, then act on approval:
 
-- Each validated thread with reviewer login, verdict, and file/line.
+- Each classified thread with reviewer login, **class** (fix / skip / ask), one-line evidence, and file/line.
 - Failing checks, classified branch-related vs flaky/infra.
 - Conflicts or behind-base state.
-- The commit plan: one `Commit N: <title>` per comment or coherent cluster, with
-  files touched, the message per `commit-message` after reading its `SKILL.md`,
-  planned reply text **copied from the routed template** (author × action), and
-  the verification for that commit. Reply-only threads listed separately, no
-  commit — still routed.
-- **Re-request set:** distinct logins whose feedback this cycle addresses
-  (known bots + humans). Omit anyone who left no feedback. Planned re-request
-  per login (bot: filled `review-prompt.md` comment; human: confirm the
-  `--add-reviewer LOGIN` action only — no request text, no extra comment).
+- The commit plan: one `Commit N: <title>` per **fix-class** comment or coherent
+  fix cluster, with files touched, the message per `commit-message` after
+  reading its `SKILL.md`, planned Fixed reply **copied from the routed
+  template**, and the verification for that commit.
+- **Skip set:** skip-class threads — no commit; planned Skip reply copied from
+  `thread-reply.md`. Bot: reply + resolve after scope. Human: confirm exact
+  text; resolve only if confirmed.
+- Already-fixed / reply-only listed separately, no commit — still routed.
+- Ask-class listed as blockers (Stop conditions) — no commit, no skip-resolve.
+- **Re-request set:** distinct logins whose **fix-class** feedback this cycle
+  addresses (known bots + humans). Omit skip-only reviewers and anyone who
+  left no feedback. Planned re-request per login (bot: filled
+  `review-prompt.md` comment; human: confirm the `--add-reviewer LOGIN`
+  action only — no request text, no extra comment).
 
 ## CI classification
 
@@ -154,8 +174,8 @@ Rerun budget: at most 3 per head SHA. A new push resets it — read attempts fro
 the run's `run_attempt`, do not track a count yourself. Budget exhausted → stop
 and report. Never edit tests, CI config, or dependency pins to green a flake.
 
-Actionable review feedback outranks a flaky rerun: a new commit retriggers CI
-anyway, so fix first instead of rerunning the old SHA.
+**Fix-class** review feedback outranks a flaky rerun: a new commit retriggers CI
+anyway, so fix first instead of rerunning the old SHA. Skip-class does not.
 
 Treat non-GitHub-Actions providers as report-only unless asked.
 
@@ -171,7 +191,7 @@ Treat non-GitHub-Actions providers as report-only unless asked.
 ## Re-request
 
 Via **Comment routing** and the Scope Gate **re-request set** only — reviewers
-who already left feedback this cycle, not every installed bot.
+whose **fix-class** feedback this cycle addresses, not every installed bot.
 
 Policy: at most one re-request per reviewer per push batch; never while that
 reviewer's review is outstanding; never invent a human or unknown-bot trigger;
@@ -198,5 +218,6 @@ stop rather than wait for a check to appear.
 
 ## Report
 
-PR readiness, then one table: reviewer, comment, solution, commit hash or
-reply-only, verification result. Then what is blocked and on whom.
+PR readiness, then one table: reviewer, class, comment, solution or skip
+reason, commit hash or reply-only, verification result. Then what is blocked
+and on whom.
