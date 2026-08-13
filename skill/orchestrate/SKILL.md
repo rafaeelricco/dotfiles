@@ -1,9 +1,8 @@
 ---
 name: orchestrate
 description: >
-  Use when making a code change, planning, shipping, committing, opening or
-  babysitting a PR, or the user runs /orchestrate. Do NOT use for chat,
-  reading, or drawing with no repo change.
+  Orchestrates a graph (fan-out, checker, synthesize, plan, writers) to
+  resolve complex tasks.
 ---
 
 ## 1. Think Before Acting
@@ -13,41 +12,23 @@ Then, when choosing an approach — not before every tool call:
 
 - If a simpler approach exists, say so. Push back when warranted.
 
-Route before loading anything:
+When this skill loads, load `scope-and-plan` and stop routing. That skill owns
+the diamond (fan-out → check → synthesize → plan → approve → writers). Do not
+load `plan-format` here. Do not enter plan mode here.
 
-| Lane   | When                                                                                                                   | Do                                       |
-| ------ | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| Direct | Can name the paths (or one search will) and approach is clear — default                                                | Act. §5 still applies. Cheap fan-out OK. |
-| Plan   | Can name the paths (or one search will) **and** one or more open approach questions                                    | Plan directly per §4.                    |
-| Scope  | Cannot yet name the paths **and** the change is large enough to need synthesize → plan-as-diffs → approve before write | Load `scope-and-plan`.                   |
-
-Pick the first matching row top-to-bottom. File count is not a lane signal.
-"Thorough" is not Scope. "Use sub-agents" / explore phrasing is not Scope.
-Diff review alone is not Plan — that is Direct plus §5.
-≥2 independent concerns is free Direct fan-out, not a Scope trigger.
-Approve only on Plan/Scope — never invent an approval gate on Direct.
-
-In every lane: work that does not consume another's output ships in one message.
-That covers reads and read-only sub-agents equally — two independent concerns are
-two workers whether the lane is Direct or Scope. A second read that never uses the
-first's result is not a later step, it is the same step typed twice.
+Work that does not consume another's output ships in one message — two
+independent concerns are two workers. A second read that never uses the first's
+result is not a later step, it is the same step typed twice.
 
 After any parallel reads, before you use them: drop empty, off-task, and
 mutually impossible claims. Do not edit or synthesize from a dropped claim.
-This checker is not `verify`. Direct has no other gate — do not load
-`scope-and-plan` for it.
+This checker is not `verify`.
 
-Fanning out is not a lane. `scope-and-plan` owns the read diamond
-(fan-out → check → synthesize), then plan → approve → write diamond —
-not permission to spawn a worker. Parallel reads/sub-agents on Direct
-never load it.
-
-Writing in parallel is the same rule one step later. Once the change is decided —
-an approved plan, or a Direct-lane edit you have already stated — one writer per
-group of files, groups disjoint by path. A writer applies the decision, it does
-not remake it. Diffs that must land in order are one writer, never a fan-out. A
-writer that cannot apply its diffs stops and reports which ones landed; you finish
-that group yourself, serially, and never respawn it.
+Writing in parallel is the same rule one step later. Once the plan is approved,
+one writer per group of files, groups disjoint by path. A writer applies the
+decision, it does not remake it. Diffs that must land in order are one writer,
+never a fan-out. A writer that cannot apply its diffs stops and reports which
+ones landed; you finish that group yourself, serially, and never respawn it.
 
 ## 2. Simplicity
 
@@ -72,10 +53,12 @@ No assertable behavior (comment typos, formatting, copy) or no test suite → sk
 
 ## 4. Make Changes Reviewable
 
-Plan lane: load `plan-format` before writing the plan. Scope lane: `scope-and-plan` step 1 owns that load — do not double-load here. Direct: do not load — one sentence, then edit. Unresolved decisions don't defer a plan: the question and the formatted plan ship in the same response.
-Then, while planning:
+Load `scope-and-plan` and stop routing. That skill owns fan-out, `plan-format`
+(step 1), and harness plan mode (step 4). Unresolved decisions don't defer a
+plan: the question and the formatted plan ship in the same response.
+Then, while `scope-and-plan` is planning:
 
-- Prefer the harness plan/approval workflow when one exists; otherwise present the plan as a normal message. Either way: inspection stays read-only until the user explicitly approves.
+- Inspection stays read-only until the user explicitly approves.
 - Stress-test with the user until decisions resolve. Independent questions ship in one
   ask, hardest first. Sequence only when one answer changes the next question.
 
