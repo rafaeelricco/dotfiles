@@ -42,9 +42,15 @@ That covers reads and read-only sub-agents equally — two independent concerns 
 two workers whether the lane is Direct or Scope. A second read that never uses the
 first's result is not a later step, it is the same step typed twice.
 
-Fanning out is not a lane. `scope-and-plan` owns the five-step diamond
-(fan-out → check → synthesize → plan → approve → writers), not permission
-to spawn a worker. Parallel reads/sub-agents on Direct never load it.
+After any parallel reads, before you use them: drop empty, off-task, and
+mutually impossible claims. Do not edit or synthesize from a dropped claim.
+This checker is not `verify`. Direct has no other gate — do not load
+`scope-and-plan` for it.
+
+Fanning out is not a lane. `scope-and-plan` owns the read diamond
+(fan-out → check → synthesize), then plan → approve → write diamond —
+not permission to spawn a worker. Parallel reads/sub-agents on Direct
+never load it.
 
 Writing in parallel is the same rule one step later. Once the change is decided —
 an approved plan, or a Direct-lane edit you have already stated — one writer per

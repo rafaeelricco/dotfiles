@@ -1,8 +1,8 @@
 ---
 name: scope-and-plan
 description: >
-  Five-step diamond before write: fan-out readers → checker → synthesize →
-  plan-as-diffs → approve → writers. Use when paths are not yet nameable and
+  Read diamond (fan-out → check → synthesize), then plan-as-diffs → approve →
+  write diamond. Use when paths are not yet nameable and
   the change is large enough that synthesize + plan + explicit approve must
   gate edits — or the user names this skill (`scope-and-plan`). Do NOT use when
   paths (or one search) answer the where, when the user asked for a direct edit,
