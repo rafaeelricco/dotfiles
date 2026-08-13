@@ -8,7 +8,7 @@ vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
 -- Native completion / snippets. Tab stays Copilot (domains/ai.lua).
 vim.keymap.set("i", "<CR>", function()
-  if vim.fn.pumvisible() ~= 0 then
+  if vim.fn.pumvisible() ~= 0 and vim.fn.complete_info({ "selected" }).selected ~= -1 then
     return "<C-y>"
   end
   return require("nvim-autopairs").autopairs_cr()
