@@ -121,6 +121,15 @@ vim.opt.formatoptions:remove({ "c", "r", "o" })
 vim.opt.wrap = false
 -- vim.opt.textwidth = 120
 
+-- Native insert completion (vim.lsp.completion). menuone + noselect + popup
+-- is the official recipe; CTRL-Y accepts. |complete_CTRL-Y|
+vim.opt.completeopt:append({ "menuone", "noselect", "popup" })
+
+-- 0.12 enables documentColor with style=background (Tailwind color classes
+-- get a wash). Require first so the runtime default-true runs, then opt out.
+require("vim.lsp.document_color")
+vim.lsp.document_color.enable(false)
+
 -- [[ Core Autocommands ]]
 -- Defines fundamental autocommands that enhance the editing experience.
 --  See `:help lua-guide-autocommands`

@@ -6,6 +6,26 @@
 -- Reference: `:help hlsearch`
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
+-- Native completion / snippets. Tab stays Copilot (domains/ai.lua).
+vim.keymap.set("i", "<CR>", function()
+  if vim.fn.pumvisible() ~= 0 and vim.fn.complete_info({ "selected" }).selected ~= -1 then
+    return "<C-y>"
+  end
+  return require("nvim-autopairs").autopairs_cr()
+end, { expr = true, desc = "Accept completion or autopairs CR" })
+
+vim.keymap.set({ "i", "s" }, "<C-j>", function()
+  if vim.snippet.active({ direction = 1 }) then
+    vim.snippet.jump(1)
+  end
+end, { silent = true, desc = "Snippet jump forward" })
+
+vim.keymap.set({ "i", "s" }, "<C-k>", function()
+  if vim.snippet.active({ direction = -1 }) then
+    vim.snippet.jump(-1)
+  end
+end, { silent = true, desc = "Snippet jump backward" })
+
 -- Quick text substitution mappings
 -- - Normal mode: Replace word under cursor globally
 -- - Visual mode: Replace selected text globally

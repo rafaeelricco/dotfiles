@@ -125,22 +125,18 @@ return {
       disable_filetype = { "TelescopePrompt", "spectre_panel" },
       -- Enable smart backspace behavior
       map_bs = true,
-      -- Enable smart enter behavior
-      map_cr = true,
+      -- Owned by the native pum <CR> map in core/editor.lua
+      map_cr = false,
     },
     config = function(_, opts)
       local npairs = require("nvim-autopairs")
       npairs.setup(opts)
-
-      -- Note: This configuration uses blink.cmp instead of nvim-cmp
-      -- blink.cmp has built-in auto_brackets functionality that may overlap
-      -- with nvim-autopairs. You can disable blink.cmp's auto_brackets
-      -- in completion.lua if you prefer nvim-autopairs' behavior.
     end,
   },
 
   -- Inline color swatches for hex, rgb/hsl, CSS vars, named colors, and Tailwind.
   -- Uses virtual symbol rendering so the original source text stays untouched.
+  --[[
   {
     "brenoprata10/nvim-highlight-colors",
     event = { "BufReadPost", "BufNewFile" },
@@ -168,4 +164,5 @@ return {
       exclude_buftypes = {},
     },
   },
+  --]]
 }

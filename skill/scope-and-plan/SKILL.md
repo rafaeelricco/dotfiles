@@ -2,12 +2,12 @@
 name: scope-and-plan
 description: >
   Read diamond (fan-out → check → synthesize), then plan-as-diffs → approve →
-  write diamond. Use when paths are not yet nameable and
-  the change is large enough that synthesize + plan + explicit approve must
-  gate edits — or the user names this skill (`scope-and-plan`). Do NOT use when
-  paths (or one search) answer the where, when the user asked for a direct edit,
-  for explore/"get context first" phrasing alone, or only to spawn parallel
-  workers — fan-out alone needs no skill; that is Direct.
+  write diamond. Use when orchestrate loads this skill, or the user names it
+  (`scope-and-plan`). Runs even when paths are already known — workers gather
+  related call sites so the plan does not break neighbors.
+  Do NOT use for explore/"get context first" phrasing alone, or only to spawn
+  parallel workers — fan-out alone needs no skill; that is a session that did
+  not call orchestrate.
   When the harness has one, every invocation enters the harness plan/approval
   mode at step 4, before the plan is written.
 ---
