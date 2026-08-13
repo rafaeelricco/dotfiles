@@ -11,7 +11,7 @@ argument-hint: "[--branch <name> | --pr <number-or-url>]"
 
 Prefer proofs the repo already defines. Mode selects ambition:
 
-- **FAST** (default on pre-commit from INSTRUCTIONS §5): one decisive check for
+- **FAST** (default on pre-commit from `orchestrate` §5): one decisive check for
   the package(s) the diff touches; then stop.
 - **STRICT** (`/verify`, babysit, user says "strict", or `--branch`/`--pr`):
   full Discovery ladder and strict PASS rules below.
