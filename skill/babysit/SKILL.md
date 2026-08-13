@@ -5,7 +5,8 @@ description: >
   threads, failing CI, and merge conflicts; fix, verify, commit, push, reply,
   resolve, re-request. Use when the user says babysit this PR, keep this PR
   merge-ready, triage PR comments and CI, resolve review feedback, watch CI
-  until mergeable, or get a PR ready to merge. Do NOT use for opening a PR
+  until mergeable, get a PR ready to merge, validate review comments, or run
+  another babysit round. Do NOT use for opening a PR
   (use create-pr), writing a PR body (use pr-body), reviewing code (use
   /code-review), or merging.
 ---
@@ -64,7 +65,7 @@ text). No map entry and not human → do not invent; surface at Scope Gate or st
 | known bot    | thread reply — fixed                 | `references/thread-reply.md` → Fixed                       | auto after scope |
 | known bot    | thread reply — disagree / wontfix    | `references/thread-reply.md` → Disagree                    | auto after scope |
 | known bot    | thread reply — already fixed on HEAD | `references/thread-reply.md` → Already fixed               | auto after scope |
-| known bot    | re-request after push batch          | `references/review-prompt.md`                              | auto after scope |
+| known bot    | re-request after push batch          | `references/review-prompt.md` — mention-line bots only     | auto after scope |
 | human        | any reply or re-request              | confirm exact text; reply shape may follow thread-reply.md | always gated     |
 | unknown bot  | any                                  | report; do not invent a trigger or template                | stop / ask       |
 
@@ -80,10 +81,15 @@ Normalize first: strip a trailing `[bot]` suffix, then match.
    not change the class.
 3. Else → unknown bot (stop / ask; do not invent a trigger).
 
-| Bot   | login (match)             | `<mention-line>` for re-request |
-| ----- | ------------------------- | ------------------------------- |
-| Codex | `chatgpt-codex-connector` | `@codex review`                 |
-| Cubic | `cubic-dev-ai`            | `@cubic-dev-ai review this PR`  |
+| Bot    | login (match)             | `<mention-line>` for re-request               |
+| ------ | ------------------------- | --------------------------------------------- |
+| Codex  | `chatgpt-codex-connector` | `@codex review`                               |
+| Cubic  | `cubic-dev-ai`            | `@cubic-dev-ai review this PR`                |
+| Cursor | `cursor`                  | _(none — report only; no re-request trigger)_ |
+
+A filled `<mention-line>` is required to re-request. Cursor has none —
+report only; omit it from the re-request set. Never post
+`review-prompt.md` without a mention-line.
 
 Bans on every reply: thanks, LGTM, "as discussed", status theater ("pushed,
 verifying…"), pasted diffs, restating the reviewer's full comment.
@@ -110,18 +116,30 @@ verifying…"), pasted diffs, restating the reviewer's full comment.
   Ignore other bot noise.
 - Read checks. The moment one job fails, fetch **that job's** logs — do not wait
   for the whole workflow run to finish.
-- Validate every unresolved comment before proposing a fix: is it real, does it
-  apply to this PR, is it worth fixing. Spawn one read-only sub-agent per
-  comment and run them concurrently. Unsure whether a report is a bug or
-  intended → surface it at the Scope Gate rather than guessing.
+- Validate every unresolved comment before proposing a fix. Spawn one
+  read-only sub-agent per comment and run them concurrently. Each returns
+  exactly: `VERDICT`, `SEVERITY`, `FAILURE PATH`, `WHY` (`file:line`),
+  `SMALLEST FIX`. Route on `VERDICT` — ignore the reviewer's P-label when
+  the path is not ADDRESS:
+
+  | Verdict | When                                                                                                                                                                              | Then                            |
+  | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+  | ADDRESS | Concrete user path on this PR: correctness, security or safety impact, data-loss, or a broken contract/invariant the diff introduced or left incomplete                           | Commit plan                     |
+  | SKIP    | Hypothetical, impossible under current callers or types; pre-existing, not worsened, and outside the PR's stated scope; or no user-visible break and no security or safety impact | Reply-only Disagree (known bot) |
+  | UNSURE  | Bug vs intent                                                                                                                                                                     | Scope Gate; do not guess        |
 
 Commands: `references/gh-recipes.md`.
 
 ## Scope Gate
 
-Present, then act on approval:
+Present, then act on approval. Approval of that table is the grant to fix
+every ADDRESS cluster and Disagree-reply every SKIP known-bot thread
+(Comment routing). UNSURE stays blocked for that thread only — do not
+guess it; granted ADDRESS and SKIP work still runs. Human reply and
+re-request stay gated. This gate is the plan.
 
-- Each validated thread with reviewer login, verdict, and file/line.
+- Each validated thread with reviewer login, verdict (`ADDRESS` / `SKIP` /
+  `UNSURE`), and file/line.
 - Failing checks, classified branch-related vs flaky/infra.
 - Conflicts or behind-base state.
 - The commit plan: one `Commit N: <title>` per comment or coherent cluster, with
@@ -130,7 +148,8 @@ Present, then act on approval:
   the verification for that commit. Reply-only threads listed separately, no
   commit — still routed.
 - **Re-request set:** distinct logins whose feedback this cycle addresses
-  (known bots + humans). Omit anyone who left no feedback. Planned re-request
+  (mention-line known bots + humans). Omit anyone who left no feedback,
+  and omit known bots with no `<mention-line>` (Cursor). Planned re-request
   per login (bot: filled `review-prompt.md` comment; human: confirm the
   `--add-reviewer LOGIN` action only — no request text, no extra comment).
 
@@ -176,19 +195,22 @@ who already left feedback this cycle, not every installed bot.
 Policy: at most one re-request per reviewer per push batch; never while that
 reviewer's review is outstanding; never invent a human or unknown-bot trigger;
 never re-request a known bot that is not in the set (e.g. Cubic-only feedback →
-Cubic only, not Codex).
+Cubic only, not Codex); never re-request a known bot with no `<mention-line>`
+(Cursor).
 
 ## Stop conditions
 
 Every cycle ends. It ends early when a blocker needs a human:
 
-- A finding is a bug-vs-intent judgement call
 - A fix would broaden scope, change CI workflows, or alter tests just to green
 - A merge conflict whose intent is unclear
 - A product or design question
 - Rerun budget exhausted, or the same thread touched twice with no progress
 - `gh` auth/permission failure, or the branch cannot be pushed
 - Verification fails in a way that needs a human call
+
+An UNSURE (bug-vs-intent) finding is not an early-stop: report it, leave
+that thread blocked, and finish granted ADDRESS and SKIP work.
 
 Green + mergeable ends the cycle: report it and stop. Review comments still
 arrive — the next scheduled cycle picks them up. Waiting here for one is the
