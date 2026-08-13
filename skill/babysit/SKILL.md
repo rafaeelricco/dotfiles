@@ -122,11 +122,11 @@ verifying…"), pasted diffs, restating the reviewer's full comment.
   `SMALLEST FIX`. Route on `VERDICT` — ignore the reviewer's P-label when
   the path is not ADDRESS:
 
-  | Verdict | When                                                                                                                         | Then                            |
-  | ------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-  | ADDRESS | Concrete user path on this PR: correctness, security or safety impact, data-loss, or a broken contract/invariant the diff introduced or left incomplete | Commit plan                     |
+  | Verdict | When                                                                                                                                                                              | Then                            |
+  | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+  | ADDRESS | Concrete user path on this PR: correctness, security or safety impact, data-loss, or a broken contract/invariant the diff introduced or left incomplete                           | Commit plan                     |
   | SKIP    | Hypothetical, impossible under current callers or types; pre-existing, not worsened, and outside the PR's stated scope; or no user-visible break and no security or safety impact | Reply-only Disagree (known bot) |
-  | UNSURE  | Bug vs intent                                                                                                                | Scope Gate; do not guess        |
+  | UNSURE  | Bug vs intent                                                                                                                                                                     | Scope Gate; do not guess        |
 
 Commands: `references/gh-recipes.md`.
 
