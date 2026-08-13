@@ -1,34 +1,10 @@
 -- [[ Completion Domain ]]
--- Blink.cmp setup tailored for:
--- - Manual Ctrl+Space to show LSP + Path items (great for imports and paths)
--- - Non‑conflicting with Copilot: <Tab> accepts Copilot, snippets live on Ctrl+j/k
--- - Clear menu/docs/selection behavior with predictable triggers
-
-local color_item_cache = setmetatable({}, { __mode = "k" })
-
-local function get_lsp_color_item(ctx)
-  if ctx.item.source_name ~= "LSP" then
-    return nil
-  end
-
-  local cached = color_item_cache[ctx.item]
-  if cached ~= nil then
-    return cached ~= false and cached or nil
-  end
-
-  local ok, highlight_colors = pcall(require, "nvim-highlight-colors")
-  if not ok then
-    color_item_cache[ctx.item] = false
-    return nil
-  end
-
-  local color_item = highlight_colors.format(ctx.item.documentation, { kind = ctx.kind })
-  color_item_cache[ctx.item] = color_item or false
-  return color_item
-end
+-- blink.cmp parked. Native vim.lsp.completion is enabled in domains/lsp.lua.
+-- Restore: uncomment the spec, restore the lsp.lua dependency +
+-- get_lsp_capabilities() merge, and drop the native LspAttach enable().
 
 return {
-  -- blink.cmp completion engine and sources (LSP/snippets/path/buffer)
+  --[[
   {
     "saghen/blink.cmp",
     event = { "InsertEnter", "CmdlineEnter" },
@@ -94,7 +70,9 @@ return {
         trigger = {
           show_on_keyword = true,
           show_on_trigger_character = true,
-          show_on_blocked_trigger_characters = { ' ', '\n', '\t' },
+          -- Space is a Tailwind class-list trigger (className="flex |").
+          -- Keep newline/tab blocked so those still do not auto-open.
+          show_on_blocked_trigger_characters = { '\n', '\t' },
           show_on_insert_on_trigger_character = false,
         },
         -- Documentation window behavior and styling
@@ -118,26 +96,6 @@ return {
             },
 
             components = {
-              -- Show color swatch in kind icon for LSP color items (tailwindcss, cssls, etc.)
-              kind_icon = {
-                text = function(ctx)
-                  local icon = ctx.kind_icon
-                  local color_item = get_lsp_color_item(ctx)
-                  if color_item and color_item.abbr ~= "" then
-                    icon = color_item.abbr
-                  end
-                  return icon .. ctx.icon_gap
-                end,
-                highlight = function(ctx)
-                  local highlight = "BlinkCmpKind" .. ctx.kind
-                  local color_item = get_lsp_color_item(ctx)
-                  if color_item and color_item.abbr_hl_group then
-                    highlight = color_item.abbr_hl_group
-                  end
-                  return highlight
-                end,
-              },
-
               -- Show import detail/paths when LSP provides them
               label_description = {
                 width = { max = 40 },
@@ -200,14 +158,21 @@ return {
             fallbacks = {},
             -- Do not block the menu while waiting for LSP responses
             async = true,
-            timeout_ms = 500,
-            -- On manual show (Ctrl+Space) allow 0-char prefix; otherwise require 3
+            -- Tailwind's first completion after attach is often >500ms.
+            timeout_ms = 2000,
+            opts = {
+              -- blink.cmp sources/lsp/hacks/tailwind.lua paints Color items
+              -- whose documentation is `#RRGGBB`. Default icon is `██`.
+              tailwind_color_icon = "■",
+            },
+            -- On manual show (Ctrl+Space) allow 0-char prefix; otherwise require 2
             min_keyword_length = function(ctx)
               local trig = ctx and ctx.trigger or {}
               if trig.kind == 'manual' or trig.initial_kind == 'manual' then
                 return 0
               end
-              return 3
+              -- 2 so prefixes like `bg` / `p-` auto-show; 3 hid most utilities.
+              return 2
             end,
             -- Disable on special buffers where completion isn't appropriate
             enabled = function() return vim.bo.buftype ~= "prompt" and vim.bo.buftype ~= "nofile" end,
@@ -315,4 +280,5 @@ return {
       },
     },
   },
+  ]]
 }

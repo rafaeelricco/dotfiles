@@ -62,7 +62,7 @@ return {
       },
 
       -- Allows extra capabilities provided by nvim-cmp
-      "saghen/blink.cmp",
+      -- "saghen/blink.cmp",
 
       -- Better inline diagnostics without updating on the insert hot path
       {
@@ -157,6 +157,20 @@ return {
           -- The following two autocommands are used to highlight references of the
           -- word under your cursor when your cursor rests there for a little while.
           local client = vim.lsp.get_client_by_id(event.data.client_id)
+          -- 0.12 paints documentColor as a background wash (Tailwind
+          -- color classes). Completions / hover are a different method.
+          vim.lsp.document_color.enable(false, { bufnr = event.buf })
+          if client and client:supports_method("textDocument/completion") then
+            -- Optional: trigger on every keypress. May be slow.
+            -- local chars = {}
+            -- for i = 32, 126 do table.insert(chars, string.char(i)) end
+            -- client.server_capabilities.completionProvider.triggerCharacters = chars
+            vim.lsp.completion.enable(true, client.id, event.buf, { autotrigger = true })
+            local opts = { buffer = event.buf, desc = "LSP: Trigger completion" }
+            vim.keymap.set("i", "<C-Space>", function() vim.lsp.completion.get() end, opts)
+            vim.keymap.set("i", "<C-@>", function() vim.lsp.completion.get() end, opts)
+            vim.keymap.set("i", "<C-;>", function() vim.lsp.completion.get() end, opts)
+          end
           if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
             local highlight_augroup = vim.api.nvim_create_augroup("kickstart-lsp-highlight", { clear = false })
             vim.api.nvim_create_autocmd("CursorHold", {
@@ -195,7 +209,6 @@ return {
 
       -- LSP servers and clients are able to communicate to each other what features they support.
       local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities = vim.tbl_deep_extend("force", capabilities, require("blink.cmp").get_lsp_capabilities())
 
       -- Configure language servers before enabling them
       -- TypeScript/JavaScript configuration
@@ -331,11 +344,26 @@ return {
       vim.lsp.enable('ts_ls')
       vim.lsp.enable('lua_ls')
 
+      -- Tailwind IntelliSense. nvim-lspconfig already supplies filetypes,
+      -- classAttributes (class / className / classList / ngClass), lint, and
+      -- a v3-or-v4 root_dir. Only add client capabilities + helpers used by
+      -- typical React/TS class builders (official `classFunctions`, not the
+      -- older experimental.classRegex).
+      vim.lsp.config('tailwindcss', {
+        capabilities = capabilities,
+        settings = {
+          tailwindCSS = {
+            classFunctions = { "cn", "clsx", "cva", "cx", "twMerge" },
+          },
+        },
+      })
+      vim.lsp.enable('tailwindcss')
+
       -- Setup Mason and ensure language servers are installed
       require("mason").setup()
 
       require("mason-lspconfig").setup({
-        ensure_installed = { "pyright", "ts_ls", "lua_ls" },
+        ensure_installed = { "pyright", "ts_ls", "lua_ls", "tailwindcss" },
         -- automatic_enable = true is the default, so mason-lspconfig will
         -- automatically enable installed servers via vim.lsp.enable()
       })
