@@ -5,7 +5,8 @@ description: >
   threads, failing CI, and merge conflicts; fix, verify, commit, push, reply,
   resolve, re-request. Use when the user says babysit this PR, keep this PR
   merge-ready, triage PR comments and CI, resolve review feedback, watch CI
-  until mergeable, or get a PR ready to merge. Do NOT use for opening a PR
+  until mergeable, get a PR ready to merge, validate review comments, or run
+  another babysit round. Do NOT use for opening a PR
   (use create-pr), writing a PR body (use pr-body), reviewing code (use
   /code-review), or merging.
 ---
@@ -80,10 +81,11 @@ Normalize first: strip a trailing `[bot]` suffix, then match.
    not change the class.
 3. Else → unknown bot (stop / ask; do not invent a trigger).
 
-| Bot   | login (match)             | `<mention-line>` for re-request |
-| ----- | ------------------------- | ------------------------------- |
-| Codex | `chatgpt-codex-connector` | `@codex review`                 |
-| Cubic | `cubic-dev-ai`            | `@cubic-dev-ai review this PR`  |
+| Bot    | login (match)             | `<mention-line>` for re-request               |
+| ------ | ------------------------- | --------------------------------------------- |
+| Codex  | `chatgpt-codex-connector` | `@codex review`                               |
+| Cubic  | `cubic-dev-ai`            | `@cubic-dev-ai review this PR`                |
+| Cursor | `cursor`                  | _(none — report only; no re-request trigger)_ |
 
 Bans on every reply: thanks, LGTM, "as discussed", status theater ("pushed,
 verifying…"), pasted diffs, restating the reviewer's full comment.
@@ -110,18 +112,29 @@ verifying…"), pasted diffs, restating the reviewer's full comment.
   Ignore other bot noise.
 - Read checks. The moment one job fails, fetch **that job's** logs — do not wait
   for the whole workflow run to finish.
-- Validate every unresolved comment before proposing a fix: is it real, does it
-  apply to this PR, is it worth fixing. Spawn one read-only sub-agent per
-  comment and run them concurrently. Unsure whether a report is a bug or
-  intended → surface it at the Scope Gate rather than guessing.
+- Validate every unresolved comment before proposing a fix. Spawn one
+  read-only sub-agent per comment and run them concurrently. Each returns
+  exactly: `VERDICT`, `SEVERITY`, `FAILURE PATH`, `WHY` (`file:line`),
+  `SMALLEST FIX`. Route on `VERDICT` — ignore the reviewer's P-label when
+  the path is not ADDRESS:
+
+  | Verdict | When                                                                                                                         | Then                            |
+  | ------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+  | ADDRESS | Concrete user path on this PR: correctness, data-loss, or a broken contract/invariant the diff introduced or left incomplete | Commit plan                     |
+  | SKIP    | Hypothetical, impossible under current callers or types, pre-existing and not worsened, or no user-visible break             | Reply-only Disagree (known bot) |
+  | UNSURE  | Bug vs intent                                                                                                                | Scope Gate; do not guess        |
 
 Commands: `references/gh-recipes.md`.
 
 ## Scope Gate
 
-Present, then act on approval:
+Present, then act on approval. Approval of that table is the grant to fix
+every ADDRESS cluster and Disagree-reply every SKIP known-bot thread
+(Comment routing). UNSURE stays blocked. Human reply and re-request stay
+gated. This gate is the plan.
 
-- Each validated thread with reviewer login, verdict, and file/line.
+- Each validated thread with reviewer login, verdict (`ADDRESS` / `SKIP` /
+  `UNSURE`), and file/line.
 - Failing checks, classified branch-related vs flaky/infra.
 - Conflicts or behind-base state.
 - The commit plan: one `Commit N: <title>` per comment or coherent cluster, with
