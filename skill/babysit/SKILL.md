@@ -65,7 +65,7 @@ text). No map entry and not human → do not invent; surface at Scope Gate or st
 | known bot    | thread reply — fixed                 | `references/thread-reply.md` → Fixed                       | auto after scope |
 | known bot    | thread reply — disagree / wontfix    | `references/thread-reply.md` → Disagree                    | auto after scope |
 | known bot    | thread reply — already fixed on HEAD | `references/thread-reply.md` → Already fixed               | auto after scope |
-| known bot    | re-request after push batch          | `references/review-prompt.md`                              | auto after scope |
+| known bot    | re-request after push batch          | `references/review-prompt.md` — mention-line bots only     | auto after scope |
 | human        | any reply or re-request              | confirm exact text; reply shape may follow thread-reply.md | always gated     |
 | unknown bot  | any                                  | report; do not invent a trigger or template                | stop / ask       |
 
@@ -86,6 +86,10 @@ Normalize first: strip a trailing `[bot]` suffix, then match.
 | Codex  | `chatgpt-codex-connector` | `@codex review`                               |
 | Cubic  | `cubic-dev-ai`            | `@cubic-dev-ai review this PR`                |
 | Cursor | `cursor`                  | _(none — report only; no re-request trigger)_ |
+
+A filled `<mention-line>` is required to re-request. Cursor has none —
+report only; omit it from the re-request set. Never post
+`review-prompt.md` without a mention-line.
 
 Bans on every reply: thanks, LGTM, "as discussed", status theater ("pushed,
 verifying…"), pasted diffs, restating the reviewer's full comment.
@@ -143,7 +147,8 @@ gated. This gate is the plan.
   the verification for that commit. Reply-only threads listed separately, no
   commit — still routed.
 - **Re-request set:** distinct logins whose feedback this cycle addresses
-  (known bots + humans). Omit anyone who left no feedback. Planned re-request
+  (mention-line known bots + humans). Omit anyone who left no feedback,
+  and omit known bots with no `<mention-line>` (Cursor). Planned re-request
   per login (bot: filled `review-prompt.md` comment; human: confirm the
   `--add-reviewer LOGIN` action only — no request text, no extra comment).
 
@@ -189,7 +194,8 @@ who already left feedback this cycle, not every installed bot.
 Policy: at most one re-request per reviewer per push batch; never while that
 reviewer's review is outstanding; never invent a human or unknown-bot trigger;
 never re-request a known bot that is not in the set (e.g. Cubic-only feedback →
-Cubic only, not Codex).
+Cubic only, not Codex); never re-request a known bot with no `<mention-line>`
+(Cursor).
 
 ## Stop conditions
 
