@@ -134,8 +134,9 @@ Commands: `references/gh-recipes.md`.
 
 Present, then act on approval. Approval of that table is the grant to fix
 every ADDRESS cluster and Disagree-reply every SKIP known-bot thread
-(Comment routing). UNSURE stays blocked. Human reply and re-request stay
-gated. This gate is the plan.
+(Comment routing). UNSURE stays blocked for that thread only — do not
+guess it; granted ADDRESS and SKIP work still runs. Human reply and
+re-request stay gated. This gate is the plan.
 
 - Each validated thread with reviewer login, verdict (`ADDRESS` / `SKIP` /
   `UNSURE`), and file/line.
@@ -201,13 +202,15 @@ Cubic only, not Codex); never re-request a known bot with no `<mention-line>`
 
 Every cycle ends. It ends early when a blocker needs a human:
 
-- A finding is a bug-vs-intent judgement call
 - A fix would broaden scope, change CI workflows, or alter tests just to green
 - A merge conflict whose intent is unclear
 - A product or design question
 - Rerun budget exhausted, or the same thread touched twice with no progress
 - `gh` auth/permission failure, or the branch cannot be pushed
 - Verification fails in a way that needs a human call
+
+An UNSURE (bug-vs-intent) finding is not an early-stop: report it, leave
+that thread blocked, and finish granted ADDRESS and SKIP work.
 
 Green + mergeable ends the cycle: report it and stop. Review comments still
 arrive — the next scheduled cycle picks them up. Waiting here for one is the
