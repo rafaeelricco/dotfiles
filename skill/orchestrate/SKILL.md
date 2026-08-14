@@ -1,8 +1,14 @@
 ---
 name: orchestrate
 description: >
-  Orchestrates a graph (fan-out, checker, synthesize, plan, writers) to
-  resolve complex tasks.
+  Run the house engineering loop for a code change: ask-or-decide threshold,
+  simplicity, a verifiable goal, planning through scope-and-plan, then the
+  ship order — verify, commit, stop. Use when the user asks to implement,
+  add, build, fix, debug, refactor, migrate, or clean up code, or names
+  /orchestrate. Do NOT use for a single obvious edit whose file and fix are
+  already named, for read-only questions or exploration alone, or for a bare
+  commit (use commit-message), PR (use create-pr), or open-PR triage (use
+  babysit).
 ---
 
 ## 1. Think Before Acting
