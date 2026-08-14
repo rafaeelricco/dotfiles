@@ -7,12 +7,15 @@
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
 -- Native completion / snippets. Tab stays Copilot (domains/ai.lua).
+-- autopairs_cr() returns termcode-replaced bytes, so replace_keycodes must be
+-- false or the second pass mangles <CMD>/<Up>/<End> into literal text. The
+-- <C-y> branch is expanded by hand, same as the Copilot <Tab> map (ai.lua:130).
 vim.keymap.set("i", "<CR>", function()
   if vim.fn.pumvisible() ~= 0 and vim.fn.complete_info({ "selected" }).selected ~= -1 then
-    return "<C-y>"
+    return vim.api.nvim_replace_termcodes("<C-y>", true, true, true)
   end
   return require("nvim-autopairs").autopairs_cr()
-end, { expr = true, desc = "Accept completion or autopairs CR" })
+end, { expr = true, replace_keycodes = false, desc = "Accept completion or autopairs CR" })
 
 vim.keymap.set({ "i", "s" }, "<C-j>", function()
   if vim.snippet.active({ direction = 1 }) then
