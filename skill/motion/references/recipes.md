@@ -222,22 +222,35 @@ For destructive actions where a plain click is too easy to fire by accident.
 }
 ```
 
-The CSS is paint only — `:active` cannot delay or cancel activation, so the button carries no `click` handler at all. The timer is what commits the action:
+The CSS is paint only — `:active` cannot delay or cancel activation, so no `click` handler fires the action directly. The timer is what commits it, armed by the primary pointer or a non-repeat Space/Enter, and only ever one at a time:
 
 ```js
 // The fill is feedback; this timer is the only thing that fires the action.
-let held;
+let held = null;
 const arm = () => {
+  if (held) return;
   held = setTimeout(confirmDestructive, 2000);
 };
-const disarm = () => clearTimeout(held);
+const disarm = () => {
+  clearTimeout(held);
+  held = null;
+};
 
-button.addEventListener("pointerdown", arm);
+button.addEventListener("pointerdown", e => {
+  if (e.isPrimary && e.button === 0) arm();
+});
 button.addEventListener("keydown", e => {
   if ((e.key === " " || e.key === "Enter") && !e.repeat) arm();
 });
 ["pointerup", "pointerleave", "pointercancel", "keyup", "blur"].forEach(evt => button.addEventListener(evt, disarm));
+
+// A synthesized activation cannot hold. Give it an ordinary confirm dialog.
+button.addEventListener("click", e => {
+  if (e.detail === 0) openConfirmDialog();
+});
 ```
+
+A hold is a physical gesture, so it can never be the only route. `detail === 0` marks a synthesized activation — voice control, screen readers, `element.click()` — which must reach an ordinary confirm dialog instead.
 
 `linear` is correct here — the fill is a progress indicator, and progress shouldn't ease.
 
