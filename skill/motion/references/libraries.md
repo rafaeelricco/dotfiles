@@ -1,6 +1,6 @@
 # Libraries
 
-Match the task to the list. Don't substitute outside it unless asked, or the task isn't covered.
+Match the task to the list. Don't substitute outside it unless asked, or the task isn't covered. The list assumes React; in a Vue, Svelte, or vanilla project, check the framework first and treat every React-only entry as not covered — fall through to step 4.
 
 ## How to use this
 
