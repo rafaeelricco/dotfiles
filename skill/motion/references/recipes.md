@@ -222,7 +222,7 @@ For destructive actions where a plain click is too easy to fire by accident.
 }
 ```
 
-The CSS is paint only — `:active` cannot delay or cancel activation, so no `click` handler fires the action directly. The timer is what commits it, armed by the primary pointer and only ever one at a time:
+The CSS is paint only — `:active` cannot delay or cancel activation, so no `click` handler fires the action directly. The control must be `<button type="button">`: a bare `<button>` inside a `<form>` is a submit button, and its native activation would fire the action on every released press, hold or no hold. The timer is what commits it, armed by the primary pointer and only ever one at a time:
 
 ```js
 // The fill is feedback; this timer is the only thing that fires the action.
