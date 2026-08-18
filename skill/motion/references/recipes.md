@@ -222,6 +222,23 @@ For destructive actions where a plain click is too easy to fire by accident.
 }
 ```
 
+The CSS is paint only — `:active` cannot delay or cancel activation, so the button carries no `click` handler at all. The timer is what commits the action:
+
+```js
+// The fill is feedback; this timer is the only thing that fires the action.
+let held;
+const arm = () => {
+  held = setTimeout(confirmDestructive, 2000);
+};
+const disarm = () => clearTimeout(held);
+
+button.addEventListener("pointerdown", arm);
+button.addEventListener("keydown", e => {
+  if ((e.key === " " || e.key === "Enter") && !e.repeat) arm();
+});
+["pointerup", "pointerleave", "pointercancel", "keyup", "blur"].forEach(evt => button.addEventListener(evt, disarm));
+```
+
 `linear` is correct here — the fill is a progress indicator, and progress shouldn't ease.
 
 ---
@@ -230,12 +247,13 @@ For destructive actions where a plain click is too easy to fire by accident.
 
 Timing individual color transitions across a tab list never quite lands. Clip instead.
 
-Duplicate the tab list. Style the copy as the active state — different background, different text color. Clip the copy so only the active tab shows, and animate the clip on change:
+Duplicate the tab list. Style the copy as the active state — different background, different text color. Clip the copy so only the active tab shows, and animate the clip on change. The copy is presentation only: mark it `aria-hidden="true"` and `inert`, so it adds no second set of focusable tabs and no duplicate accessible names.
 
 ```css
 .tabs-active-copy {
   clip-path: inset(0 60% 0 20%); /* driven by the active tab's position */
   transition: clip-path 250ms var(--ease-in-out);
+  pointer-events: none;
 }
 ```
 
@@ -248,7 +266,7 @@ The text and background change together, in perfect sync, because they're one el
 Marketing surfaces only. Don't do this to functional UI a user visits daily.
 
 ```css
-.reveal {
+.js .reveal {
   clip-path: inset(0 0 100% 0);
   transition: clip-path 600ms var(--ease-in-out);
 }
@@ -258,7 +276,7 @@ Marketing surfaces only. Don't do this to functional UI a user visits daily.
 }
 ```
 
-Trigger with `IntersectionObserver`, or Motion's `useInView` with `{ once: true, margin: "-100px" }`. Fire it once — re-animating on every scroll-by is an interface fighting its reader.
+Trigger with `IntersectionObserver`, or Motion's `useInView` with `{ once: true, margin: "-100px" }`. Fire it once — re-animating on every scroll-by is an interface fighting its reader. Add the `js` class from an inline `<head>` script (`document.documentElement.classList.add("js")`) so the clipped start state only applies once JavaScript is running; with JS off or broken, the content stays visible instead of clipped to nothing.
 
 ---
 
