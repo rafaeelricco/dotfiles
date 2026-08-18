@@ -88,8 +88,10 @@ In a framework, keep the class names and structure; only the rendering syntax ch
   transition: color 150ms ease-out;
 }
 
-.proto-picker-item:hover {
-  color: rgba(255, 255, 255, 0.85);
+@media (hover: hover) and (pointer: fine) {
+  .proto-picker-item:hover {
+    color: rgba(255, 255, 255, 0.85);
+  }
 }
 
 .proto-picker-item:active {
@@ -134,9 +136,9 @@ In a framework, keep the class names and structure; only the rendering syntax ch
 
 The contract is fixed regardless of how the harness renders:
 
-- Number keys `1–N` and `←`/`→` switch variants; `R` replays. Ignore key events when focus is in an input, textarea, select, or contenteditable, or when a modifier is held.
+- Number keys `1–N` and `←`/`→` switch variants; `R` replays. Ignore key events when focus is in an input, textarea, select, or contenteditable, when a modifier is held, when the event was already handled (`defaultPrevented`), or when it came from a keyboard-operable widget inside a variant (`tablist`, `menu`, `listbox`, `radiogroup`, `slider`) — a variant's own arrow keys must never also swap the variant.
 - Clicking an item switches to it; exactly one item carries `data-active` and `aria-current="true"` at all times, and the highlight slides to it.
-- Selection persists across reload via a URL param (`?v=2`), falling back to variant 1. The highlight takes its initial position without animating (`data-ready` is added after first paint).
+- Selection persists across reload via a URL param (`?v=2`), falling back to variant 1 when the param is missing, unparseable, or out of range. The highlight takes its initial position without animating (`data-ready` is added after first paint).
 - Switching re-mounts the variant (so entrance animations re-run); the replay key re-mounts without switching.
 
 ## Reference wiring
@@ -150,6 +152,7 @@ const picker = document.querySelector(".proto-picker");
 const highlight = picker.querySelector(".proto-picker-highlight");
 const items = [...picker.querySelectorAll(".proto-picker-item:not(.proto-picker-replay)")];
 const replay = picker.querySelector(".proto-picker-replay");
+const arrowWidgets = "[role='tablist'],[role='menu'],[role='listbox'],[role='radiogroup'],[role='slider']";
 let current = 0;
 
 function moveHighlight() {
@@ -187,6 +190,7 @@ window.addEventListener("resize", moveHighlight);
 
 document.addEventListener("keydown", e => {
   if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+  if (e.defaultPrevented || (!picker.contains(e.target) && e.target.closest?.(arrowWidgets))) return;
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const num = parseInt(e.key, 10);
   if (num >= 1 && num <= variants.length) setActive(num - 1);
@@ -195,7 +199,8 @@ document.addEventListener("keydown", e => {
   else if (e.key === "r" || e.key === "R") mount(current);
 });
 
-setActive((parseInt(new URLSearchParams(location.search).get("v"), 10) || 1) - 1);
+const requested = parseInt(new URLSearchParams(location.search).get("v"), 10);
+setActive(requested >= 1 && requested <= variants.length ? requested - 1 : 0);
 // Enable the slide only after first paint, so load doesn't animate.
 requestAnimationFrame(() => requestAnimationFrame(() => picker.setAttribute("data-ready", "")));
 ```
