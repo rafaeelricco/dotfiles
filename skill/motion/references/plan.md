@@ -70,4 +70,4 @@ imitate (token names, file placement, prop patterns):
 - One plan per finding. If two findings share every file and the same fix pattern (e.g. the same easing token swap across components), they may merge into one plan.
 - Pull every value from `bar.md` — never approximate from memory.
 - The feel check is not optional. Motion can be mechanically correct and still feel wrong; give the executor (or the human reviewing the executor's diff) concrete things to watch for in slow motion.
-- After writing plans, create or update `plans/README.md` with: a table of plans (number, title, severity, status), the recommended execution order, and any dependencies between plans.
+- After writing plans, create or update `<plan dir>/README.md` — the directory the plans went in (`plans/`, or `animation-plans/` if `plans/` was taken) — with: a table of plans (number, title, severity, status), the recommended execution order, and any dependencies between plans.
