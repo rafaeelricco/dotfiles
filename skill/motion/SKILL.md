@@ -33,4 +33,4 @@ Values live in `references/bar.md`. Load it when a job needs a number. Do not re
 `audit` writing a plan also loads `references/plan.md`.
 A toast / drawer / command menu / dropdown **component** → `lib`, not a hand-rolled `build`.
 
-Keyboard-initiated or 100+/day → no motion. Say so and stop.
+When a job would add motion: keyboard-initiated or 100+/day → no motion. Say so and stop.
