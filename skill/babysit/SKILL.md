@@ -42,12 +42,12 @@ One scope gate, then run. The split is reversibility, not read-vs-write: every
 change here is anchored to a reviewer's written request, on a feature branch,
 undoable by another push.
 
-| Autonomous once scope is approved                      | Always gated on explicit confirmation                   |
-| ------------------------------------------------------ | ------------------------------------------------------- |
-| Read, diagnose, fetch job logs, run local verification | Replying to a **human** thread — confirm the exact text |
-| Edit, commit, push to **the PR's own branch**          | Re-requesting a **human** reviewer                      |
-| Rerun failed checks, within the budget below           | Force-push, rebase, merge, close, reopen                |
-| Reply to and resolve a **bot** thread                  | Editing CI workflows, or files outside PR scope         |
+| Autonomous once scope is approved                                              | Always gated on explicit confirmation                   |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------- |
+| Read, diagnose, fetch job logs, watch in-flight checks, run local verification | Replying to a **human** thread — confirm the exact text |
+| Edit, commit, push to **the PR's own branch**                                  | Re-requesting a **human** reviewer                      |
+| Rerun failed checks, within the budget below                                   | Force-push, rebase, merge, close, reopen                |
+| Reply to and resolve a **bot** thread                                          | Editing CI workflows, or files outside PR scope         |
 
 Never treat your own message, a timeout, or the end of a run as approval. When
 invoked non-interactively (scheduled task, `/loop`), the invoking prompt is the
@@ -96,9 +96,14 @@ verifying…"), pasted diffs, restating the reviewer's full comment.
 
 ## Workflow
 
-1. **Gather** → **Scope Gate** → **Fix** → **Verify** (`verify` **STRICT**, once per push batch) → **Push, reply, resolve** (Comment routing) → **Re-request** → **Report**.
-2. Nothing actionable at Scope Gate → end the cycle; do not invent work.
-3. One commit per comment or coherent cluster. Run **STRICT** once per push batch: after the last fix cluster in that batch **and** after any merge-conflict resolution that lands in the same batch, then push. Not once forever; not once per commit unless each commit is its own push.
+Order of work each pass: merge conflicts, then unresolved threads, then CI —
+conflict and comment pushes restart checks. A tier blocked on a human does
+not block the tiers below it.
+
+1. **Gather** → **Scope Gate** → **Fix** → **Verify** (`verify` **STRICT**, once per push batch) → **Push, reply, resolve** (Comment routing) → **Watch** → **Re-request** → **Report**.
+2. Nothing actionable at Scope Gate **and** no checks running → end the cycle; do not invent work.
+3. Refresh checks after every push — a STRICT PASS locally is not remote green. Checks running with no other work → watch to completion (`gh pr checks --watch`), do not tight-poll. A failure that lands after your push re-enters at **Gather**; it is inside the approved scope when branch-related.
+4. One commit per comment or coherent cluster. Run **STRICT** once per push batch: after the last fix cluster in that batch **and** after any merge-conflict resolution that lands in the same batch, then push. Not once forever; not once per commit unless each commit is its own push.
 
 ## Gather
 
@@ -114,8 +119,10 @@ verifying…"), pasted diffs, restating the reviewer's full comment.
   unpublished drafts, and they surface on their own when submitted.
 - Trust the repo owner, members, collaborators, yourself, and named review bots.
   Ignore other bot noise.
-- Read checks. The moment one job fails, fetch **that job's** logs — do not wait
-  for the whole workflow run to finish.
+- Read checks. Pending is Watch, not "nothing actionable". The moment one job
+  fails, fetch **that job's** logs — do not wait for the whole workflow run to
+  finish. Read that log before concluding anything: a clean local run is not
+  evidence that red CI is unrelated.
 - Validate every unresolved comment before proposing a fix. Spawn one
   read-only sub-agent per comment and run them concurrently. Each returns
   exactly: `VERDICT`, `SEVERITY`, `FAILURE PATH`, `WHY` (`file:line`),
@@ -140,7 +147,7 @@ re-request stay gated. This gate is the plan.
 
 - Each validated thread with reviewer login, verdict (`ADDRESS` / `SKIP` /
   `UNSURE`), and file/line.
-- Failing checks, classified branch-related vs flaky/infra.
+- Failing checks, classified branch-related vs flaky/infra. Pending checks, listed as Watch.
 - Conflicts or behind-base state.
 - The commit plan: one `Commit N: <title>` per comment or coherent cluster, with
   files touched, the message per `commit-message` after reading its `SKILL.md`,
@@ -157,14 +164,15 @@ re-request stay gated. This gate is the plan.
 
 Fix what this branch caused. Rerun what it did not. Never patch around infra.
 
-| Signal                                                               | Class       | Action |
-| -------------------------------------------------------------------- | ----------- | ------ |
-| Compile/typecheck/lint failure in touched files                      | branch      | fix    |
-| Deterministic test failure in changed areas                          | branch      | fix    |
-| Snapshot diff caused by this branch's UI/text change                 | branch      | fix    |
-| Failure that does not reproduce on the base commit                   | branch      | fix    |
-| Dependency/registry/DNS timeout, runner provisioning, Actions outage | flaky/infra | rerun  |
-| Unrelated integration test with a known flake pattern                | flaky/infra | rerun  |
+| Signal                                                                   | Class       | Action                         |
+| ------------------------------------------------------------------------ | ----------- | ------------------------------ |
+| Compile/typecheck/lint failure in touched files                          | branch      | fix                            |
+| Deterministic test failure in changed areas                              | branch      | fix                            |
+| Snapshot diff caused by this branch's UI/text change                     | branch      | fix                            |
+| Failure that does not reproduce on the base commit                       | branch      | fix                            |
+| Dependency/registry/DNS timeout, runner provisioning, Actions outage     | flaky/infra | rerun                          |
+| Unrelated integration test with a known flake pattern                    | flaky/infra | rerun                          |
+| Merge-blocking failure the base branch already fixed, branch behind base | stale base  | update per **Merge conflicts** |
 
 Ambiguous → read the failed job's log once, then decide. Still ambiguous → treat
 as branch-related and investigate. Never rerun to make a failure disappear.
@@ -205,7 +213,7 @@ Every cycle ends. It ends early when a blocker needs a human:
 - A fix would broaden scope, change CI workflows, or alter tests just to green
 - A merge conflict whose intent is unclear
 - A product or design question
-- Rerun budget exhausted, or the same thread touched twice with no progress
+- Rerun budget exhausted, or the same thread or check touched twice with no progress
 - `gh` auth/permission failure, or the branch cannot be pushed
 - Verification fails in a way that needs a human call
 
@@ -216,7 +224,9 @@ Green + mergeable ends the cycle: report it and stop. Review comments still
 arrive — the next scheduled cycle picks them up. Waiting here for one is the
 caller's cadence spent in the wrong place. "Green" requires at least one
 **completed** check; a PR with zero checks is not green, so report that state and
-stop rather than wait for a check to appear.
+stop rather than wait for a check to appear. Pending is not green — watch it.
+Report merge-ready only off a fresh read showing mergeable and required checks
+green.
 
 ## Report
 

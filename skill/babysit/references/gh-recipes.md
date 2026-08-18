@@ -58,6 +58,12 @@ gh pr checks N --json name,state,bucket,link,workflow || true
 `gh pr checks` exits non-zero when checks are pending or failing. Without
 `|| true` the command reads as an error on exactly the path that matters.
 
+Higher tiers clear and checks still running — wait once, do not poll:
+
+```bash
+gh pr checks N --watch
+```
+
 ## Failed job logs — do not wait for the run to finish
 
 ```bash
