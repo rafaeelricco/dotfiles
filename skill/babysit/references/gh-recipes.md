@@ -58,6 +58,15 @@ gh pr checks N --json name,state,bucket,link,workflow || true
 `gh pr checks` exits non-zero when checks are pending or failing. Without
 `|| true` the command reads as an error on exactly the path that matters.
 
+Higher tiers clear and checks still running — wait once, do not poll:
+
+```bash
+gh pr checks N --watch --fail-fast
+```
+
+`--fail-fast` exits watch mode on the first failed check, so a failure goes
+straight back to Gather instead of waiting on the slowest job in the matrix.
+
 ## Failed job logs — do not wait for the run to finish
 
 ```bash
