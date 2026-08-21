@@ -13,20 +13,16 @@ disable-model-invocation: true
 
 # GitHub Issue Drafter
 
-Turn incomplete notes into GitHub issues that are easy to discuss, implement,
-and close. Keep the issue diagnostic rather than prescriptive, and make
-completion criteria objectively testable.
+Keep the issue diagnostic rather than prescriptive. Completion criteria must be
+objectively testable.
 
 ## Workflow
 
-1. Inspect what the user already provided before asking questions.
-2. Read `references/template.md` for the output format. Treat it as the source
-   of truth.
-3. Read `references/rules.md` for section-writing rules.
-4. Read `references/validation-patterns.md` when validation scenarios need
-   concrete test shapes.
-5. Read `references/examples.md` only when a nearby example would help structure
-   a similar issue.
+1. Read `references/template.md` for the output format.
+2. Read `references/rules.md` for section-writing rules.
+3. Read `references/validation-patterns.md` when validation needs concrete test
+   shapes.
+4. Read `references/examples.md` only when a nearby example would help.
 
 ## Operating Rules
 
@@ -38,7 +34,7 @@ completion criteria objectively testable.
 
 ### If the User Provides Only a Topic
 
-Ask for the smallest missing set of inputs needed to draft the issue:
+Ask for the smallest missing set:
 
 - What is wrong or missing now.
 - Why it matters.
@@ -47,8 +43,8 @@ Ask for the smallest missing set of inputs needed to draft the issue:
 
 ### If the User Provides Rough Notes
 
-Reorganize the notes into the template, tighten wording, and fill only the gaps
-that are directly supported by the provided material.
+Reorganize the notes into the template and fill only the gaps that are directly
+supported by the provided material.
 
 ### If the User Provides a Partial Issue
 
@@ -59,7 +55,5 @@ Criteria` and `Validation` so they are not redundant.
 
 Always return:
 
-1. `Title: ...` as issue metadata.
+1. `Title: ...`
 2. `Body:` followed by the Markdown issue body using `references/template.md`.
-
-Include `References` in the body only when the user supplied references.

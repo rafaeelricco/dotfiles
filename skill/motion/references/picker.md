@@ -1,8 +1,8 @@
 # The Picker
 
-The picker's appearance is **not a design decision** — it is this spec. Copy the markup, CSS, and wiring below verbatim; the only values that change per run are the variant names and count. It stays identical across every project so it always reads as harness chrome, never as part of the design being judged. Do not restyle it with the project's tokens, fonts, or colors.
+The picker's appearance is **not a design decision** — it is this spec. Copy the markup, CSS, and wiring below verbatim; the only values that change per run are the variant names and count. Do not restyle it with the project's tokens, fonts, or colors.
 
-It is a floating dark pill, bottom-center. Dark glass works on top of any page — light or dark — which is why it is not theme-aware.
+Floating dark pill, bottom-center. Not theme-aware.
 
 ## Markup
 
@@ -127,14 +127,12 @@ In a framework, keep the class names and structure; only the rendering syntax ch
 
 ## Rules
 
-- **Verbatim.** These values are the spec. No project fonts, no brand colors, no theme switching, no extra shadows or borders.
-- **The highlight slides; the variant swap stays instant.** The active pill animates between buttons (250ms, strong ease-out) as spatial feedback on the picker itself — but the variant being previewed still switches with no transition. The `width` transition is a deliberate exception to the transform/opacity rule: the element is 28px tall, absolutely positioned, and has no layout dependents, so the paint cost is negligible.
+- **Verbatim.** No extra shadows or borders.
+- **The highlight slides; the variant swap stays instant.** Active pill 250ms strong ease-out; previewed variant switches with no transition. The `width` transition is a deliberate exception to transform/opacity: 28px tall, absolutely positioned, no layout dependents.
 - **One allowed modification:** if a variant occupies the bottom-center of the screen (a toast stack, a bottom sheet, a dock), set `data-position="top"` so the picker never covers the work. Nothing else about it may move or change.
 - **Replay is conditional.** Render the replay button and its divider only when at least one variant has an entrance or state animation worth re-triggering; a static comparison gets a shorter pill.
 
 ## Behavior contract
-
-The contract is fixed regardless of how the harness renders:
 
 - Number keys `1–N` and `←`/`→` switch variants; `R` replays. Ignore key events when focus is in an input, textarea, select, or contenteditable, when a modifier is held, when the event was already handled (`defaultPrevented`), or when it came from a keyboard-operable widget inside a variant (`tablist`, `menu`, `listbox`, `radiogroup`, `slider`) — a variant's own arrow keys must never also swap the variant.
 - Clicking an item switches to it; exactly one item carries `data-active` and `aria-current="true"` at all times, and the highlight slides to it.

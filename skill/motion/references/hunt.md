@@ -23,7 +23,7 @@ Every candidate must survive all four, in order. Record the answer.
 
 **Group** — occasional grid/list pops in at once → 30–80ms stagger; never block input.
 
-**Gesture** — snap with no physics → spring `{ duration: 0.5, bounce: 0.2 }`, velocity dismiss `> ~0.11`, rubber-band at bounds.
+**Gesture** — snap with no physics → bar spring, velocity dismiss `> ~0.11`, rubber-band at bounds.
 
 **Delight** — rare first-run / empty / success rendered flat. Only tier that may bounce or go long.
 

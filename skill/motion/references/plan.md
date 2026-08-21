@@ -1,6 +1,6 @@
 # Plan Template
 
-Every plan written by the `audit` job follows this structure. The executor may be a less capable model with zero context and zero taste — the plan must contain everything, exactly. No references to "the audit above" or "the easing we discussed."
+Every plan written by the `audit` job follows this structure. The plan must contain everything, exactly. No references to "the audit above" or "the easing we discussed."
 
 ```markdown
 # NNN — <Short imperative title>
@@ -69,5 +69,4 @@ imitate (token names, file placement, prop patterns):
 
 - One plan per finding. If two findings share every file and the same fix pattern (e.g. the same easing token swap across components), they may merge into one plan.
 - Pull every value from `bar.md` — never approximate from memory.
-- The feel check is not optional. Motion can be mechanically correct and still feel wrong; give the executor (or the human reviewing the executor's diff) concrete things to watch for in slow motion.
 - After writing plans, create or update `<plan dir>/README.md` — the directory the plans went in (`plans/`, or `animation-plans/` if `plans/` was taken) — with: a table of plans (number, title, severity, status), the recommended execution order, and any dependencies between plans.

@@ -2,7 +2,7 @@
 
 ## Title
 
-- Keep it short and GitHub-friendly.
+- Keep it short.
 - Prefer a direct verb or outcome.
 - Avoid implementation detail in the title unless the user already framed it that way.
 
@@ -11,13 +11,12 @@
 - State the current issue, gap, inconsistency, or missing behavior.
 - Keep it observable and objective.
 - Do not include proposed solutions.
-- Include only context needed to understand the current state.
 
 ## Direction
 
 - Explain how to think about the fix or what shape the outcome should have.
 - Include small before/after snippets, pseudo-diffs, or API shapes only when they reduce ambiguity.
-- Keep snippets short; do not turn this section into a full implementation.
+- Do not turn this section into a full implementation.
 - Use code fences only for snippets inside `Direction`, not for the whole body.
 - Mention tradeoffs only when they are essential to prevent a wrong implementation.
 - Do not create separate `Target Shape`, `Preview`, `Tradeoffs`, or `Suggested Approach` sections.
@@ -32,7 +31,6 @@
 Good:
 
 - `The customer list supports filtering by city.`
-- `Shared rules are defined in a single source of truth.`
 
 Bad:
 
@@ -44,21 +42,17 @@ Bad:
 - Write explicit test scenarios.
 - Each line should prove or falsify one expected behavior.
 - Prefer user-visible inputs and results.
-- Include combined-filter behavior, reset behavior, and empty-state behavior when relevant.
-- For structural or documentation work, validate the resulting artifact directly.
+- Concrete shapes: `validation-patterns.md`.
 
 Good:
 
 - `When city = Sao Paulo, the list must show only customers from Sao Paulo.`
-- `When the shared model is referenced, duplicated password-policy text must no longer appear in portal-specific files.`
 
 Bad:
 
 - `Manual review completed.`
-- `QA tested it.`
 
 ## References
 
 - Include only real references from the user or inspected materials.
 - Do not fabricate links, paths, PRs, or issue IDs.
-- Omit the entire section when no references were supplied.
