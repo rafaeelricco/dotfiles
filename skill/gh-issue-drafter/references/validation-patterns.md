@@ -1,7 +1,5 @@
 # Validation Patterns
 
-Use these patterns to turn broad requests into objective validation scenarios.
-
 ## Filter or search features
 
 - When filter `X` is applied, only matching results must be shown.

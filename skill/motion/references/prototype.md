@@ -1,6 +1,6 @@
 # Prototype
 
-Diverge. Three tints of one idea waste the picker. Each variant is a shippable direction on a named axis. Every variant meets `bar.md`.
+Diverge. Each variant is a shippable direction on a named axis. Every variant meets `bar.md`.
 
 It does not review (`review`), audit (`audit`), or pick libraries (`lib`).
 

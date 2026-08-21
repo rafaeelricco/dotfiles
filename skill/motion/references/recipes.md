@@ -1,14 +1,12 @@
 # Animation Recipes
 
-Ready-to-build implementations for the cases that come up most. Start from the recipe, then adapt — don't rebuild from scratch.
+Start from the recipe, then adapt — don't rebuild from scratch.
 
 Curves are the `--ease-out`, `--ease-in-out`, and `--ease-drawer` tokens in `bar.md`.
 
 ---
 
 ## Button press
-
-Any pressable element. Instant feedback that the interface heard the user.
 
 ```css
 .button {
@@ -20,15 +18,11 @@ Any pressable element. Instant feedback that the interface heard the user.
 }
 ```
 
-`scale()` scales children too — the label and icons come along, which is what makes it read as a physical press.
-
 No hover gating needed here: `:active` is a real press on touch. Gate any `:hover` styling separately.
 
 ---
 
 ## Dropdown, popover, menu, select
-
-Scales out of its trigger, not out of thin air.
 
 ```css
 .popover {
@@ -45,13 +39,9 @@ Scales out of its trigger, not out of thin air.
 }
 ```
 
-The `transform-origin` is the whole point — the panel should look like it came out of the thing you clicked.
-
 ---
 
 ## Tooltip
-
-Same shape as a popover, faster, plus the detail most implementations miss.
 
 ```css
 .tooltip {
@@ -117,8 +107,6 @@ Animate the backdrop's opacity alongside it so they read as one surface.
 }
 ```
 
-This is how Vaul hides a drawer before animating it in.
-
 Add drag and it becomes a gesture problem — see **Drag to dismiss** below.
 
 ---
@@ -140,7 +128,7 @@ Add drag and it becomes a gesture problem — see **Drag to dismiss** below.
 }
 ```
 
-- `ease` rather than `ease-out`, slightly slower than typical UI: Sonner reads as elegant partly because its motion is tuned to the component's personality rather than to the generic UI budget.
+- `ease` rather than `ease-out`, slightly slower than typical UI.
 - If `@starting-style` isn't available, fall back to the mount flag:
 
 ```jsx
@@ -150,7 +138,7 @@ useEffect(() => {
 // <div data-mounted={mounted}>
 ```
 
-When toasts stack and the list reflows, the opacity change has to work against the height change. There's no formula for that pair — adjust until it feels right, then check it again the next day.
+When toasts stack and the list reflows, the opacity change has to work against the height change. No formula — tune the pair.
 
 ---
 
@@ -165,7 +153,7 @@ When toasts stack and the list reflows, the opacity change has to work against t
 }
 ```
 
-Keep it short — this is one of the few animations that costs layout on every frame, so a long duration is expensive as well as sluggish. Measure the content height in JS (or use a headless primitive that supplies it) rather than animating to `auto`.
+Measure the content height in JS (or use a headless primitive that supplies it) rather than animating to `auto`.
 
 ---
 
@@ -225,7 +213,6 @@ For destructive actions where a plain click is too easy to fire by accident.
 The CSS is paint only — `:active` cannot delay or cancel activation, so no `click` handler fires the action directly. The control must be `<button type="button">`: a bare `<button>` inside a `<form>` is a submit button, and its native activation would fire the action on every released press, hold or no hold. The timer is what commits it, armed by the primary pointer and only ever one at a time:
 
 ```js
-// The fill is feedback; this timer is the only thing that fires the action.
 let held = null;
 const arm = () => {
   if (held) return;
@@ -241,14 +228,12 @@ button.addEventListener("pointerdown", e => {
 });
 ["pointerup", "pointerleave", "pointercancel", "blur"].forEach(evt => button.addEventListener(evt, disarm));
 
-// Keyboard, voice control, and screen readers all activate with `detail === 0`
-// and cannot hold. Route them to an ordinary confirm dialog.
 button.addEventListener("click", e => {
   if (e.detail === 0) openConfirmDialog();
 });
 ```
 
-A hold is a pointer gesture, so it can never be the only route. Keyboard, voice control, screen readers, and `element.click()` all arrive as a click with `detail === 0` and cannot hold — send them to an ordinary confirm dialog, which keeps the action reachable and still costs a deliberate second step. Do not also arm the timer from `keydown`: Enter fires its click on keydown and Space on keyup, so a key that both arms the hold and opens the dialog can fire the action twice, or fire it after the user cancels.
+A hold is a pointer gesture, so it can never be the only route. Keyboard, voice control, screen readers, and `element.click()` all arrive as a click with `detail === 0` and cannot hold — send them to an ordinary confirm dialog. Do not also arm the timer from `keydown`: Enter fires its click on keydown and Space on keyup, so a key that both arms the hold and opens the dialog can fire the action twice, or fire it after the user cancels.
 
 `linear` is correct here — the fill is a progress indicator, and progress shouldn't ease.
 
@@ -267,8 +252,6 @@ Duplicate the tab list. Style the copy as the active state — different backgro
   pointer-events: none;
 }
 ```
-
-The text and background change together, in perfect sync, because they're one element being revealed rather than two colors being interpolated.
 
 ---
 
@@ -293,8 +276,6 @@ Trigger with `IntersectionObserver`, or Motion's `useInView` with `{ once: true,
 
 ## Drag to dismiss
 
-The gesture recipe. Springs, not durations, because the user can reverse mid-motion.
-
 ```js
 // Dismiss on a flick, not just on distance
 const timeTaken = Date.now() - dragStartTime.current;
@@ -311,18 +292,12 @@ if (Math.abs(swipeAmount) >= SWIPE_THRESHOLD || velocity > 0.11) {
 element.style.transform = `translateY(${distance}px)`;
 ```
 
-Four details that separate a good drag from a bad one:
-
 - **Pointer capture** once the drag starts, so it continues when the pointer leaves the element's bounds.
 - **Multi-touch protection** — `if (isDragging) return` on new touch points, or switching fingers mid-drag makes the element jump.
-- **Damping past boundaries** — dragging beyond a natural edge moves the element less the further it goes. Real things slow before they stop.
+- **Damping past boundaries** — dragging beyond a natural edge moves the element less the further it goes.
 - **Friction, not a wall** — allow the over-drag with rising resistance rather than refusing it.
 
-Settle with a spring so an interrupted drag keeps its velocity:
-
-```js
-{ type: "spring", duration: 0.5, bounce: 0.2 }
-```
+Settle with the bar default spring so an interrupted drag keeps its velocity.
 
 ---
 
@@ -343,13 +318,11 @@ When two states overlap visibly during a transition and no amount of easing or d
 }
 ```
 
-Without blur the eye reads two distinct objects swapping. Blur blends them into one perceived transformation. Keep it under 20px — heavy blur is expensive, especially in Safari.
+Keep it under 20px — heavy blur is expensive, especially in Safari.
 
 ---
 
 ## Programmatic, without a library
-
-When the motion needs JS control but not a dependency, WAAPI gives you CSS-grade performance:
 
 ```js
 element.animate([{ clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0 0)" }], {
@@ -358,5 +331,3 @@ element.animate([{ clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0 0)"
   easing: "cubic-bezier(0.77, 0, 0.175, 1)",
 });
 ```
-
-Hardware-accelerated, interruptible, no bundle cost.

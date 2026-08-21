@@ -9,8 +9,7 @@ Body:
 
 ## Situation
 
-The customer list does not support filtering by city, which makes it harder to locate customers
-from a specific location quickly.
+The customer list does not support filtering by city.
 
 ## Direction
 

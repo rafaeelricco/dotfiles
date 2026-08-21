@@ -17,30 +17,27 @@ One cycle over one open PR: gather state, present scope, then fix → verify →
 commit → push → reply → resolve → re-request, until the PR is merge-ready or a
 blocker needs a human. Never merges.
 
-Re-running is safe — every cycle re-reads state from GitHub and holds nothing
-locally. For repeated runs the caller schedules them (`/loop`, a scheduled
-task). This skill owns one cycle, not the cadence.
+Re-run is safe — re-read GitHub, hold nothing locally. Caller schedules
+repeats (`/loop`, scheduled task). This skill owns one cycle, not cadence.
 
 ## Non-goals
 
 - Never merge, force-push, rebase, rewrite history, or touch branch protection.
 - Never edit CI workflow files, loosen test expectations, or change unrelated
   code to make a check pass.
-- Not a code reviewer (`/code-review`), not a change validator (`verify` — load it,
-  do not reimplement; always **STRICT**), not a PR body writer (`pr-body`), not the create path
-  (`create-pr`), not a recap poster (`visual-recap`). Commit format belongs to
-  `commit-message`. Before every commit, read `commit-message`'s `SKILL.md`.
-  Invocation alone is not a load. Thread-reply and re-request shape for
-  babysit live in **Comment routing** and `references/thread-reply.md` /
-  `references/review-prompt.md` — not in those skills.
-- Not a scheduler. Not multi-PR orchestration — stacked-PR sequencing and
-  project-specific verification belong in the invoking prompt.
+- Not `/code-review`, not `verify` (load it, do not reimplement; always
+  **STRICT**), not `pr-body`, not `create-pr`, not `visual-recap`. Commit
+  format belongs to `commit-message`. Before every commit, read
+  `commit-message`'s `SKILL.md`. Invocation alone is not a load. Thread-reply
+  and re-request shape live in **Comment routing** and
+  `references/thread-reply.md` / `references/review-prompt.md` — not in those
+  skills.
+- Not a scheduler. Not multi-PR — stacked-PR sequencing and project-specific
+  verification belong in the invoking prompt.
 
 ## Autonomy
 
-One scope gate, then run. The split is reversibility, not read-vs-write: every
-change here is anchored to a reviewer's written request, on a feature branch,
-undoable by another push.
+One scope gate, then run.
 
 | Autonomous once scope is approved                                              | Always gated on explicit confirmation                   |
 | ------------------------------------------------------------------------------ | ------------------------------------------------------- |
@@ -55,10 +52,10 @@ scope grant: report instead of asking, and stop rather than guess.
 
 ## Comment routing
 
-Every outbound PR comment (thread reply or re-request) is high-signal. Match
-**author class × action**, load the ref before drafting, post only that shape.
-Fill reviewer-specific slots from the **known bots** map (or confirmed human
-text). No map entry and not human → do not invent; surface at Scope Gate or stop.
+Match **author class × action**, load the ref before drafting, post only that
+shape. Fill reviewer-specific slots from the **known bots** map (or confirmed
+human text). No map entry and not human → do not invent; surface at Scope Gate
+or stop.
 
 | Author class | Action                               | Ref / body                                                 | Autonomy         |
 | ------------ | ------------------------------------ | ---------------------------------------------------------- | ---------------- |
@@ -69,16 +66,14 @@ text). No map entry and not human → do not invent; surface at Scope Gate or st
 | human        | any reply or re-request              | confirm exact text; reply shape may follow thread-reply.md | always gated     |
 | unknown bot  | any                                  | report; do not invent a trigger or template                | stop / ask       |
 
-**Author class** from reviewer login + account type (GraphQL thread:
-`author.login` + `author.__typename`; REST reviews / issue comments:
-`user.login` + `user.type`). Gather both fields — see `references/gh-recipes.md`.
-Normalize first: strip a trailing `[bot]` suffix, then match.
+**Author class** from reviewer login + account type. Gather both — see
+`references/gh-recipes.md`. Normalize first: strip a trailing `[bot]` suffix,
+then match.
 
 1. Normalized login matches a **known bots** row (or the repo's documented
    alias for that bot) → known bot.
-2. Account is human (`user.type` / `author.__typename` is User, not Bot/App)
-   → human. Always confirmation-gated for reply/re-request — association does
-   not change the class.
+2. Account is human (`User`, not Bot/App) → human. Always confirmation-gated
+   for reply/re-request — association does not change the class.
 3. Else → unknown bot (stop / ask; do not invent a trigger).
 
 | Bot    | login (match)             | `<mention-line>` for re-request               |
@@ -87,9 +82,8 @@ Normalize first: strip a trailing `[bot]` suffix, then match.
 | Cubic  | `cubic-dev-ai`            | `@cubic-dev-ai review this PR`                |
 | Cursor | `cursor`                  | _(none — report only; no re-request trigger)_ |
 
-A filled `<mention-line>` is required to re-request. Cursor has none —
-report only; omit it from the re-request set. Never post
-`review-prompt.md` without a mention-line.
+Never post `review-prompt.md` without a filled `<mention-line>`. Cursor has
+none — report only; omit it from the re-request set.
 
 Bans on every reply: thanks, LGTM, "as discussed", status theater ("pushed,
 verifying…"), pasted diffs, restating the reviewer's full comment.
@@ -100,7 +94,7 @@ Order of work each pass: merge conflicts, then unresolved threads, then CI —
 conflict and comment pushes restart checks. A tier blocked on a human does
 not block the tiers below it.
 
-1. **Gather** → **Scope Gate** → **Fix** → **Verify** (`verify` **STRICT**, once per push batch) → **Push, reply, resolve** (Comment routing) → **Watch** → **Re-request** → **Report**.
+1. **Gather** → **Scope Gate** → **Fix** → **Verify** (`verify` **STRICT**) → **Push, reply, resolve** (Comment routing) → **Watch** → **Re-request** → **Report**.
 2. Nothing actionable at Scope Gate **and** no checks running → end the cycle; do not invent work.
 3. Refresh checks after every push — a STRICT PASS locally is not remote green. Checks running with no other work → watch to completion (`gh pr checks --watch --fail-fast`), do not tight-poll. A failure that lands after your push re-enters at **Gather**; it is inside the approved scope when branch-related.
 4. One commit per comment or coherent cluster. Run **STRICT** once per push batch: after the last fix cluster in that batch **and** after any merge-conflict resolution that lands in the same batch, then push. Not once forever; not once per commit unless each commit is its own push.
@@ -115,8 +109,7 @@ not block the tiers below it.
 - Read unresolved, non-outdated review threads: body plus the minimum
   file/line/URL context. Never dump whole JSON payloads.
 - Three sources: inline review threads, review submissions, PR issue comments.
-  Drop reviews in `PENDING` state and their inline comments — they are
-  unpublished drafts, and they surface on their own when submitted.
+  Drop `PENDING` reviews and their inline comments — unpublished drafts.
 - Trust the repo owner, members, collaborators, yourself, and named review bots.
   Ignore other bot noise.
 - Read checks. Pending is Watch, not "nothing actionable". The moment one job
@@ -162,7 +155,7 @@ re-request stay gated. This gate is the plan.
 
 ## CI classification
 
-Fix what this branch caused. Rerun what it did not. Never patch around infra.
+Never patch around infra.
 
 | Signal                                                                   | Class       | Action                         |
 | ------------------------------------------------------------------------ | ----------- | ------------------------------ |
@@ -221,8 +214,7 @@ An UNSURE (bug-vs-intent) finding is not an early-stop: report it, leave
 that thread blocked, and finish granted ADDRESS and SKIP work.
 
 Green + mergeable ends the cycle: report it and stop. Review comments still
-arrive — the next scheduled cycle picks them up. Waiting here for one is the
-caller's cadence spent in the wrong place. "Green" requires at least one
+arrive — the next scheduled cycle picks them up. "Green" requires at least one
 **completed** check; a PR with zero checks is not green, so report that state and
 stop rather than wait for a check to appear. Pending is not green — watch it.
 Report merge-ready only off a fresh read showing mergeable and required checks

@@ -1,7 +1,7 @@
 # Output Template
 
-Always return a separate title before the Markdown body. Use the title to name
-the GitHub issue; do not include it inside the body.
+Always return a separate title before the Markdown body. Do not include it
+inside the body.
 
 The fenced block below shows the shape only. In the final answer, return plain
 Markdown and do not wrap the whole output or body in a code fence.
