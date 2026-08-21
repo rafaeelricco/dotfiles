@@ -15,7 +15,7 @@ One home per fact. No new sections. No hypotheticals.
 
 Dir = argument after `/compress-skill`, else the path the user named.
 Need `SKILL.md`. Missing → STOP.
-Read `SKILL.md` + `references/` only. `wc -w` each file.
+Read `SKILL.md` + `references/` + instructional files it links to. `wc -w` each.
 
 Never write the target dir until the user says apply.
 
@@ -36,9 +36,9 @@ drop a STOP or never-do.
 Skip if the skill is pure reference (API/tables only); say so.
 
 Else copy the dir aside, apply proposed cuts only in that copy. Never touch
-the original. Same user prompt on original vs copy (subagents, or a local
-compare if spawn is unavailable). Check: same STOPs, same never-do, same
-output headings/fields. Divergence → revert that cut, list it.
+the original. Trigger the target on original vs copy, loaded separately
+(subagents); spawn unavailable → compare the two trees. Check: same STOPs,
+same never-do, same output headings/fields. Divergence → revert that cut, list it.
 
 ## Report (before any write to the target)
 
