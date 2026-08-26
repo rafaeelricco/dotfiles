@@ -4,7 +4,7 @@ Keeping a development environment reproducible should not require maintaining
 the same AI instructions in several vendor-specific trees.
 
 This repository is the source of truth for my Neovim, PowerShell, shell,
-Claude Code, Codex, Grok, and Cursor setup. AI tools share one generic `INSTRUCTIONS.md` and
+Claude Code, Codex, Grok, Cursor, and Hermes setup. AI tools share one generic `INSTRUCTIONS.md` and
 one `skill/` tree, installed through safe, repeatable symlinks. A skill's body never
 loads until it is invoked, so the tree is cheap to keep whole; skills that should
 never fire on their own carry `disable-model-invocation: true`, which keeps them out
@@ -17,7 +17,7 @@ of the model's listing while leaving `/<name>` available to me.
 
 ## Quick Install
 
-**Prerequisites:** Git. Claude Code 2.1.203+, Codex, and Grok are optional; each is
+**Prerequisites:** Git. Claude Code 2.1.203+, Codex, Grok, and Hermes are optional; each is
 configured only when its CLI is available on `PATH`. Cursor is configured when
 `~/.cursor` exists, since it ships no CLI. Windows also requires
 PowerShell 7. Developer Mode or an elevated shell is required when agent or
@@ -65,14 +65,14 @@ The default clone is `~/.dotfiles`. Use `--dir PATH` / `-Dir PATH` or
 `DOTFILES_DIR` to override it. Use `--yes` / `-Yes` to back up conflicts
 without prompting, `--override` / `-Override` to permanently remove conflicts
 without backups, `--skip-claude` / `-SkipClaude`, `--skip-codex` / `-SkipCodex`,
-`--skip-grok` / `-SkipGrok`, and `--skip-cursor` / `-SkipCursor` to skip
-individual agents, and `-SkipTerminal` on
+`--skip-grok` / `-SkipGrok`, `--skip-cursor` / `-SkipCursor`, and
+`--skip-hermes` / `-SkipHermes` to skip individual agents, and `-SkipTerminal` on
 Windows to skip PowerShell profile / Windows Terminal setup. Skip flags may be
 combined. Install and update preserve existing configuration for absent or
 skipped CLIs. Backup and override modes cannot be used together.
 
 These scripts configure agent instructions and skills; they do not install,
-remove, or authenticate Claude Code, Codex, Grok, or Cursor. On Windows they
+remove, or authenticate Claude Code, Codex, Grok, Cursor, or Hermes. On Windows they
 also copy the PowerShell profile, link the theme, and merge managed Windows Terminal
 keys (unless `-SkipTerminal`).
 
@@ -135,14 +135,17 @@ Repository validation and filesystem failures exit 1; Bash argument errors exit
 
 ## Installed Paths
 
-| Source            | Claude Code               | Codex                     | Grok                    | Cursor                    |
-| ----------------- | ------------------------- | ------------------------- | ----------------------- | ------------------------- |
-| `INSTRUCTIONS.md` | `~/.claude/CLAUDE.md`     | `~/.codex/AGENTS.md`      | `~/.grok/AGENTS.md`     | not installed             |
-| `skill/<name>`    | `~/.claude/skills/<name>` | `~/.agents/skills/<name>` | `~/.grok/skills/<name>` | `~/.cursor/skills/<name>` |
+| Source            | Claude Code               | Codex                     | Grok                    | Cursor                    | Hermes                    |
+| ----------------- | ------------------------- | ------------------------- | ----------------------- | ------------------------- | ------------------------- |
+| `INSTRUCTIONS.md` | `~/.claude/CLAUDE.md`     | `~/.codex/AGENTS.md`      | `~/.grok/AGENTS.md`     | not installed             | not installed             |
+| `skill/<name>`    | `~/.claude/skills/<name>` | `~/.agents/skills/<name>` | `~/.grok/skills/<name>` | `~/.cursor/skills/<name>` | `~/.hermes/skills/<name>` |
 
 Each column is created or synchronized only when its CLI is detected on `PATH`
 and not explicitly skipped; Cursor is keyed on `~/.cursor` existing instead.
 Existing managed links remain untouched otherwise.
+Hermes is skills-only: per-skill links into the existing `$HERMES_HOME/skills`
+directory (never replace that tree; bundled/hub skills stay). Windows default
+home is `%LOCALAPPDATA%\hermes` instead of `~/.hermes`.
 
 Cursor gets skills only. Its user-global rules live in application settings
 rather than on disk, so there is no destination for `INSTRUCTIONS.md`. Cursor
@@ -178,7 +181,7 @@ wsl -d Ubuntu-24.04 -- bash /mnt/<drive>/.../dotfiles/scripts/windows/setup-wsl-
 
 Docker: install **Docker Desktop** on Windows (not docker-ce inside the distro).
 
-`CLAUDE_CONFIG_DIR`, `CODEX_HOME`, and `GROK_HOME` are honored; Cursor has no
+`CLAUDE_CONFIG_DIR`, `CODEX_HOME`, `GROK_HOME`, and `HERMES_HOME` are honored; Cursor has no
 equivalent override and always uses `~/.cursor`. The former Claude
 marketplace is retired; existing marketplace installations are not removed
 automatically.
@@ -193,7 +196,7 @@ installation first, then run the checked-out installer with `--local` / `-Local`
 No install command automatically deletes an existing repository.
 
 Managed state survives update and is deleted with the clone. If an older
-installation used a custom `CLAUDE_CONFIG_DIR`, `CODEX_HOME`, or `GROK_HOME`, supply the same
+installation used a custom `CLAUDE_CONFIG_DIR`, `CODEX_HOME`, `GROK_HOME`, or `HERMES_HOME`, supply the same
 variable once when running the updated installer, updater, or uninstaller so
 that location can be recorded or cleaned safely.
 

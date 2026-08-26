@@ -206,6 +206,12 @@ function Get-Candidates {
     $codexHome = if ($env:CODEX_HOME) { [System.IO.Path]::GetFullPath($env:CODEX_HOME) } else { $defaultCodex }
     $defaultGrok = Join-Path $HOME '.grok'
     $grokHome = if ($env:GROK_HOME) { [System.IO.Path]::GetFullPath($env:GROK_HOME) } else { $defaultGrok }
+    $defaultHermes = if ($IsWindows -and -not [string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) {
+        Join-Path $env:LOCALAPPDATA 'hermes'
+    } else {
+        Join-Path $HOME '.hermes'
+    }
+    $hermesHome = if ($env:HERMES_HOME) { [System.IO.Path]::GetFullPath($env:HERMES_HOME) } else { $defaultHermes }
     $profilePath = $PROFILE
     $themePath = if (-not [string]::IsNullOrWhiteSpace($profilePath)) {
         Join-Path (Split-Path -Parent $profilePath) 'themes\robbyrussell.omp.json'
@@ -232,6 +238,8 @@ function Get-Candidates {
     Add-SkillCandidates (Join-Path $defaultGrok 'skills') $candidates $known
     Add-SkillCandidates (Join-Path $grokHome 'skills') $candidates $known
     Add-SkillCandidates (Join-Path $HOME '.cursor\skills') $candidates $known
+    Add-SkillCandidates (Join-Path $defaultHermes 'skills') $candidates $known
+    Add-SkillCandidates (Join-Path $hermesHome 'skills') $candidates $known
     [pscustomobject]@{ All = $candidates; Known = $known }
 }
 
