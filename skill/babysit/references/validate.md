@@ -38,22 +38,22 @@ context pack + that cluster's thread texts.
 
 Return exactly:
 
-| Field         | Meaning                           |
-| ------------- | --------------------------------- |
-| `CLUSTER`     | short id                          |
+| Field         | Meaning                                                     |
+| ------------- | ----------------------------------------------------------- |
+| `CLUSTER`     | short id                                                    |
 | `SOURCES`     | thread / review / issue-comment ids or URLs in this cluster |
-| `VERDICT`     | `CANDIDATE` \| `SKIP` \| `UNSURE` |
-| `HYPOTHESIS`  | one sentence failure claim        |
-| `WHY`         | `file:line`                       |
-| `SHARED_ROOT` | why these threads are one concern |
+| `VERDICT`     | `CANDIDATE` \| `SKIP` \| `UNSURE`                           |
+| `HYPOTHESIS`  | one sentence failure claim                                  |
+| `WHY`         | `file:line`                                                 |
+| `SHARED_ROOT` | why these threads are one concern                           |
 
 Phase-1 routing:
 
-| Verdict     | When                                                                                                                                                     | Then           |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| Verdict     | When                                                                                                                                                                     | Then           |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------- |
 | `CANDIDATE` | Plausible functional bug / broken contract / data-loss / security-safety on a path this PR introduced or left reachable; or a plausible bug that no longer fires on HEAD | Phase 2        |
-| `SKIP`      | Hypothetical; pre-existing not worsened and outside PR+session scope; nit/style/no user-visible break                                                    | final `SKIP`   |
-| `UNSURE`    | Bug vs intentional product behavior                                                                                                                      | final `UNSURE` |
+| `SKIP`      | Hypothetical; pre-existing not worsened and outside PR+session scope; nit/style/no user-visible break                                                                    | final `SKIP`   |
+| `UNSURE`    | Bug vs intentional product behavior                                                                                                                                      | final `UNSURE` |
 
 Cannot-fire / already-fixed is not Phase-1 `SKIP` — keep those `CANDIDATE` so Phase 2 can map them.
 
@@ -80,12 +80,12 @@ path is `NOT_REPRODUCED` or `UNABLE`, not ADDRESS.
 
 Final map:
 
-| Phase-2 `RESULT` | Final `VERDICT` | Scope Gate            |
-| ---------------- | --------------- | --------------------- |
-| `REPRODUCED`     | `ADDRESS`       | commit plan           |
+| Phase-2 `RESULT` | Final `VERDICT` | Scope Gate                                                                                       |
+| ---------------- | --------------- | ------------------------------------------------------------------------------------------------ |
+| `REPRODUCED`     | `ADDRESS`       | commit plan                                                                                      |
 | `NOT_REPRODUCED` | `ALREADY_FIXED` | Already fixed (known bot) when HEAD or history shows a post-comment commit addressed the finding |
-| `NOT_REPRODUCED` | `SKIP`          | Disagree (known bot) otherwise |
-| `UNABLE`         | `UNSURE`        | blocked; do not guess |
+| `NOT_REPRODUCED` | `SKIP`          | Disagree (known bot) otherwise                                                                   |
+| `UNABLE`         | `UNSURE`        | blocked; do not guess                                                                            |
 
 No Phase-2 → no `ADDRESS`. Never commit from Phase-1 alone.
 
