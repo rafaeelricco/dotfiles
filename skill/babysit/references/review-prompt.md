@@ -1,8 +1,8 @@
 # High-signal bot re-request
 
 Post with `gh pr comment`, once per bot reviewer in the re-request set.
-Fill `<mention-line>` from the known-bot map in SKILL.md only — do not
-hard-code triggers here.
+Fill `<mention-line>` from the known-bot map in `flow-babysit.md` only —
+do not hard-code triggers here.
 Human re-request is not this file — confirm the `--add-reviewer LOGIN`
 action only (`gh pr edit --add-reviewer`); no request body, no comment.
 
