@@ -94,7 +94,9 @@ Then 2–3 numbered suggestions from the Step 2 diff: the problem or goal, not a
 changelog or commit subject. First is (Recommended). User picks a number or
 writes their own.
 
-Never skip. Never use a suggestion the user did not pick.
+Never skip the prompt. Never use a suggestion the user did not pick.
+No picked number and no own prose is a completed empty answer — omit
+the Motivation section. Do not re-ask. Waiver is the same omit path.
 
 ### Shape
 
@@ -170,6 +172,12 @@ Four questions, always all four. Fill the bracketed values from Step 2.
   group holding every file. The user still confirms it — a one-option question
   is a confirmation, not a skipped question. Waiver selects every listed group.
 
+If approved Scope excludes any Step 2 group, discard a numbered Motivation
+pick (it was generated from the full Step 2 diff). Re-ask Motivation with
+2–3 suggestions from the scoped subset only. Keep the user's own prose.
+Do not proceed to Step 4 until that answer is in — a new pick, own prose,
+or empty (omit).
+
 ### Body
 
 `Full flow` only. Do not ask `pr-body`'s formatting questions. Derive:
@@ -179,7 +187,7 @@ Four questions, always all four. Fill the bracketed values from Step 2.
 - Diagram Scope — the flow that made Architecture Flow eligible.
 
 Render via `pr-body` `references/template.md`; the Motivation section = the
-picked suggestion or the user's own text. No text → omit the section.
+picked suggestion or the user's own text. No text (unanswered or waiver) → omit the section.
 Name the three derived Body choices beside the body in the Step 4 plan.
 
 ## Step 4 — Present the plan
@@ -268,6 +276,7 @@ Body → present plan with rendered body → execute on approval.
 
 **Non-compliant.** Using a Motivation suggestion the user did not pick, or
 skipping Branch / Path / Scope / State because answers looked obvious.
+Keeping a full-diff Motivation pick after Scope excludes a Step 2 group.
 
 **Waiver.** "Don't ask, just ship it" → skip Motivation and Shape, use Recommended defaults,
 omit Motivation, present plan, execute on approval.
