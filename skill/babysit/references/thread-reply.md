@@ -2,7 +2,10 @@
 
 Same shape for any reviewer. Fill slots; do not change structure.
 
-Post as a pull-request review-comment reply (`gh api .../replies`). 2–4 lines.
+Post as a pull-request review-comment reply (`gh api .../replies`) when
+the source is an inline thread. For a review-submission body or issue
+comment, post the same template with `gh pr comment`. Resolve only when
+a thread id exists. 2–4 lines.
 No thanks, no process theater, no full diffs, no restating the reviewer's paragraph.
 
 Replace `<hash>` with the 7-char commit that fixed it. Omit the Fixed line only

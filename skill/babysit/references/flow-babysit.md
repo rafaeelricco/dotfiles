@@ -103,7 +103,7 @@ checks.
   evidence that red CI is unrelated.
 - Build the context pack (PR title/body, trusted review sources, session
   constraints). Load `./validate.md` now. Obey it end-to-end. Do not propose
-  fixes until validate returns final per-thread verdicts (`ADDRESS` /
+  fixes until validate returns final per-cluster verdicts (`ADDRESS` /
   `SKIP` / `UNSURE`).
 
 ## Scope Gate
@@ -114,9 +114,10 @@ every SKIP known-bot thread (Comment routing). UNSURE stays blocked for that
 thread only — do not guess it; granted ADDRESS and SKIP work still runs.
 Human reply and re-request stay gated. This gate is the plan.
 
-- Each validated thread with cluster id, reviewer login, verdict
-  (`ADDRESS` / `SKIP` / `UNSURE`), repro evidence one-liner (or `n/a` for
-  SKIP/UNSURE), and file/line.
+- Each validated source (thread, review submission, or issue comment)
+  with cluster id, reviewer login, verdict (`ADDRESS` / `SKIP` /
+  `UNSURE`), repro evidence one-liner (or `n/a` for SKIP/UNSURE), and
+  file/line or source URL.
 - Failing checks, classified branch-related vs flaky/infra. Pending checks, listed as Watch.
 - Conflicts or behind-base state.
 - The commit plan: one `Commit N: <title>` per **ADDRESS cluster**, with

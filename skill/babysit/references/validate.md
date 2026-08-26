@@ -17,12 +17,15 @@ Pass every cluster agent the same pack:
 
 ## Phase 0 — Cluster
 
-Group unresolved threads by shared concern before any spawn:
+Group trusted unresolved threads, review submissions, and issue
+comments by shared concern before any spawn:
 
 - same symbol / invariant / failure mode, or
 - same file region with one root cause, or
 - cross-cutting concern named in the PR body or session
 
+Skip a review submission or issue comment with no actionable finding
+(empty, boilerplate wrapper, or process-only).
 Singleton cluster when nothing shares. Never one agent per thread by
 default. Cap: one Phase-1 agent per cluster, concurrent across clusters.
 
@@ -36,7 +39,7 @@ Return exactly:
 | Field         | Meaning                           |
 | ------------- | --------------------------------- |
 | `CLUSTER`     | short id                          |
-| `THREADS`     | thread ids / URLs in this cluster |
+| `SOURCES`     | thread / review / issue-comment ids or URLs in this cluster |
 | `VERDICT`     | `CANDIDATE` \| `SKIP` \| `UNSURE` |
 | `HYPOTHESIS`  | one sentence failure claim        |
 | `WHY`         | `file:line`                       |
