@@ -130,7 +130,9 @@ Human reply and re-request stay gated. This gate is the plan.
   commit — still routed.
 - **Re-request set:** distinct logins whose feedback this cycle addresses
   (mention-line known bots + humans). Omit anyone who left no feedback,
-  and omit known bots with no `<mention-line>` (Cursor). Planned re-request
+  and omit known bots with no `<mention-line>` (Cursor). Omit a login
+  whose only addressed sources this cycle are `ALREADY_FIXED` or `SKIP`
+  unless this cycle pushed a commit. Planned re-request
   per login (bot: filled `review-prompt.md` comment; human: confirm the
   `--add-reviewer LOGIN` action only — no request text, no extra comment).
 

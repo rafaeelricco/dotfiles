@@ -25,7 +25,9 @@ comments by shared concern before any spawn:
 - cross-cutting concern named in the PR body or session
 
 Skip a review submission or issue comment with no actionable finding
-(empty, boilerplate wrapper, or process-only).
+(empty, boilerplate wrapper, or process-only). Also skip one this user
+already answered with a later Fixed / Already-fixed / Disagree `gh pr
+comment` (comment `created_at` > source).
 Singleton cluster when nothing shares. Never one agent per thread by
 default. Cap: one Phase-1 agent per cluster, concurrent across clusters.
 
