@@ -79,7 +79,8 @@ Final map:
 | Phase-2 `RESULT` | Final `VERDICT` | Scope Gate            |
 | ---------------- | --------------- | --------------------- |
 | `REPRODUCED`     | `ADDRESS`       | commit plan           |
-| `NOT_REPRODUCED` | `SKIP`          | Disagree (known bot)  |
+| `NOT_REPRODUCED` | `ALREADY_FIXED` | Already fixed (known bot) when HEAD or history shows a post-comment commit addressed the finding |
+| `NOT_REPRODUCED` | `SKIP`          | Disagree (known bot) otherwise |
 | `UNABLE`         | `UNSURE`        | blocked; do not guess |
 
 No Phase-2 → no `ADDRESS`. Never commit from Phase-1 alone.

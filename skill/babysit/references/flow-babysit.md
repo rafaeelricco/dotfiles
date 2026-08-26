@@ -104,20 +104,21 @@ checks.
 - Build the context pack (PR title/body, trusted review sources, session
   constraints). Load `./validate.md` now. Obey it end-to-end. Do not propose
   fixes until validate returns final per-cluster verdicts (`ADDRESS` /
-  `SKIP` / `UNSURE`).
+  `SKIP` / `UNSURE` / `ALREADY_FIXED`).
 
 ## Scope Gate
 
 Present, then act on approval. Approval of that table is the grant to fix
-every ADDRESS cluster (reproved functional bugs only) and Disagree-reply
-every SKIP known-bot thread (Comment routing). UNSURE stays blocked for that
+every ADDRESS cluster (reproved functional bugs only), Already-fixed-reply
+every ALREADY_FIXED known-bot source, and Disagree-reply every SKIP
+known-bot source (Comment routing). UNSURE stays blocked for that
 thread only — do not guess it; granted ADDRESS and SKIP work still runs.
 Human reply and re-request stay gated. This gate is the plan.
 
 - Each validated source (thread, review submission, or issue comment)
   with cluster id, reviewer login, verdict (`ADDRESS` / `SKIP` /
-  `UNSURE`), repro evidence one-liner (or `n/a` for SKIP/UNSURE), and
-  file/line or source URL.
+  `UNSURE` / `ALREADY_FIXED`), repro evidence one-liner (or `n/a` for
+  SKIP/UNSURE/ALREADY_FIXED), and file/line or source URL.
 - Failing checks, classified branch-related vs flaky/infra. Pending checks, listed as Watch.
 - Conflicts or behind-base state.
 - The commit plan: one `Commit N: <title>` per **ADDRESS cluster**, with
