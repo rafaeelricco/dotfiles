@@ -15,8 +15,8 @@ supplies what changed; only the user supplies why.
 
 ## Caller mode
 
-`create-pr` and other workflow skills already hold the git context, the
-motivation, and the title. Skip "Read the diff", skip the motivation question,
+`create-pr` and other workflow skills already hold the git context, the title,
+and any motivation. Skip "Read the diff", skip the motivation question,
 and skip the formatting questions. Derive:
 
 - Sections — every option standalone would offer for this diff
@@ -63,8 +63,9 @@ Then `AskUserQuestion` — at most four questions per call (tool schema limit):
 **Call 1 (always):**
 
 - Sections — multi-select, and the only control over which of the offered
-  sections appear. Motivation, What's New, and Testing & Feedback are always on
-  and never listed. At most three options:
+  sections appear. What's New and Testing & Feedback are always on and never
+  listed. Motivation is never listed; include it only when the user or caller
+  supplied text. At most three options:
   - Architecture Flow — offer only when the diff changed a multi-step flow,
     branching logic, a cross-boundary interaction, or an event chain
   - Changed Files
@@ -86,7 +87,8 @@ Then `AskUserQuestion` — at most four questions per call (tool schema limit):
 Render `references/template.md`. Read `references/categories.md` for grouping,
 `references/mermaid-guide.md` when drawing a diagram.
 
-- Motivation: the user's words. Grammar cleanup only — do not rewrite the intent.
+- Motivation: include only when the user or caller supplied text. Grammar
+  cleanup only — do not rewrite the intent. No text → no heading.
 - What's New: bold category headings, bullets underneath.
 - Additional for Run Locally: name the dependency, service, env var, or setup
   step the diff adds.

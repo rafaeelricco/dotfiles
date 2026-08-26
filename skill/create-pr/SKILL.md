@@ -18,7 +18,7 @@ branched, staged, committed, pushed, or opened before every answer is in.
 
 1. Enter plan/approval mode if the harness has one — before any other tool call.
 2. Inspect — read-only.
-3. Ask — the prose question and the `AskUserQuestion` call in one message. One turn.
+3. Ask — Motivation + Shape in one message. One turn.
 4. Present the plan (leave plan/approval mode if used). One turn.
 5. Execute exactly what was approved.
 
@@ -31,12 +31,11 @@ Until the user approves the Step 4 plan these commands are forbidden:
 Neither authorizes a mutation, and neither skips the Step 4 plan:
 
 1. **Waiver** — user waives questions in their own words ("don't ask, just ship
-   it"). Skip 3a and 3b. Use each "(Recommended)" answer; Scope = all listed
+   it"). Skip Motivation and Shape. Use each "(Recommended)" answer; Scope = all listed
    groups. Write body from the diff, present Step 4 plan with those defaults.
-   Invented-motivation ban survives: state that no motivation was provided.
 2. **No AskUI** — no `AskUserQuestion` and no plan mode. Degrade to prose: in
-   one message, ask 3a verbatim, report Step 2 findings and the plan you would
-   propose, end turn. Mutate nothing until a user message approves. Never treat
+   one message, ask Motivation, report Step 2 findings and the plan you would propose,
+   end turn. Mutate nothing until a user message approves. Never treat
    your own message, a timeout, or end of run as approval.
 
 Accept-edits, autonomous mode, and "proceed without asking" guidance are
@@ -81,23 +80,23 @@ commits ahead of base, and whether the worktree mixes unrelated changes.
 
 ## Step 3 — Ask
 
-One message, both parts: the prose question is the message body, the
-`AskUserQuestion` call ships alongside it. Wait once.
+One message, both parts: Motivation in the message body, Shape alongside it. Wait once.
 
-### 3a. Motivation — prose, free text
+### Motivation
 
-Put this verbatim in the message body:
+In the message body:
 
 ```text
-What is the motivation or the why behind this PR? Briefly describe the problem it solves or the goal it achieves.
+What is the motivation or the why behind this PR?
 ```
 
-Never an `AskUserQuestion` option list — the answer is the user's own prose.
-Never auto-generated, never read off the commit messages, never skipped
-because the diff looks self-explanatory. The diff says what changed; only the
-user says why it matters.
+Then 2–3 numbered suggestions from the Step 2 diff: the problem or goal, not a
+changelog or commit subject. First is (Recommended). User picks a number or
+writes their own.
 
-### 3b. Branch, path, scope, state — one `AskUserQuestion` call
+Never skip. Never use a suggestion the user did not pick.
+
+### Shape
 
 Four questions, always all four. Fill the bracketed values from Step 2.
 
@@ -171,7 +170,7 @@ Four questions, always all four. Fill the bracketed values from Step 2.
   group holding every file. The user still confirms it — a one-option question
   is a confirmation, not a skipped question. Waiver selects every listed group.
 
-### 3c. Body options — derived, never asked
+### Body
 
 `Full flow` only. Do not ask `pr-body`'s formatting questions. Derive:
 
@@ -179,13 +178,14 @@ Four questions, always all four. Fill the bracketed values from Step 2.
 - Writing Style — `standard`.
 - Diagram Scope — the flow that made Architecture Flow eligible.
 
-Render via `pr-body` `references/template.md`; Motivation = 3a in the user's
-words. Name the three derived choices beside the body in the Step 4 plan.
+Render via `pr-body` `references/template.md`; the Motivation section = the
+picked suggestion or the user's own text. No text → omit the section.
+Name the three derived Body choices beside the body in the Step 4 plan.
 
 ## Step 4 — Present the plan
 
 Follow `plan-format` for diff and prose style. This plan names its own sections,
-overriding that skill's Shape list. State concretely:
+overriding that skill's section list. State concretely:
 
 - **Branch only** — approved branch name and base, or "already on it, nothing
   to create" when the approved branch is the current one. Nothing else.
@@ -196,7 +196,7 @@ overriding that skill's Shape list. State concretely:
   `commit-message`'s `SKILL.md` (invocation alone is not a load). Then each
   commit gets its exact file list and its full message per that skill; one PR
   title in `commit-message` title style, ≤72 chars; the rendered PR body and
-  the three derived 3c choices beside it; draft state and assignee.
+  the three derived Body choices beside it; draft state and assignee.
 
 Files that must move together (an API change and its consumer) stay in one
 commit. A single-category diff is one commit — say so.
@@ -263,16 +263,14 @@ assignee.
 
 ## Examples
 
-**Compliant.** Inspect → ask 3a + 3b in one message (even when branch/scope look
-obvious) → derive body options → present plan with rendered body → execute on
-approval. Two turns of questions, not four of assumptions.
+**Compliant.** Inspect → Motivation suggestions + Shape in one message → derive
+Body → present plan with rendered body → execute on approval.
 
-**Non-compliant.** Reading motivation from commit messages, or skipping Branch /
-Path / Scope / State because answers looked obvious. That is the failure this
-skill exists to prevent.
+**Non-compliant.** Using a Motivation suggestion the user did not pick, or
+skipping Branch / Path / Scope / State because answers looked obvious.
 
-**Waiver.** "Don't ask, just ship it" → skip 3a/3b, use Recommended defaults,
-body states no motivation was provided, present plan, execute on approval.
+**Waiver.** "Don't ask, just ship it" → skip Motivation and Shape, use Recommended defaults,
+omit Motivation, present plan, execute on approval.
 
 ## Codex
 
