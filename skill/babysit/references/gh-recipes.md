@@ -41,12 +41,13 @@ Do not drop it from the gather query.
 ## Review submissions and PR issue comments
 
 ```bash
-gh api repos/OWNER/REPO/pulls/N/reviews --paginate --jq '.[] | select(.state != "PENDING") | {login: .user.login, type: .user.type, state, body, commit_id, submitted_at}'
-gh api repos/OWNER/REPO/issues/N/comments --paginate --jq '.[] | {login: .user.login, type: .user.type, body, created_at}'
+gh api repos/OWNER/REPO/pulls/N/reviews --paginate --jq '.[] | select(.state != "PENDING") | {login: .user.login, type: .user.type, author_association, state, body, commit_id, submitted_at}'
+gh api repos/OWNER/REPO/issues/N/comments --paginate --jq '.[] | {login: .user.login, type: .user.type, author_association, body, created_at}'
 ```
 
 REST exposes account type under `user.type` (`User` / `Bot`) and login under
-`user.login` — both are required for classification. `PENDING` reviews are
+`user.login` — both are required for classification. REST `author_association`
+is required for Gather trust. Do not drop it. `PENDING` reviews are
 unpublished drafts — drop them and their inline comments.
 
 ## Checks

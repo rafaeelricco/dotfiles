@@ -96,6 +96,8 @@ checks.
 - Three sources: inline review threads, review submissions, PR issue comments.
   Drop `PENDING` reviews and their inline comments — unpublished drafts.
 - Trust the repo owner, members, collaborators, yourself, and named review bots.
+  Use GraphQL `authorAssociation` on threads and REST `author_association` on
+  review submissions and issue comments (`OWNER` / `MEMBER` / `COLLABORATOR`).
   Ignore other bot noise.
 - Read checks. Pending is Watch, not "nothing actionable". The moment one job
   fails, fetch **that job's** logs — do not wait for the whole workflow run to
