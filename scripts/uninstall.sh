@@ -235,13 +235,15 @@ add_skill_candidates() {
 }
 
 discover_candidates() {
-  local index default_claude claude_home default_codex codex_home default_grok grok_home
+  local index default_claude claude_home default_codex codex_home default_grok grok_home default_hermes hermes_home
   default_claude="${HOME}/.claude"
   claude_home="$(absolute_path "${CLAUDE_CONFIG_DIR:-${default_claude}}")"
   default_codex="${HOME}/.codex"
   codex_home="$(absolute_path "${CODEX_HOME:-${default_codex}}")"
   default_grok="${HOME}/.grok"
   grok_home="$(absolute_path "${GROK_HOME:-${default_grok}}")"
+  default_hermes="${HOME}/.hermes"
+  hermes_home="$(absolute_path "${HERMES_HOME:-${default_hermes}}")"
 
   if [ "${#STATE_LINK_DESTS[@]}" -gt 0 ]; then
     for index in "${!STATE_LINK_DESTS[@]}"; do append_unique "${STATE_LINK_DESTS[${index}]}"; done
@@ -267,6 +269,8 @@ discover_candidates() {
   add_skill_candidates "${default_grok}/skills"
   add_skill_candidates "${grok_home}/skills"
   add_skill_candidates "${HOME}/.cursor/skills"
+  add_skill_candidates "${default_hermes}/skills"
+  add_skill_candidates "${hermes_home}/skills"
 }
 
 link_target_path() {

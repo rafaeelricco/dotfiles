@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# Install this repository's Claude Code and Codex configuration when present.
+# Install this repository's Claude Code, Codex, Grok, Cursor, and Hermes configuration when present.
 # Compatible with the Bash 3.2 shipped by macOS.
 set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Install agent instructions and skills for detected Claude Code, Codex, Grok, and Cursor.
+Install agent instructions and skills for detected Claude Code, Codex, Grok, Cursor, and Hermes.
 Uses repository INSTRUCTIONS.md for vendor CLAUDE.md and AGENTS.md destinations.
+Hermes gets skills only.
 
 Usage: install.sh [options]
 
@@ -17,6 +18,7 @@ Options:
       --skip-codex  Do not configure Codex.
       --skip-grok   Do not configure Grok.
       --skip-cursor Do not configure Cursor.
+      --skip-hermes Do not configure Hermes.
       --local       Use this checkout without cloning or changing Git state.
       --dir PATH    Override $DOTFILES_DIR / ~/.dotfiles.
   -h, --help        Show this help.
@@ -26,6 +28,7 @@ Environment:
   CLAUDE_CONFIG_DIR  Claude user configuration directory.
   CODEX_HOME         Codex user configuration directory.
   GROK_HOME          Grok user configuration directory.
+  HERMES_HOME        Hermes user configuration directory.
 EOF
 }
 
@@ -229,6 +232,7 @@ parse_args() {
       --skip-codex) SKIP_CODEX=1 ;;
       --skip-grok) SKIP_GROK=1 ;;
       --skip-cursor) SKIP_CURSOR=1 ;;
+      --skip-hermes) SKIP_HERMES=1 ;;
       --local) LOCAL_MODE=1 ;;
       --dir)
         shift
@@ -648,6 +652,14 @@ install_cursor() {
   link_skill_set "${CURSOR_HOME_DIR}/skills" "Cursor"
 }
 
+install_hermes() {
+  local default_home="${HOME}/.hermes"
+  if [ "${HERMES_HOME_DIR}" != "${default_home}" ]; then
+    cleanup_managed_skill_dir "${default_home}/skills"
+  fi
+  link_skill_set "${HERMES_HOME_DIR}/skills" "Hermes"
+}
+
 main() {
   ASSUME_YES=0
   OVERRIDE=0
@@ -655,6 +667,7 @@ main() {
   SKIP_CODEX=0
   SKIP_GROK=0
   SKIP_CURSOR=0
+  SKIP_HERMES=0
   DIR_OVERRIDE=""
   LOCAL_MODE=0
   LOCAL_STATE_SOURCE=""
@@ -708,6 +721,7 @@ main() {
   CLAUDE_HOME="$(absolute_path "${CLAUDE_CONFIG_DIR:-${HOME}/.claude}")"
   CODEX_HOME_DIR="$(absolute_path "${CODEX_HOME:-${HOME}/.codex}")"
   GROK_HOME_DIR="$(absolute_path "${GROK_HOME:-${HOME}/.grok}")"
+  HERMES_HOME_DIR="$(absolute_path "${HERMES_HOME:-${HOME}/.hermes}")"
   CURSOR_HOME_DIR="${HOME}/.cursor"
   validate_sources
   if [ "${SKIP_CODEX}" -eq 0 ] && cli_is_present codex; then
@@ -740,6 +754,15 @@ main() {
     install_grok
   else
     echo "Grok: not detected on PATH; skipping."
+  fi
+
+  if [ "${SKIP_HERMES}" -eq 1 ]; then
+    echo "Hermes: skipped (--skip-hermes)."
+  elif cli_is_present hermes; then
+    echo "== Hermes =="
+    install_hermes
+  else
+    echo "Hermes: not detected on PATH; skipping."
   fi
 
   if [ "${SKIP_CURSOR}" -eq 1 ]; then

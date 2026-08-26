@@ -9,6 +9,7 @@ param(
     [switch]$SkipCodex,
     [switch]$SkipGrok,
     [switch]$SkipCursor,
+    [switch]$SkipHermes,
     [switch]$SkipTerminal
 )
 
@@ -789,13 +790,20 @@ function Invoke-DotfilesInstall {
     $codexHome = if ($env:CODEX_HOME) { [System.IO.Path]::GetFullPath($env:CODEX_HOME) } else { $defaultCodexHome }
     $defaultGrokHome = Join-Path $HOME '.grok'
     $grokHome = if ($env:GROK_HOME) { [System.IO.Path]::GetFullPath($env:GROK_HOME) } else { $defaultGrokHome }
+    $defaultHermesHome = if ($IsWindows -and -not [string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) {
+        Join-Path $env:LOCALAPPDATA 'hermes'
+    } else {
+        Join-Path $HOME '.hermes'
+    }
+    $hermesHome = if ($env:HERMES_HOME) { [System.IO.Path]::GetFullPath($env:HERMES_HOME) } else { $defaultHermesHome }
     $cursorHome = Join-Path $HOME '.cursor'
     $installClaude = -not $SkipClaude.IsPresent -and (Test-CliPresent 'claude')
     $installCodex = -not $SkipCodex.IsPresent -and (Test-CliPresent 'codex')
     $installGrok = -not $SkipGrok.IsPresent -and (Test-CliPresent 'grok')
+    $installHermes = -not $SkipHermes.IsPresent -and (Test-CliPresent 'hermes')
     $installCursor = -not $SkipCursor.IsPresent -and (Test-Path -LiteralPath $cursorHome -PathType Container)
     $installTerminal = $IsWindows -and -not $SkipTerminal.IsPresent
-    if ($installClaude -or $installCodex -or $installGrok -or $installCursor -or $installTerminal) {
+    if ($installClaude -or $installCodex -or $installGrok -or $installHermes -or $installCursor -or $installTerminal) {
         Test-SymlinkCapability
     }
     if ($installCodex) {
@@ -847,6 +855,18 @@ function Invoke-DotfilesInstall {
         Sync-SkillSet -Destination (Join-Path $grokHome 'skills') -Label 'Grok'
     } else {
         Write-Host 'Grok: not detected on PATH; skipping.'
+    }
+
+    if ($SkipHermes.IsPresent) {
+        Write-Host 'Hermes: skipped (-SkipHermes).'
+    } elseif ($installHermes) {
+        Write-Host '== Hermes =='
+        if (-not (Test-SamePath $hermesHome $defaultHermesHome)) {
+            Clear-ManagedSkillDirectory (Join-Path $defaultHermesHome 'skills')
+        }
+        Sync-SkillSet -Destination (Join-Path $hermesHome 'skills') -Label 'Hermes'
+    } else {
+        Write-Host 'Hermes: not detected on PATH; skipping.'
     }
 
     if ($SkipCursor.IsPresent) {
