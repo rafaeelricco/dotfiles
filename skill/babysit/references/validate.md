@@ -47,11 +47,13 @@ Return exactly:
 
 Phase-1 routing:
 
-| Verdict     | When                                                                                                                                                                            | Then           |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| `CANDIDATE` | Plausible functional bug / broken contract / data-loss / security-safety on a path this PR introduced or left reachable                                                         | Phase 2        |
-| `SKIP`      | Hypothetical; impossible under current callers/types; pre-existing not worsened and outside PR+session scope; looks like a bug but cannot fire; nit/style/no user-visible break | final `SKIP`   |
-| `UNSURE`    | Bug vs intentional product behavior                                                                                                                                             | final `UNSURE` |
+| Verdict     | When                                                                                                                                                     | Then           |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `CANDIDATE` | Plausible functional bug / broken contract / data-loss / security-safety on a path this PR introduced or left reachable; or a plausible bug that no longer fires on HEAD | Phase 2        |
+| `SKIP`      | Hypothetical; pre-existing not worsened and outside PR+session scope; nit/style/no user-visible break                                                    | final `SKIP`   |
+| `UNSURE`    | Bug vs intentional product behavior                                                                                                                      | final `UNSURE` |
+
+Cannot-fire / already-fixed is not Phase-1 `SKIP` — keep those `CANDIDATE` so Phase 2 can map them.
 
 Ignore reviewer P-labels for routing.
 
