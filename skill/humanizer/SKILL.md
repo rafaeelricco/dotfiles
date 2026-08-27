@@ -64,7 +64,7 @@ Cut the -ing clause that only inflates a simple fact.
 
 **Watch:** Industry reports, Observers have cited, Experts argue, Some critics argue, several sources/publications (when few cited)
 
-Name a source only when the source text provides one. Else remove the unsupported claim. Never invent a source.
+Name a source only when the source text provides one. Else keep the claim as written or ask; do not drop it. Never invent a source.
 
 ### 6. Formulaic challenges and outlook sections
 
