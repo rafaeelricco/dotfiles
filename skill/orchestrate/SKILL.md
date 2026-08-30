@@ -15,24 +15,23 @@ description: >
 
 If you cannot restate the task in one sentence without inventing a value — what to cache, which field, which threshold, which file — stop and ask. Else decide and say what you decided.
 
-When this skill loads, load `scope-and-plan` and stop routing. Do not load `plan-format` here. Do not enter plan mode here.
+When this skill loads, load `scope-and-plan` and stop routing.
 
 When choosing an approach — not before every tool call — if a simpler one exists, say so.
 
 Independent work ships in one message; two independent concerns are two workers. A read that never uses a prior result is the same step, not a later one.
 
-After parallel reads, before using them: drop empty, off-task, and mutually impossible claims. Do not edit or synthesize from a dropped claim. This checker is not `verify`.
+After parallel reads, before using them: drop empty, off-task, and mutually impossible claims. Do not edit or synthesize from a dropped claim.
 
 Once the plan is approved: one writer per file group, groups disjoint by path. A writer applies the decision; it does not remake it. Ordered diffs are one writer, never a fan-out. A writer that cannot apply its diffs stops and reports which landed; you finish that group serially and never respawn it.
 
 ## 2. Simplicity
 
-Ship the minimum that fully solves the problem — no speculative features, abstractions, or config; not a thinner or partial solution. Never drop required behavior to look simple.
+Ship the minimum that fully solves the problem. Never drop required behavior to look simple.
 
 - Every abstraction, parameter, and file in the change needs a caller in the change. Tests count as their own caller. No caller → cut it.
 - No abstraction for code used once.
 - No error handling for impossible states.
-- 200 lines that could be 50 → rewrite it.
 
 ## 3. Goal-Driven Execution
 
@@ -57,17 +56,11 @@ Ship order after Edit (do not invent steps the user did not ask for):
 1. **behavior?**
    - Docs, comments, formatting, config-only → skip verify.
    - Behavior change → load `verify` in **FAST** (one package-level decisive check).
+
 2. **commit?**
    - User asked for a commit → `commit-message` (and PR title style when only a title is needed).
    - No ask → skip. Finishing an edit is not an ask: report what changed and stop.
+
 3. **done** — stop. Do not commit, open a PR, or babysit unless the user asked.
-
-User-asked only (never by lifecycle inference):
-
-- Open / create PR, or commit-then-PR → `create-pr` (loads `pr-body` / `commit-message` as it needs).
-- PR body only → `pr-body`.
-- Babysit / merge-ready an open PR → `babysit` (uses `verify` **STRICT** once per batch).
-
-Skill missing in the harness → stop. Never invent the house format.
 
 One quality gate per ship: do not stack `verify` with `/code-review` or a second verify pass on the same commit batch unless the user asked for that second pass.
