@@ -8,7 +8,8 @@ argument-hint: "<skill-dir>"
 
 Two verbs. Dir = argument after `/compress-skill`, else the path the user named.
 
-- **cut** — shorten in place. Same triggers, STOPs, never-do, outputs.
+- **cut** — shorten in place. Same triggers, behavioral constraints, and outputs;
+  every surviving rule keeps its reason.
 - **router** — `SKILL.md` becomes a short load-path; procedure moves under `references/`. STOP / Do not trees become recipes.
 
 Verb is **cut** unless the user names scout-grain, thin `SKILL.md`, route to `references/`, or drop STOP liturgy.
