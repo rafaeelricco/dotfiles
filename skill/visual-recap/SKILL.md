@@ -8,8 +8,9 @@ disable-model-invocation: true
 
 Produce a compact PR comment from current code, not PR prose or commit messages alone.
 
-When this skill loads, load `show-me` for visual-format selection only. This skill
-remains authoritative for target resolution, preview approval, freshness, and posting.
+Read `../show-me/references/format-selection.md` now for visual-format selection
+only. This skill remains authoritative for target resolution, preview approval,
+freshness, and posting.
 
 ## Workflow
 
@@ -19,7 +20,7 @@ remains authoritative for target resolution, preview approval, freshness, and po
 
 ## Visual Rules
 
-- Use `show-me` to choose one small reviewer-facing visual; add a second only when lifecycle cannot remain readable inline.
+- Use the shared format-selection guidance to choose one small reviewer-facing visual; add a second only when lifecycle cannot remain readable inline.
 - Use GitHub-compatible Markdown only; never create or open an HTML artifact for a PR recap.
 - When Mermaid is selected, prefer `flowchart TB` for actors and branching and `flowchart LR` for simple pipelines; quote node labels, avoid custom styles/colors, and target no more than 15 nodes.
 - Add a compact table only for exact actor/permission or repeated-field mappings.
