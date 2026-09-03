@@ -1,6 +1,6 @@
 # Compress — cut
 
-Shorten the target in place. Same triggers, gates on fragile operations, outputs.
+Shorten the target in place. Preserve its triggers, behavioral constraints, and outputs.
 
 Cut what the agent already knows: general domain knowledge, restated defaults,
 and sentences the skill still works without. A rule keeps the reason beside it;
@@ -14,8 +14,9 @@ repeated examples of the same pattern, and bans on an output style that carry
 no reason and encode no product constraint — state the wanted behavior once,
 positively. Point at `--help` or a sibling file instead of restating it.
 
-Keep: triggers, gates on fragile operations (destructive commands, approvals,
-auth), output shape, the reason beside each rule, the one owner of each fact.
+Keep: triggers, every behavioral constraint and scope restriction — including
+fragile-operation gates such as destructive commands, approvals, and auth —
+output shape, the reason beside each rule, and the one owner of each fact.
 
 Word count is a measurement, not a target: report before/after, and justify
 every cut by what it removes, never by length.
@@ -26,9 +27,12 @@ Skip if the skill is pure reference (API/tables only); say so.
 
 Else copy the dir aside, apply proposed cuts only in that copy. Never touch
 the original. Trigger the target on original vs copy, loaded separately
-(subagents); spawn unavailable → compare the two trees. Check: same gates on
-fragile operations, same output headings/fields, each kept rule still beside
-its reason. Divergence → revert that cut, list it.
+(subagents); spawn unavailable → compare the two trees. Compare semantic
+behavior, not wording: same triggers, every behavioral constraint and scope
+restriction (including any removed from the candidate copy), same output
+headings/fields, and the reason beside each surviving rule. A negative rule may
+become positive only when its constraint and reason survive. Divergence → revert
+that cut, list it.
 
 ## Report
 
