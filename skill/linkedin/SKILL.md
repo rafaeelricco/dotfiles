@@ -58,12 +58,15 @@ Before the table, in this order:
   rule-2 hold keeps each area's own implied mode (do not inherit the first). Mode-only
   rewrite ("now rewrite it") replaces mode for that turn. Naming a different supported
   area falls through to re-selection (chain/hold may abandon or update).
-- **Metrics read.** Ask **only** to read/interpret/diagnose search appearances or profile
-  views (incl. which titles find you) → `ssi`, **Reading the metrics** only; `title` does
-  not win. SSI score/pillars/network in the same ask → not metrics-only; fall through.
-  Metrics plus another area → count `ssi` for multi-match; that `ssi` turn uses **Reading
-  the metrics** + metrics-only Output exception. Post analytics → `content`. How to raise
-  the numbers → full `ssi` table match (not **Reading the metrics**), then fall through.
+- **Metrics read.** A request to read, interpret, or diagnose analytics — search
+  appearances, profile views, which titles find the profile — is an `ssi` turn under
+  **Reading the metrics** alone, and `title` does not win. That turn works from the
+  readings, never asks for or uses the SSI score, and returns only the fixes the data
+  supports: zero to three, no checklist, never padded. Checking which titles find the
+  profile also needs the target role: Source when known, else ask once and wait. Asking
+  how to raise the numbers, or about the SSI score, pillars, or network, is an ordinary
+  `ssi` table match. Post analytics → `content`. Metrics mixed with another area counts
+  `ssi` for rule 2; the `ssi` turn keeps this shape.
 
 Then apply the rules below in order; the first that fits wins. Do not invent areas or rules.
 
@@ -192,14 +195,8 @@ Pick **one** mode for the turn:
    `references/plan.md`. Use advisory “3 fixes” only when reviewing an existing routine.
 6. Otherwise by area class (below).
 
-**Exception — metrics-only diagnosis** (overrides whichever mode was picked): any request
-the **Metrics read** pre-rule sent to `Reading the metrics` — including the metrics portion
-of a mixed ask that counted `ssi` for multi-match — needs the analytics readings alone —
-never the SSI score — and returns just the fixes the data supports, zero to three, with no
-SSI checklist and never padded to three. When the diagnosis checks which job titles are
-finding the profile (or whether the target role appears in search appearances), the target
-role is also required: Source when known; else ask once for the target role and wait —
-still never ask for or use the SSI score.
+**Exception — metrics read** overrides whichever mode was picked; its shape is fixed in
+the **Metrics read** pre-rule.
 
 **Variant labels:** `Variant 1 — <emphasis>`, `Variant 2 — <emphasis>`, `Variant 3 — <emphasis>`.
 Each in its own fenced block. Paste blocks are full prose, never session shorthand.

@@ -67,9 +67,6 @@ then match.
 Never post `review-prompt.md` without a filled `<mention-line>`. Cursor has
 none — report only; omit it from the re-request set.
 
-Bans on every reply: thanks, LGTM, "as discussed", status theater ("pushed,
-verifying…"), pasted diffs, restating the reviewer's full comment.
-
 ## Workflow
 
 Order of work each pass: merge conflicts, then unresolved threads, then CI —

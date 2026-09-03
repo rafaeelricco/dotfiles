@@ -1,21 +1,24 @@
 # Compress — cut
 
-Shorten the target in place. Same triggers, STOPs, never-do, outputs.
+Shorten the target in place. Same triggers, gates on fragile operations, outputs.
 
-Agent already knows the domain. Cut any sentence the skill still works without.
+Cut what the agent already knows: general domain knowledge, restated defaults,
+and sentences the skill still works without. A rule keeps the reason beside it;
+a rule without its reason gets applied where it does not fit.
 One home per fact. No new sections. No hypotheticals.
 
 ## Cut
 
 Delete: no-ops, buzzwords, hedges, duplicates, explanations of the obvious,
-repeated examples of the same pattern. Point at `--help` or a sibling file
-instead of restating it.
+repeated examples of the same pattern, and bans on an output style that carry
+no reason and encode no product constraint — state the wanted behavior once,
+positively. Point at `--help` or a sibling file instead of restating it.
 
-Keep: triggers, STOPs, never-do, output shape, the one owner of each fact.
+Keep: triggers, gates on fragile operations (destructive commands, approvals,
+auth), output shape, the reason beside each rule, the one owner of each fact.
 
-Targets (body, not frontmatter): getting-started <150 words; frequent <200;
-other <500. Over is a finding, not a hard fail if cutting further would
-drop a STOP or never-do.
+Word count is a measurement, not a target: report before/after, and justify
+every cut by what it removes, never by length.
 
 ## Even-behavior (copies only)
 
@@ -23,8 +26,9 @@ Skip if the skill is pure reference (API/tables only); say so.
 
 Else copy the dir aside, apply proposed cuts only in that copy. Never touch
 the original. Trigger the target on original vs copy, loaded separately
-(subagents); spawn unavailable → compare the two trees. Check: same STOPs,
-same never-do, same output headings/fields. Divergence → revert that cut, list it.
+(subagents); spawn unavailable → compare the two trees. Check: same gates on
+fragile operations, same output headings/fields, each kept rule still beside
+its reason. Divergence → revert that cut, list it.
 
 ## Report
 
