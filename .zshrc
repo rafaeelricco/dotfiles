@@ -95,6 +95,24 @@ zinit cdreplay -q
 alias ambar="cd ~/Projects/ambar"
 alias personal="cd ~/Projects/personal"
 
+function open_tunel() {
+  ssh -fN -o ExitOnForwardFailure=yes -L 6080:127.0.0.1:6080 root@<YOUR_SERVER_IP> || return
+  for i in {1..50}; do
+    nc -z 127.0.0.1 6080 2>/dev/null && break
+    sleep 0.1
+  done
+  open 'http://<address>/vnc.html?autoconnect=1'
+}
+
+function close_tunel() {
+  local -a pids
+  pids=(${(u)${(f)"$(command lsof -nP -iTCP:6080 -sTCP:LISTEN -t 2>/dev/null)"}})
+  (( $#pids )) && kill $pids[@]
+}
+
+alias tunel="open_tunel"
+alias untunel="close_tunel"
+
 # ── Prompt ──────────────────────────────────────────────────────────────────
 # To use powerlevel10k instead of robbyrussell: brew install powerlevel10k,
 # unset ZSH_THEME above, then uncomment both lines and run `p10k configure`.
