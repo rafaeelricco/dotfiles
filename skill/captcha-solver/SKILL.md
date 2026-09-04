@@ -83,7 +83,8 @@ print(capture_screenshot("/tmp/captcha-drag.png", max_dim=1800))
 1. `path = capture_screenshot("/tmp/captcha-text.png", max_dim=1800)`.
 2. OCR with agent vision on that PNG (no harness `readText`).
 3. Fill the answer field with `fill_input(selector, text)` (or focus + `type_text`).
-4. Verify as in Checkbox step 4.
+4. Submit it — the form's own control, or Enter. Filling the field does not submit.
+5. Verify as in Checkbox step 4.
 
 Measure clicks from the image only after converting device px → CSS px — that
 rule lives in browser-use’s screenshots interaction skill; point at it, do not
@@ -94,7 +95,10 @@ copy it.
 1. Screenshot (`max_dim=1800`).
 2. Vision picks which cells match the prompt.
 3. Click each cell center with `click_at_xy` (CSS px).
-4. Verify with another screenshot / `js` / `page_info`.
+4. Click the widget's own Verify / Next / Skip control. Selecting cells does
+   not submit, and without it no response token is issued.
+5. Verify with another screenshot / `js` / `page_info`. reCAPTCHA and hCaptcha
+   chain rounds routinely — while a new grid appears, repeat from step 1.
 
 No annotated overlay helper exists — cell geometry is yours from the PNG and
 widget bounds.
