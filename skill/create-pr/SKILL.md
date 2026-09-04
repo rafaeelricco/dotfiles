@@ -186,7 +186,9 @@ State   question: How should the PR be opened?
   single-select — "Yes, all of it (Recommended)" / "No, let me split it"; no
   multi-select field at all becomes one single-select keep/drop question per
   group. Both are still ask-tool calls. Never reach Step 4 on a Scope the user
-  has not answered.
+  has not answered. "No, let me split it" is not an answered Scope — follow it
+  with one single-select keep/drop question per Step 2 group, or per file when
+  Step 2 found a single group, before continuing.
 
 If approved Scope excludes any Step 2 group, discard a numbered Motivation
 pick (it was generated from the full Step 2 diff). Re-ask Motivation with
