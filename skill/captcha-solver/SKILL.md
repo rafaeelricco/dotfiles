@@ -56,9 +56,12 @@ print(capture_screenshot("/tmp/captcha.png", max_dim=1800))
 ## Slider / puzzle drag
 
 No drag helper on browser-use. Drive a stepped press→move→release with raw
-`cdp("Input.dispatchMouseEvent", …)` (CSS viewport px). If the widget ignores
-it, stop and open browser-use’s `drag-and-drop` interaction skill — do not
-invent a second drag API here.
+`cdp("Input.dispatchMouseEvent", …)` (CSS viewport px). `button` names the
+event's button; `buttons` is the held-button bitmask and defaults to 0, so
+every move between press and release needs `buttons=1` or a widget that reads
+`MouseEvent.buttons` aborts the drag. If the widget ignores it, stop and open
+browser-use’s `drag-and-drop` interaction skill — do not invent a second drag
+API here.
 
 ```python
 def drag_xy(x0, y0, x1, y1, steps=20):
@@ -66,7 +69,7 @@ def drag_xy(x0, y0, x1, y1, steps=20):
     cdp("Input.dispatchMouseEvent", type="mousePressed", x=x0, y=y0, button="left", clickCount=1)
     for i in range(1, steps + 1):
         t = i / steps
-        cdp("Input.dispatchMouseEvent", type="mouseMoved", x=x0 + (x1 - x0) * t, y=y0 + (y1 - y0) * t, button="left")
+        cdp("Input.dispatchMouseEvent", type="mouseMoved", x=x0 + (x1 - x0) * t, y=y0 + (y1 - y0) * t, button="left", buttons=1)
     cdp("Input.dispatchMouseEvent", type="mouseReleased", x=x1, y=y1, button="left", clickCount=1)
 
 # from / to = handle and target centers (CSS px), from screenshot or js bounds
