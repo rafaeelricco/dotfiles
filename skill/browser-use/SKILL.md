@@ -23,7 +23,7 @@ metadata:
 
 # Browser Use
 
-Direct browser control via CDP. For task-specific edits, use `agent-workspace/agent_helpers.py`. For setup, install, or connection problems, read https://github.com/browser-use/browser-harness/blob/main/install.md.
+Direct browser control via CDP. For task-specific edits, use `$BH_AGENT_WORKSPACE/agent_helpers.py`. For setup, install, or connection problems, read https://github.com/browser-use/browser-harness/blob/main/install.md.
 
 ## When Not to Use
 
