@@ -18,8 +18,8 @@ branched, staged, committed, pushed, or opened before every answer is in.
 
 1. Enter plan/approval mode if the harness has one — before any other tool call.
 2. Inspect the repo and all changes (staged/unstaged) — read-only.
-3. Ask — Motivation in the message body. Shape as one call to the ask tool
-   found in this turn's available tools. Wait for answers.
+3. Ask — Motivation in the message body. Shape through the ask tool found in
+   this turn's available tools. Wait for answers.
 4. Present the plan (leave plan/approval mode if used). One turn.
 5. Execute exactly what was approved.
 
@@ -81,7 +81,8 @@ commits ahead of base, and whether the worktree mixes unrelated changes.
 Discover the ask tool first. Then one turn, both parts, then wait once:
 
 - **Motivation** — in the message body (see below).
-- **Shape** — one call to the tool Discover returned. That call is Shape.
+- **Shape** — the four questions put to the tool Discover returned. Those
+  calls are Shape.
 
 ### Discover the ask tool
 
@@ -95,14 +96,18 @@ missing because a remembered name is absent.
    search for MCP/server tools. Those catalogs do not list native harness
    tools, so a miss there is not a miss on step 1.
 
-Read the matched tool's schema. Map the four Shape questions onto it. Call
-once. Wait. Plan mode does not hide this tool — ending the turn with that
-call is this step.
+Read the matched tool's schema. Map the four Shape questions onto it. One call
+when the schema carries all four; otherwise split them across back-to-back
+calls in Branch, Path, Scope, State order. No question is dropped. Wait. Plan
+mode does not hide this tool — ending the turn with those calls is this step.
 
 No match after both steps: stop and report that this turn's available tools
 have no multiple-choice ask tool. Wait. Do not present the Step 4 plan.
 
 Schema error on the call: remap to the schema in the error and call again.
+When the limit is one no remapping satisfies — a cap on questions per call, no
+multi-select field, a minimum option count a one-group Scope cannot meet — do
+not retry the rejected call. Split, or apply the Shape fallbacks, and re-ask.
 
 ### Motivation
 
@@ -122,7 +127,7 @@ the Motivation section. Do not re-ask. Waiver is the same omit path.
 
 ### Shape
 
-Payload for the one Discover call — not a message. Four questions, always all
+Payload for the Discover call — not a message. Four questions, always all
 four. Fill brackets from Step 2. Field names follow the schema you read
 (`question`, `options[{label, description}]`, `multi_select` / `multiSelect`).
 Optional `header` only if the schema has it.
@@ -176,6 +181,12 @@ State   question: How should the PR be opened?
 - Scope: when the whole worktree is one coherent change, the list is a single
   group holding every file. The user still confirms it — a one-option question
   is a confirmation, not a skipped question. Waiver selects every listed group.
+- Shape fallbacks, only when the schema rejects the question itself: a
+  single-group Scope the tool will not accept becomes a two-option
+  single-select — "Yes, all of it (Recommended)" / "No, let me split it"; no
+  multi-select field at all becomes one single-select keep/drop question per
+  group. Both are still ask-tool calls. Never reach Step 4 on a Scope the user
+  has not answered.
 
 If approved Scope excludes any Step 2 group, discard a numbered Motivation
 pick (it was generated from the full Step 2 diff). Re-ask Motivation with
