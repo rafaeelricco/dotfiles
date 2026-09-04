@@ -134,9 +134,9 @@ Branch  question: Which branch should this PR come from?
           - <current-branch> (Recommended)
             Open from the branch you are on. <n> commits ahead of <default>.
             Omit this option when already on the default branch.
-          - rafaelricco/<slug-from-diff> (Recommended when on default)
+          - rafaeelricco/<slug-from-diff> (Recommended when on default)
             Create this branch from HEAD, then open the PR.
-          - rafaelricco/<alt-slug>
+          - rafaeelricco/<alt-slug>
             Create this branch from HEAD, then open the PR.
 
 Path    question: How far should I take this?
