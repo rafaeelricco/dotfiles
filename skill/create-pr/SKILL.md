@@ -2,7 +2,7 @@
 name: create-pr
 description: >
   Open a GitHub pull request from local repository changes. Use when the user
-  asks to create PR, open PR, abrir PR, criar pull request, ship this branch,
+  asks to create PR, open PR, ship this branch,
   ready for review, publish local changes as a pull request, or invokes
   /create-pr. Asks the user for motivation, branch, path, scope, and PR state
   before any branch, stage, commit, push, or mutating gh call. Full flow derives
