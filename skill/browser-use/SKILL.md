@@ -192,6 +192,13 @@ If you get stuck on a browser mechanic, check https://github.com/browser-use/bro
 - On macOS, if Chrome shows an "Allow remote debugging?" popup, run `browser-use mac-approve`. Do not poll in a loop — the daemon holds one connection.
 - Omnibox popups are not real work tabs.
 - CDP target order is not Chrome's visible tab-strip order.
+- If `fill_input` leaves inputs empty on a hidden tab, verify values first;
+  this demonstrates background input failure and permits `Page.bringToFront`,
+  then re-fill and verify. Do not assume typing succeeded.
+- Sites with smooth scrolling can move a button after `scrollIntoView` and
+  before its CDP click. Wait for its bounding rectangle to settle, remeasure,
+  then click. An unchanged form alone does not prove submission; read the
+  resulting success/error state before retrying.
 - `BU_CDP_URL` is an HTTP DevTools endpoint; the daemon resolves it to WebSocket.
 - Ask before leaving cloud browsers running; stop them with `stop_remote_daemon(name)` or `PATCH /browsers/{id} {"action":"stop"}`.
 
