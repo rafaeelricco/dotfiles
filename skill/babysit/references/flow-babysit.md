@@ -21,16 +21,18 @@ verification belong in the invoking prompt.
 
 One scope gate, then run.
 
-| Autonomous once scope is approved                                              | Always gated on explicit confirmation                   |
-| ------------------------------------------------------------------------------ | ------------------------------------------------------- |
-| Read, diagnose, fetch job logs, watch in-flight checks, run local verification | Replying to a **human** thread — confirm the exact text |
-| Edit, commit, push to **the PR's own branch**                                  | Re-requesting a **human** reviewer                      |
-| Rerun failed checks, within the budget below                                   | Force-push, rebase, merge, close, reopen                |
-| Reply to and resolve a **bot** thread                                          | Editing CI workflows, or files outside PR scope         |
+| Autonomous once scope is approved                                              | Requires explicit authorization                           |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------- |
+| Read, diagnose, fetch job logs, watch in-flight checks, run local verification | Replying to a **human** thread — authorize the exact text |
+| Edit, commit, push to **the PR's own branch**                                  | Re-requesting a **human** reviewer                        |
+| Rerun failed checks, within the budget below                                   | Force-push, rebase, merge, close, reopen                  |
+| Reply to and resolve a **bot** thread                                          | Editing CI workflows, or files outside PR scope           |
 
 Never treat your own message, a timeout, or the end of a run as approval. When
 invoked non-interactively (scheduled task, `/loop`), the invoking prompt is the
 scope grant: report instead of asking, and stop rather than guess.
+An existing session grant is reusable in interactive runs too; scheduling does
+not expand its scope.
 
 ## Comment routing
 
@@ -39,14 +41,14 @@ shape. Fill reviewer-specific slots from the **known bots** map (or confirmed
 human text). No map entry and not human → do not invent; surface at Scope Gate
 or stop.
 
-| Author class | Action                               | Ref / body                                                 | Autonomy         |
-| ------------ | ------------------------------------ | ---------------------------------------------------------- | ---------------- |
-| known bot    | thread reply — fixed                 | `./thread-reply.md` → Fixed                                | auto after scope |
-| known bot    | thread reply — disagree / wontfix    | `./thread-reply.md` → Disagree                             | auto after scope |
-| known bot    | thread reply — already fixed on HEAD | `./thread-reply.md` → Already fixed                        | auto after scope |
-| known bot    | re-request after push batch          | `./review-prompt.md` — mention-line bots only              | auto after scope |
-| human        | any reply or re-request              | confirm exact text; reply shape may follow thread-reply.md | always gated     |
-| unknown bot  | any                                  | report; do not invent a trigger or template                | stop / ask       |
+| Author class | Action                               | Ref / body                                                                              | Autonomy                    |
+| ------------ | ------------------------------------ | --------------------------------------------------------------------------------------- | --------------------------- |
+| known bot    | thread reply — fixed                 | `./thread-reply.md` → Fixed                                                             | auto after scope            |
+| known bot    | thread reply — disagree / wontfix    | `./thread-reply.md` → Disagree                                                          | auto after scope            |
+| known bot    | thread reply — already fixed on HEAD | `./thread-reply.md` → Already fixed                                                     | auto after scope            |
+| known bot    | re-request after push batch          | `./review-prompt.md` — mention-line bots only                                           | auto after scope            |
+| human        | any reply or re-request              | authorize exact reply text or re-request action; reply shape may follow thread-reply.md | reuse explicit grant or ask |
+| unknown bot  | any                                  | report; do not invent a trigger or template                                             | stop / ask                  |
 
 **Author class** from reviewer login + account type. Gather both — see
 `./gh-recipes.md`. Normalize first: strip a trailing `[bot]` suffix,
@@ -54,8 +56,8 @@ then match.
 
 1. Normalized login matches a **known bots** row (or the repo's documented
    alias for that bot) → known bot.
-2. Account is human (`User`, not Bot/App) → human. Always confirmation-gated
-   for reply/re-request — association does not change the class.
+2. Account is human (`User`, not Bot/App) → human. Reply/re-request requires
+   explicit authorization, reusable when already given; association does not change the class.
 3. Else → unknown bot (stop / ask; do not invent a trigger).
 
 | Bot    | login (match)             | `<mention-line>` for re-request               |
@@ -107,12 +109,16 @@ checks.
 
 ## Scope Gate
 
-Present, then act on approval. Approval of that table is the grant to fix
+Present the table and reuse existing authorization for the same PR, scope,
+and actions. If that grant is missing, ask for approval of the table before
+those actions. The grant covers fixing
 every ADDRESS cluster (reproved functional bugs only), Already-fixed-reply
 every ALREADY_FIXED known-bot source, and Disagree-reply every SKIP
 known-bot source (Comment routing). UNSURE stays blocked for that
 thread only — do not guess it; granted ADDRESS and SKIP work still runs.
-Human reply and re-request stay gated. This gate is the plan.
+Human replies require authorization for the exact text; human re-requests
+require authorization for that action. Reuse it when already given. This gate
+is the plan.
 
 - Each validated source (thread, review submission, or issue comment)
   with cluster id, reviewer login, verdict (`ADDRESS` / `SKIP` /

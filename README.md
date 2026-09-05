@@ -5,10 +5,10 @@ the same AI instructions in several vendor-specific trees.
 
 This repository is the source of truth for my Neovim, PowerShell, shell,
 Claude Code, Codex, Grok, Cursor, and Hermes setup. AI tools share one generic `INSTRUCTIONS.md` and
-one `skill/` tree, installed through safe, repeatable symlinks. A skill's body never
-loads until it is invoked, so the tree is cheap to keep whole; skills that should
-never fire on their own carry `disable-model-invocation: true`, which keeps them out
-of the model's listing while leaving `/<name>` available to me.
+one `skill/` tree, installed through safe, repeatable symlinks. A skill's body loads
+when the skill is used. Explicit-only skills carry `disable-model-invocation: true`
+for Claude Code and `policy.allow_implicit_invocation: false` in
+`agents/openai.yaml` for Codex. They remain available through explicit invocation.
 
 - **One source of truth:** no generated skill or plugin copies.
 - **Safe re-runs:** exact links are no-ops and conflicts can be backed up or

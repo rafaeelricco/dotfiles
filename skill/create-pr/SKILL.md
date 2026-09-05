@@ -4,48 +4,52 @@ description: >
   Open a GitHub pull request from local repository changes. Use when the user
   asks to create PR, open PR, ship this branch,
   ready for review, publish local changes as a pull request, or invokes
-  /create-pr. Asks the user for motivation, branch, path, scope, and PR state
-  before any branch, stage, commit, push, or mutating gh call. Full flow derives
-  body options.
+  /create-pr. Resolves missing motivation, branch, path, scope, and PR state
+  choices and authorization before mutations. Full flow derives body options.
 ---
 
 # Create PR
 
-Open a pull request from local changes. You ask, the user decides. Nothing is
-branched, staged, committed, pushed, or opened before every answer is in.
+Open a pull request from local changes. Reuse the user's choices and ask for
+missing ones. Resolve scope and authorization before mutations.
 
 ## Order of operations
 
-1. Enter plan/approval mode if the harness has one — before any other tool call.
+1. Respect the current harness mode (Step 1).
 2. Inspect the repo and all changes (staged/unstaged) — read-only.
-3. Ask — Motivation in the message body. Shape through the ask tool found in
-   this turn's available tools. Wait for answers.
-4. Present the plan (leave plan/approval mode if used). One turn.
+3. Resolve missing choices — Motivation in prose; Shape through an available,
+   permitted question tool or plain text. Wait for needed answers.
+4. Present the concrete plan and confirm execution is authorized and permitted.
 5. Execute exactly what was approved.
 
-Until the user approves the Step 4 plan these commands are forbidden:
+Without authorization for the scope and actions, or while the harness forbids
+execution, these commands are forbidden:
 `git switch -c`, `git checkout -b`, `git add`, `git reset`, `git commit`,
 `git push`, `gh pr create`, `gh pr edit`.
 
 ## Step 3 exceptions
 
-Waiver is the only skip, and it does not authorize a mutation or skip the
-Step 4 plan.
+Reuse Motivation and Shape choices already supplied for this PR. Ask only for
+missing choices. Keep the guided questions when the user has not chosen or
+authorized defaults.
 
-**Waiver** — user waives questions in their own words ("don't ask, just ship
-it"). Skip Motivation and Shape. Use each "(Recommended)" answer; Scope = all listed
-groups. Write body from the diff, present Step 4 plan with those defaults.
+**Waiver** — when the user says "don't ask, just ship it" or otherwise
+authorizes the requested PR workflow without more questions, use the existing
+Recommended defaults for unanswered choices. Preserve any supplied motivation;
+otherwise omit it. Present the concrete Step 4 plan and execute within that
+grant when the harness permits it. Unrelated or ambiguous changes still need
+a scope decision.
 
-Accept-edits, autonomous mode, and "proceed without asking" are not a
-waiver. A guessable answer is still asked — put it first with
-"(Recommended)".
+Environment settings alone do not grant authorization. Existing authorization
+does not permit additional external actions or bypass harness permissions.
 
 ## Step 1 — Plan mode
 
-If the harness has plan/approval mode and the session is not already in it,
-enter it before anything else. Inspection stays read-only; Step 4 plan is the
-approval artifact for every Step 5 mutation. No plan mode → same steps, post
-Step 4 as a normal message; execute only after user approval.
+Respect the current harness mode. Enter plan/approval mode only when an
+available tool and the harness instructions permit it. A planning-only request
+stays read-only; user approval does not override harness-enforced Plan mode.
+Present the Step 4 plan before execution. Reuse authorization for the same
+scope and actions; if it is missing, ask for approval of that concrete plan.
 
 ## Step 2 — Inspect (read-only)
 
@@ -78,11 +82,12 @@ commits ahead of base, and whether the worktree mixes unrelated changes.
 
 ## Step 3 — Ask
 
-Discover the ask tool first. Then one turn, both parts, then wait once:
+Reuse supplied choices first. For unanswered choices, discover the ask tool,
+ask both parts together when needed, then wait once:
 
 - **Motivation** — in the message body (see below).
-- **Shape** — the four questions put to the tool Discover returned. Those
-  calls are Shape.
+- **Shape** — unanswered choices through the tool Discover returned, or plain
+  text when no suitable tool is callable.
 
 ### Discover the ask tool
 
@@ -96,18 +101,14 @@ missing because a remembered name is absent.
    search for MCP/server tools. Those catalogs do not list native harness
    tools, so a miss there is not a miss on step 1.
 
-Read the matched tool's schema. Map the four Shape questions onto it. One call
-when the schema carries all four; otherwise split them across back-to-back
-calls in Branch, Path, Scope, State order. No question is dropped. Wait. Plan
-mode does not hide this tool — ending the turn with those calls is this step.
+Use a matching question tool only when it is available and permitted in the
+current mode. Read its schema and fit the unanswered Shape questions to its
+question count and selection types, in Branch, Path, Scope, State order.
+If no suitable tool is callable, ask the unresolved questions in plain text.
+A missing widget does not block inspection or preparation of the plan.
 
-No match after both steps: stop and report that this turn's available tools
-have no multiple-choice ask tool. Wait. Do not present the Step 4 plan.
-
-Schema error on the call: remap to the schema in the error and call again.
-When the limit is one no remapping satisfies — a cap on questions per call, no
-multi-select field, a minimum option count a one-group Scope cannot meet — do
-not retry the rejected call. Split, or apply the Shape fallbacks, and re-ask.
+On a schema error, correct the payload to the actual schema; do not repeat an
+invalid call. If the schema cannot express a needed choice, ask it in plain text.
 
 ### Motivation
 
@@ -121,14 +122,15 @@ Then 2–3 numbered suggestions from the Step 2 diff: the problem or goal, not a
 changelog or commit subject. First is (Recommended). User picks a number or
 writes their own.
 
-Never skip the prompt. Never use a suggestion the user did not pick.
+Ask only when motivation is missing and questions were not waived. Never use
+a suggestion the user did not pick.
 No picked number and no own prose is a completed empty answer — omit
-the Motivation section. Do not re-ask. Waiver is the same omit path.
+the Motivation section. Do not re-ask. Waiver omits only missing motivation.
 
 ### Shape
 
-Payload for the Discover call — not a message. Four questions, always all
-four. Fill brackets from Step 2. Field names follow the schema you read
+Choices for the Discover call or plain-text fallback; ask only those unresolved.
+Fill brackets from Step 2. Field names follow the schema you read
 (`question`, `options[{label, description}]`, `multi_select` / `multiSelect`).
 Optional `header` only if the schema has it.
 
@@ -179,22 +181,23 @@ State   question: How should the PR be opened?
   first and append "(Recommended)". Derive the alternatives from the diff.
   Only one Branch option carries "(Recommended)" in the rendered list.
 - Scope: when the whole worktree is one coherent change, the list is a single
-  group holding every file. The user still confirms it — a one-option question
-  is a confirmation, not a skipped question. Waiver selects every listed group.
+  group holding every file. Confirm it unless the user already supplied scope
+  or authorized defaults for this change.
 - Shape fallbacks, only when the schema rejects the question itself: a
   single-group Scope the tool will not accept becomes a two-option
   single-select — "Yes, all of it (Recommended)" / "No, let me split it"; no
   multi-select field at all becomes one single-select keep/drop question per
-  group. Both are still ask-tool calls. Never reach Step 4 on a Scope the user
-  has not answered. "No, let me split it" is not an answered Scope — follow it
+  group. Use plain text when the tool cannot express the choice. Resolve Scope
+  from the user's choices or authorized defaults before execution.
+  "No, let me split it" is not an answered Scope — follow it
   with one single-select keep/drop question per Step 2 group, or per file when
   Step 2 found a single group, before continuing.
 
 If approved Scope excludes any Step 2 group, discard a numbered Motivation
-pick (it was generated from the full Step 2 diff). Re-ask Motivation with
-2–3 suggestions from the scoped subset only. Keep the user's own prose.
-Do not proceed to Step 4 until that answer is in — a new pick, own prose,
-or empty (omit).
+pick (it was generated from the full Step 2 diff). Keep the user's own prose.
+Otherwise re-ask Motivation with 2–3 suggestions from the scoped subset only,
+unless questions were waived; then omit the missing motivation. Accept a new
+pick, own prose, or empty answer (omit).
 
 ### Body
 
@@ -205,7 +208,7 @@ or empty (omit).
 - Diagram Scope — the flow that made Architecture Flow eligible.
 
 Render via `pr-body` `references/template.md`; the Motivation section = the
-picked suggestion or the user's own text. No text (unanswered or waiver) → omit the section.
+picked suggestion or the user's own text. No supplied text → omit the section.
 Name the three derived Body choices beside the body in the Step 4 plan.
 
 ## Step 4 — Present the plan
@@ -227,7 +230,8 @@ overriding that skill's section list. State concretely:
 Files that must move together (an API change and its consumer) stay in one
 commit. A single-category diff is one commit — say so.
 
-Approval of this plan is the gate for Step 5. Leave plan/approval mode if the harness uses one.
+Reuse authorization for this scope and these actions. If it is missing, ask for
+approval of this concrete plan. Execute only when authorized and the harness permits it.
 
 ## Step 5 — Execute
 
@@ -289,19 +293,18 @@ assignee.
 
 ## Examples
 
-**Compliant.** Inspect → Discover ask tool from this turn's available tools →
-Motivation in the message + Shape as that tool call → wait → derive Body →
-present plan → execute on approval.
+**Compliant.** Inspect → reuse supplied choices → ask unresolved questions with
+an available, permitted tool or plain text → derive Body → present plan →
+execute within existing authorization, or obtain missing approval first.
 
-**Non-compliant.** Putting Shape in the message as numbered lists. Ending Step
-3 without an ask-tool call while this turn's available tools had a
-purpose-match. Treating the tool as missing because a remembered name was not
+**Non-compliant.** Treating a tool as missing because a remembered name was not
 in MCP/tool-search. Using a Motivation suggestion the user did not pick, or
-skipping Branch / Path / Scope / State because answers looked obvious. Keeping
-a full-diff Motivation pick after Scope excludes a Step 2 group.
+skipping unresolved Shape choices without authorization to use defaults.
+Keeping a full-diff Motivation pick after Scope excludes a Step 2 group.
 
-**Waiver.** "Don't ask, just ship it" → skip Motivation and Shape, use Recommended defaults,
-omit Motivation, present plan, execute on approval.
+**Waiver.** "Don't ask, just ship it" → preserve supplied choices and motivation,
+use Recommended defaults for remaining choices within scope, present plan,
+execute when the harness permits it.
 
 ## Codex
 

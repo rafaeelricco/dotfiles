@@ -13,9 +13,9 @@ disable-model-invocation: true
 A recruiter spends 5 seconds and must leave with three facts: the area, the target role, the
 seniority. Every area below serves that.
 
-**Turn order** (per area, including each step of `all`): select area → Source → if Audit,
+**Workflow** (per area, including each step of `all`): select area → Source → if Audit,
 require the current state → Interview only if gated → load the area reference → Output
-mode → draft → Close.
+mode → draft. Close after the requested deliverables are complete or a staged step ends.
 
 ## Area selection
 
@@ -53,10 +53,11 @@ Before the table, in this order:
   brief, personal-profile About, SSI guidance, post draft — runs only when the user asks
   for that LinkedIn deliverable instead.
 - **Continuation.** `continue` / `next` / `yes` while an `all` chain or rule-2 hold is
-  active skips this table only when the reply names no different supported area: run the
-  next `all` step or next held area. `all` keeps the chain's starting Output mode; a
+  paused for guided or requested staged delivery or required input skips this table
+  only when the reply names no different supported area: run the next `all` step or
+  next held area. `all` keeps the chain's starting Output mode; a
   rule-2 hold keeps each area's own implied mode (do not inherit the first). Mode-only
-  rewrite ("now rewrite it") replaces mode for that turn. Naming a different supported
+  rewrite ("now rewrite it") replaces mode for that area. Naming a different supported
   area falls through to re-selection (chain/hold may abandon or update).
 - **Metrics read.** A request to read, interpret, or diagnose analytics — search
   appearances, profile views, which titles find the profile — is an `ssi` turn under
@@ -72,9 +73,10 @@ Then apply the rules below in order; the first that fits wins. Do not invent are
 
 1. One row matches → that area only.
 2. Two or more rows match → run the one clearly led on (`rewrite my about`, `fix my
-headline`, `open to work`), or the first named when there is no lead. Either way, one
-   area this turn; hold every other matched area with the Output mode its own wording
-   implies for **Output → Close**.
+headline`, `open to work`), or the first named when there is no lead. Complete the
+   other explicitly requested areas in order, keeping the Output mode each area's
+   wording implies. Hold remaining areas only for guided selection from ambiguous
+   signals, requested staged delivery, or required input.
 3. Zero matches, no argument, or no clear lead, but still a personal-profile deliverable
    this skill covers → staged area chooser, below.
 4. Anything else → not covered (see **Excluded deliverable**); say so and stop.
@@ -101,13 +103,12 @@ When the group is Full profile or 21-day plan, Call 2 options are exactly:
 
 `all` means the profile, not everything this skill knows: `positioning` → `headline` →
 `about` → `experience` → `sections` → `visuals`, in that order. Visuals last — the cover is
-the least load-bearing artifact on the page. One area per turn; wait for continue before
-the next. Never dump the full chain in one response. Content, SSI, and outreach belong to
-`plan` (or a separate ask), not to `all`.
+the least load-bearing artifact on the page. Complete the requested profile in order;
+pause between areas only for requested staged delivery or required input. Content,
+SSI, and outreach belong to `plan` (or a separate ask), not to `all`.
 
-Use only the reference file named for the chosen area. One area → one file. `all` is the
-only case that uses more than one file, in order. For `plan`, use `references/plan.md`
-alone.
+Read each requested area's reference when working on that area, in order.
+For `plan`, use `references/plan.md` alone.
 
 ## Source
 
@@ -166,7 +167,7 @@ One `AskUserQuestion` (≤4 options, recommended first) **only if** the user ref
 
 ## Output
 
-Pick **one** mode for the turn:
+Pick **one** mode for each requested area:
 
 1. **Audit** — user asked to review/audit only → the area's current state required (paste,
    image, or Source path): text for copy areas, the photo or cover for `visuals`, the
@@ -216,11 +217,12 @@ delivering the schedule) → if current state is known, read it, then exactly 3 
 fixes each with a ready-to-use example. If current state is unknown: say so (or ask once);
 give 3 generic prioritized fixes — never invent “your profile currently…”.
 
-**Close** (only after an area deliverable — variants, advisory fixes, audit-then-rewrite,
-or a full `plan` schedule — not after a chooser or the Interview question alone):
+**Close** once after the requested deliverables or staged step — variants, advisory
+fixes, audit-then-rewrite, or a full `plan` schedule — not after a chooser or the
+Interview question alone:
 (1) short list of what changed, (2) questions for blank source facts, (3) exactly one
-next-step offer only if: other areas were held from selection rule 2, or this is `all` and
-the next chain step remains, or the user already accepted a next-step. Do **not** upsell
+next-step offer only if other areas remain held under the selection or `all` rules,
+or the user already accepted a next-step. Do **not** upsell
 content, SSI, or outreach by default.
 
 ## Writing rules
@@ -258,7 +260,7 @@ Apply to every area.
 
 Rules live by deliverable under `references/`. Where the original course is silent, say so
 rather than improvising. Where the course contradicts the live platform, the platform wins —
-say so plainly. Product contracts in this file (turn order, area selection, Interview gate,
+say so plainly. Product contracts in this file (workflow order, area selection, Interview gate,
 Output modes, draft-first, vanity ban, soft-skill seniority) override course silence.
 
 Course outcome statistics ("21x more views", "9x more contacts") are motivation, not

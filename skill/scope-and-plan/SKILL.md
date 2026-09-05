@@ -1,22 +1,20 @@
 ---
 name: scope-and-plan
 description: >
-  Read diamond (fan-out → check → synthesize), then plan-as-diffs → approve →
+  Read diamond (fan-out → check → synthesize), then plan-as-diffs → confirm authorization →
   write diamond. Use when orchestrate loads this skill, or the user names it
   (`scope-and-plan`). Runs even when paths are already known — workers gather
   related call sites so the plan does not break neighbors.
   Do NOT use for explore/"get context first" phrasing alone, or only to spawn
   parallel workers — fan-out alone needs no skill; that is a session that did
   not call orchestrate.
-  When the harness has one, every invocation enters the harness plan/approval
-  mode at step 4, before the plan is written.
 ---
 
 # Scope and plan
 
-Five steps, in order. Steps 1–3 gather context, read-only. Step 4 enters
-plan/approval mode and writes the plan there; step 5 is the only one that writes
-to the tree, and only after the user approves.
+Five steps, in order. Steps 1–3 gather context, read-only. Step 4 presents the
+plan under the current harness mode; step 5 is the only one that writes to the
+tree, when execution is authorized and the harness permits it.
 
 ## 1. Fan out
 
@@ -62,20 +60,19 @@ Never forward raw worker transcripts.
 
 ## 4. Plan
 
-Enter the harness plan/approval mode before writing anything here, when the
-harness has one. Steps 1–3 exist to earn the context that mode is entered with;
-nothing about their result makes approval skippable. Already in that mode →
-stay; do not re-enter.
+Respect the current harness mode. Enter plan/approval mode only when an
+available tool and the harness instructions permit it; do not claim to change
+mode through a message. A planning-only request stays read-only, and user
+approval does not itself override a harness-enforced Plan mode.
 
-Approval is the only thing that leaves it — never your own message, a timeout,
-or the end of a run. "Accept edits", autonomous mode, and standing "proceed
-without asking" guidance are not approval.
+Present the plan before execution. Reuse authorization already given for the
+same scope and actions, including an explicit request to proceed without
+asking. If that authorization is missing, wait for approval of the concrete
+plan. A timeout, your own message, or an environment setting is not approval.
+Ask again only for unresolved decisions or actions outside the existing grant.
 
-No such mode in the harness → the five steps do not change. Post the plan as a
-normal message and wait for a user message that approves it.
-
-Follow `plan-format`, already loaded at step 1. Its Mode section defers to the
-three paragraphs above — do not re-check the mode there.
+Follow `plan-format`, already loaded at step 1; this section owns mode and
+authorization handling.
 
 Fill the Verify section from the synthesis: name the repo's own commands,
 narrowed to the checks that would fail if this change were wrong. Do not run
@@ -87,7 +84,7 @@ plan ship in the same response.
 
 ## 5. Execute
 
-After approval, fan out again — writers this time.
+When execution is authorized and permitted by the harness, fan out again — writers this time.
 
 Group by the plan's own diffs: files one diff touches together are one writer.
 `plan-format` orders diffs by apply order, so a group whose diffs depend on an

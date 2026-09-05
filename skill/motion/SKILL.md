@@ -12,7 +12,8 @@ argument-hint: "[build|review|audit|hunt|prototype|lib|vocab]"
 
 # Motion
 
-Match the ask. Load that file. One job per turn.
+Match the ask. Load each requested job's reference when that job begins.
+Complete explicitly requested jobs in order, preserving each job's scope and gates.
 
 | Signal                                      | Job         | Read                       |
 | ------------------------------------------- | ----------- | -------------------------- |
@@ -24,7 +25,8 @@ Match the ask. Load that file. One job per turn.
 | toasts, dnd, charts, which library          | `lib`       | `references/libraries.md`  |
 | what's it called when…                      | `vocab`     | `references/vocabulary.md` |
 
-Zero matches → ask which row. Two match → the one they led on.
+Zero matches → ask which row. If one ambiguous request matches two jobs, use the
+one they led on; if they explicitly request both, perform both in order.
 
 Values live in `references/bar.md`. Load it when a job needs a number. Do not restate it.
 

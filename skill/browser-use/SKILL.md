@@ -142,8 +142,9 @@ browser-use recordings
 natural nudge to “record,” “show,” “demo,” or “make a video” opts in that task;
 significant work alone does not.
 
-Before browser work, call `start_recording(name, title=...)`, retain its exact
-returned directory, and call `stop_recording()` after verifying the result.
+For an opted-in recording task, call `start_recording(name, title=...)` before
+browser work, retain its exact returned directory, and call `stop_recording()`
+after verifying the result.
 Never replace that path with `recordings --latest`. For a request made after
 the task, use:
 

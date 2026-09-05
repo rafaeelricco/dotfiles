@@ -12,14 +12,15 @@ A plan is approved as diffs, not prose. Show every change as a real before/after
 
 ## Mode
 
-Before writing the plan, enter the harness plan/approval mode if it has one and
-the session is not already in it. Inspection stays read-only until the user
-approves.
+When a caller owns mode and authorization handling, follow its mode step.
+Otherwise respect the current harness mode: enter plan/approval mode only when
+an available tool and the harness instructions permit it. A planning-only
+request stays read-only; user approval alone does not override harness Plan mode.
 
-Leave the mode as it stands when the harness has none, or when the skill that
-loaded this one owns its own mode step. Then post the plan as a normal message
-and wait — never treat your own message, a timeout, or the end of a run as
-approval.
+Present the plan and reuse authorization already given for the same scope and
+actions. If it is missing, wait for approval of the concrete plan. Ask again only
+for unresolved decisions or actions outside that grant. Your own message, a
+timeout, or an environment setting is not approval.
 
 ## Shape
 
