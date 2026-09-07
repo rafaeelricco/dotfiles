@@ -2,7 +2,7 @@
 
 Step 1 workers are read-only. A worker that edits while siblings are reading
 invalidates every other worker's snapshot. Step 5 writers are the exception —
-they run after every reader has returned, over disjoint paths from an approved
+they run after every reader has returned, over disjoint paths from an authorized
 plan.
 
 Brief each reader with:
@@ -17,7 +17,7 @@ the same path, merge them into one worker.
 
 Brief each writer with:
 
-    Apply:      <the approved diffs, verbatim>
+    Apply:      <the authorized diffs, verbatim>
     Boundaries: <the only files this writer may touch>
     Return:     files changed; any diff that did not apply cleanly
     Do not:     re-plan, widen the diff, touch a path outside Boundaries, commit

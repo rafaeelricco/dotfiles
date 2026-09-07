@@ -37,7 +37,9 @@ Need another curve → easing.dev / easings.co. Don't invent one. Prefer the rep
 | Modal, drawer          | 200–500ms |
 | Marketing              | longer ok |
 
-UI stays under **300ms**. After the first tooltip in a group: 0ms.
+Standard UI stays under **300ms**. Modals and drawers may use the table's longer
+range when travel distance warrants it; deliberate holds and gesture springs keep
+their separate timing below. After the first tooltip in a group: 0ms.
 
 ## Physicality
 

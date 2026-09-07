@@ -17,7 +17,7 @@ Grep: `transition`, `animation`, `@keyframes`, `motion.`, `animate={`, `useSprin
 Values from `bar.md`. Hunt only:
 
 1. **Purpose & frequency** — keyboard/⌘K motion, decorative list/hover on high-traffic surfaces. Strongest fix is often delete.
-2. **Easing & duration** — `ease-in`, bare `ease`/`linear` on entrances, UI > 300ms, every toolbar tooltip animating after the first.
+2. **Easing & duration** — `ease-in`, bare `ease`/`linear` on entrances, durations outside `bar.md` without a documented reason, every toolbar tooltip animating after the first.
 3. **Physicality & origin** — `scale(0)`, pure-fade, center origin on a trigger popover (modals exempt), no press feedback.
 4. **Interruptibility** — `@keyframes` on toasts/toggles, fixed-duration gestures, no velocity dismiss (`> ~0.11`), hard drag stops.
 5. **Performance** — `transition: all`, layout props, Motion `x`/`y`/`scale` on busy pages, parent CSS var driving children, rAF doing CSS's job.

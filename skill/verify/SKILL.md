@@ -1,8 +1,8 @@
 ---
 name: verify
 description: >
-  Validate a change set before commit. Default mode is FAST (one package-level
-  decisive check from the diff). STRICT mode runs the full discovery ladder —
+  Validate a change set before commit. Default mode is FAST (the smallest
+  sufficient package-level check set from the diff). STRICT mode runs the full discovery ladder —
   use on `/verify`, when babysit loads this skill, or when the user says strict.
 argument-hint: "[--branch <name> | --pr <number-or-url>]"
 ---
@@ -11,8 +11,8 @@ argument-hint: "[--branch <name> | --pr <number-or-url>]"
 
 Prefer proofs the repo already defines. Mode selects ambition:
 
-- **FAST** (default on pre-commit from `orchestrate` §5): one decisive check for
-  the package(s) the diff touches; then stop.
+- **FAST** (default on pre-commit from `orchestrate` §5): the smallest sufficient
+  check set for the package(s) the diff touches; then stop.
 - **STRICT** (`/verify`, babysit, user says "strict", or `--branch`/`--pr`):
   full Discovery ladder and strict PASS rules below.
 
@@ -29,17 +29,19 @@ Default target when no flag is given: local changes — staged, unstaged,
 untracked. Empty change set: stop, there is nothing to validate. For `--branch`
 and `--pr`, read `references/targets.md` before anything else.
 
-One exit fires before Discovery, off the diff alone: a docs-only diff. Report
-that no behavioral verification is required and do not probe. That is not PASS.
+For nonbehavioral prose-only changes, report that no behavioral verification
+is required and do not probe. That is not PASS. Skill instructions and
+configuration that change execution do not qualify for this exit.
 
 ### FAST path
 
 From the diff alone (no Tools/Live multi-step probe):
 
 1. Map changed paths → package or repo root.
-2. Name **one** decisive check for that surface (prefer package `test` / language
-   default over lint or typecheck alone).
-3. Run it once. Verdict from that single result.
+2. Select the smallest check set covering the changed behavior, usually one
+   package-level check. Add complementary checks only when needed.
+3. Run the selected checks. Repeat or expand only for a new edit, failure,
+   unresolved coverage gap, or explicit user request.
 4. If no check can be named → BLOCKED with the one unblock action — never invent PASS.
 5. State residual risk in one line when Tools/Live/full ladder were skipped.
 
@@ -75,8 +77,8 @@ subagent that inventories project tooling, delegate rather than re-derive.
 
 Two methods could both be decisive → run the cheapest and name the one you
 skipped. Ask only when they would prove different things and the diff does not
-say which matters: then one `AskUserQuestion`, best match first and labelled
-`(Recommended)`, each option stating its cost and what it cannot prove. One
+say which matters: use an available, permitted question tool or plain text,
+best match first and labelled `(Recommended)`, each option stating its cost and what it cannot prove. One
 method: name it and run. Zero: BLOCKED, not PASS — name what is missing and the
 one action that unblocks it. Never ask after the checks have run.
 
@@ -99,17 +101,18 @@ one action that unblocks it. Never ask after the checks have run.
 6. Keep validation in the canonical layer the repo already uses.
 7. Missing environment is a blocker, not a pass. In **STRICT**, a present
    harness is an obligation (run covering checks; do not skip an available
-   decisive harness). **FAST** stays one package-level check; name residual
-   risk when Tools/Live/full ladder were skipped — do not expand FAST into
-   the harness ladder under this rule.
+   decisive harness). **FAST** uses the smallest sufficient package-level set;
+   name residual risk when Tools/Live/full ladder were skipped — do not expand
+   FAST into the harness ladder under this rule.
 8. Materialize non-local targets; gate untrusted PR execution.
 
 ## Verdict
 
 `PASS` · `FAIL` · `PARTIAL` · `BLOCKED`
 
-**FAST PASS:** the one selected check ran successfully and targets the package
-(or root) of the changed files; residual risk named if the full ladder was skipped.
+**FAST PASS:** every selected check ran successfully and the set covers the
+changed behavior in the affected package(s) or root; residual risk named if
+the full ladder was skipped.
 
 **STRICT PASS** requires all four:
 

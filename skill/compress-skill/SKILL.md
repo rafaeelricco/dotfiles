@@ -16,7 +16,7 @@ Verb is **cut** unless the user names scout-grain, thin `SKILL.md`, route to `re
 
 Need `SKILL.md`. Read `SKILL.md` + `references/` + files it links. `wc -w` each.
 
-Draft and report. Write the target only when the user says apply.
-Skip the report / just apply / we trust you / time pressure are not apply.
+Draft and report by default. An explicit request to apply, including “just apply,”
+authorizes writing the target. Trust or time pressure alone does not.
 
 Read `./references/flow-cut.md` or `./references/flow-router.md` for the chosen verb.

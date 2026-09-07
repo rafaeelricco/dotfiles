@@ -10,8 +10,8 @@ thin the flow files; do not invent a second router.
 
 Else:
 
-1. **`SKILL.md`** — keep `name` + `description`. Body is identity (one
-   line), path resolve the skill already had, `Skill-local files:
+1. **`SKILL.md`** — keep `name`, `description`, and existing optional frontmatter.
+   Body is identity (one line), path resolve the skill already had, `Skill-local files:
 ./references/* only.`, `Read ./references/flow-{stem}.md now.`,
    `Load each additional reference only when that flow names it.`
    `{stem}` = existing `flow-*.md` if there is one; else the skill name.
@@ -28,10 +28,10 @@ Else:
 
 ## Strip
 
-Gone from `SKILL.md` and from the flow: missing-file STOP strings,
-“Do not”, “Never X”, third-fail counters, “STOP this agent”.
-The agent reports a missing input and stops; the skill does not
-script the sentence.
+Remove scripted STOP wording and redundant bans only when their behavioral
+constraints survive. Preserve retry limits, stopping conditions, authorization
+gates, and scope restrictions in the flow. The agent reports a missing input
+and stops; the skill need not script the sentence.
 
 Stay as **what the work is**, not a ban list: write-set, which URL is
 source, what the verifier may see, “content not geometry”.
@@ -41,9 +41,10 @@ brief) stay in the flow.
 ## Even-behavior (copies only)
 
 Copy the dir aside; apply the draft only there.
-Check: same description/triggers; same output headings/fields; same
-write-set; `SKILL.md` loads the flow; contracts not restated in the
-flow. STOPs may leave `SKILL.md` — that is the verb.
+Check: same frontmatter/triggers; same behavioral constraints, including retry
+limits, stopping conditions, and authorization gates; same output headings/fields
+and write-set; `SKILL.md` loads the flow; contracts not restated in the flow.
+STOP wording may leave `SKILL.md`; its constraints must survive.
 Divergence on those checks → revert that cut, list it.
 
 ## Report

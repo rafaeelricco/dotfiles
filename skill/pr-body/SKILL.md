@@ -4,7 +4,7 @@ description: >
   Write the body of a GitHub pull request from the branch diff. Use before
   creating, opening, or updating any PR body — `gh pr create`, `gh pr edit
   --body`, "create a PR", "ship this branch", "describe my changes", "write the
-  PR body", "refresh the PR description". Ask the user for motivation first.
+  PR body", "refresh the PR description". Reuse supplied motivation; ask when missing.
   Pairs with commit-message for PR title style.
 ---
 
@@ -50,17 +50,21 @@ per change, and any flow change worth a diagram. Keep this internal.
 
 ## Ask
 
-Motivation first, in prose, then wait:
+Reuse motivation already supplied by the user or caller. If it is missing and
+the user has not waived questions, ask in prose, then wait:
 
 ```text
 What is the motivation or the why behind this PR? Briefly describe the problem it solves or the goal it achieves.
 ```
 
-Never auto-generate it, never read it off the commit messages, never skip it.
+Do not invent motivation or infer it from commit messages. A waived or empty
+answer omits the section.
 
-Then `AskUserQuestion` — at most four questions per call (tool schema limit):
+Resolve only unanswered formatting choices. Use an available question tool
+when permitted, following its actual schema; otherwise ask in plain text.
+When the user authorizes defaults, use the Caller mode defaults.
 
-**Call 1 (always):**
+**Formatting choices:**
 
 - Sections — multi-select, and the only control over which of the offered
   sections appear. What's New and Testing & Feedback are always on and never
@@ -78,7 +82,7 @@ Then `AskUserQuestion` — at most four questions per call (tool schema limit):
 - Writing Style — concise (terse bullets, one line each) / standard (one or two
   sentences with context) / verbose (rationale and tradeoffs).
 
-**Call 2 (only when Sections includes Architecture Flow):**
+**Diagram scope (only when Architecture Flow was selected and its scope remains unresolved):**
 
 - Diagram Scope — which flow the diagram should show.
 

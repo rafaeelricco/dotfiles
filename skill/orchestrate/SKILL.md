@@ -23,7 +23,7 @@ Independent work ships in one message; two independent concerns are two workers.
 
 After parallel reads, before using them: drop empty, off-task, and mutually impossible claims. Do not edit or synthesize from a dropped claim.
 
-Once the plan is approved: one writer per file group, groups disjoint by path. A writer applies the decision; it does not remake it. Ordered diffs are one writer, never a fan-out. A writer that cannot apply its diffs stops and reports which landed; you finish that group serially and never respawn it.
+Once execution of the plan is authorized: one writer per file group, groups disjoint by path. A writer applies the decision; it does not remake it. Ordered diffs are one writer, never a fan-out. A writer that cannot apply its diffs stops and reports which landed; you finish that group serially and never respawn it.
 
 ## 2. Simplicity
 
@@ -43,7 +43,7 @@ No assertable behavior (comment typos, formatting, copy) or no test suite → sk
 
 While `scope-and-plan` is planning:
 
-- Inspection stays read-only until the user explicitly approves.
+- Inspection stays read-only for a planning-only request, while the harness requires it, or until any missing execution authorization is supplied.
 - Unresolved decisions don't defer a plan: the question and the formatted plan ship in the same response.
 - Stress-test with the user until decisions resolve. Independent questions ship in one ask, hardest first. Sequence only when one answer changes the next question.
 
@@ -54,8 +54,8 @@ Load a skill at the step that needs it, not ahead of it.
 Ship order after Edit (do not invent steps the user did not ask for):
 
 1. **behavior?**
-   - Docs, comments, formatting, config-only → skip verify.
-   - Behavior change → load `verify` in **FAST** (one package-level decisive check).
+   - Nonbehavioral prose, comments, or formatting → inspect the diff and skip verify.
+   - Behavior change, including configuration or skill instructions that affect execution → load `verify` in **FAST** (the smallest sufficient check set).
 
 2. **commit?**
    - User asked for a commit → `commit-message` (and PR title style when only a title is needed).
@@ -63,4 +63,4 @@ Ship order after Edit (do not invent steps the user did not ask for):
 
 3. **done** — stop. Do not commit, open a PR, or babysit unless the user asked.
 
-One quality gate per ship: do not stack `verify` with `/code-review` or a second verify pass on the same commit batch unless the user asked for that second pass.
+Use one verification pass for the final change set. Add or repeat checks only when the user requests them, the changes require complementary coverage, or a new edit, failure, or unresolved concern justifies them.
