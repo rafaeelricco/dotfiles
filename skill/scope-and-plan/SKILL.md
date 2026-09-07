@@ -12,9 +12,9 @@ description: >
 
 # Scope and plan
 
-Five steps, in order. Steps 1–3 gather context, read-only. Step 4 presents the
-plan under the current harness mode; step 5 is the only one that writes to the
-tree, when execution is authorized and the harness permits it.
+Five steps, in order. Steps 1–3 gather context, read-only. Step 4 enters
+plan/approval mode and presents the plan there; step 5 is the only one that
+writes to the tree, when execution is authorized and the harness permits it.
 
 ## 1. Fan out
 
@@ -60,10 +60,14 @@ Never forward raw worker transcripts.
 
 ## 4. Plan
 
-Respect the current harness mode. Enter plan/approval mode only when an
-available tool and the harness instructions permit it; do not claim to change
-mode through a message. A planning-only request stays read-only, and user
-approval does not itself override a harness-enforced Plan mode.
+Enter the harness plan/approval mode before writing anything here. Already
+in it → stay; do not re-enter. The tool for it may be deferred: if it is not in
+the loaded tool list, fetch it (for example `ToolSearch` with
+`select:EnterPlanMode`) rather than concluding no tool exists. Only a harness
+with no such tool at all leaves the mode as it stands — then post the plan as a
+normal message. Do not claim to change mode through a message. A planning-only
+request stays read-only, and user approval does not itself override a
+harness-enforced Plan mode.
 
 Present the plan before execution. Reuse authorization already given for the
 same scope and actions, including an explicit request to proceed without
