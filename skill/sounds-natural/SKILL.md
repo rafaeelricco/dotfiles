@@ -2,7 +2,7 @@
 name: sounds-natural
 description: >
   Use when writing should sound natural, not rehearsed.
-  Triggers: sounds-natural, /humanizer, humanize this, de-slop, tonalidade,
+  Triggers: sounds-natural, /sounds-natural, humanize this, de-slop, tonalidade,
   too scripted, match a writing sample. Not for inventing facts, rewriting
   code, or changing what the source claims.
 license: MIT
