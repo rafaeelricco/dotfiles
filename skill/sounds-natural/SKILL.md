@@ -19,6 +19,8 @@ Patterns from Wikipedia ["Signs of AI writing"](https://en.wikipedia.org/wiki/Wi
 3. **Do not invent facts.** No new fact, name, number, date, quote, or citation unless it is in the source or from the user. If a sentence needs a missing detail, ask or simplify. Opinion or reaction is allowed when the writer's voice calls for it; a factual claim is not. Fiction is exempt: invented details are the task.
 4. **Match the register.** Spoken if it will be said; written otherwise. A sample overrides the style rules.
 
+Preserve non-prose content, including code, YAML metadata, structured data, and link destinations, unless the user requests changes to it.
+
 ## Spoken vs written
 
 Spoken (call scripts, interviews, messages you will say): short sentences, one idea per breath, light connectors (`so`, `and`, `kind of`) when they help. Do not sprinkle fake hesitation.
@@ -35,23 +37,23 @@ The tell is a stack of labels or perfect claims with no break.
 
 Let the example carry the confidence. Do not replace one stacked label with another (`I'm comfortable` three times is the same tell).
 
-Move technical lists out of the main line to support (`if they ask`). Split an optional follow-up into its own turn. Keep a related pair when it is one topic.
+For spoken material, move a technical list to support (`if they ask`) when it interrupts the main point. In dialogue, split an optional follow-up into its own turn when that helps pacing. Keep a related pair when it is one topic.
 
-Do not rewrite a passage that already sounds spoken.
+Keep passages that already sound natural in the intended register.
 
 `I think` / `I guess` only for an interpretation. Do not hedge a fact you know.
 
 If the source has a speak-aloud budget, keep it and say to time it out loud.
 
-## Preview before write
+## Return or apply the result
 
-Pasted text → coaching, then the rewrite.
+Follow the user's requested output and existing authorization.
 
-Named file → coaching, then a unified diff. Do not write the file until asked.
+- Pasted text: brief coaching, then the rewrite.
+- Named file: when a preview is requested, return coaching and a unified diff without editing. When editing is authorized, including approval of a previous diff, apply the rewrite and summarize the changes. Otherwise, return coaching and a unified diff.
+- Embedded in another task: return only the rewritten text.
 
-Embedded in another task → return only the rewritten text.
-
-Coaching may ask to apply. That offer never goes inside the artifact.
+In coaching, name what sounds off, skip passages you are keeping, and note any detail moved to support. Keep coaching outside the artifact.
 
 ## Match the writer's voice
 
@@ -304,15 +306,9 @@ Keep unless they hurt meaning:
 - **Genuine asides, parentheticals, self-corrections.**
 - **Edits made before November 30, 2022.** ChatGPT public launch. Older text is almost never AI-written.
 
-## How to return the result
-
-1. Name the tell, in the user's language. Skip passages you are keeping.
-2. Pasted text: the rewrite. Named file: unified diff, file untouched. Embedded: rewrite only.
-3. Note anything left for support or to time aloud.
-
 ## Rewrite process
 
 1. Read the source. Mark rehearsed tells, then AI patterns.
 2. Draft. Read it aloud. Check rhythm, facts, simple verbs, register.
 3. Still rehearsed or AI? Any fact added or lost? Either is an error.
-4. Rewrite the paragraph around its point; do not patch one phrase. Apply §14. Do not write a named file.
+4. Rewrite the paragraph around its point; do not patch one phrase. Apply §14.
