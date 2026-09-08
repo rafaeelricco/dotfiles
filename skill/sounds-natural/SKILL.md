@@ -1,24 +1,57 @@
 ---
-name: humanizer
+name: sounds-natural
 description: >
-  Use when the user runs /humanizer, asks to humanize text, strip AI-isms,
-  remove AI slop, make prose sound less AI, add real voice, or match a writing
-  sample. Triggers: humanize this, de-slop, anti-ai-slop, signs of AI writing,
-  rewrite so a person wrote it. Not for inventing facts, rewriting code, or
-  changing what the source says.
+  Use when writing should sound natural, not rehearsed.
+  Triggers: sounds-natural, /humanizer, humanize this, de-slop, tonalidade,
+  too scripted, match a writing sample. Not for inventing facts, rewriting
+  code, or changing what the source claims.
 license: MIT
 ---
 
-Rewrite so it reads like the writer, not a chatbot. Keep every claim. Do not invent facts.
+Rewrite so it sounds like a person, not a script or a chatbot. Keep every fact. Do not invent facts.
 
 Patterns from Wikipedia ["Signs of AI writing"](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing).
 
 ## What to do
 
-1. **Find AI patterns** against the lists below.
-2. **Keep every claim.** Shorten, expand, merge, or split freely. Do not drop information.
+1. **Find what sounds off.** Rehearsed and absolute tells first, then AI patterns below.
+2. **Keep every fact.** Shorten, expand, merge, split, or move detail to support. Do not drop information.
 3. **Do not invent facts.** No new fact, name, number, date, quote, or citation unless it is in the source or from the user. If a sentence needs a missing detail, ask or simplify. Opinion or reaction is allowed when the writer's voice calls for it; a factual claim is not. Fiction is exempt: invented details are the task.
-4. **Match the voice.** Formal, casual, or technical as the text requires. Personality only when the text and writer call for it.
+4. **Match the register.** Spoken if it will be said; written otherwise. A sample overrides the style rules.
+
+## Spoken vs written
+
+Spoken (call scripts, interviews, messages you will say): short sentences, one idea per breath, light connectors (`so`, `and`, `kind of`) when they help. Do not sprinkle fake hesitation.
+
+Written: same naturalness without performing speech.
+
+Coaching matches the user's language. The artifact matches the source language.
+
+## Rehearsed tells
+
+The tell is a stack of labels or perfect claims with no break.
+
+**Watch:** I'm an expert / I'm very good / I am very dependable; long formal sentences; dump lists in the main line; two asks in one turn when the second is optional.
+
+Let the example carry the confidence. Do not replace one stacked label with another (`I'm comfortable` three times is the same tell).
+
+Move technical lists out of the main line to support (`if they ask`). Split an optional follow-up into its own turn. Keep a related pair when it is one topic.
+
+Do not rewrite a passage that already sounds spoken.
+
+`I think` / `I guess` only for an interpretation. Do not hedge a fact you know.
+
+If the source has a speak-aloud budget, keep it and say to time it out loud.
+
+## Preview before write
+
+Pasted text → coaching, then the rewrite.
+
+Named file → coaching, then a unified diff. Do not write the file until asked.
+
+Embedded in another task → return only the rewritten text.
+
+Coaching may ask to apply. That offer never goes inside the artifact.
 
 ## Match the writer's voice
 
@@ -145,7 +178,7 @@ Straight quotes ("...") unless the writer or target format uses curly.
 
 **Watch:** I hope this helps, Of course!, Certainly!, You're absolutely right!, Would you like..., Want me to...?, Want me to give examples?, Should I continue?, let me know, here is a...
 
-Greetings, offers, closings. The text should stand alone.
+Greetings, offers, closings inside the artifact. Coaching may offer a next step. The rewritten text stands alone.
 
 ### 21. Knowledge-limit disclaimers and guesses
 
@@ -172,7 +205,7 @@ No praise or agreement before the answer.
 
 **Watch:** to be fair, it's also possible, could potentially, might arguably, in some cases it may, this is an inference
 
-Keep a qualifier only when the source supports it and the meaning needs it. Drop caveats that only repair an earlier overstatement.
+Keep a qualifier when the meaning needs it. `I think` is fine for a personal reading. Drop hedges on known facts and caveats that only repair an earlier overstatement.
 
 ### 25. Generic positive endings
 
@@ -273,15 +306,13 @@ Keep unless they hurt meaning:
 
 ## How to return the result
 
-**Pasted text (default).** Draft, a short list of remaining AI patterns, and the final rewrite.
-
-**File mode.** User names a file → write only the final text to the file. Prose only. Keep code blocks, YAML metadata, data, and link targets. Then a short summary.
-
-**Embedded mode.** Another task uses this skill for a PR, commit message, or document → return only the final text.
+1. Name the tell, in the user's language. Skip passages you are keeping.
+2. Pasted text: the rewrite. Named file: unified diff, file untouched. Embedded: rewrite only.
+3. Note anything left for support or to time aloud.
 
 ## Rewrite process
 
-1. Read the source. Mark each AI pattern.
-2. Draft. Read it aloud. Check rhythm, details, simple verbs (_is_, _has_), formality.
-3. Two questions: what still sounds AI-generated? Did the rewrite add or remove any fact, name, number, date, quote, citation, ranking, or other claim? Unsupported addition or lost claim = error.
-4. Final: state each point naturally; do not patch one flagged phrase at a time. Awkward sentence → rewrite the paragraph around its main point. Apply §14.
+1. Read the source. Mark rehearsed tells, then AI patterns.
+2. Draft. Read it aloud. Check rhythm, facts, simple verbs, register.
+3. Still rehearsed or AI? Any fact added or lost? Either is an error.
+4. Rewrite the paragraph around its point; do not patch one phrase. Apply §14. Do not write a named file.
