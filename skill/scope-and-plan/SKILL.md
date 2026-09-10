@@ -1,7 +1,7 @@
 ---
 name: scope-and-plan
 description: >
-  Read diamond (fan-out → check → synthesize), then plan-as-diffs → confirm authorization →
+  Read diamond (fan-out → check → synthesize → refute), then plan-as-diffs → confirm authorization →
   write diamond. Use when orchestrate loads this skill, or the user names it
   (`scope-and-plan`). Runs even when paths are already known — workers gather
   related call sites so the plan does not break neighbors.
@@ -12,9 +12,9 @@ description: >
 
 # Scope and plan
 
-Five steps, in order. Steps 1–3 gather context, read-only. Step 4 enters
-plan/approval mode and presents the plan there; step 5 is the only one that
-writes to the tree, when execution is authorized and the harness permits it.
+Six steps, in order. Steps 1–4 gather and test context, read-only. Step 5
+enters plan/approval mode and presents the plan there; step 6 is the only one
+that writes to the tree, when execution is authorized and the harness permits it.
 
 ## 1. Fan out
 
@@ -34,8 +34,9 @@ nothing.
 
 ## 2. Check
 
-Checker gate — do not enter Synthesize until every surviving claim passes.
-Judge each worker's return on its own:
+Check each return the moment it arrives; do not hold it for the others. Every
+rule below reads one worker alone, so waiting here is a barrier with nothing to
+gather. Judge each return on its own:
 
 - Returned nothing, or nothing on its Objective → drop it.
 - Claims carry no `file:line` anchor → drop those claims.
@@ -49,7 +50,9 @@ on missing context — do not invent Paths/Facts.
 
 ## 3. Synthesize
 
-Collapse worker output into these four labels, verbatim, posted in the response:
+This is the one barrier: wait for every reader here, because dedupe across
+workers needs the whole set. Collapse worker output into these four labels,
+verbatim, posted in the response:
 
     Paths:    <file:line — what lives there>
     Facts:    <what the code does today, verified>
@@ -58,7 +61,15 @@ Collapse worker output into these four labels, verbatim, posted in the response:
 
 Never forward raw worker transcripts.
 
-## 4. Plan
+## 4. Refute
+
+The plan is built on Facts, so test them before building. Spawn one fresh
+read-only skeptic — never a reader that produced a Fact — briefed per
+`./worker-brief.md`, whose only job is to refute each Fact by reading its
+anchor. A Fact it refutes moves to Gaps with the reason; a Fact it cannot
+refute stands. No Facts → skip this step.
+
+## 5. Plan
 
 Enter the harness plan/approval mode before writing anything here. Already
 in it → stay; do not re-enter. The tool for it may be deferred: if it is not in
@@ -86,7 +97,7 @@ to manufacture a pass.
 Unresolved decisions do not defer the plan: the open question and the formatted
 plan ship in the same response.
 
-## 5. Execute
+## 6. Execute
 
 When execution is authorized and permitted by the harness, fan out again — writers this time.
 

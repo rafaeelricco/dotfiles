@@ -63,4 +63,4 @@ Ship order after Edit (do not invent steps the user did not ask for):
 
 3. **done** — stop. Do not commit, open a PR, or babysit unless the user asked.
 
-Use one verification pass for the final change set. Add or repeat checks only when the user requests them, the changes require complementary coverage, or a new edit, failure, or unresolved concern justifies them.
+Use one verification pass for the final change set. Add or repeat checks only when the user requests them, the changes require complementary coverage, or a new edit, failure, or unresolved concern justifies them. A failing check buys at most two fix-and-rerun rounds; still failing after the second → report the failing output and stop.
