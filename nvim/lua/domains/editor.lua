@@ -165,4 +165,11 @@ return {
     },
   },
   --]]
+
+  -- Markdown preview bar + in-place renderer (local development checkout).
+  {
+    dir = "~/Projects/personal/preview.nvim",
+    ft = "markdown",
+    opts = {},
+  },
 }
