@@ -10,13 +10,16 @@
 
 - State the current issue, gap, inconsistency, or missing behavior.
 - Keep it observable and objective.
+- Lead with the gap. Add at most two evidence quotes.
 - Do not include proposed solutions.
+- Do not use Expected, Actual, Impact, or Environment labels.
 
 ## Direction
 
 - Explain how to think about the fix or what shape the outcome should have.
 - Include small before/after snippets, pseudo-diffs, or API shapes only when they reduce ambiguity.
 - Do not turn this section into a full implementation.
+- Do not require a Hypothesis label.
 - Use code fences only for snippets inside `Direction`, not for the whole body.
 - Mention tradeoffs only when they are essential to prevent a wrong implementation.
 - Direction is one section; shape, tradeoffs, and approach live inside it, not under their own headings.
@@ -56,3 +59,4 @@ Bad:
 
 - Include only real references from the user or inspected materials.
 - Do not fabricate links, paths, PRs, or issue IDs.
+- One line per source. Do not add SHA-256 unless the user supplied it.
