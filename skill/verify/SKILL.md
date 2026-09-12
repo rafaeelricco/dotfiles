@@ -14,8 +14,10 @@ from the final changes. The same standard applies to every invocation.
 `/verify [--local | --branch <name> | --pr <number-or-url>]`
 
 Verification may add focused tests and temporary harnesses within the authorized
-scope. Report product defects to the caller; the caller owns repairs and retry
-limits. Preserve existing test expectations.
+scope. If the tree had no uncommitted product changes when verification started,
+delete those added tests and harnesses before return. Report product defects to
+the caller; the caller owns repairs and retry limits. Preserve existing test
+expectations.
 
 ## 1. Establish the target and requirements
 
