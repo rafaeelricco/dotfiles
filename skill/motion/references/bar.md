@@ -1,6 +1,6 @@
 # Bar
 
-Cite these. Do not approximate. Do not copy them into other files.
+Cite these values; do not approximate them. Skill files point here rather than restating them.
 
 ## Gate
 

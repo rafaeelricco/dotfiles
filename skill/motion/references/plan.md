@@ -49,10 +49,10 @@ imitate (token names, file placement, prop patterns):
 
 ## Boundaries
 
-- Do NOT touch <files/components out of scope>.
-- Do NOT change markup/structure — motion properties only (unless a step says otherwise).
-- Do NOT add new dependencies.
-- If a step doesn't match the code you find (drift since the commit stamp), STOP and report instead of improvising.
+- Out of scope: <files/components>.
+- Motion properties only; markup and structure stay unless a step says otherwise.
+- No new dependencies.
+- A step that does not match the code (drift since the commit stamp) → report the mismatch rather than improvising.
 
 ## Verification
 

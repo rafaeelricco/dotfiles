@@ -31,8 +31,6 @@ A basic fetch of public information needs no browser. If a plain HTTP request ca
 
 Domain skills are off by default. Set `BH_DOMAIN_SKILLS=1` to enable them; see the bottom section.
 
-**If `BH_DOMAIN_SKILLS=1` and the task is site-specific, read every file in the matching `$BH_AGENT_WORKSPACE/domain-skills/<site>/` directory before inventing an approach.**
-
 ## Usage
 
 ```bash

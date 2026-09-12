@@ -8,7 +8,7 @@ Remedial order: delete → reduce → easing → origin → interruptible → GP
 
 ## Part 1 — Findings (required)
 
-One table. Never a Before:/After: list.
+One table.
 
 | Before | After | Why |
 | ------ | ----- | --- |

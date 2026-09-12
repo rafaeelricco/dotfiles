@@ -19,7 +19,7 @@
 - Do not turn this section into a full implementation.
 - Use code fences only for snippets inside `Direction`, not for the whole body.
 - Mention tradeoffs only when they are essential to prevent a wrong implementation.
-- Do not create separate `Target Shape`, `Preview`, `Tradeoffs`, or `Suggested Approach` sections.
+- Direction is one section; shape, tradeoffs, and approach live inside it, not under their own headings.
 
 ## Acceptance Criteria
 

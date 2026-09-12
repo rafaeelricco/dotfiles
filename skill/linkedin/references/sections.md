@@ -2,7 +2,7 @@
 
 Heterogeneous by topic, uniform by contract: every item here is advisory and
 checklist-shaped. Ordered by what a recruiter can filter on, because that is what decides
-whether the profile is ever returned. Do not re-split this file by course module.
+whether the profile is ever returned.
 
 ## Skills — recruiters filter on this field
 

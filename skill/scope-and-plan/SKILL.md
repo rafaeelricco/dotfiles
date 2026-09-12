@@ -2,7 +2,7 @@
 name: scope-and-plan
 description: >
   Read diamond (fan-out → check → synthesize → refute), then plan-as-diffs → confirm authorization →
-  write diamond. Use when orchestrate loads this skill, or the user names it
+  implement. Use when orchestrate loads this skill, or the user names it
   (`scope-and-plan`). Runs even when paths are already known — workers gather
   related call sites so the plan does not break neighbors.
   Do NOT use for explore/"get context first" phrasing alone, or only to spawn
@@ -25,7 +25,8 @@ concerns found; do not pad to a number.
 Load `plan-format` in that same message — it reads no worker output, so waiting
 for one is a wait for nothing.
 
-Brief each worker per `./worker-brief.md`.
+Brief each worker per `./worker-brief.md`; load `model-tiers` in the message
+that reads it — a brief's tier resolves there, so it must arrive before the spawn.
 
 Read the briefs against each other before spawning: an Objective that needs a path
 outside its own Boundaries cannot be answered, and an unanswerable worker is a full
@@ -60,6 +61,9 @@ verbatim, posted in the response:
     Approach: <provisional, one paragraph>
 
 Never forward raw worker transcripts.
+
+Overlapping findings mean the scopes were not independent: dedupe them here;
+do not re-run the workers.
 
 ## 4. Refute
 
@@ -99,12 +103,6 @@ plan ship in the same response.
 
 ## 6. Execute
 
-When execution is authorized and permitted by the harness, fan out again — writers this time.
-
-Group by the plan's own diffs: files one diff touches together are one writer.
-`plan-format` orders diffs by apply order, so a group whose diffs depend on an
-earlier group is not a second writer — it waits. Brief each per
-`./worker-brief.md`.
-
-A writer that stops without applying its diffs → read `./recovery.md` before
-touching the tree again.
+When execution is authorized and permitted by the harness, load `implement`
+and hand it the plan. Grouping, writer tiers, briefs, gates, and writer
+recovery are its alone.

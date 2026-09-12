@@ -291,21 +291,6 @@ rm -f "$body_file"
 Then report: PR URL, branch, commits created, base branch, draft state,
 assignee.
 
-## Examples
-
-**Compliant.** Inspect → reuse supplied choices → ask unresolved questions with
-an available, permitted tool or plain text → derive Body → present plan →
-execute within existing authorization, or obtain missing approval first.
-
-**Non-compliant.** Treating a tool as missing because a remembered name was not
-in MCP/tool-search. Using a Motivation suggestion the user did not pick, or
-skipping unresolved Shape choices without authorization to use defaults.
-Keeping a full-diff Motivation pick after Scope excludes a Step 2 group.
-
-**Waiver.** "Don't ask, just ship it" → preserve supplied choices and motivation,
-use Recommended defaults for remaining choices within scope, present plan,
-execute when the harness permits it.
-
 ## Codex
 
 In Codex, request escalated execution

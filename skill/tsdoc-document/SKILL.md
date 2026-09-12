@@ -12,8 +12,8 @@ disable-model-invocation: true
 
 # TSDoc Document
 
-Write surgical TypeScript documentation. Goal: IntelliSense-ready comments
-that TypeDoc and TSDoc-aware tools can parse. Do not turn the file into an essay.
+Write surgical TypeScript documentation: IntelliSense-ready comments that
+TypeDoc and TSDoc-aware tools can parse, each carrying only what the type cannot say.
 
 ## When to use
 
@@ -154,7 +154,7 @@ When documenting:
 3. **Skipped** — symbols left alone and why (trivial / unclear / private).
 4. **Open questions** — only if missing intent would make docs wrong.
 
-Keep output short. No lecture on documentation theory.
+Report the four items above and stop.
 
 ## Out of scope (do not expand unless user upgrades the skill)
 

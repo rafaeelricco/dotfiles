@@ -44,7 +44,7 @@ URL or file path, plus keys. Choice is the user's.
 
 ## Phase 6 — Promote
 
-Integrate the pick. Delete the surface (Hard Rule 5). Another round → keep harness, Phase 3 around the direction they gravitated to.
+Integrate the pick. Delete the surface. Another round → keep harness, Phase 3 around the direction they gravitated to.
 
 | Invocation                         | Behavior                         |
 | ---------------------------------- | -------------------------------- |

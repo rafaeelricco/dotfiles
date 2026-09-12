@@ -23,8 +23,6 @@ Independent work ships in one message; two independent concerns are two workers.
 
 After parallel reads, before using them: drop empty, off-task, and mutually impossible claims. Do not edit or synthesize from a dropped claim.
 
-Once execution of the plan is authorized: one writer per file group, groups disjoint by path. A writer applies the decision; it does not remake it. Ordered diffs are one writer, never a fan-out. A writer that cannot apply its diffs stops and reports which landed; you finish that group serially and never respawn it.
-
 ## 2. Simplicity
 
 Ship the minimum that fully solves the problem. Never drop required behavior to look simple.
@@ -51,11 +49,11 @@ While `scope-and-plan` is planning:
 
 Load a skill at the step that needs it, not ahead of it.
 
-Ship order after Edit (do not invent steps the user did not ask for):
+Ship order after Edit:
 
 1. **behavior?**
    - Nonbehavioral prose, comments, or formatting → inspect the diff and skip verify.
-   - Behavior change, including configuration or skill instructions that affect execution → load `verify` in **FAST** (the smallest sufficient check set).
+   - Behavior change, including configuration or skill instructions that affect execution → load `verify`.
 
 2. **commit?**
    - User asked for a commit → `commit-message` (and PR title style when only a title is needed).
