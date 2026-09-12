@@ -29,7 +29,7 @@ freshness, and posting.
 
 - Lead with `Re-read <target> at <head SHA>... Not posted.`, then `Proposed comment:` and a separator.
 - Start the comment with `## Visual recap` and one scope sentence.
-- Include the visual, optional lifecycle/table, and 4–8 non-duplicative behavior bullets.
+- Include the visual, optional lifecycle/table, and one bullet per reviewer-relevant behavior change, none duplicating the visual.
 - State meaningful exclusions such as no frontend changes only when confirmed by the diff.
 - Omit file inventories, unverified test claims, review findings, and generated-by text.
 

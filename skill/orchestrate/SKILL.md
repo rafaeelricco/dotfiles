@@ -49,7 +49,7 @@ While `scope-and-plan` is planning:
 
 Load a skill at the step that needs it, not ahead of it.
 
-Ship order after Edit (do not invent steps the user did not ask for):
+Ship order after Edit:
 
 1. **behavior?**
    - Nonbehavioral prose, comments, or formatting → inspect the diff and skip verify.

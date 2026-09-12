@@ -14,12 +14,10 @@ If several terms could fit, list the best match first, then 1–2 alternates wit
 
 ## Instructions
 
-1. **Read for intent, not keywords.** Users describe what they _see_ or _feel_ ("springy", "slides off", "draws itself in"), not the technical name. Map the sensation to the glossary below.
-2. **Quote the glossary verbatim.** Its descriptions are authoritative — use them as-is, don't paraphrase.
-3. **Disambiguate close terms.** When two compete (_Clip-path_ vs _Mask_, _Pop in_ vs _Bounce_, _Shared element transition_ vs _Layout animation_), contrast them so the user can pick.
-4. **When nothing matches exactly,** name the closest term and say plainly it's an approximation, or describe the effect in the glossary's vocabulary (e.g. "that's a _stagger_ of _scale-in_ entrances").
-5. **Stay within this glossary.** If a term genuinely isn't here, say so rather than inventing one — though you may explain the concept using these words.
-6. **Keep it tight.** A naming question wants a name, not an essay. Lead with the term; expand only if asked.
+Quote the glossary description verbatim; it is authoritative. When two terms compete
+(_Clip-path_ vs _Mask_, _Pop in_ vs _Bounce_), contrast them so the user can pick.
+If nothing matches exactly, name the closest term and say it is an approximation, or
+describe the effect in glossary vocabulary; do not invent a term.
 
 ## Examples
 

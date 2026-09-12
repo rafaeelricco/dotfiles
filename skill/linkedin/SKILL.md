@@ -52,13 +52,11 @@ Before the table, in this order:
   `message`) and a continuation reply mid-chain. The in-scope neighbour — LinkedIn cover
   brief, personal-profile About, SSI guidance, post draft — runs only when the user asks
   for that LinkedIn deliverable instead.
-- **Continuation.** `continue` / `next` / `yes` while an `all` chain or rule-2 hold is
-  paused for guided or requested staged delivery or required input skips this table
-  only when the reply names no different supported area: run the next `all` step or
-  next held area. `all` keeps the chain's starting Output mode; a
-  rule-2 hold keeps each area's own implied mode (do not inherit the first). Mode-only
-  rewrite ("now rewrite it") replaces mode for that area. Naming a different supported
-  area falls through to re-selection (chain/hold may abandon or update).
+- **Continuation.** A bare `continue` / `next` / `yes` while work is paused runs the
+  next held step with the mode that step already carried (an `all` chain carries its
+  starting mode; a rule-2 hold carries each area's own). A reply that names a mode
+  ("now rewrite it") changes the mode for that step; a reply that names a different
+  supported area re-selects.
 - **Metrics read.** A request to read, interpret, or diagnose analytics — search
   appearances, profile views, which titles find the profile — is an `ssi` turn under
   **Reading the metrics** alone, and `title` does not win. That turn works from the
@@ -142,11 +140,7 @@ non-copy steps of `all`.
 For gated areas only, after Source — ask only what is still missing:
 
 - Target role **and** problem solved known → skip; draft.
-- Neither known → ask this verbatim and wait:
-
-```text
-What role do you want this profile to attract, and what is the one problem you solve for an employer? A couple of sentences is enough.
-```
+- Neither known → in one short message ask for the target role and the one problem they solve for an employer; wait.
 
 - Role known, problem missing:
   - `positioning` or `about` → ask once for the problem only (one short message); wait.
@@ -155,7 +149,7 @@ What role do you want this profile to attract, and what is the one problem you s
     reference.
 - Problem known, role missing → ask once for the target role only; wait.
 
-Never an option list for these answers. Never re-ask a found fact.
+Never an option list for these answers.
 
 After any answer (or skip), **draft**. Keywords, employment status, seniority framing, and
 target market: Source when present; else `[brackets]` and questions at the end.
@@ -266,5 +260,3 @@ Output modes, draft-first, vanity ban, soft-skill seniority) override course sil
 Course outcome statistics ("21x more views", "9x more contacts") are motivation, not
 evidence: keep the action, drop the number. Never present one as the reason for a
 recommendation.
-
-References are cut by deliverable, not by course module. Do not restore a 1:1 module mapping.

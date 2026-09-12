@@ -1,7 +1,6 @@
 # Visual format selection
 
-Skip the preamble and keep prose brief. Pick the smallest view that makes the
-key point clear.
+Pick the smallest view that makes the key point clear, and lead with it.
 
 - Show logic or an algorithm as pseudocode:
 
@@ -120,4 +119,4 @@ Place each visual next to the short text it supports. Keep only the calls, files
 props, states, and boundaries needed to answer the user's current question or
 the options to resolve the current discussion point.
 
-Use one or several formats as needed, but do not overwhelm the user.
+Use one format, or several when each answers a different part of the question.
