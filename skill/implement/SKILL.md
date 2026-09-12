@@ -50,10 +50,11 @@ what its hunks leave to decide. A group with any derive hunk is a derive group.
 Gate each return as it arrives. Evidence in this order; the first failure
 decides:
 
-1. A changed file no writer's Boundaries cover → disjointness is void. Stop,
+1. A changed file this writer's Boundaries do not cover → disjointness is void. Stop,
    show the diff, let the user decide; spawn no more writers on this plan.
-2. Re-run the Check yourself (none → skip). The writer's report is a claim;
-   the exit code is evidence.
+2. Re-run the Check yourself (none → skip). A package-wide Check while siblings in
+   that package are in flight is not evidence — skip it. Otherwise the writer's
+   report is a claim; the exit code is evidence.
 3. Read the diff against the plan hunks it came from.
 
 A failure returns that group only, never the batch — re-running accepted work
