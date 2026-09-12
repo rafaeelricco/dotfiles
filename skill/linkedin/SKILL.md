@@ -52,7 +52,8 @@ Before the table, in this order:
   `message`) and a continuation reply mid-chain. The in-scope neighbour — LinkedIn cover
   brief, personal-profile About, SSI guidance, post draft — runs only when the user asks
   for that LinkedIn deliverable instead.
-- **Continuation.** A bare `continue` / `next` / `yes` while work is paused runs the
+- **Continuation.** `continue` / `next` / `yes` while work is paused — including a
+  qualified confirmation that names no mode and no different supported area — runs the
   next held step with the mode that step already carried (an `all` chain carries its
   starting mode; a rule-2 hold carries each area's own). A reply that names a mode
   ("now rewrite it") changes the mode for that step; a reply that names a different
