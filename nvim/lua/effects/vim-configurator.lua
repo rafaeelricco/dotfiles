@@ -117,9 +117,8 @@ vim.opt.paste = false
 -- Customizes the format options to control automatic formatting behavior.
 vim.opt.formatoptions:remove({ "c", "r", "o" })
 
--- Disables line wrapping to prevent unintended line breaks in code.
+-- Soft-wraps long lines on screen without inserting physical line breaks.
 vim.opt.wrap = true
-vim.opt.textwidth = 120
 
 -- Native insert completion (vim.lsp.completion). menuone + noselect + popup
 -- is the official recipe; CTRL-Y accepts. |complete_CTRL-Y|
