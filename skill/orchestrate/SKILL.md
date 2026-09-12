@@ -23,8 +23,6 @@ Independent work ships in one message; two independent concerns are two workers.
 
 After parallel reads, before using them: drop empty, off-task, and mutually impossible claims. Do not edit or synthesize from a dropped claim.
 
-Once execution of the plan is authorized: one writer per file group, groups disjoint by path. A writer applies the decision; it does not remake it. Ordered diffs are one writer, never a fan-out. A writer that cannot apply its diffs stops and reports which landed; you finish that group serially and never respawn it.
-
 ## 2. Simplicity
 
 Ship the minimum that fully solves the problem. Never drop required behavior to look simple.
