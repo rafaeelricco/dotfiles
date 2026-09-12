@@ -53,7 +53,7 @@ Ship order after Edit (do not invent steps the user did not ask for):
 
 1. **behavior?**
    - Nonbehavioral prose, comments, or formatting → inspect the diff and skip verify.
-   - Behavior change, including configuration or skill instructions that affect execution → load `verify` in **FAST** (the smallest sufficient check set).
+   - Behavior change, including configuration or skill instructions that affect execution → load `verify`.
 
 2. **commit?**
    - User asked for a commit → `commit-message` (and PR title style when only a title is needed).

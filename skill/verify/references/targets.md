@@ -9,8 +9,9 @@ this file.
 
 ## `--branch <name>`
 
-Resolve the remote default base as `refs/remotes/origin/HEAD` (fallback
-`origin/main`, then `origin/master`). Compute the change set as
+Use an explicitly supplied comparison base; otherwise resolve the remote
+default as `refs/remotes/origin/HEAD`, then `origin/main`, then `origin/master`.
+If none resolves, ask for the comparison base. Pin both revisions and compute
 merge-base(base, branch)…branch tip.
 
 **Materialize the target:** create a temporary `git worktree` at the branch's
@@ -23,15 +24,15 @@ user's current tree.
 
 ## `--pr <number-or-url>`
 
-Validate the PR diff via `gh`. If `gh` is missing or unauthenticated, stop with
-instructions to run `gh auth login`.
+Resolve the PR's actual base and head through an available GitHub integration
+or authenticated `gh`. Pin those revisions and inspect their merge-base diff.
+Report unavailable metadata or checkout access as an unresolved prerequisite.
 
 **Before executing any PR-discovered install/test/make/CI-local command:** decide
-trust. If the PR is from an external fork, unknown author, or otherwise untrusted
-source, do not run untrusted tree scripts on the developer machine. Require an
-explicit user trust decision, or run only in an isolated environment, or restrict
-command and script discovery to the trusted base revision. Without that gate,
-mark BLOCKED — not PASS.
+trust using existing authorization. Execute untrusted code only with explicit
+trust or in suitable isolation without developer credentials. A worktree alone
+is not execution isolation; a trusted runner can still execute untrusted code.
 
-Prefer materializing the PR head in a temporary worktree (or equivalent
-isolation) the same way as `--branch` when execution is approved.
+Materialize the exact PR head in a temporary worktree or equivalent checkout,
+and run checks there. Preserve useful added tests and evidence as artifacts
+before cleanup; do not switch or modify the user's primary checkout.

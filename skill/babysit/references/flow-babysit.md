@@ -7,8 +7,8 @@ Write-set: the PR's own branch only. Never merge, force-push, rebase,
 rewrite history, touch branch protection, edit CI workflows, loosen test
 expectations, or change unrelated code to make a check pass.
 
-Not `/code-review`, not `verify` (load it, do not reimplement; always
-**STRICT**), not `pr-body`, not `create-pr`, not `visual-recap`. Commit
+Not `/code-review`, not `verify` (load it, do not reimplement),
+not `pr-body`, not `create-pr`, not `visual-recap`. Commit
 format belongs to `commit-message`. Before every commit, read
 `commit-message`'s `SKILL.md`. Invocation alone is not a load. Thread-reply
 and re-request shape live in **Comment routing** and
@@ -75,10 +75,10 @@ Order of work each pass: merge conflicts, then unresolved threads, then CI —
 conflict and comment pushes restart checks. A tier blocked on a human does
 not block the tiers below it.
 
-1. **Gather** → **Scope Gate** → **Fix** → **Verify** (`verify` **STRICT**) → **Push, reply, resolve** (Comment routing) → **Watch** → **Re-request** → **Report**.
+1. **Gather** → **Scope Gate** → **Fix** → **Verify** (`verify`) → **Push, reply, resolve** (Comment routing) → **Watch** → **Re-request** → **Report**.
 2. Nothing actionable at Scope Gate **and** no checks running → end the cycle; do not invent work.
-3. Refresh checks after every push — a STRICT PASS locally is not remote green. Checks running with no other work → watch to completion (`gh pr checks --watch --fail-fast`), do not tight-poll. A failure that lands after your push re-enters at **Gather**; it is inside the approved scope when branch-related.
-4. One commit per **ADDRESS cluster**. Run **STRICT** once per push batch: after the last fix cluster in that batch **and** after any merge-conflict resolution that lands in the same batch, then push. Not once forever; not once per commit unless each commit is its own push.
+3. Refresh checks after every push — a PASS locally is not remote green. Checks running with no other work → watch to completion (`gh pr checks --watch --fail-fast`), do not tight-poll. A failure that lands after your push re-enters at **Gather**; it is inside the approved scope when branch-related.
+4. One commit per **ADDRESS cluster**. Run `verify` once per push batch: after the last fix cluster in that batch **and** after any merge-conflict resolution that lands in the same batch, then push. Not once forever; not once per commit unless each commit is its own push.
 
 ## Gather
 
@@ -172,7 +172,7 @@ Treat non-GitHub-Actions providers as report-only unless asked.
 - Prefer the repo's normal update path; otherwise ask before merging base in.
 - Resolve only when both branch and base intent are clear. Intents genuinely
   conflict → stop and ask.
-- After resolving, include that work in the same push batch and run the batch’s **STRICT** verify before push (do not skip verify because an earlier cluster already passed).
+- After resolving, include that work in the same push batch and run the batch’s `verify` before push (do not skip verify because an earlier cluster already passed).
 - Never rebase, reset, or force-push without explicit approval of that exact
   operation.
 

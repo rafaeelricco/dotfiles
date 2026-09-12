@@ -1,137 +1,110 @@
 ---
 name: verify
 description: >
-  Validate a change set before commit. Default mode is FAST (the smallest
-  sufficient package-level check set from the diff). STRICT mode runs the full discovery ladder —
-  use on `/verify`, when babysit loads this skill, or when the user says strict.
-argument-hint: "[--branch <name> | --pr <number-or-url>]"
+  Verify a change against its requirements with real-interface checks,
+  affected regression suites, and current evidence. Use when asked to verify
+  work or when an implementation or PR-maintenance workflow needs validation.
 ---
 
-# Change Validation
+# Verify
 
-Prefer proofs the repo already defines. Mode selects ambition:
+Verify every material requirement and affected existing behavior with evidence
+from the final changes. The same standard applies to every invocation.
 
-- **FAST** (default on pre-commit from `orchestrate` §5): the smallest sufficient
-  check set for the package(s) the diff touches; then stop.
-- **STRICT** (`/verify`, babysit, user says "strict", or `--branch`/`--pr`):
-  full Discovery ladder and strict PASS rules below.
+`/verify [--local | --branch <name> | --pr <number-or-url>]`
 
-This skill is not `/code-review` (maintainability) and not a completeness check
-on whether the session finished the request. It does not scaffold new test
-suites unless the user separately asks for that.
+Verification may add focused tests and temporary harnesses within the authorized
+scope. Report product defects to the caller; the caller owns repairs and retry
+limits. Preserve existing test expectations.
 
-## Mode select
+## 1. Establish the target and requirements
 
-STRICT when any of: slash `/verify`; caller is `babysit`; user said "strict";
-target is `--branch` or `--pr`. Otherwise FAST.
+Default to staged, unstaged, and relevant untracked local changes. For a branch
+or PR, read [targets](references/targets.md) before executing target code.
 
-Default target when no flag is given: local changes — staged, unstaged,
-untracked. Empty change set: stop, there is nothing to validate. For `--branch`
-and `--pr`, read `references/targets.md` before anything else.
+Record the repository, base and target revisions, and local changes included.
+An empty diff does not settle a supplied requirement. If neither changes nor a
+concrete outcome are available, report that there is nothing to verify.
 
-For nonbehavioral prose-only changes, report that no behavioral verification
-is required and do not probe. That is not PASS. Skill instructions and
-configuration that change execution do not qualify for this exit.
+Read the original request, accepted decisions, and relevant specifications and
+contracts. Use the diff to locate implementation and affected callers, not to
+invent the requirements. Resolve material uncertainty from available sources;
+ask only for expected behavior those sources cannot establish.
 
-### FAST path
+Map each material requirement and affected invariant to:
+expected outcome → interface/scenario → required evidence.
+Include relevant failure behavior, boundaries, defaults, and compatibility.
 
-From the diff alone (no Tools/Live multi-step probe):
+For purely explanatory prose, inspect the change and report what was checked
+without a behavioral PASS. Skill instructions and execution configuration
+require behavioral verification.
 
-1. Map changed paths → package or repo root.
-2. Select the smallest check set covering the changed behavior, usually one
-   package-level check. Add complementary checks only when needed.
-3. Run the selected checks. Repeat or expand only for a new edit, failure,
-   unresolved coverage gap, or explicit user request.
-4. If no check can be named → BLOCKED with the one unblock action — never invent PASS.
-5. State residual risk in one line when Tools/Live/full ladder were skipped.
+## 2. Find the evidence
 
-### STRICT path
+Inspect repository commands, CI requirements, existing tests, dependencies,
+available runtimes, and running services. Determine what each check actually
+covers and which obligations remain uncovered.
 
-Everything else below (Discovery → Rules → full PASS clauses). A repo with no
-manifest is not a repo with no runnable check — the PATH probe settles that.
-Never infer BLOCKED from a glob alone.
+Use the existing test layer where suitable. Fill material gaps with a focused
+regression test, fixture-driven runtime invocation, replay, or temporary harness.
+Start permitted local services when needed. Missing test scripts alone do not
+establish a blocker.
 
-## Discovery
+Choose evidence appropriate to the claim. Types, lint, and builds can establish
+static properties; runtime behavior requires execution. Substitute external
+dependencies when necessary and state what the substitute leaves unverified.
 
-STRICT only. FAST must not enter this section.
+## 3. Exercise behavior and regressions
 
-Tool rosters differ per environment. Discover at run time; never assume a fixed
-set, never call a capability missing because an expected name is absent. Probe
-once per session, cheapest first, and stop at the first step that yields a command
-covering the changed behavior — the later steps exist for when it does not:
+Exercise the interface used by the actual caller: application interaction,
+endpoint, command, exported interface, or consuming runtime. Assert observable
+outcomes using expectations derived independently from the implementation.
 
-1. **Tools** — anything in the current surface that drives a runtime rather than
-   a file: device or simulator control, browser automation, containers, remote
-   sessions. Absent from the surface = unavailable. Do not shell out to prove it.
-2. **Live targets** — ask each candidate what is already running. No candidates
-   from step 1 → this step is empty, not skipped. Reuse is free; a cold start is
-   a cost the user decides to pay.
-3. **PATH** — `type -P` for the CLIs this project implies. Project-local runners
-   live under the package manager's bin dir — read the manifest for those.
-4. **Repo commands** — manifests, Makefiles, and CI steps that are runnable
-   locally.
+For bug fixes, reuse or reproduce the original failure and confirm the final
+behavior with the same case. When feasible, establish that the regression check
+fails for the intended reason on the broken baseline. For changed validators
+or harnesses, check known valid and invalid cases. Keep deliberate faults in
+isolated copies. Preservation checks may correctly pass before and after.
 
-Overlapping harnesses: take the one covering more of the changed surface, or the
-one the repo already opts into. Say which and why. If the environment ships a
-subagent that inventories project tooling, delegate rather than re-derive.
+Run the complete affected regression suites and repository-required checks.
+Include affected consumers of shared code or configuration; expand to the
+repository-wide checks when the dependency scope requires them.
 
-Two methods could both be decisive → run the cheapest and name the one you
-skipped. Ask only when they would prove different things and the diff does not
-say which matters: use an available, permitted question tool or plain text,
-best match first and labelled `(Recommended)`, each option stating its cost and what it cannot prove. One
-method: name it and run. Zero: BLOCKED, not PASS — name what is missing and the
-one action that unblocks it. Never ask after the checks have run.
+Investigate failures and retain their evidence. Attribute a failure to the
+baseline only after checking that claim. A later passing retry does not erase
+an unexplained failure. Complete useful independent checks despite blockers.
 
-## Rules
+## 4. Challenge the evidence
 
-0. Be ambitious about decisive proofs — the smallest set that would fail if this
-   change were wrong.
-1. Never rubber-stamp a green typecheck as proof of behavior. Typecheck/lint
-   alone is insufficient for non-trivial behavior changes unless the diff is
-   truly types-only or a pure mechanical rename — and say so explicitly.
-2. Never run the whole monorepo when one package moved.
-3. Bias toward evidence, not "it looks fine."
-4. Prefer this repo's real commands over invented ones. Discover `test`,
-   `typecheck`, `lint`, `check`, `build` from manifests, Makefiles, and
-   locally-runnable CI; when no script exists, fall back to language CLI
-   defaults (`dotnet test`, `go test`, `cargo test`, `pytest`, `make test`).
-5. Match the check to the change — platform-specific paths get their own
-   platform. CLI change → invoke the affected subcommand with an expected exit
-   code or output fragment when cheap.
-6. Keep validation in the canonical layer the repo already uses.
-7. Missing environment is a blocker, not a pass. In **STRICT**, a present
-   harness is an obligation (run covering checks; do not skip an available
-   decisive harness). **FAST** uses the smallest sufficient package-level set;
-   name residual risk when Tools/Live/full ladder were skipped — do not expand
-   FAST into the harness ladder under this rule.
-8. Materialize non-local targets; gate untrusted PR execution.
+For changes involving cross-module/runtime interactions, shared contracts or
+configuration, stateful failure/recovery behavior, or unresolved coverage
+assumptions, use one fresh verifier when delegation is available and permitted.
 
-## Verdict
+Give it the original requirements, target identity, source paths, and raw check
+evidence. Ask it to identify missing requirements, unexercised paths, and
+unsupported conclusions. It may inspect and run checks, but must not edit,
+invoke this skill recursively, or delegate further.
 
-`PASS` · `FAIL` · `PARTIAL` · `BLOCKED`
+Reproduce consequential findings. Reuse an earlier independent challenge only
+when it covered the same final target and obligations. Without delegation,
+perform a separate requirements-first challenge and disclose the lack of an
+independent reader.
 
-**FAST PASS:** every selected check ran successfully and the set covers the
-changed behavior in the affected package(s) or root; residual risk named if
-the full ladder was skipped.
+## 5. Decide and report
 
-**STRICT PASS** requires all four:
+Confirm that the checked inputs still match the final target, including relevant
+untracked files. New edits invalidate affected evidence; refresh it before
+issuing a verdict. Stop once the obligations are settled.
 
-- every selected decisive check ran and exited successfully
-- the selected set covers the changed behavior, or residual risk is explicit and
-  proportionate to the size of the change
-- no failed product check was ignored
-- no required check was silently skipped
+- PASS: every material obligation has adequate current evidence and all required
+  checks pass.
+- FAIL: a requirement is violated or a required product/static check fails.
+  Identify confirmed pre-existing failures separately.
+- PARTIAL: useful evidence exists, but a material obligation or required check
+  remains unresolved.
+- BLOCKED: missing prerequisites prevent decisive behavioral verification.
 
-Presumptive blockers unless justified out loud: typecheck or lint as the only
-proof for a non-trivial behavior change; a decisive package test that exists and
-was not run; a failed product test presented as success; PR validation without
-working `gh` auth; the wrong package tested for the files that changed; residual
-risk hiding an obvious available check; `--branch` checks run on the active tree;
-untrusted `--pr` scripts run without a trust decision.
+A disclosed coverage gap cannot justify PASS. Read
+[report](references/report.md) when presenting the result.
 
-## Load on demand
-
-| Read                    | When                 |
-| ----------------------- | -------------------- |
-| `references/targets.md` | `--branch` or `--pr` |
-| `references/report.md`  | writing the verdict  |
+When changing this skill, run the retained [evaluation cases](evals/cases.md).
