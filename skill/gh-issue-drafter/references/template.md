@@ -13,7 +13,7 @@ Body:
 
 ## Situation
 
-[Describe what exists today and what is not working well enough.]
+[Observable gap. Quotes only for evidence.]
 
 ## Direction
 
