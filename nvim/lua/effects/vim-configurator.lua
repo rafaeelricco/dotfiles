@@ -118,8 +118,8 @@ vim.opt.paste = false
 vim.opt.formatoptions:remove({ "c", "r", "o" })
 
 -- Disables line wrapping to prevent unintended line breaks in code.
-vim.opt.wrap = false
--- vim.opt.textwidth = 120
+vim.opt.wrap = true
+vim.opt.textwidth = 120
 
 -- Native insert completion (vim.lsp.completion). menuone + noselect + popup
 -- is the official recipe; CTRL-Y accepts. |complete_CTRL-Y|

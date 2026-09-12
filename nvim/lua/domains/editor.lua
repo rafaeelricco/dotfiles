@@ -166,10 +166,17 @@ return {
   },
   --]]
 
-  -- Markdown preview bar + in-place renderer (local development checkout).
+  -- Graphical Markdown preview (local development checkout).
   {
     dir = "~/Projects/personal/preview.nvim",
+    dependencies = { { "folke/snacks.nvim", opts = {} } },
     ft = "markdown",
+    event = {
+      "BufReadPost *.[mM][dD]",
+      "BufNewFile *.[mM][dD]",
+      "BufReadPost *.[mM][aA][rR][kK][dD][oO][wW][nN]",
+      "BufNewFile *.[mM][aA][rR][kK][dD][oO][wW][nN]",
+    },
     opts = {},
   },
 }
