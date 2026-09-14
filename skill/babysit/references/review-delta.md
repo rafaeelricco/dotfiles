@@ -24,8 +24,9 @@ one extra read. Count commits with
 `git log --oneline <earliest-review-sha>..HEAD` on the PR branch.
 
 Order review submissions by `submitted_at`. One section per submission
-(`login` + `commit_id`). Attach each finding to the latest submission
-at or before its first comment time.
+(`login` + `commit_id`). Attach each finding to the latest same-login
+submission at or before its first comment time. If that login has no
+submission, use a login-only section (no foreign `commit_id`).
 
 Disposition per finding, from this cycle's Scope Gate and later
 Fixed / Already-fixed / Disagree / Skip replies (`created_at` > source):
