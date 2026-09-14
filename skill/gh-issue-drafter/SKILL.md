@@ -26,7 +26,7 @@ objectively testable.
 
 ## Operating Rules
 
-- If the user already supplied enough detail, do not ask follow-up questions.
+- If the user already supplied enough detail, draft.
 - If material information is missing, ask one short round of questions and then
   draft the issue.
 

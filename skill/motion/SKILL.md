@@ -28,7 +28,7 @@ Complete explicitly requested jobs in order, preserving each job's scope and gat
 Zero matches → ask which row. If one ambiguous request matches two jobs, use the
 one they led on; if they explicitly request both, perform both in order.
 
-Values live in `references/bar.md`. Load it when a job needs a number. Do not restate it.
+Values live in `references/bar.md`. Load it when a job needs a number.
 
 `build` matching a recipe (button, dropdown, tooltip, modal, drawer, toast, accordion, stagger, hold-to-confirm, tabs, scroll reveal, drag-to-dismiss) also loads `references/recipes.md`.
 `prototype` also loads `references/picker.md`.

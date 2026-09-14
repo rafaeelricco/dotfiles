@@ -17,7 +17,7 @@ If several terms could fit, list the best match first, then 1–2 alternates wit
 Quote the glossary description verbatim; it is authoritative. When two terms compete
 (_Clip-path_ vs _Mask_, _Pop in_ vs _Bounce_), contrast them so the user can pick.
 If nothing matches exactly, name the closest term and say it is an approximation, or
-describe the effect in glossary vocabulary; do not invent a term.
+describe the effect in glossary vocabulary.
 
 ## Examples
 

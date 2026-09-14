@@ -33,7 +33,7 @@ work. This skill owns _how the message looks_ and _how to invoke git commit_.
 **Staging (single rule)**
 
 - Workflow callers (`babysit`, `create-pr`, etc.) own the index — assume it is
-  already the intended tree; never invent a split or stage for them.
+  already the intended tree.
 - Empty index, mixed index, or index beyond approved scope → stop and report;
   never `git commit` on an empty index.
 - Standalone commit only (`commit this` / clear ask, not a workflow skill): if

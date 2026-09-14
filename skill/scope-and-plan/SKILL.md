@@ -20,7 +20,7 @@ that writes to the tree, when execution is authorized and the harness permits it
 
 Decompose into independent concerns — two workers must answer without reading
 each other's output. Spawn them all in one message. Worker count follows the
-concerns found; do not pad to a number.
+concerns found.
 
 Load `plan-format` in that same message — it reads no worker output, so waiting
 for one is a wait for nothing.
@@ -35,7 +35,7 @@ nothing.
 
 ## 2. Check
 
-Check each return the moment it arrives; do not hold it for the others. Every
+Check each return the moment it arrives. Every
 rule below reads one worker alone, so waiting here is a barrier with nothing to
 gather. Judge each return on its own:
 
@@ -47,7 +47,7 @@ gather. Judge each return on its own:
 Everything dropped goes under Gaps in step 3, named. A worker that survives with
 part of its output dropped passes through with the remainder.
 All workers fully dropped → Gaps only; still produce Plan with Approach = blocked
-on missing context — do not invent Paths/Facts.
+on missing context.
 
 ## 3. Synthesize
 
@@ -62,8 +62,7 @@ verbatim, posted in the response:
 
 Never forward raw worker transcripts.
 
-Overlapping findings mean the scopes were not independent: dedupe them here;
-do not re-run the workers.
+Overlapping findings mean the scopes were not independent: dedupe them here.
 
 ## 4. Refute
 
@@ -76,7 +75,7 @@ refute stands. No Facts → skip this step.
 ## 5. Plan
 
 Enter the harness plan/approval mode before writing anything here. Already
-in it → stay; do not re-enter. The tool for it may be deferred: if it is not in
+in it → stay. The tool for it may be deferred: if it is not in
 the loaded tool list, fetch it (for example `ToolSearch` with
 `select:EnterPlanMode`) rather than concluding no tool exists. Only a harness
 with no such tool at all leaves the mode as it stands — then post the plan as a
@@ -95,8 +94,7 @@ authorization handling.
 
 Fill the Verify section from the synthesis: name the repo's own commands,
 narrowed to the checks that would fail if this change were wrong. Do not run
-them. Where the repo defines no runnable check, say so — do not scaffold a suite
-to manufacture a pass.
+them. Where the repo defines no runnable check, say so.
 
 Unresolved decisions do not defer the plan: the open question and the formatted
 plan ship in the same response.
