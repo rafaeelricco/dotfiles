@@ -43,6 +43,7 @@ Return exactly:
 | `CLUSTER`     | short id                                                    |
 | `SOURCES`     | thread / review / issue-comment ids or URLs in this cluster |
 | `VERDICT`     | `CANDIDATE` \| `SKIP` \| `UNSURE`                           |
+| `ACTION`      | when `SKIP`: `Skip` \| `Disagree`; else omit                |
 | `HYPOTHESIS`  | one sentence failure claim                                  |
 | `WHY`         | `file:line`                                                 |
 | `SHARED_ROOT` | why these threads are one concern                           |
@@ -53,7 +54,7 @@ Phase-1 routing:
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
 | `CANDIDATE` | Plausible functional bug / broken contract / data-loss / security-safety on a path this PR introduced or left reachable; or a plausible bug that no longer fires on HEAD | Phase 2                 |
 | `SKIP`      | Hypothetical; nit/style/no user-visible break                                                                                                                            | final `SKIP` → Skip     |
-| `SKIP`      | pre-existing not worsened and outside PR+session scope                                                                                                                   | final `SKIP` → Disagree |
+| `SKIP`      | pre-existing not worsened and outside PR+session scope, and not a nit/style/hypothetical                                                                                 | final `SKIP` → Disagree |
 | `UNSURE`    | Bug vs intentional product behavior                                                                                                                                      | final `UNSURE`          |
 
 Cannot-fire / already-fixed is not Phase-1 `SKIP` — keep those `CANDIDATE` so Phase 2 can map them.

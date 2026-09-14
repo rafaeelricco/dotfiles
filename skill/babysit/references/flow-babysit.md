@@ -111,7 +111,7 @@ and actions. If that grant is missing, ask for approval of the table before
 those actions. The grant covers fixing
 every ADDRESS cluster (reproved functional bugs only), Already-fixed-reply
 every ALREADY_FIXED known-bot source, and Skip- or Disagree-reply every SKIP
-known-bot source (Comment routing). UNSURE stays blocked for that
+known-bot source per Phase-1 `ACTION` (Comment routing). UNSURE stays blocked for that
 thread only; granted ADDRESS and SKIP work still runs.
 Human replies require authorization for the exact text; human re-requests
 require authorization for that action. Reuse it when already given. This gate
@@ -119,7 +119,8 @@ is the plan.
 
 - Each validated source (thread, review submission, or issue comment)
   with cluster id, reviewer login, verdict (`ADDRESS` / `SKIP` /
-  `UNSURE` / `ALREADY_FIXED`), repro evidence one-liner (or `n/a` for
+  `UNSURE` / `ALREADY_FIXED`), Phase-1 `ACTION` (`Skip` / `Disagree`)
+  when SKIP, repro evidence one-liner (or `n/a` for
   SKIP/UNSURE/ALREADY_FIXED), and file/line or source URL.
 - Failing checks, classified branch-related vs flaky/infra. Pending checks, listed as Watch.
 - Conflicts or behind-base state.
