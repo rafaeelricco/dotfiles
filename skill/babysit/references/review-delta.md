@@ -52,7 +52,7 @@ in parens; omit it when unknown.
 
 ```text
 Since this PR opened, <names> reviewed it <N> times and found <Y>
-issues. We pushed <C> commits since.
+issues. We pushed <C> commits since the first review.
 
 **<login> on `<sha7>` — <k> findings**
 - <problem>, so <action>; <how>, and <outcome> (`<hash>`).
