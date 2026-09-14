@@ -31,8 +31,8 @@ submission, use a login-only section (no foreign `commit_id`).
 Disposition per finding, from this cycle's Scope Gate and later
 Fixed / Already-fixed / Disagree / Skip replies (`created_at` > source):
 
-- **Fixed `<hash>`** — ADDRESS commit this cycle, or Already-fixed reply;
-  omit `<hash>` when that reply had none
+- **Fixed `<hash>`** — ADDRESS commit this cycle, or a Fixed /
+  Already-fixed reply; omit `<hash>` when that reply had none
 - **Skipped** — SKIP / Skip reply; resolved
 - **Not applying** — SKIP / Disagree reply; leave open
 - **Unanswered** — no such reply (includes UNSURE)
