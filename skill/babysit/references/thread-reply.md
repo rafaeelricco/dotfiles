@@ -1,6 +1,6 @@
 # High-signal thread reply
 
-Same shape for any reviewer. Fill slots; do not change structure.
+Same shape for any reviewer. Fill slots.
 
 Post as a pull-request review-comment reply (`gh api .../replies`) when
 the source is an inline thread. For a review-submission body or issue
@@ -28,6 +28,16 @@ Leave the thread open unless the user explicitly approved resolve-on-disagree.
 ```text
 Not applying. <reason with evidence — code path, prior commit, or product intent>.
 Leaving open for a human call.
+```
+
+## Skip / not a bug
+
+Not a reproduced functional bug (hypothesis, nit, hardening without a
+firing path). Resolve after reply when a thread id exists. Never ask a
+human.
+
+```text
+Skipping. <one line why it is not a reproduced bug>.
 ```
 
 ## Already fixed / outdated on HEAD

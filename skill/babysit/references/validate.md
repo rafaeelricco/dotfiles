@@ -9,7 +9,7 @@ Pass every cluster agent the same pack:
 
 - PR title + body (stated intent / non-goals)
 - Trusted unresolved threads + review submissions + issue comments
-  (bodies + min path/line/URL; no raw JSON dumps)
+  (bodies + min path/line/URL)
 - Touched paths / diff intent for this PR
 - Session constraints: user messages in this session about this PR
   (prior Scope Gate calls, "don't fix X", product intent). Ignore
@@ -26,10 +26,10 @@ comments by shared concern before any spawn:
 
 Skip a review submission or issue comment with no actionable finding
 (empty, boilerplate wrapper, or process-only). Also skip one this user
-already answered with a later Fixed / Already-fixed / Disagree `gh pr
+already answered with a later Fixed / Already-fixed / Disagree / Skip `gh pr
 comment` (comment `created_at` > source).
-Singleton cluster when nothing shares. Never one agent per thread by
-default. Cap: one Phase-1 agent per cluster, concurrent across clusters.
+Singleton cluster when nothing shares. Cap: one Phase-1 agent per cluster,
+concurrent across clusters.
 
 ## Phase 1 — Hypothesis (read-only, per cluster)
 
@@ -49,11 +49,12 @@ Return exactly:
 
 Phase-1 routing:
 
-| Verdict     | When                                                                                                                                                                     | Then           |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------- |
-| `CANDIDATE` | Plausible functional bug / broken contract / data-loss / security-safety on a path this PR introduced or left reachable; or a plausible bug that no longer fires on HEAD | Phase 2        |
-| `SKIP`      | Hypothetical; pre-existing not worsened and outside PR+session scope; nit/style/no user-visible break                                                                    | final `SKIP`   |
-| `UNSURE`    | Bug vs intentional product behavior                                                                                                                                      | final `UNSURE` |
+| Verdict     | When                                                                                                                                                                     | Then                    |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
+| `CANDIDATE` | Plausible functional bug / broken contract / data-loss / security-safety on a path this PR introduced or left reachable; or a plausible bug that no longer fires on HEAD | Phase 2                 |
+| `SKIP`      | Hypothetical; nit/style/no user-visible break                                                                                                                            | final `SKIP` → Skip     |
+| `SKIP`      | pre-existing not worsened and outside PR+session scope                                                                                                                   | final `SKIP` → Disagree |
+| `UNSURE`    | Bug vs intentional product behavior                                                                                                                                      | final `UNSURE`          |
 
 Cannot-fire / already-fixed is not Phase-1 `SKIP` — keep those `CANDIDATE` so Phase 2 can map them.
 
@@ -84,10 +85,10 @@ Final map:
 | ---------------- | --------------- | ------------------------------------------------------------------------------------------------ |
 | `REPRODUCED`     | `ADDRESS`       | commit plan                                                                                      |
 | `NOT_REPRODUCED` | `ALREADY_FIXED` | Already fixed (known bot) when HEAD or history shows a post-comment commit addressed the finding |
-| `NOT_REPRODUCED` | `SKIP`          | Disagree (known bot) otherwise                                                                   |
-| `UNABLE`         | `UNSURE`        | blocked; do not guess                                                                            |
+| `NOT_REPRODUCED` | `SKIP`          | Skip (known bot); resolve. Not Disagree.                                                         |
+| `UNABLE`         | `UNSURE`        | blocked                                                                                          |
 
-No Phase-2 → no `ADDRESS`. Never commit from Phase-1 alone.
+No Phase-2 → no `ADDRESS`.
 
 ## Out of scope here
 

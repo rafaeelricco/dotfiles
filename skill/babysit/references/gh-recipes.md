@@ -14,7 +14,7 @@ No positional argument resolves the PR from the current branch.
 ## Unresolved review threads
 
 `isResolved` / `isOutdated` are the dedup marker — server-side, shared across
-machines. Do not keep a local seen-list.
+machines.
 
 ```bash
 gh api graphql -f query='
@@ -36,7 +36,6 @@ query($owner:String!,$repo:String!,$pr:Int!){
 ```
 
 `author.__typename` is required for **Author class** step 2 (User vs Bot/App).
-Do not drop it from the gather query.
 
 ## Review submissions and PR issue comments
 
@@ -47,7 +46,7 @@ gh api repos/OWNER/REPO/issues/N/comments --paginate --jq '.[] | {login: .user.l
 
 REST exposes account type under `user.type` (`User` / `Bot`) and login under
 `user.login` — both are required for classification. REST `author_association`
-is required for Gather trust. Do not drop it. `PENDING` reviews are
+is required for Gather trust. `PENDING` reviews are
 unpublished drafts — drop them and their inline comments.
 
 ## Checks
@@ -59,7 +58,7 @@ gh pr checks N --json name,state,bucket,link,workflow || true
 `gh pr checks` exits non-zero when checks are pending or failing. Without
 `|| true` the command reads as an error on exactly the path that matters.
 
-Higher tiers clear and checks still running — wait once, do not poll:
+Higher tiers clear and checks still running — wait once:
 
 ```bash
 gh pr checks N --watch --fail-fast
@@ -68,7 +67,7 @@ gh pr checks N --watch --fail-fast
 `--fail-fast` exits watch mode on the first failed check, so a failure goes
 straight back to Gather instead of waiting on the slowest job in the matrix.
 
-## Failed job logs — do not wait for the run to finish
+## Failed job logs
 
 ```bash
 # 1. runs for the head SHA
@@ -109,5 +108,4 @@ gh pr comment N --body-file /tmp/review-rerequest.md  # known bot — filled rev
 gh pr edit N --add-reviewer LOGIN                     # human — confirmed only
 ```
 
-One comment per bot in the re-request set (distinct logins); do not batch
-several @mentions into one comment.
+One comment per bot in the re-request set (distinct logins).
