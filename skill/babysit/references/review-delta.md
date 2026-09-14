@@ -42,7 +42,8 @@ the original section.
 
 ## Shape
 
-Fill slots; do not change structure. No "Round N". No diagrams. No
+Fill slots; do not change structure. Login-only section omits
+`on `<sha7>`` — do not invent a `commit_id`. No "Round N". No diagrams. No
 file inventory. No test-pass claims. Echo reviewer P-labels in the
 header only when the review itself used them; ignore them for routing.
 One bullet per finding: problem + action + how + outcome. Do not paste
@@ -55,6 +56,7 @@ Since this PR opened, <names> reviewed it <N> times and found <Y>
 issues. We pushed <C> commits since the first review.
 
 **<login> on `<sha7>` — <k> findings**
+**<login> — <k> findings**
 - <problem>, so <action>; <how>, and <outcome> (`<hash>`).
 - <problem>, so we skipped; <reason>, and the thread is resolved (`<path>`).
 - <problem>, so we did not apply; <reason>, and the thread stays open (`<path>`).
