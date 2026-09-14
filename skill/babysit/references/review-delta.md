@@ -16,7 +16,8 @@ Otherwise skip.
 Reuse Gather's review submissions and issue comments. Skip empty or
 boilerplate submissions per `./validate.md` Phase 0. For finding text
 and inline replies, run the Unresolved review threads query in
-`./gh-recipes.md` with the `isResolved==false` conjunct removed.
+`./gh-recipes.md` with the `isResolved==false` and
+`isOutdated==false` conjuncts removed.
 Keep an outdated thread that has a Fixed / Already-fixed / Disagree
 reply; keep one with a Skip reply too. Skip unresolved outdated threads with no reply. That is the
 one extra read. Count commits with

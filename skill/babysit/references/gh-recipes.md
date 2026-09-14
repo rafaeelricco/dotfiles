@@ -25,7 +25,7 @@ query($owner:String!,$repo:String!,$pr:Int!){
         nodes{
           id isResolved isOutdated
           comments(first:20){nodes{
-            databaseId author{login __typename} authorAssociation path line originalLine body url
+            databaseId createdAt author{login __typename} authorAssociation path line originalLine body url
           }}
         }
       }
