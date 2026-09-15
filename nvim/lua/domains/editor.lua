@@ -166,10 +166,9 @@ return {
   },
   --]]
 
-  -- Graphical Markdown preview (local development checkout).
+  -- In-buffer Markdown preview.
   {
-    dir = "~/Projects/personal/preview.nvim",
-    dependencies = { { "folke/snacks.nvim", opts = {} } },
+    "rafaeelricco/preview.nvim",
     ft = "markdown",
     event = {
       "BufReadPost *.[mM][dD]",
