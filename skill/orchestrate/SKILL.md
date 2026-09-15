@@ -21,7 +21,7 @@ When choosing an approach — not before every tool call — if a simpler one ex
 
 Independent work ships in one message; two independent concerns are two workers. A read that never uses a prior result is the same step, not a later one.
 
-After parallel reads, before using them: drop empty, off-task, and mutually impossible claims. Do not edit or synthesize from a dropped claim.
+After parallel reads, before using them: drop empty, off-task, and mutually impossible claims.
 
 ## 2. Simplicity
 
@@ -59,6 +59,6 @@ Ship order after Edit:
    - User asked for a commit → `commit-message` (and PR title style when only a title is needed).
    - No ask → skip. Finishing an edit is not an ask: report what changed and stop.
 
-3. **done** — stop. Do not commit, open a PR, or babysit unless the user asked.
+3. **done** — stop.
 
 Use one verification pass for the final change set. Add or repeat checks only when the user requests them, the changes require complementary coverage, or a new edit, failure, or unresolved concern justifies them. A failing check buys at most two fix-and-rerun rounds; still failing after the second → report the failing output and stop.

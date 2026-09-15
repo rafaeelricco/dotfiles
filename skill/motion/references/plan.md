@@ -68,5 +68,5 @@ imitate (token names, file placement, prop patterns):
 ## Notes for the plan author
 
 - One plan per finding. If two findings share every file and the same fix pattern (e.g. the same easing token swap across components), they may merge into one plan.
-- Pull every value from `bar.md` — never approximate from memory.
+- Pull every value from `bar.md`.
 - After writing plans, create or update `<plan dir>/README.md` — the directory the plans went in (`plans/`, or `animation-plans/` if `plans/` was taken) — with: a table of plans (number, title, severity, status), the recommended execution order, and any dependencies between plans.

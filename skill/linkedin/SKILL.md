@@ -68,7 +68,7 @@ Before the table, in this order:
   `ssi` table match. Post analytics → `content`. Metrics mixed with another area counts
   `ssi` for rule 2; the `ssi` turn keeps this shape.
 
-Then apply the rules below in order; the first that fits wins. Do not invent areas or rules.
+Then apply the rules below in order; the first that fits wins.
 
 1. One row matches → that area only.
 2. Two or more rows match → run the one clearly led on (`rewrite my about`, `fix my
@@ -124,7 +124,7 @@ Lookup order:
    that plausibly carry those facts — structured data (`*.yaml`, `*.json`), a resume
    (`*.tex`, `*.md`, `*.pdf`), a LinkedIn export, achievement notes. Never assume filenames.
    Read-only: never write into the source.
-3. Continue to Interview **only if** that section’s gate says so. Do not re-ask a found fact.
+3. Continue to Interview **only if** that section’s gate says so.
    Do not run a full questionnaire for optional details before drafting.
 
 No path given and nothing in conversation → step 3 (Interview gate may still skip).
@@ -132,8 +132,7 @@ No path given and nothing in conversation → step 3 (Interview gate may still s
 ## Interview
 
 **May Interview:** `positioning`, `headline`, `about`, `experience`, `outreach`, and those
-steps under `all` (once at the start of the profile chain is enough — do not re-interview
-each step).
+steps under `all` (once at the start of the profile chain is enough).
 
 **Never Interview:** `visuals`, `sections`, `ssi`, `content`, `plan`, pure Audit mode, or
 non-copy steps of `all`.
@@ -171,14 +170,14 @@ Pick **one** mode for each requested area:
    connection count and target-field composition; a whole-`ssi` audit takes those, the
    overall score **and all four pillar scores**, the analytics readings, and the current
    profile sections needed to name the weakest pillar and trace pillar 1. Missing → ask
-   once for whatever is still missing and wait; do not invent a checklist read. Then
+   once for whatever is still missing and wait. Then
    checklist + exactly 3 prioritized fixes. No Interview. References carry checklist items
    only.
 2. **Audit and rewrite** — user asked to audit/review **and** write/rewrite/improve/fix
    the same area in one request → require the current state as in mode 1, emit the mode-1
    checklist + exactly 3 prioritized fixes, then the rewrite form for that area: generative
    or advisory for most areas; for `plan`, the full schedule from mode 5 after the audit
-   (not a second advisory-only pass). Do not skip either half. Interview follows the
+   (not a second advisory-only pass). Interview follows the
    rewrite half's gate, not pure Audit. Wins over mode 4 whenever both an audit verb and a
    write verb appear.
 3. **Paste, no write/audit verb** — profile/section paste without “rewrite” / “audit” /

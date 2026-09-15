@@ -5,7 +5,7 @@ it never restates their rules. Emitting the plan does **not** auto-run other are
 session. Each later step is a fresh user ask into that area. `all` is not this file: `all`
 stops after profile (positioning→…→visuals); this file adds weeks 2–3 growth.
 
-Use this file alone for the `plan` area. Do not pre-read the other area files it names.
+Use this file alone for the `plan` area.
 
 Mid-plan checkpoint (~day 14–15): Analytics search appearances → job titles (same 15-day
 loop as positioning), optional SSI score (same as the Day 14 row) — full `ssi` growth

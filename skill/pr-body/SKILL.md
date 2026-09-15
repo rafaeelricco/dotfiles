@@ -39,7 +39,7 @@ gh pr view --json number,url,state 2>/dev/null
 ```
 
 - No repo, empty diff, or no base branch: try `main`, then `master`, then ask
-  the user for the change context. Do not invent it.
+  the user for the change context.
 - Diff too large to read: work from `--stat`, say so, and offer to focus on
   specific directories.
 - `gh` missing or failing: assume no PR exists unless the user says otherwise.
@@ -92,7 +92,7 @@ Render `references/template.md`. Read `references/categories.md` for grouping,
 `references/mermaid-guide.md` when drawing a diagram.
 
 - Motivation: include only when the user or caller supplied text. Grammar
-  cleanup only — do not rewrite the intent. No text → no heading.
+  cleanup only. No text → no heading.
 - What's New: bold category headings, bullets underneath.
 - Additional for Run Locally: name the dependency, service, env var, or setup
   step the diff adds.

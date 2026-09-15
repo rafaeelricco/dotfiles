@@ -61,7 +61,7 @@ A failure returns that group only, never the batch — re-running accepted work
 makes it different, not better:
 
 - Copy hunk did not apply → the plan's anchor is stale. Apply the group
-  yourself, serially; do not respawn, do not revert groups that landed.
+  yourself, serially.
 - Derive group still red after its 3 runs → write it yourself. The contract is
   the problem, and the writer cannot see the plan that made it.
 - Derive group green but the diff read (3) failed → one correction: resume the

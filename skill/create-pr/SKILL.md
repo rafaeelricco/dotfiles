@@ -107,8 +107,8 @@ question count and selection types, in Branch, Path, Scope, State order.
 If no suitable tool is callable, ask the unresolved questions in plain text.
 A missing widget does not block inspection or preparation of the plan.
 
-On a schema error, correct the payload to the actual schema; do not repeat an
-invalid call. If the schema cannot express a needed choice, ask it in plain text.
+On a schema error, correct the payload to the actual schema. If the schema
+cannot express a needed choice, ask it in plain text.
 
 ### Motivation
 
@@ -125,7 +125,7 @@ writes their own.
 Ask only when motivation is missing and questions were not waived. Never use
 a suggestion the user did not pick.
 No picked number and no own prose is a completed empty answer — omit
-the Motivation section. Do not re-ask. Waiver omits only missing motivation.
+the Motivation section. Waiver omits only missing motivation.
 
 ### Shape
 
@@ -201,7 +201,7 @@ pick, own prose, or empty answer (omit).
 
 ### Body
 
-`Full flow` only. Do not ask `pr-body`'s formatting questions. Derive:
+`Full flow` only. Derive:
 
 - Sections — every option `pr-body` would offer for this diff.
 - Writing Style — `standard`.
@@ -267,7 +267,7 @@ git diff --cached
 
 Confirm the cached diff matches the approved commit, then create the commit
 with the approved title/body (already validated against `commit-message` at
-Step 4). Do not restate format rules here.
+Step 4).
 
 After all approved commits are created, write the approved PR body to a temp
 file, push once, and create the PR once:

@@ -75,7 +75,7 @@ xtf --monitor @yourhandle
 
 ## Error Handling for Agents
 
-Branch on **CLI JSON** from `xtf` / `python3 scripts/fetch_tweet.py` only (this skill is the agent surface; do not load README/CHANGELOG/MIGRATION for branching).
+Branch on **CLI JSON** from `xtf` / `python3 scripts/fetch_tweet.py` only (this skill is the agent surface).
 
 **Exception — `--monitor` setup/backend failure:** exit `2`, human message on stderr, **no** JSON envelope (no `error` / `error_code`). Branch on exit code + stderr for that path only. Baseline / new-mentions success still emit JSON when not `--text-only` (exit 0 / 1).
 
