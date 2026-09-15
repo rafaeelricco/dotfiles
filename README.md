@@ -180,6 +180,7 @@ wsl -d Ubuntu-24.04 -- bash /mnt/<drive>/.../dotfiles/scripts/windows/setup-wsl-
 ```
 
 Docker: install **Docker Desktop** on Windows (not docker-ce inside the distro).
+On Apple Silicon macOS, use Colima via [`scripts/macos/setup-colima.sh`](scripts/macos/setup-colima.sh), not Docker Desktop.
 
 `CLAUDE_CONFIG_DIR`, `CODEX_HOME`, `GROK_HOME`, and `HERMES_HOME` are honored; Cursor has no
 equivalent override and always uses `~/.cursor`. The former Claude
@@ -223,6 +224,11 @@ Run the installer as your normal user, not with `sudo`.
   Windows Terminal keys (`#141414` background, `Ctrl+Shift+T` → `duplicateTab`).
 - [`scripts/windows/`](scripts/windows/) — Windows helpers: Node/pnpm-via-WSL
   (`setup-wsl-node.sh`, `wsl_dev_env` + profile `BASH_ENV`), and system cleanup.
+- [`scripts/macos/setup-colima.sh`](scripts/macos/setup-colima.sh) — Colima +
+  Docker CLI on Apple Silicon (vz, virtiofs, Rosetta; 4 CPU / 8 GiB / 50 GiB).
+  Hand-run; writes the template only (`colima start` later). Not hooked into
+  the main installer. Teardown: `colima delete` then
+  `brew uninstall colima docker docker-compose docker-buildx`.
 - [`.zshrc`](.zshrc) — Zsh configuration.
 - [`scripts/install-maestro.sh`](scripts/install-maestro.sh) /
   [`scripts/uninstall-maestro.sh`](scripts/uninstall-maestro.sh) — Maestro CLI +

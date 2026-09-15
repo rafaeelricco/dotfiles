@@ -1,0 +1,31 @@
+cpu: 4
+memory: 8
+disk: 50
+arch: aarch64
+runtime: docker
+hostname: colima
+vmType: vz
+mountType: virtiofs
+rosetta: true
+binfmt: true
+portForwarder: ssh
+autoActivate: true
+sshConfig: true
+nestedVirtualization: false
+mountInotify: false
+forwardAgent: false
+
+kubernetes:
+  enabled: false
+
+network:
+  address: false
+  mode: shared
+  gatewayAddress: 192.168.5.2
+  dns: null
+  dnsHosts: {}
+  hostAddresses: false
+
+docker: {}
+mounts: []
+provision: null
