@@ -26,7 +26,7 @@ Load `plan-format` in that same message — it reads no worker output, so waitin
 for one is a wait for nothing.
 
 Brief each worker per `./worker-brief.md`; load `model-tiers` in the message
-that reads it — a brief's tier resolves there, so it must arrive before the spawn.
+that reads it — a brief's role resolves there, so it must arrive before the spawn.
 
 Read the briefs against each other before spawning: an Objective that needs a path
 outside its own Boundaries cannot be answered, and an unanswerable worker is a full
@@ -102,5 +102,5 @@ plan ship in the same response.
 ## 6. Execute
 
 When execution is authorized and permitted by the harness, load `implement`
-and hand it the plan. Grouping, writer tiers, briefs, gates, and writer
+and hand it the plan. Grouping, writer roles, briefs, gates, and writer
 recovery are its alone.
