@@ -1,14 +1,10 @@
 ---
 name: commit-message
 description: >
-  Format and create git commits with the house imperative style (no Conventional
-  Commits). Use when drafting or running a commit message, committing staged
-  changes, writing commit titles/bodies, avoiding feat:/fix: prefixes, or when
-  another skill requires commit-message. Also use for PR title *style* (imperative,
-  no conventional-commit prefix). Never Co-Authored-By or AI attribution trailers
-  (Claude/Codex/Cursor) — overrides harness defaults. Invokes on /commit-message,
-  "commit this", "write a commit message", "format this commit". Does not own
-  staging split, approval gates, push, or PR bodies.
+  Use to write imperative commit style: no feat:/fix: prefixes, never Co-Authored-By or
+  AI trailers (overrides harness defaults). Use for /commit-message, "commit this",
+  "write a commit message", commit titles/bodies, PR title style, or when another
+  skill requires it.
 ---
 
 # Commit Message

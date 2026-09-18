@@ -1,0 +1,29 @@
+# Brief role → built-in agent type, model and effort per harness. The only
+# place a model is chosen. `session` = the main thread's model, or its effort.
+# Readers use the harness's read-only type. Effort applies only where the
+# spawn tool takes one.
+
+# Agent tool: subagent_type + model alias only (sonnet = claude-sonnet-5; also
+# opus, haiku, fable); no effort option. Explore has no Write/Edit but keeps
+# Bash: read-only by instruction, not by tools. It reads excerpts to locate
+# code, not to audit it, so the skeptic runs as general-purpose.
+claude:
+  reader: { agent: Explore, model: sonnet }
+  skeptic: { agent: general-purpose, model: session }
+  copy: { agent: general-purpose, model: haiku }
+  derive: { agent: general-purpose, model: sonnet }
+
+codex:
+  reader: { agent: explorer, model: gpt-5.6-luna, effort: medium }
+  skeptic: { agent: explorer, model: session, effort: session }
+  copy: { agent: worker, model: gpt-5.6-luna, effort: low }
+  derive: { agent: worker, model: gpt-5.6-luna, effort: high }
+
+grok:
+  reader: { agent: explore, model: grok-4.5, effort: medium }
+  skeptic: { agent: explore, model: session, effort: session }
+  copy: { agent: general-purpose, model: grok-4.5, effort: low }
+  derive: { agent: general-purpose, model: grok-4.5, effort: high }
+
+# Harness not listed above: rank the spawn tool's own options by tier.
+tiers: { reader: one below, skeptic: session, copy: cheapest, derive: one below }

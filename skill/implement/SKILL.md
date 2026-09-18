@@ -1,7 +1,7 @@
 ---
 name: implement
 description: >
-  Write diamond for an authorized plan: group its hunks → cheaper-tier writers
+  Write diamond for an authorized plan: group its hunks → role-matched writers
   apply or author each group → gate each return → merge. Use when
   scope-and-plan reaches Execute, or the user names /implement on an approved
   plan. Do NOT use without an authorized plan — planning is orchestrate's.
@@ -19,13 +19,14 @@ Files one hunk touches together are one writer; writers are disjoint by path.
 A group that uses what another group creates waits for that group's gate, not
 for every group — spawn the rest in one message.
 
-Load `model-tiers` unless the session already has it, then tier each writer by
-what its hunks leave to decide. A group with any derive hunk is a derive group.
+Load `model-tiers` unless the session already has it, then pick each writer's
+role by what its hunks leave to decide. A group with any derive hunk is a
+derive group.
 
 - Copy — literal hunks, `Same pattern:` lines, or a `body:` hunk naming a
-  pattern to copy → `cheapest`. Nothing is left to decide.
+  pattern to copy → `copy`. Nothing is left to decide.
 - Derive — a `body:` hunk pinned only by its test, or a representative excerpt
-  → `one below`. It works something out, but the plan still fixes what counts
+  → `derive`. It works something out, but the plan still fixes what counts
   as right.
 
 ## 2. Brief
@@ -33,7 +34,7 @@ what its hunks leave to decide. A group with any derive hunk is a derive group.
     Apply:      <plan file path + the `path:line` anchors this writer owns; no plan file → the hunks, verbatim>
     Boundaries: <files this writer may edit; tests the plan pins are read-only>
     Check:      <the pinning test; else the narrowest repo check over Boundaries; else none>
-    Model:      <tier from §1>
+    Role:       <copy or derive, from §1>
     Loop:       derive → edit, run Check, fix; stop at green or 3 runs. Copy → stop at the first hunk that does not apply
     Return:     files changed; the Check's last output, verbatim; runs used
     Do not:     edit a pinned test, widen a hunk, touch a path outside Boundaries, re-plan, commit
@@ -66,7 +67,7 @@ makes it different, not better:
   the problem, and the writer cannot see the plan that made it.
 - Derive group green but the diff read (3) failed → one correction: resume the
   same writer if the harness can (it keeps what it tried), else spawn a fresh
-  one at the same tier. Send the finding, the hunk it contradicts, its
+  one with the same role. Send the finding, the hunk it contradicts, its
   Boundaries. Fails again → write it yourself.
 
 ## 4. Merge

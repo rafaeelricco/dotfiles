@@ -2,6 +2,7 @@
 name: compress-skill
 description: "Use when the user runs /compress-skill, asks to compress a skill, strip skill overhead, cut buzzwords from SKILL.md, make a skill shorter without changing behavior, thin a SKILL.md like job-scout, route procedure into references/, or drop STOP / Do not liturgy. Not for creating a skill."
 argument-hint: "<skill-dir>"
+disable-model-invocation: true
 ---
 
 # Compress skill
