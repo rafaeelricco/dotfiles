@@ -1,6 +1,8 @@
 # Spoken examples
 
 Raw lines from real calls, then the version that follows profile.md. Rules: profile.md.
+A Raw line is an excerpt; its Polished version may use facts stated elsewhere in the same call. When
+rewriting, use only facts the user gave you.
 Anything private (pay, contracts, dates, who was in the room) stays out of this file.
 
 ## Intro, stack
