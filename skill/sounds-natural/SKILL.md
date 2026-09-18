@@ -3,7 +3,8 @@ name: sounds-natural
 description: >
   Use when writing should sound natural, not rehearsed.
   Triggers: sounds-natural, /sounds-natural, humanize this, de-slop, tonalidade,
-  too scripted, match a writing sample. Not for inventing facts, rewriting
+  too scripted, match a writing sample, in my voice, write like me, como eu
+  escrevo. Not for inventing facts, rewriting
   code, or changing what the source claims.
 license: MIT
 ---
@@ -60,6 +61,8 @@ In coaching, name what sounds off, skip passages you are keeping, and note any d
 If the user gives a writing sample, read it first. Note sentence length, word choice, paragraph openings, punctuation, repeated phrases, and transitions. Match those habits. Do not swap casual for formal or sand off quirks.
 
 A sample overrides the style rules below. If it uses em dashes, keep them at about the same rate; do not apply §14 as a ban.
+
+**The user's own voice.** When the user asks for their own voice, or the text is theirs (a Slack message, an interview answer, a note they will send), read `./references/voice/profile.md` first. Then read the example file for the register it names, and only the `##` section that fits the situation (e.g. `chat.md` → "Owning mistakes"). The examples are a sample for tone and rhythm; where one breaks a profile rule (grammar, emoji), the profile wins.
 
 No sample → use the guidance below.
 

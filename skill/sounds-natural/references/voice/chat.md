@@ -1,0 +1,333 @@
+# Chat examples
+
+Real messages, anonymized. `↵` separates a burst sent within 60 seconds. Rules: profile.md.
+
+## Openers
+
+- `manager` Good morning, [manager]. I will keep you informed about our status on the front-end or if I have any blockers.
+- `lead` Hey, when you start working let me know. I need help to proceed ;)
+- `lead` Good morning, [lead]! How's going?
+- `lead` Hey, no worries
+- `lead` Hey man, I need to sync with you about my next task. Is the super admin portal?
+- `lead` Good morning! How's it going?
+- `lead` Hey! Got it, once I finish the request changes I would start working on it
+- `lead` Good morning! How are you? Today I plan to make some updates to the meeting bot, and besides that, I need to sync with you about how we will be this week
+- `lead` Hey, just saw that Anthropic released Claude Sonnet 4.5 and remembered our conversation. The highlight for us is the Claude Agent SDK that came with the launch, it's literally the same infrastructure they use internally for Claude Code, now open for us to build our own agents. Should be really useful for our software development framework.
+- `lead` Good morning boss
+- `lead` Hey! how's it going?
+- `lead` Hey! I created the new project ↵ If this is not correct, feel free to delete them
+- `lead` Hey, you think this meeting will take a long time? because I will have a personal commitment in a half hour :sweat_smile:
+- `channel` Hey! Let’s do this after standup, works for you?
+- `lead` Hey! How's it going? Are you working today?
+- `lead` Hey! I was on sync with [teammate] ↵ I just want to show what I'm building ↵ And discuss the idea to solve the architecture problem ↵ Yes
+- `lead` Hello hello ↵ Good morning! How's it going?
+- `lead` Good morning! I had an excellent weekend. And you?
+- `lead` Hey, I need to sync up about my next tasks
+- `lead` Good morning. No worries, what exactly was changed? The order of tasks?:sweat_smile:
+- `manager` Yooo, how's it going?
+- `close peer` Hey! How's it going? Did you look at the things yesterday?
+- `manager` Yoooo ↵ You have free time to chat today? If not, let’s do this tomorrow
+- `manager` Yooo, how's it going? I want to share something I did using the MM (UI description). It's just a prototype, but it will help us to see what the final version looks like
+- `manager` yooo
+- `close peer` Yooo, after the meeting please share your thoughts about it, I'd love to hear.
+- `close peer` Yooo, how's it going? hope you had a good weekend!
+- `close peer` Hey! The links of the prototypes? ↵ There is the latest version of each
+- `close peer` Good morning! How's it going, buddy?
+- `lead` Good morning! How's it going? ↵ I need helppp
+- `lead` Yooo, how's it going? ↵ I think I missed something. What is the `Event Sourcing 101` meeting we will have today? ↵ All good, my brother
+- `close peer` Hey [teammate]! How's it going? Welcome back, buddy!
+- `close peer` Yoo ↵ try this
+- `close peer` Good morning! Excellent work!
+- `lead` Yoo, how's it going?
+- `close peer` Yooo ↵ I need help ↵ He wants to have access
+- `close peer` yoo ↵ happens with me sometimes; I just reset all things, and it works better after this ↵ `docker system df && docker builder prune -af && docker system prune -a` ↵ then
+- `close peer` Hey ↵ How's it going? ↵ (kidding) ↵ What is your opinion about the mental models? (the current one in the project)
+- `close peer` Hey buddy, how are you feeling? better? :face_holding_back_tears:
+- `lead` Hello hello ↵ Let me know if you will have availability to do our 1:1 today :smile:
+- `lead` Hey man, I would like to chat with you. I'm available whenever you are.
+- `close peer` Yooo, how's it going? ↵ Just here to say: great work on the dashboard stuff!
+- `close peer` Hey sir ↵ How's it going?
+- `manager` Hey, how's it going?
+
+## Review and approval
+
+- `lead` Send in the same PR?
+- `lead` The PR is ready
+- `lead` Hey, you know what is happening here? My pull requests disappeared:thinking_face:
+- `lead` Hey! Just to sync, I'm currently creating a script like `./utils.sh run` to handle the back-end locally, using your implementation of the `watch` script from the last PR. Would this be valuable, or are there other priorities for now?
+- `lead` Hey, of course! I will take a look and update this on the agent flow
+- `lead` Is it okay if I ask Codex to run a code review on your PR? Or do you think this is no longer needed?
+- `lead` Approved :white_check_mark:
+- `lead` I'll review it now.
+- `lead` It's ok if I take a look in this PR before you merge them?
+- `lead` About the PRs, ping me when they are available to review (if needed)
+- `channel` Yep, I will take a look at this :ok_hand:
+- `lead` I'd like to ask you to leave this under my ownership, including the review process and everything else, just as we did with the last project
+- `lead` Hey! Check if you receive any requests from Cursor to allow my bot to review things
+- `lead` Hey! This PR is ready to review
+- `lead` Here is the PR
+- `lead` Review this another PR, pls
+- `lead` Of course. I'll take a look
+- `lead` Take a look pls
+- `lead` I pushed another commit. Could you please approve again?
+- `lead` Here is the PR, could you please take a look
+- `lead` Yes, everything is happening fast. Is this essentially bad? ↵ btw, could you please take a look ↵ I find an issue in full-screen mode. I just updated one line and fixed that :crossed_fingers:
+- `lead` If you want to test with me or take a look before the presentation, I'm ready when you are. ↵ I just want to make sure everything is as you expect so there are no surprises.
+- `channel` I’m back now. I’ll take a look at that
+- `lead` Approved
+- `lead` Here is the PR to address the issues with voice mode
+- `close peer` Good morning! Interesting, I'm curious about how this new digest system works. As for the PR side, I'll take a look.
+- `manager` Here is the PR for that In the PR description, I put all details about what I've changed in the Google Console and G Suite (with URL to check if needed)
+- `close peer` I also have a lot of PR opened currently (and more coming); pls help me to get all reviewed :face_holding_back_tears:
+- `close peer` Yooo, since last week I've continued exploring the Expo things; hopefully I'm finishing the initial setup (PR coming soon) ↵ If you want, I'm available to catch up. Just ping me. ↵ And I'll respond to your PR comments today. ↵ And I've used the command `npx create-expo-app@latest --template default@sdk-55`
+- `close peer` I have a new big PR to be reviewed: ↵ oh, yeah
+- `close peer` Please re-review this PR
+- `close peer` I did this yesterday and some points like this I allow to pass; if you find more pls let me know ↵ btw, I'll create a PR to fix that
+- `close peer` Ok ok, then ping me I'll review more carefully
+- `close peer` Reviewing your PR
+- `close peer` Great! I'll review soon
+- `close peer` Okok ↵ Let's get the PR merged
+- `close peer` Yoo ↵ I'll take a look in all remaining PRs after the stand-up ↵ (one of these PR's I already approved)
+- `close peer` (Just to let you know, I'm reviewing your PR's)
+- `close peer` Something tells me you're right. I think I'll close this PR for now
+- `close peer` Howdy, partner! ↵ I'm fixing some urgent stuff in the mobile app. I promise I'll review your PR's after that. Just to keep you posted.
+- `close peer` Why do we need this today? I'd like to review it carefully on Monday. Let me know if there's any urgency around this.
+- `close peer` Just something I want to mention: I've been adding a visual recap to provide a quick context about what the PR is doing. Also, the "Motivation" section I write myself 95% of the time.
+- `close peer` Please, let's close this PR. This new one is addressing the same concern (also, I've already replaced in all surfaces to have the new logo.)
+- `close peer` ok, hold the review of all open PRs until we have this merged, pls
+- `close peer` I see you are enjoying using the codex review stuff
+
+## Heads-up and status
+
+- `lead` No worries, I could imagine ↵ I will send you a small report about our progress ↵ I think that is better for this case ↵ Of course!
+- `lead` Hey! When are you available to chat about the chatbot progress? I have some news to talk about
+- `lead` I will organize my tasks before moving forward, to have a clear path to follow, FYI.
+- `lead` Even the WebSocket is screaming for mercy*.* A quick update on my progress: the feature is working, our chat has voice now, but it still needs some polish, especially the audio capture. It's been a fun challenge exploring the browser's audio API. I'll keep working on this tomorrow, but let's sync up early in the morning on what we have to present.
+- `lead` I want to present my progress with voice on the chatbot. Do you have some time available for us to do this?
+- `lead` The last thing I want to share is my schedule for today and tomorrow. I think it's important for you to know when I'll be available or not
+- `lead` Ok! ↵ I'll send you the changes I've made during my tests. ↵ Just to let you know. I'll work on bringing back the voice to the chatbot.
+- `lead` Do you know if the transcription feature is currently working?
+- `lead` Besides that, I'll be looking for a solution like Next Image so that it doesn't render images at their original sizes. That's another big issue
+- `lead` [lead], just to let you know, the voice mode is broken. ↵ I'm starting to solve this now
+- `lead` And just so you know: that last one I would really like your help to solve it, I think I complicated things too much :white_frowning_face:
+- `lead` Just to let you know, I'll spend a bit more time reading the official docs while we cannot test in prod, and then I'll test in prod to ensure everything is working fine. ↵ Or, if you have another priority, just let me know
+- `close peer` I'll be available to sync in 30 minutes. Let me know when you are available. I want to sync
+- `manager` Just to let you know
+- `close peer` Hey! Just to let you know, I'll probably address your comments tomorrow. I'm done for today.
+- `close peer` Yooo, good morning! Just to let you know: I've added one more comment, and please don't kill me (joking) :face_holding_back_tears:
+- `close peer` I'll also add a Claude skill to help in future screen creations and things related to design. Just to let you know.
+- `close peer` I will be honest, doing this skill needed a significant effort and tests. If you want my help to do this, I would be glad to help you
+- `close peer` Just to let you know, I'll be off by 1h (if I don't respond)
+- `close peer` Yooo, I'm off right now. Just to let you know.
+- `close peer` I made progress here; I'll analyze better tomorrow because I'm very tired today. ↵ I cleaned everything and re-ran it with the patch applied, and it works.
+- `manager` I'll try a bit more, and I'll be back with you in a minute.
+- `channel` Just sharing the progress with the product assets, ; now it is working. I'm pushing this to staging to start testing.
+- `close peer` yep, I'll do my best ↵ just to let you know, now I'm looking at the products feature and in parallel ensuring what we need in the back-end for the mobile app.
+- `close peer` all .sql dumps I've used; ↵ All JSONs exported from PROD as well. ↵ I'll have an appt in a few minutes, just to let you know. but please, keep me posted.
+- `channel` Folks, I won't be able to join our internal progress meeting. I have an appointment scheduled for the same time. I should be back in ~1h, after that I'll be available to talk if needed.
+
+## Short replies
+
+- `lead` Of course
+- `channel` Yep
+- `lead` Got it
+- `lead` great
+- `lead` Yes
+- `lead` Nice!
+- `lead` No worries
+- `lead` Of course!
+- `channel` same here
+- `lead` Done!
+- `lead` Ok!
+- `lead` Yes!
+- `lead` No worries!
+- `lead` Done.
+- `close peer` Works for me
+- `channel` Ok
+- `lead` YES!!
+- `close peer` Excellent!
+- `close peer` Reviewed!
+- `lead` Yeah
+- `close peer` reviewed
+
+## Questions and alignment
+
+- `lead` We have 2 conditions to check, how is the best approach for that? ↵ try catch?:smiling_face_with_tear:
+- `lead` humm, but we also need the command to dispatch this event, right?
+- `lead` Ok, you use the podman? ↵ I think, for development we need to prioritize only docker, like [teammate]
+- `lead` like this?
+- `lead` How's the meeting going with the client? :face_holding_back_tears:
+- `lead` Our deadline is 4 weeks ahead?
+- `lead` That's it?
+- `lead` Is there an outage for you?
+- `lead` You have 10/15 minutes to chat about?
+- `lead` Hmm, but the admin will not do the same sign-up for the agencies/users, right?
+- `lead` Ok, and another: The admin must have an agency, right?
+- `lead` probably ↵ here works perfectly ↵ already started the meeting?
+- `lead` How was the meeting?
+- `lead` You have the right envs for Stripe?
+- `lead` Which branch are you using?
+- `lead` Is it possible to do a quick huddle? I want to align some stuff with you
+- `lead` Are you able to start the containers? I'm having issues with one of the services
+- `lead` I also need to confirm some doubts about this task ; are you available to have a quick huddle, or are you busy today?
+- `lead` This is a good level of "concise"? Or might they need to talk a bit more?
+- `lead` Are you still having problems with this?
+- `lead` What do you mean? ↵ The voice mode only has a different prompt, they will return a more concise and natural response. But they will continue reading the message.
+- `lead` Gotcha! ↵ Is there any other strange behavior besides that? ↵ Nice!!
+- `lead` You mean, have this screen when the user opens the chatbot on mobile? ↵ (this is a mobile frame)
+- `lead` Could you help me with another technical question?
+- `lead` Hmmm, this is to allow only things we have defined on our types, right?
+- `close peer` If it's possible for you, chat when you're back from your commitments?
+- `close peer` Shall we?
+- `close peer` btw, do you have any recommendations on the "Business Model Canvas" content?
+- `close peer` Is it really bad? :face_holding_back_tears:
+- `close peer` quick question: where will the catalog things be placed? I mean, will this be a concern of the ops platform?
+- `close peer` Humm, no worries; I'll address this. What do you suggest?
+- `close peer` Shall we do a quick catch-up?
+- `close peer` Is there any way to share this gist with me?
+- `channel` Sounds good. The process to import all data is taking longer; I'll keep you posted
+- `close peer` did you try to clean localstorage?
+- `close peer` Let's do the following, I want to change the staging and test my hypothesis. For that I'll need to reset everything. Anyway, I would say to keep investigating. What do you think?
+- `channel` Nice! Could you please add them on Linear?
+- `close peer` I would like to hear your opinion about this: ↵ Why do you think this seems like "overengineering," and what shape would you like to have?
+- `close peer` Fair. Let's do the follow: I'll revert and keep the previous option and also add the new one as well, and the user needs to use at least one of these to proceed to the check-out. What do you think?
+- `close peer` I'm thinking of sending the mobile notification stuff in small chunks/PRs. That's ok for you?
+- `close peer` No worries. Are you ok?
+- `close peer` I plan to push all the stuff to prod today. Is there some caveat about that?
+- `lead` What are your thoughts about the `cubic` reviews? Me: I think it is raising a lot of false positives. ↵ I would like to ask to remove it completely; the Codex and the Bugbot are performing much better.
+- `lead` I took a quick look at your work and I’m curious. How did you build so many stacked PRs? How was your process?
+- `lead` let me paraphrase that: how did you build the whole thing? I mean, do you ask claude to "Hey, read this X ticket and let's crack on"? ↵ I'm asking just to learn more ↵ I mean, this feature is so big. Did you make it in one shot?
+
+## Owning mistakes
+
+- `lead` Apologies for the delay. I'm currently working through the GitHub issues we opened yesterday and will have an update for you later today. As soon as those are complete, I'll jump on the remaining tasks and let you know right away.
+- `lead` Hey, I forgot to tell you not to consider PR in draft state. And another important point, I organized the next tasks on Linear. I will send an invite to your email
+- `lead` Sorry, I think I used a lot during the crawler tests
+- `lead` Ooppss, my bad I didn't see any problem and that's why I did the merge :sweat_smile:
+- `lead` Yes, my apologies. Your PR is already approved; I'll be careful about this next time. :sweat_smile:
+- `lead` Oops, I'm sorry. I didn't know that. Let's chat at Monday :) ↵ Have a great weekend.
+- `manager` yoooo, sorry for the delay
+- `lead` And sorry for sending it in Portuguese. I was with [teammate] and replying to you at the same time. I'll avoid that.
+- `lead` Oops, you are right! :sweat_smile:
+- `lead` Gotcha! ↵ Good luck! ↵ And sorry, it will not be possible to present the chatbot with voice yet :pensive:
+- `close peer` Good morning, [teammate]! Sorry for the delay. Answer: We broke out the schemas into `.schema.ts` files for _every backend file that was imported by the frontend_, in most cases, things used on `endpoints.ts` On the front-end, the root problem wasn't a schema _structure_ issue, but a Node.js/Vite bundling error caused by the frontend importing backend files directly. When `endpoints.ts` imported a type from a backend file, Vite pulled in the _entire file_, including Node-only code (like database/process logic), which caused the `"process is not defined"` error, for example.
+- `lead` And [teammate] is now off, and they sent a message that they will be back later. Sorry for that, I cannot test the application completely :/
+- `lead` Yes, let me make some changes. Sorry about that :sweat_smile:
+- `lead` I’m sorry, I was having lunch ↵ I’m ready to review anything you need now.
+- `channel` Oh, my bad. That was locally :sweat_smile:
+- `close peer` Let's do our sync after the meeting. The things with mental models went well. ↵ yeah ↵ sorry ↵ after*
+- `close peer` No worries, buddy. Sorry for the delay
+- `close peer` I understand, I'm sorry for not reading it yet. I'll certainly take a look.
+- `close peer` Hey, sorry for the delay (I have a personal appointment). ↵ also, I'll review your PR's right now
+- `close peer` Maybe I didn't understand at first look what I need to change about this, sorry
+- `close peer` Sorry, what? :sweat_smile:
+- `close peer` sorry boss :disappointed: ↵ I don't know how to use it to run things locally
+- `close peer` [teammate], I accidentally pushed some changes to your branch. Please feel free to force-push your changes and overwrite mine.
+- `close peer` I should have recorded more videos about this or made it easier to use. Sorry.
+- `lead` YES! sorry, the right term is `slow`
+- `close peer` Sorry, I already posted the review :smiling_face_with_tear:
+- `close peer` ahh, sorry ↵ I didn't read correctly
+- `channel` yeah ↵ my mistake ↵ re-running the deploy
+- `close peer` yoo ↵ my bad ↵ you must run this ↵ first
+- `close peer` PR reviewed, and sorry about the communication failure from my side.
+- `close peer` I'm sorry man, I did that this morning. I didn't mean to do your work, I just reviewed what was left to complete the issue, and along with that I added things like the BA assign modal as a convenience. Maybe I expressed myself poorly :sweat_smile:
+- `close peer` Sorry, I'm terrible at that :sob:
+- `close peer` Britney is sad? sorry, I don't know about musics from her. :sweat_smile:
+- `close peer` sorry sorry sorry ↵ I'll create my newsletter for this :sunglasses:
+- `close peer` sorry
+- `manager` Yes, I missed this. It is my fault.
+- `manager` Yes, I'll try not to make this mistake again. Thanks for understanding!
+- `close peer` Thanks for that! By the way, I think I'll need to review why the skill is making the same mistake every time. ↵ All PR was reviewed. Sorry for the delay
+- `close peer` Yoo! Sorry for the delay. The prompt really seems to have improved the results, I saw your PR's and they were more consistent. I promise I'll take that into consideration, but I'm not going to add it to the skill or anywhere else yet. I'm continuing to run experiments, I've been getting good results, one of them is that I used this and managed to completely finish a whole feature, but I still need to review the thousands of changes that were made. I know I might seem resistant to some things, but please, don't stop sharing things that are working for you.
+- `close peer` Oh, sorry. I have a lot of tabs open; I must have gotten confused. :sweat_smile:
+- `channel` Yep, all good. Sorry for the delay; I was in an appointment.
+- `close peer` Hey! I forgot to ask, but could you please test the new feature? It is currently in staging, and we want to push it to prod soon.
+- `close peer` Bro, I created the account to watch this video. Sorry for the delay
+- `manager` Of course! ↵ Sorry for the delay
+- `channel` Of course, I'll do this today. Sorry for the delay.
+
+## Thanks and celebration
+
+- `lead` Ok, thanks man!
+- `lead` Ok, thanks, man. See you soon.
+- `lead` Good morning man! Thanks for letting me know, I'll make sure of that. :slightly_smiling_face:
+- `lead` Thank you so much for the help and for the changes to the PR! I'll learn from what you did to ensure that next time the PR is ready for approval from the start.
+- `lead` Got it, thanks man
+- `lead` Oh, got it! In this case, the update is done hehe ↵ Thanks!
+- `lead` Hey, no worries. Thanks for letting me know
+- `channel` Gotcha! Thanks for giving me context and clarifying things.
+- `lead` Nice! Thanks! ↵ I know you are off today. Have a great weekend.
+- `lead` I'll investigate more about this. Thanks for clarifying
+- `lead` More time to polish things :raised_hands:
+- `lead` Interesting. Thanks for the reply. After we get through this week and reach our goal, I'll take some time to think of a solution for this. If you have anything in mind, feel free to send it over anytime.
+- `lead` Perfect. Thanks! ↵ I'll keep on track with the tasks progress ↵ I'll give more priority to bugs instead of features, btw
+- `close peer` No problem, thanks for sharing with me.
+- `lead` Thanks! And btw, I created a task to address in the better way the redirecting stuff (like you've mentioned);
+- `lead` works! thanks.
+- `lead` Alright! Thanks
+- `manager` Thanks, [manager]! See you then! Excited to learn with you.
+- `manager` I found it, thanks!
+- `close peer` Thanks a lot! I really appreciate :pray:
+- `close peer` Interesting, I'll take a look, thanks!
+- `close peer` I really like your vision [teammate], thank you for sharing it with me. I think I have an idea to embrace the points you brought, I'll think a little more before sharing. And yes, I want to get down to business soon, but I will direct this energy with strategy and caution as you recommended.
+- `lead` Yooo, I would like to ask you about your awesome GIFs. If you have something, pls share, and I'll add it in the daily app ( to be rendered at the end )
+- `close peer` Nice!! Thanks for sharing!
+- `manager` Ok ok, thanks!
+- `close peer` I'll keep studying; it's powerful. And thanks for the feedback
+- `channel` Happy birthday!! :partying_face::tada:
+- `close peer` Thanks sir, I'll take a look tomorrow
+- `channel` Yeah, I've accepted the invite right now. ↵ Thanks for that, [teammate]. I'll explore this, and let us know about the LLM wiki.
+- `close peer` That's something relevant to know; Thanks a lot for sharing!
+- `lead` Works! ↵ Thanks, I'll start testing routines using Claude
+- `close peer` Thanks a lot, buddy!
+- `close peer` Nice! Thanks!
+- `close peer` Perfect! Thanks for that!
+- `close peer` great! who would have thought that watching a peanut video could teach me something. Thanks for the explanation, I really appreciate it :heart_hands:
+- `lead` Yoo, good morning! How's it going? ↵ That's a shame; I really enjoy our 1:1, but these things happen. Thanks for letting me know.
+- `close peer` I see your comment, thanks for it ↵ Btw, at the end the problem was the URL from the env ↵ I was not using the URL constructor, and was fetching using "//api/.." ↵ This was causing the issues
+- `close peer` Ok! Thanks for that. I'll review by tomorrow at the latest.
+- `close peer` Ok, thanks chief
+- `close peer` Ok! Thanks!
+- `manager` Thanks a lot for that!
+- `close peer` Thanks
+- `channel` Thanks for raising this. And I would love your help with this one. Feel free to assign it to yourself on Linear and take care of this. I'll continue on mobile offline today, at least.
+- `manager` Ok, thanks for the note
+- `close peer` Thanks for hearing me and feel free to suggest things ↵ You probably have much more experience with hiring stuff
+
+## Explaining a decision
+
+- `lead` Do you have any clue what it could be? ↵ Because I want to solve this
+- `lead` I chose a class over functions for `EmailTemplate` because it provides a cleaner API - you just instantiate with properties like our existing `CommandResponse`. Classes also make future extensions (different logos, themes) much easier to implement without breaking existing code.
+- `lead` So just to clarify, since everything is processed in parallel, I'm curious about how the order of events is handled. Are events processed simply as they arrive, like in a FIFO queue, or is there another mechanism that determines their sequence?
+- `lead` Really nice! My initial idea is to have pure stateless functions because we'll have dozens of different functions for each action, and I want to call each one without persisting anything
+- `lead` Because I tried and it's no longer possible to access in the local containers, that's weird
+- `lead` Nice! I ask because I got some errors when I started working with the chatbot, they apparently were related to anthropic
+- `lead` This happened mainly because he was trying to fix it at the same time as I was, so I didn't realize he had pushed a commit ahead of mine.
+- `lead` I added the comment with steps to configure the stuff, because I'll need to handle this with [teammate] to use production envs
+- `lead` Also, I see some things that could be done better. For the items in the chat store, I'm not sure we're loading them in the best way for this case. And since we're making the transcriptions public, I don't think that's correct.
+- `lead` I see now, it's because the booking flow is not being saved.
+- `lead` yep, definitely. I mentioned this because it was previously suggested as a solution, but I'm reluctant to implement it because I think it is not a good way to solve this.
+- `channel` I’ll create a ticket to look into this more closely; it seems like something that deserves attention since it’s been happening frequently.
+- `lead` I don't use recording on mobile because it doesn't capture my speech or the bot's responses, but the problem has been solved. I studied how Acoustic Echo Cancellation (AEC) works and fixed it.
+- `lead` Ok ok I ask because I'm a bit confused about what the right type is for that case. :sweat_smile:
+- `lead` btw, after you advise, I'm currently doing the exercise to write the "motivation" myself, and it's a really great thing I've been doing. ↵ because I need to really understand what I'm writing about, not just automate with an LLM.
+- `lead` btw, I started writing it after my normal workday. That's my own initiative, because I feel that it will be useful to start a new project, having in mind what pattern for each thing.
+- `close peer` because each node must be an individual mental model, according to what I understand
+- `close peer` not yet, because we need a thumbs-up about our current mental models. Once we have this, we could use it. Because my concern is using them as input and then having them change drastically afterward, which would create rework.
+- `close peer` Yes, that's exactly it. I didn't express myself very well, but what I meant by not using them is basically not attaching them as context and asking the LLM questions with them, since I think that could create rework.
+- `close peer` That will last only until the real costs of AI start to show up. In a few years, the landscape will change because the number of users keeps growing, and the cost of maintaining these systems is extremely high and does not seem likely to go down. On top of that, most AI companies are operating without being able to cover their own costs, surviving mainly on investment rounds. Not to mention that all the apps built with “vibe coding” only scale up to the point where they need experienced engineers to keep the work going.
+- `close peer` Ah, yes! What I’d like to put on the table is that, one way or another, it's important to have at least a small definition of the mental models for each Linear ticket. That's why my proposal is to keep creating them in a simpler way and with less detail so that when we actually implement the features, we probably already have a clearer definition of what to build, so then we could update each. What do you think about that?
+- `close peer` That's a joke, because these words are not difficult to pronounce (I guess)
+- `close peer` Just don't pay too much attention to the implementations, because most of them will probably change. For now it's just a "simulation" to see everything working, but during integration I'll change things.
+- `close peer` I feel like now is the time to ask for help, because I'm struggling with some problems related to importing things from the back end into the mobile app
+- `lead` No worries, I'm really happy to receive your help :face_holding_back_tears: ↵ I delayed responding because I did a little break.
+- `manager` extra context ↵ because I realized this yesterday
+- `close peer` Yeah, because even on my Mac, some pages have performance degraded.
+- `close peer` Here are some examples ↵ The idea is to encapsulate actions or changes inside of the "actions" column (the last column)
+- `close peer` I don't think so; I think I should have followed more of what you were doing, because when I jumped to the web app, I got a little lost. ↵ maybe having been more involved in the architecture and followed you more closely
+- `close peer` I'm having these AI initiatives because I really follow what's coming out new, which sometimes fills my head because every day there's a new way to use markdown files, lol ↵ well, either way, it's just to help us
+- `close peer` I want to use the knowledge graph for the codebase, and I think the MM could generate some kind of noising. ↵ I'm exploring it, and it looks like what we need, because our project has a significant level of complexity, and this thing maybe will help us.
+- `close peer` hahah that's true, maybe NotAsked could be different, maybe claude is having difficulty because of that
+- `channel` Yes, don’t worry about it. It’s just a warning saying that version 1.0.3 closed the tests because it has already been published. I’ll go up to 1.0.4 and this will be solved.
+- `close peer` Hmmmm, a very interesting and sophisticated way to handle the problem with versions. ↵ I'll really consider this, because this solves the biggest pain in the ass with reconciliation.
+- `close peer` I'm willing to ditch it if there's a cheaper and faster model than it. I'm really not opposed to that. But I use it because I still haven't found a better one in that regard :sweat_smile:
