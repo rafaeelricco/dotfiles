@@ -5,8 +5,8 @@ description: >
   bugs, triage failing CI and conflicts. Use for babysit this PR, keep this PR
   merge-ready, triage PR comments and CI, resolve or validate review comments,
   get a PR ready to merge, watch CI until mergeable, run another babysit round.
-  Not for opening a PR (create-pr), PR bodies (pr-body), or code review
-  (/code-review).
+  Not for opening a PR (create-pr), PR bodies (pr-body), code review
+  (/code-review), or merging.
 ---
 
 # Babysit PR
