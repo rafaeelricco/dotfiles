@@ -4,7 +4,7 @@ description: >
   House engineering loop for a code change: plan via scope-and-plan, then
   verify, commit, stop. Use when asked to implement, add, build, fix, debug,
   refactor, migrate, or clean up code, or /orchestrate. Not for one obvious
-  named edit, read-only questions, bare commits, PRs, or PR triage.
+  named edit, read-only questions, bare commits, opening PRs, or PR triage.
 ---
 
 ## 1. Think Before Acting
