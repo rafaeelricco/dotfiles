@@ -1,13 +1,9 @@
 ---
 name: scope-and-plan
 description: >
-  Read diamond (fan-out → check → synthesize → refute), then plan-as-diffs → confirm authorization →
-  implement. Use when orchestrate loads this skill, or the user names it
-  (`scope-and-plan`). Runs even when paths are already known — workers gather
-  related call sites so the plan does not break neighbors.
-  Do NOT use for explore/"get context first" phrasing alone, or only to spawn
-  parallel workers — fan-out alone needs no skill; that is a session that did
-  not call orchestrate.
+  Read diamond (fan-out → check → synthesize → refute), then plan as diffs,
+  confirm authorization, implement. Use when orchestrate loads it or the user
+  names scope-and-plan. Not for explore / "get context first" requests alone.
 ---
 
 # Scope and plan
@@ -20,7 +16,8 @@ that writes to the tree, when execution is authorized and the harness permits it
 
 Decompose into independent concerns — two workers must answer without reading
 each other's output. Spawn them all in one message. Worker count follows the
-concerns found.
+concerns found. Fan out even when the user named the paths: workers gather the
+callers and neighbors a plan could break.
 
 Load `plan-format` in that same message — it reads no worker output, so waiting
 for one is a wait for nothing.

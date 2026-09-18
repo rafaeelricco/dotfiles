@@ -1,14 +1,10 @@
 ---
 name: orchestrate
 description: >
-  Run the house engineering loop for a code change: ask-or-decide threshold,
-  simplicity, a verifiable goal, planning through scope-and-plan, then the
-  ship order — verify, commit, stop. Use when the user asks to implement,
-  add, build, fix, debug, refactor, migrate, or clean up code, or names
-  /orchestrate. Do NOT use for a single obvious edit whose file and fix are
-  already named, for read-only questions or exploration alone, or for a bare
-  commit (use commit-message), PR (use create-pr), or open-PR triage (use
-  babysit).
+  House engineering loop for a code change: plan via scope-and-plan, then
+  verify, commit, stop. Use when asked to implement, add, build, fix, debug,
+  refactor, migrate, or clean up code, or /orchestrate. Not for one obvious
+  named edit, read-only questions, bare commits, PRs, or PR triage.
 ---
 
 ## 1. Think Before Acting
