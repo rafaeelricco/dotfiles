@@ -17,8 +17,8 @@ missing ones. Resolve scope and authorization before mutations.
 
 1. Respect the current harness mode (Step 1).
 2. Inspect the repo and all changes (staged/unstaged) — read-only.
-3. Resolve missing choices — Motivation in prose; Shape through an available,
-   permitted question tool or plain text. Wait for needed answers.
+3. Resolve missing choices — Motivation and Shape through an available,
+   permitted question tool, or in prose. Wait for needed answers.
 4. Present the concrete plan and confirm execution is authorized and permitted.
 5. Execute exactly what was approved.
 
@@ -85,7 +85,8 @@ commits ahead of base, and whether the worktree mixes unrelated changes.
 Reuse supplied choices first. For unanswered choices, discover the ask tool,
 ask both parts together when needed, then wait once:
 
-- **Motivation** — in the message body (see below).
+- **Motivation** — first question in the Discover call when that tool fits it
+  (see below), else in the message body.
 - **Shape** — unanswered choices through the tool Discover returned, or plain
   text when no suitable tool is callable.
 
@@ -102,8 +103,13 @@ missing because a remembered name is absent.
    tools, so a miss there is not a miss on step 1.
 
 Use a matching question tool only when it is available and permitted in the
-current mode. Read its schema and fit the unanswered Shape questions to its
-question count and selection types, in Branch, Path, Scope, State order.
+current mode. Read its schema and fit the unanswered questions to its question
+count and selection types, in Motivation, Branch, Path, Scope, State order.
+Motivation is the first to fall back to the message body when the count is
+short; Shape questions stay in the tool while it can hold them.
+A tool that marks its own recommended option, orders by it, or appends its own
+free-text row gets no hand-written "(Recommended)" label and no hand-written
+"other" option — read the schema before adding either.
 If no suitable tool is callable, ask the unresolved questions in plain text.
 A missing widget does not block inspection or preparation of the plan.
 
@@ -112,19 +118,27 @@ cannot express a needed choice, ask it in plain text.
 
 ### Motivation
 
-In the message body:
-
 ```text
 What is the motivation or the why behind this PR?
 ```
 
-Then 2–3 numbered suggestions from the Step 2 diff: the problem or goal, not a
-changelog or commit subject. First is (Recommended). User picks a number or
-writes their own.
+Then 2–3 suggestions from the Step 2 diff: the problem or goal, not a
+changelog or commit subject. Most likely first, marked Recommended. The user
+picks one or supplies their own words.
+
+Send it as the first question in the Discover call when that tool offers a
+free-text escape for an unlisted answer — an "other"/write-your-own row or a
+free-text question type — and the schema has room beside the unanswered Shape
+questions. An option schema with a description field carries the suggestion's
+detail there and keeps each label one short line; a schema of bare option
+strings gets one sentence per suggestion, ~140 characters.
+
+No free-text escape, or no room → ask it in the message body instead, as a
+numbered list the user answers by number or in their own words.
 
 Ask only when motivation is missing and questions were not waived. Never use
 a suggestion the user did not pick.
-No picked number and no own prose is a completed empty answer — omit
+No pick and no own prose is a completed empty answer — omit
 the Motivation section. Waiver omits only missing motivation.
 
 ### Shape
@@ -193,11 +207,13 @@ State   question: How should the PR be opened?
   with one single-select keep/drop question per Step 2 group, or per file when
   Step 2 found a single group, before continuing.
 
-If approved Scope excludes any Step 2 group, discard a numbered Motivation
-pick (it was generated from the full Step 2 diff). Keep the user's own prose.
-Otherwise re-ask Motivation with 2–3 suggestions from the scoped subset only,
-unless questions were waived; then omit the missing motivation. Accept a new
-pick, own prose, or empty answer (omit).
+If approved Scope excludes any Step 2 group, discard a Motivation pick from
+the suggestions (they were generated from the full Step 2 diff). Keep the
+user's own prose.
+Otherwise re-ask Motivation through its own section's channel, with 2–3
+suggestions from the scoped subset only, unless questions were waived; then
+omit the missing motivation. Accept a new pick, own prose, or empty answer
+(omit).
 
 ### Body
 
