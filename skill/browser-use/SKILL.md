@@ -50,6 +50,36 @@ PY
 
 ## Local Chrome
 
+On macOS the everyday Chrome is often unreachable: its profile dir is
+TCC-protected, so the daemon dies with
+`fatal: [Errno 1] Operation not permitted: .../Google/Chrome/DevToolsActivePort`
+before any fallback runs. `--doctor`, `chrome://inspect`, and `mac-approve` all
+dead-end there — `mac-approve` reads `Local State` through the same blocked path
+and keeps returning `setup-required` however often the checkbox is ticked.
+Do not loop on them. Use a dedicated automation Chrome instead:
+
+```bash
+bash "${JOB_KIT_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/job-kit}/scripts/browser-use/chrome.sh"
+export BU_CDP_URL=http://127.0.0.1:9333
+```
+
+It launches Chrome with `--remote-debugging-port` and a non-default
+`--user-data-dir`, which is upstream's documented "isolated profile, no popups"
+path. Sign in there once; the profile persists. Inside the Hermes desktop app,
+where a shell `export` never reaches the process, set `browser.cdp_url:
+http://127.0.0.1:9333` in `~/.hermes/config.yaml` instead.
+
+That dedicated profile starts signed into nothing. Sign in there yourself; it
+persists across reboots. Hermes's `browser.use_real_profile` is not an
+alternative on macOS: it is hard-wired to the OS default https handler
+(`detect_default_chromium()` takes no config key, and `real_profile_pin` only
+picks a profile directory _within_ that browser), and its snapshot reads the
+TCC-protected Chrome profile dir — where a permission denial is misreported as
+"profile locked". It needs Chrome as the OS default, Full Disk Access for the
+Hermes app, and the browser quit before every session.
+Note the precedence: `browser.cdp_url` beats `use_real_profile`, so a
+configured CDP endpoint silently suppresses real-profile mode entirely.
+
 If the daemon cannot connect, run diagnostics:
 
 ```bash
@@ -189,6 +219,7 @@ If you get stuck on a browser mechanic, check https://github.com/browser-use/bro
 
 - `chrome://inspect/#remote-debugging` must be enabled for local Chrome control.
 - On macOS, if Chrome shows an "Allow remote debugging?" popup, run `browser-use mac-approve`. The daemon holds one connection.
+- `mac-approve` returning `setup-required`, or a `DevToolsActivePort` "Operation not permitted" fatal, means TCC — not an unticked checkbox. Switch to the dedicated Chrome in "Local Chrome"; retrying cannot fix it.
 - Omnibox popups are not real work tabs.
 - CDP target order is not Chrome's visible tab-strip order.
 - `BU_CDP_URL` is an HTTP DevTools endpoint; the daemon resolves it to WebSocket.
