@@ -60,14 +60,19 @@ Do not loop on them. Use a dedicated automation Chrome instead:
 
 ```bash
 bash "${JOB_KIT_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/job-kit}/scripts/browser-use/chrome.sh"
-export BU_CDP_URL=http://127.0.0.1:9333
+BU_CDP_URL=http://127.0.0.1:9333 browser-use <<'PY'
+print(page_info())
+PY
 ```
 
 It launches Chrome with `--remote-debugging-port` and a non-default
 `--user-data-dir`, which is upstream's documented "isolated profile, no popups"
-path. Sign in there once; the profile persists. Inside the Hermes desktop app,
-where a shell `export` never reaches the process, set `browser.cdp_url:
-http://127.0.0.1:9333` in `~/.hermes/config.yaml` instead.
+path. Sign in there once; the profile persists. Prefix every later `browser-use`
+call with `BU_CDP_URL=http://127.0.0.1:9333` the way cloud calls carry
+`BU_NAME` — each shell call is a new process, so a bare `export` dies with
+the one that ran the launcher. Inside the Hermes desktop app, which reads no
+shell environment at all, set `browser.cdp_url: http://127.0.0.1:9333` in
+`~/.hermes/config.yaml` instead.
 
 That dedicated profile starts signed into nothing. Sign in there yourself; it
 persists across reboots. Hermes's `browser.use_real_profile` is not an
