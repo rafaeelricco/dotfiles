@@ -19,8 +19,9 @@ Rule: three-step intro; the stack moves to its own sentence.
 Raw: "Hi! I forgot to mention something important in our last call: [a detail about my availability]. I'm raising
 this because I think can help you to take decisions that benefits me and you in this process. Best, [full name]."
 Polished: "Hi! I forgot to mention something important in our last call: [a detail about my availability]. I'm
-raising it because I think it helps both of us plan the next steps. Best, [full name]."
-Rule: colon setup and the reason stay; grammar gets fixed.
+raising this because I think it can help you take decisions that benefit me and you in this process. Best,
+[full name]."
+Rule: the colon setup and the reason stay; the missing subject and "help you to take" get fixed.
 
 ## LinkedIn post: the result
 
@@ -28,10 +29,11 @@ Raw: "At last delivery, we achieved a excellent result that makes the client hap
 agencies using the easy onboarding which basically new agencies must only past a URL of their websites and
 complete 5 steps to get all done and working and this allow the user to don't lose more potential leads and also
 they now can scale the operation."
-Polished: "At the last delivery, the client was happy with the result. Now he can onboard new agencies easily: a
-new agency pastes its website URL and completes 5 steps, and everything works. Agencies stop losing potential
-leads, and the client can scale the operation."
-Rule: a 65-word run splits into three sentences in the same order.
+Polished: "At the last delivery, we achieved an excellent result that makes the client happy. Now he can onboard
+new agencies easily: a new agency pastes its website URL and completes 5 steps, and everything works. That keeps
+the user from losing more potential leads, and they can now scale the operation."
+Rule: a 65-word run splits into three sentences in the same order; "we achieved" and "the user" stay, and "allow
+the user to don't lose" becomes "keep the user from losing".
 
 ## Recruiter email: closing
 
@@ -46,9 +48,9 @@ Rule: the missing article before "senior" gets fixed; the rest stays as written.
 Raw: "Hi, I'm here to thanks a lot for the opportunity during the process. [My decision] and now you don't need to
 push me in this process anymore. I really appreciate the way you conducted the process and was a real pleasure
 meet you. If you need anything else, please just ping me."
-Polished: "Hi, I'm here to say thanks a lot for the opportunity during the process. [My decision], so you don't
-need to push me in this process anymore. I really appreciate the way you conducted the process, and it was a real
-pleasure to meet you. If you need anything else, please just ping me."
+Polished: "Hi, I'm here to say thanks a lot for the opportunity during the process. [My decision], and now you
+don't need to push me in this process anymore. I really appreciate the way you conducted the process, and it was
+a real pleasure to meet you. If you need anything else, please just ping me."
 Rule: the warm opener and closer stay; "to thanks" and "meet you" get fixed.
 
 ## LinkedIn post: the ask

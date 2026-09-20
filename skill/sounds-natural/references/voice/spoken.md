@@ -20,7 +20,7 @@ Rule: end on the result, then stop.
 ## Specific beats vague
 
 Raw: "Voice mode was very difficult, but I sorted it and the result was good."
-Polished: "The hardest part was voice mode: [what kept failing]. I fixed it by [what changed]."
+Polished: "The difficult part was voice mode: [what kept failing]. I fixed it by [what changed]."
 Rule: replace "difficult" and "good" with the problem and the fix.
 
 ## Side project
