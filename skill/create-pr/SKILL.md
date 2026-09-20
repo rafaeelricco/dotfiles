@@ -107,9 +107,10 @@ current mode. Read its schema and fit the unanswered questions to its question
 count and selection types, in Motivation, Branch, Path, Scope, State order.
 Motivation is the first to fall back to the message body when the count is
 short; Shape questions stay in the tool while it can hold them.
-A tool that marks its own recommended option, orders by it, or appends its own
-free-text row gets no hand-written "(Recommended)" label and no hand-written
-"other" option — read the schema before adding either.
+A tool that marks its own recommended option or orders by it gets no
+hand-written "(Recommended)" label; a tool that appends its own free-text
+row gets no hand-written "other" option — read the schema before adding
+either.
 If no suitable tool is callable, ask the unresolved questions in plain text.
 A missing widget does not block inspection or preparation of the plan.
 
