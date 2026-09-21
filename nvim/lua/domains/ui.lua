@@ -79,7 +79,7 @@ return {
     keys = {
       { "<leader>sh", "<cmd>Telescope help_tags<cr>", desc = "[S]earch [H]elp" },
       { "<leader>sk", "<cmd>Telescope keymaps<cr>", desc = "[S]earch [K]eymaps" },
-      { "<leader>sf", "<cmd>Telescope find_files<cr>", desc = "[S]earch [F]iles" },
+      { "<leader>sf", function() require("telescope.builtin").find_files({ hidden = true }) end, desc = "[S]earch [F]iles" },
       { "<leader>ss", "<cmd>Telescope builtin<cr>", desc = "[S]earch [S]elect Telescope" },
       { "<leader>sw", "<cmd>Telescope grep_string<cr>", desc = "[S]earch current [W]ord" },
       { "<leader>sg", "<cmd>Telescope live_grep<cr>", desc = "[S]earch by [G]rep" },
@@ -308,10 +308,16 @@ return {
       filesystem = {
         -- Filtered items in the filesystem
         filtered_items = {
+          -- Show filtered items (dimmed) instead of hiding them
+          visible = true,
           -- Hide dotfiles (hidden files starting with a dot); false shows everything
           hide_dotfiles = false,
           -- Hide Git-ignored files; false shows everything
           hide_gitignored = false,
+          -- Hide files listed in .ignore / .neotreeignore; false shows everything
+          hide_ignored = false,
+          -- Hide files by exact name (defaults hide .DS_Store and thumbs.db)
+          hide_by_name = {},
         },
         -- Automatically follows the current file in the explorer
         follow_current_file = {
@@ -368,6 +374,10 @@ return {
     },
     opts = {
       default_file_explorer = false,
+      -- Show dotfiles (toggle with `g.`)
+      view_options = {
+        show_hidden = true,
+      },
     },
   },
 
