@@ -3,9 +3,9 @@ name: sounds-natural
 description: >
   Write or rewrite prose so it sounds like a person wrote it, and like the
   user when the text is theirs: Slack, email, LinkedIn, interview answers,
-  resume lines. Triggers: in my voice, write like me, como eu escrevo,
-  humanize this, de-slop, too scripted, tonalidade, match a writing sample.
-  Not for code, or for changing what the source claims.
+  resume lines. Use when asked, in English or Portuguese, to write in the
+  user's voice or tone, to humanize or de-slop text, or to match a writing
+  sample. Not for code, or for changing what the source claims.
 license: MIT
 ---
 
