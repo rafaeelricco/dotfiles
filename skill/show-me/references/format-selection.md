@@ -86,8 +86,7 @@ For a call-tree or call-stack change:
      persistPrompt
 +    expandSkillMention
      launchAgent
--  navigateToSession
-+  navigateToSession
+   navigateToSession
 +    subscribeToEvents
 ```
 
