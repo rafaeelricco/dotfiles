@@ -5,7 +5,7 @@ description: Concise, high-signal principles for writing and editing skills well
 
 # Skill design principles
 
-Apply these when writing a skill and when editing one. Before responding, search the skill files for each fact, value, or list you touched and confirm the edit did not add a second copy. Refactors the user did not ask for stay out of the diff: complete the request, then name the opportunity.
+Apply these when writing a skill and when editing one. Before responding, search the skill files for each fact, value, or list you touched and confirm the edit did not add a second copy; when the skill has an `evals/` directory, run its cases too. Refactors the user did not ask for stay out of the diff: complete the request, then name the opportunity.
 
 - **One home per fact.** Keep each rule, value, or list in a single authoritative place others point to, because copies drift apart. An existing duplicate you did not create is reported, not refactored.
 
