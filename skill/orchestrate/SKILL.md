@@ -2,9 +2,10 @@
 name: orchestrate
 description: >
   House engineering loop for a code change: plan via scope-and-plan, then
-  verify, commit, stop. Use when asked to implement, add, build, fix, debug,
-  refactor, migrate, or clean up code, or /orchestrate. Not for one obvious
-  named edit, read-only questions, bare commits, opening PRs, or PR triage.
+  verify, commit when asked, stop. Use when asked to implement, add, build,
+  fix, debug, refactor, migrate, or clean up code, or /orchestrate. Not for
+  one obvious named edit, read-only questions, bare commits, opening PRs, or
+  PR triage.
 ---
 
 ## 1. Think Before Acting
@@ -37,7 +38,6 @@ No assertable behavior (comment typos, formatting, copy) or no test suite → sk
 
 While `scope-and-plan` is planning:
 
-- Inspection stays read-only for a planning-only request, while the harness requires it, or until any missing execution authorization is supplied.
 - Unresolved decisions don't defer a plan: the question and the formatted plan ship in the same response.
 - Stress-test with the user until decisions resolve. Independent questions ship in one ask, hardest first. Sequence only when one answer changes the next question.
 
