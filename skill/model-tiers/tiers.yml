@@ -3,8 +3,8 @@
 # Readers use the harness's read-only type. Effort applies only where the
 # spawn tool takes one.
 
-# Agent tool: subagent_type + model alias only (sonnet = claude-sonnet-5; also
-# opus, haiku, fable); no effort option. Explore has no Write/Edit but keeps
+# Agent tool: subagent_type + model alias only (sonnet, opus, haiku, fable);
+# no effort option. Explore has no Write/Edit but keeps
 # Bash: read-only by instruction, not by tools. It reads excerpts to locate
 # code, not to audit it, so the skeptic runs as general-purpose.
 claude:
