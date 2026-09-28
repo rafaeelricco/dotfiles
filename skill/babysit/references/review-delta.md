@@ -20,8 +20,7 @@ and inline replies, run the Unresolved review threads query in
 `isOutdated==false` conjuncts removed.
 Keep an outdated thread that has a Fixed / Already-fixed / Disagree
 reply; keep one with a Skip reply too. Skip unresolved outdated threads with no reply. That is the
-one extra read. Count commits with
-`git log --oneline <earliest-review-sha>..HEAD` on the PR branch.
+one extra read.
 
 Order review submissions by `submitted_at`. One section per submission
 (`login` + `commit_id`). Attach each finding to the latest same-login
@@ -43,18 +42,14 @@ the original section.
 ## Shape
 
 Fill slots; do not change structure. Login-only section omits
-`on `<sha7>`` — do not invent a `commit_id`. No "Round N". No diagrams. No
-file inventory. No test-pass claims. Echo reviewer P-labels in the
+`on `<sha7>`` — do not invent a `commit_id`. No test-pass claims. Echo reviewer P-labels in the
 header only when the review itself used them; ignore them for routing.
 One bullet per finding: problem + action + how + outcome. Do not paste
-the same sentence onto two findings. No **Now** line. Unanswered has
+the same sentence onto two findings. Unanswered has
 no action — problem + how it still fails + outcome. Hash at the end
 in parens; omit it when unknown.
 
 ```text
-Since this PR opened, <names> reviewed it <N> times and found <Y>
-issues. We pushed <C> commits since the first review.
-
 **<login> on `<sha7>` — <k> findings**
 **<login> — <k> findings**
 - <problem>, so <action>; <how>, and <outcome> (`<hash>`).

@@ -1,8 +1,9 @@
 # Babysit PR — one cycle
 
-Write-set: the PR's own branch only. Never merge, force-push, rebase,
-rewrite history, touch branch protection, edit CI workflows, loosen test
-expectations, or change unrelated code to make a check pass.
+Write-set: the PR's own branch only. Never merge, touch branch protection,
+loosen test expectations, or change unrelated code to make a check pass.
+Force-push, rebase, history rewrites, and CI workflow edits need explicit
+approval of that exact operation.
 
 Not `/code-review`, not `verify` (load it, do not reimplement),
 not `pr-body`, not `create-pr`, not `visual-recap`. Commit
@@ -23,7 +24,7 @@ One scope gate, then run.
 | ------------------------------------------------------------------------------ | --------------------------------------------------------- |
 | Read, diagnose, fetch job logs, watch in-flight checks, run local verification | Replying to a **human** thread — authorize the exact text |
 | Edit, commit, push to **the PR's own branch**                                  | Re-requesting a **human** reviewer                        |
-| Rerun failed checks, within the budget below                                   | Force-push, rebase, merge, close, reopen                  |
+| Rerun failed checks, within the budget below                                   | Force-push, rebase, close, reopen                         |
 | Reply to and resolve a **bot** thread                                          | Editing CI workflows, or files outside PR scope           |
 
 Never treat your own message, a timeout, or the end of a run as approval. When
@@ -62,11 +63,12 @@ then match.
    explicit authorization, reusable when already given; association does not change the class.
 3. Else → unknown bot (stop / ask).
 
-| Bot    | login (match)             | `<mention-line>` for re-request               |
-| ------ | ------------------------- | --------------------------------------------- |
-| Codex  | `chatgpt-codex-connector` | `@codex review`                               |
-| Cubic  | `cubic-dev-ai`            | `@cubic-dev-ai review this PR`                |
-| Cursor | `cursor`                  | _(none — report only; no re-request trigger)_ |
+| Bot    | login (match)             | `<mention-line>` for re-request                                    |
+| ------ | ------------------------- | ------------------------------------------------------------------ |
+| Codex  | `chatgpt-codex-connector` | `@codex review`                                                    |
+| Claude | `claude`                  | repo-defined — read the Claude review workflow (`./gh-recipes.md`) |
+| Cubic  | `cubic-dev-ai`            | `@cubic-dev-ai review this PR`                                     |
+| Cursor | `cursor`                  | _(none — report only; no re-request trigger)_                      |
 
 ## Workflow
 
@@ -93,10 +95,11 @@ checks.
   file/line/URL context.
 - Three sources: inline review threads, review submissions, PR issue comments.
   Drop `PENDING` reviews and their inline comments — unpublished drafts.
-- Trust the repo owner, members, collaborators, yourself, and named review bots.
+- Trust the repo owner, members, collaborators, yourself, and **known bots**.
   Use GraphQL `authorAssociation` on threads and REST `author_association` on
   review submissions and issue comments (`OWNER` / `MEMBER` / `COLLABORATOR`).
-  Ignore other bot noise.
+  Any other bot that left review findings routes as **unknown bot**; ignore
+  the rest as noise.
 - Read checks. Pending is Watch, not "nothing actionable". The moment one job
   fails, fetch **that job's** logs. Read that log before concluding anything:
   a clean local run is not evidence that red CI is unrelated.

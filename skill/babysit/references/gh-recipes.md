@@ -100,12 +100,26 @@ gh api graphql -f query='mutation($id:ID!){resolveReviewThread(input:{threadId:$
 ```
 
 `THREAD_ID` is the thread node `id` from the GraphQL query, not a comment id.
+`COMMENT_ID` is the `databaseId` of the thread's first comment: the replies
+endpoint accepts a top-level review comment, not a reply.
 
 ## Re-request a reviewer
 
 ```bash
-gh pr comment N --body-file /tmp/review-rerequest.md  # known bot — filled review-prompt.md
-gh pr edit N --add-reviewer LOGIN                     # human — confirmed only
+gh pr comment N --body-file /tmp/babysit-rerequest-N-LOGIN.md  # known bot — filled review-prompt.md, one file per bot; LOGIN without `[bot]`, which zsh globs
+gh pr edit N --add-reviewer LOGIN                              # human — confirmed only
 ```
 
 One comment per bot in the re-request set (distinct logins).
+
+Claude's `<mention-line>` comes from the repo. Find the workflow that runs
+`anthropics/claude-code-action` with a review prompt:
+
+```bash
+grep -l 'anthropics/claude-code-action' .github/workflows/*.y*ml
+```
+
+- Its `on:` includes `pull_request: synchronize` → the push already re-requests; post nothing.
+- Its `if:` matches a comment phrase (`startsWith(github.event.comment.body, '/pr-review')`) → that phrase is the
+  mention-line, and it opens the comment.
+- Neither → report only. A bare `@claude` usually wakes a Q&A workflow, not a review.

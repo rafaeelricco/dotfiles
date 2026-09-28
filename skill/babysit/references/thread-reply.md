@@ -33,8 +33,7 @@ Leaving open for a human call.
 ## Skip / not a bug
 
 Not a reproduced functional bug (hypothesis, nit, hardening without a
-firing path). Resolve after reply when a thread id exists. Never ask a
-human.
+firing path). Resolve after reply when a thread id exists.
 
 ```text
 Skipping. <one line why it is not a reproduced bug>.
