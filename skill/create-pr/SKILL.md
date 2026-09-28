@@ -24,8 +24,8 @@ missing ones. Resolve scope and authorization before mutations.
 
 Without authorization for the scope and actions, or while the harness forbids
 execution, these commands are forbidden:
-`git switch -c`, `git checkout -b`, `git add`, `git reset`, `git commit`,
-`git push`, `gh pr create`, `gh pr edit`.
+`git switch -c`, `git checkout -b`, `git add`, `git apply --cached`,
+`git reset`, `git commit`, `git push`, `gh pr create`, `gh pr edit`.
 
 ## Step 3 exceptions
 
@@ -99,8 +99,8 @@ missing because a remembered name is absent.
    purpose: ask the user multiple-choice questions and wait for the answers.
    The name in that list is the name you call.
 2. **Tool-search helper** — only if step 1 found none and this turn has a
-   search for MCP/server tools. Those catalogs do not list native harness
-   tools, so a miss there is not a miss on step 1.
+   search for MCP/server tools. Some harnesses leave native tools out of that
+   catalog, so a miss there is not a miss on step 1.
 
 Use a matching question tool only when it is available and permitted in the
 current mode. Read its schema and fit the unanswered questions to its question
@@ -160,6 +160,9 @@ Branch  question: Which branch should this PR come from?
             Create this branch from HEAD, then open the PR.
           - rafaeelricco/<alt-slug>
             Create this branch from HEAD, then open the PR.
+          - rafaeelricco/<alt-slug-2>
+            Create this branch from HEAD, then open the PR.
+            Only on the default branch, in place of <current-branch>.
 
 Path    question: How far should I take this?
         select: single
@@ -180,9 +183,7 @@ Scope   question: Which changes belong in this PR?
 State   question: How should the PR be opened?
         select: single
         options:
-          - Draft, no assignee (Recommended)
-            gh pr create --draft, nobody assigned.
-          - Draft, assign me
+          - Draft (Recommended)
             gh pr create --draft --assignee @me.
           - Ready for review
             gh pr create --assignee @me. Reviewers are notified immediately.
@@ -278,7 +279,15 @@ Then, per approved commit, in order:
 ```bash
 git reset
 git add <whole-file paths>
-git add -p -- <shared-or-partial paths>
+git diff -- <shared-or-partial paths> >"${TMPDIR:-/tmp}/create-pr-hunks.patch"
+```
+
+Cut that file down to this commit's hunks, then stage them. The fixed path
+survives between shell calls; a variable does not.
+
+```bash
+git apply --cached --recount "${TMPDIR:-/tmp}/create-pr-hunks.patch"
+rm -f "${TMPDIR:-/tmp}/create-pr-hunks.patch"
 git diff --cached
 ```
 
@@ -293,15 +302,17 @@ file, push once, and create the PR once:
 body_file="$(mktemp "${TMPDIR:-/tmp}/pr-body.XXXXXX")"
 # write the approved PR body to "$body_file"
 git push -u origin "$(git branch --show-current)"
-gh pr create --draft --title "Approved title" --body-file "$body_file" --base BASE
+gh pr create --draft --assignee @me --title "Approved title" --body-file "$body_file" --base "$DB"
 rm -f "$body_file"
 ```
 
 - Use path-based `git add` only for files whose whole diff belongs to the
-  current commit; use hunk staging for shared files or partial-scope changes.
+  current commit. For shared files or partial-scope changes, stage the
+  commit's hunks with `git apply --cached`: `git add -p` needs a terminal, and
+  in the harness shell it exits 0 having staged nothing.
 - Confirm `git diff --cached` contains only the approved commit before
   committing.
-- `--draft` unless the user chose ready. `--assignee @me` only if chosen.
+- `--draft` unless the user chose Ready for review. Always pass `--assignee @me`.
 - Never force push. A failed push or `gh` call is reported, not retried
   differently, until the user says how.
 
