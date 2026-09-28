@@ -22,7 +22,7 @@ No project → standalone HTML; restrained defaults (neutral grays, one accent, 
 
 ## Phase 3 — Directions
 
-Default 3; max 5. Name the axis — "Quiet", "Editorial", "Playful" — never A/B/C. Two that differ only in accent or copy are one direction.
+Default 3; max 5. Name the axis — "Quiet", "Editorial", "Playful" — never A/B/C. Two that differ only in accent or copy are one direction. A direction is chosen, not fallen into: unless the product already uses them, keep variants off a cream background, italic accent words in headlines, numbered "01/02/03" section labels, monospace labels, and pill-shaped buttons.
 
 Done when every variant has a name and an axis, and no two share an axis position.
 

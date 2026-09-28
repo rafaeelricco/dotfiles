@@ -38,8 +38,10 @@ Need another curve → easing.dev / easings.co. Don't invent one. Prefer the rep
 | Marketing              | longer ok |
 
 Standard UI stays under **300ms**. Modals and drawers may use the table's longer
-range when travel distance warrants it; deliberate holds and gesture springs keep
-their separate timing below. After the first tooltip in a group: 0ms.
+range when travel distance warrants it; toasts take 400ms `ease`, tuned to the
+component's personality rather than the generic UI budget (the Sonner feel);
+deliberate holds and gesture springs keep their separate timing below. After the
+first tooltip in a group: 0ms.
 
 ## Physicality
 

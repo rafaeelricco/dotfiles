@@ -128,7 +128,7 @@ Add drag and it becomes a gesture problem — see **Drag to dismiss** below.
 }
 ```
 
-- `ease` rather than `ease-out`, slightly slower than typical UI.
+- 400ms `ease` is `bar.md`'s toast exception to the ease-out, sub-300ms budget.
 - If `@starting-style` isn't available, fall back to the mount flag:
 
 ```jsx
@@ -323,6 +323,8 @@ Keep it under 20px — heavy blur is expensive, especially in Safari.
 ---
 
 ## Programmatic, without a library
+
+`bar.md`'s WAAPI rung. `easing` does not resolve CSS variables, so pass the token's literal curve. The 1000ms is a marketing-scale reveal; UI durations come from `bar.md`.
 
 ```js
 element.animate([{ clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0 0)" }], {
