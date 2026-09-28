@@ -26,7 +26,9 @@ Fetch tweets from X/Twitter without authentication.
 | X Article        | `xtf --article <url_or_id>`        | Browser (Camofox/Playwright) |
 | Mentions monitor | `xtf --monitor @<username>`        | Nitter or browser            |
 
-`python3 scripts/fetch_tweet.py` accepts the same flags (v1-compatible entry point).
+`xtf` is on PATH only after `pip install <skill-dir>`. Otherwise run
+`python3 <skill-dir>/scripts/fetch_tweet.py`, which takes the same flags and
+prints the same JSON.
 
 ## Basic Usage (Zero Dependencies)
 
@@ -40,6 +42,10 @@ xtf --url https://x.com/user/status/1234567890 --text-only
 # Output covers: text, author, stats (likes/retweets/views), media URLs,
 # quoted tweets, and full article text for tweet-embedded articles.
 ```
+
+Human-readable text defaults to Chinese: `--text-only` labels and the `error`
+and `warning` strings. Add `--lang en` (or set `XTF_LANG=en`) for English;
+the `--search` and `--user-info` text-only labels stay Chinese either way.
 
 ## Timeline / Search / Replies (Nitter)
 
@@ -75,7 +81,7 @@ xtf --monitor @yourhandle
 
 ## Error Handling for Agents
 
-Branch on **CLI JSON** from `xtf` / `python3 scripts/fetch_tweet.py` only (this skill is the agent surface).
+Branch on **CLI JSON** from `xtf` / `python3 <skill-dir>/scripts/fetch_tweet.py` only (this skill is the agent surface).
 
 **Exception — `--monitor` setup/backend failure:** exit `2`, human message on stderr, **no** JSON envelope (no `error` / `error_code`). Branch on exit code + stderr for that path only. Baseline / new-mentions success still emit JSON when not `--text-only` (exit 0 / 1).
 
