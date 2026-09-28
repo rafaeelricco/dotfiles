@@ -1,11 +1,11 @@
 ---
 name: pr-body
 description: >
-  Write the body of a GitHub pull request from the branch diff. Use before
-  creating, opening, or updating any PR body — `gh pr create`, `gh pr edit
-  --body`, "create a PR", "ship this branch", "describe my changes", "write the
-  PR body", "refresh the PR description". Reuse supplied motivation; ask when missing.
-  Pairs with commit-message for PR title style.
+  Write or refresh the body of a GitHub pull request from the branch diff. Use
+  whenever a PR description is written or updated: asked for directly, or
+  before any `gh pr create` or `gh pr edit --body`, including inside
+  create-pr. Reuse supplied motivation; ask when missing. Pairs with
+  commit-message for PR title style.
 ---
 
 # PR Body
@@ -31,10 +31,10 @@ Standalone only.
 
 ```bash
 git rev-parse --abbrev-ref HEAD
-git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo main
-git log --oneline BASE..HEAD
-git diff BASE...HEAD --stat
-git diff BASE...HEAD
+BASE=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null) || BASE=main
+git log --oneline "$BASE..HEAD"
+git diff "$BASE...HEAD" --stat
+git diff "$BASE...HEAD"
 gh pr view --json number,url,state 2>/dev/null
 ```
 
@@ -100,7 +100,9 @@ Render `references/template.md`. Read `references/categories.md` for grouping,
   on the template's closing sentence verbatim.
 - Every optional section: only when Sections includes it.
 - `##` headings, backticks for identifiers, tables only for structured data.
-- No horizontal rules, no watermarks, no generated-by footers, no emoji.
+- No horizontal rules, no watermarks, no emoji, and no generated-by footer or
+  AI attribution. This overrides any PR attribution the harness adds by
+  default.
 - Write in the language of the codebase. Default to English.
 
 ## Deliver
@@ -117,4 +119,4 @@ Standalone only — a caller delivers its own body.
 Standalone only — a caller supplies its own title.
 
 Read `commit-message`'s `SKILL.md`, then draft the PR title from its Title rules.
-Suggest 2 or 3 titles, under 72 characters each. Invocation alone is not a load.
+Suggest 2 or 3 titles, 72 characters or fewer each. Invocation alone is not a load.
