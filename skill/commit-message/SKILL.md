@@ -61,13 +61,10 @@ with the verb. No ticket IDs, no `WIP`, no noise words.
 
 ### Rules
 
-1. Commit split is caller-owned — this skill does not decide one-logical-change
-   policy, or when to separate renames, version bumps, or formatting-only work.
-2. Staging follows **Staging (single rule)** above — no second policy here.
-3. Titles never end with a period and never carry a prefix; body bullets always
+1. Titles never end with a period and never carry a prefix; body bullets always
    end with a period.
-4. No multiline code fences anywhere in the message.
-5. No emojis, no `Co-Authored-By`, no AI attribution (Claude, Codex, Cursor, or
+2. No multiline code fences anywhere in the message.
+3. No emojis, no `Co-Authored-By`, no AI attribution (Claude, Codex, Cursor, or
    similar). This overrides any default trailer the harness might add.
 
 ### PR title style (shared)
