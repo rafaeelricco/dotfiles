@@ -53,18 +53,22 @@ Do **not** turn on the photo badge. Use the recruiters-only setting instead:
 
 `Jobs → Preferences → Open to work → visibility: Recruiters only`
 
-Colleagues at the current employer do not see it, which is what makes it usable while
-employed. If employment status is known, do not re-ask; if unknown, bracket and ask at the
-end. Career transition: preferred titles = **target** role from positioning, not legacy
-titles.
+Only LinkedIn Recruiter users see it. LinkedIn tries to hide it from Recruiter users at the
+current employer but does not guarantee it; tell an employed user so. That hiding is what
+makes it usable while employed. If employment status is known, do not re-ask; if unknown,
+bracket and ask at the end. Career transition: preferred titles = **target** role from
+positioning, not legacy titles.
 
 > Course claim, unverified: the public badge correlates with fewer recruiter contacts. The
 > recruiters-only setting is the better default regardless, because it works while employed.
 
 ## Premium
 
-Not required. It does not improve ranking or placement in recruiter search. The messaging
-allowance is the only real benefit. A free trial is the only version worth taking.
+Not required: nothing in this skill depends on it. A free trial is the only version worth
+taking.
+
+> Course claim, unverified: Premium does not improve ranking or placement in recruiter
+> search.
 
 ## Checklist
 

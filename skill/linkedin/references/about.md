@@ -34,17 +34,18 @@ If the user asks for a blank template by name, emit six unlabeled blocks with `[
 Written for someone not currently employed. Drop the "Interested in…" paragraph if they are.
 
 ```text
-Financial Planning Specialist (FP&A) with over 10 years of experience across the financial and healthcare sectors. Work spans matrix budgeting, mergers and acquisitions, and organizational transformation, focused on efficiency and strategic impact.
+Financial Planning Specialist (FP&A) with over 10 years of experience across the financial and healthcare sectors.
 
-Solid experience in data analysis, financial modeling, and cross-functional team management, with constant interface with business areas and executive leadership.
+Work spans matrix budgeting, mergers and acquisitions, and organizational transformation, with direct interface with business areas and executive leadership.
 
 Main results and deliveries:
 - Led budget processes exceeding $500M
 - Implemented forecast models that reduced budget variance by 20%
 - Conducted financial analyses that supported strategic investment decisions
-- Worked on M&A and organizational restructuring projects, supporting growth and efficiency
 
-Interested in leadership challenges in FP&A and strategic planning, contributing to companies that are more efficient, data-oriented, and sustainable over the long term.
+Specialties: FP&A, budgeting, forecasting, financial modeling, data analysis, M&A, cross-functional team management.
+
+Interested in leadership roles in FP&A and strategic planning.
 
 Open to connections and conversations about finance, strategy, and data.
 Contact: [your email] | [your phone]
@@ -57,9 +58,9 @@ about which area is being targeted. Block 3 becomes recent learnings and practic
 a career changer has no numbers yet — that is expected, not a weakness to disguise.
 
 ```text
-Professional with consolidated experience in administrative and financial work, currently transitioning to data, focused on analysis, interpretation of information, and decision support.
+Administrative and financial professional transitioning to data analysis and decision support.
 
-Previous work covered administrative routines, information control, process organization, and basic indicator analysis, developing an analytical, data-oriented view. Over recent months, studies and practical projects have been directed toward data analysis, applying the concepts in real scenarios.
+Previous work covered administrative routines, information control, process organization, and basic indicator analysis. Over recent months, studies and practical projects have gone into data analysis on real datasets.
 
 Main recent learnings and deliveries:
 - Practical projects using advanced Excel, SQL, and Power BI
@@ -68,7 +69,7 @@ Main recent learnings and deliveries:
 
 Knowledge of Excel, SQL, Power BI, and data analysis.
 
-Interested in junior or entry-level opportunities in data, in environments that value continuous learning, technical development, and the use of data for business decisions.
+Interested in junior or entry-level data analyst roles where analysis feeds business decisions.
 
 Open to connections and conversations about career transition, data, and analytics.
 Contact: [your email]
@@ -81,13 +82,13 @@ overstate experience; a student who reads as a student is credible, one who read
 not.
 
 ```text
-Business administration student, interested in starting a career in commercial and administrative areas, seeking a first professional opportunity to apply academic knowledge and develop hands-on skills.
+Business administration student starting a career in commercial and administrative work.
 
 Experience in academic projects focused on process organization, basic data analysis, and Office-suite work.
 
 Knowledge of the Office suite, administrative routine organization, and support for operational activities.
 
-Interested in internship opportunities or entry-level positions, in environments that value development and continuous learning.
+Interested in internships or entry-level positions on commercial or administrative teams.
 
 Open to connections and conversations about career, internships, and professional development.
 Contact: [your email]

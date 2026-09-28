@@ -48,7 +48,8 @@ Two ways to find them:
    then by location and current company.
 
 Quantity without relevance does not move the pillar. An unrelated network scores like no
-network, and a network unrelated to the target field teaches the algorithm the wrong niche.
+network, and it shows the user's posts and comments to people who do not hire for the
+target role.
 
 Anyone seeking a role also needs recruiters in the network, and recruiters are not "in your
 field" unless you are in HR. That tension is structural — do not chase 25/25 here either.

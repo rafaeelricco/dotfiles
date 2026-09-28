@@ -49,12 +49,15 @@ thing: a result, a post, a course finished. Never "just bumping this".
 [One line: a small, answerable ask]
 ```
 
+A connection-request note keeps only the first line and the ask, inside the note cap in
+`SKILL.md`.
+
 Three variants per request, differing in directness and in which credential leads — never
 three rewordings of one message.
 
 ## Checklist
 
 Reason stated in the first line. No resume, no interview request. Something specific to
-that person or company. Under about 80 words. Employed framing chosen correctly when known,
-or bracketed when not. Follow-up drafted separately and adds new information. User sends
-it, not this skill.
+that person or company. Under about 80 words, or inside the note cap for a connection
+request. Employed framing chosen correctly when known, or bracketed when not. Follow-up
+drafted separately and adds new information. User sends it, not this skill.

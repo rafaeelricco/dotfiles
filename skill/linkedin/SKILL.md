@@ -197,10 +197,11 @@ the **Metrics read** pre-rule.
 Each in its own fenced block. Paste blocks are full prose, never session shorthand.
 
 **Generative areas** (`headline`, `about`, `experience`, `outreach`; and `content` when the
-user wants a post or comment drafted) → exactly 3 labeled variants. LinkedIn caps: headline
-220 characters, About 2600; check before emitting. Prefer shorter headlines — several
-surfaces truncate well before 220. Experience: 4–6 responsibilities and a Results block per
-role. Outreach: ~80 words. Content comments: 2–4 lines.
+user wants a post or comment drafted) → exactly 3 labeled variants. LinkedIn caps (checked
+2026-09): headline 220 characters, About 2600, connection-request note 200; check before
+emitting. Prefer shorter headlines — several surfaces truncate well before 220. Experience:
+4–6 responsibilities and a Results block per role. Outreach: ~80 words; a connection-request
+note fits its cap. Content comments: 2–4 lines.
 
 **Draft-first:** missing optional details appear as `[brackets]` in the paste blocks. Never
 invent numbers, employers, or skills to fill a slot.
@@ -222,6 +223,10 @@ content, SSI, or outreach by default.
 ## Writing rules
 
 Apply to every area.
+
+About, experience, post, comment, and outreach drafts are the user's own text: load
+`sounds-natural` for their voice. It owns the wording; this skill owns structure, counts,
+caps, and which facts appear.
 
 **Do**
 
@@ -252,10 +257,9 @@ Apply to every area.
 
 ## Source material
 
-Rules live by deliverable under `references/`. Where the original course is silent, say so
-rather than improvising. Where the course contradicts the live platform, the platform wins —
-say so plainly. Product contracts in this file (workflow order, area selection, Interview gate,
-Output modes, draft-first, vanity ban, soft-skill seniority) override course silence.
+Rules live by deliverable under `references/`, cut from a LinkedIn course. Where neither
+this file nor the area's reference covers a question, say so rather than improvising. Where
+either contradicts the live platform, the platform wins — say so plainly.
 
 Course outcome statistics ("21x more views", "9x more contacts") are motivation, not
 evidence: keep the action, drop the number. Never present one as the reason for a

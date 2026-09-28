@@ -75,5 +75,5 @@ effort. Re-run `positioning` — the keywords are wrong, and no amount of activi
 ## Intensity
 
 The cadence above assumes a full-time search. To run it slower, scale the daily numbers
-down and hold the sequence and the fixed publishing days — those are what the algorithm
-reads. Do not stretch week 1; a half-finished profile earns nothing from weeks 2 and 3.
+down and hold the sequence and the fixed publishing days. Do not stretch week 1; a
+half-finished profile earns nothing from weeks 2 and 3.

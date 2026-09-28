@@ -61,13 +61,6 @@ Administrative Assistant | General Administration | Purchasing | Data Entry | Sp
 No "student", no "seeking opportunities", no "aspiring". A recruiter searches for the role, so the
 role goes first.
 
-## Errors
-
-- Three different roles in one headline
-- Trying to "open up" the profile to everything
-- A long headline with no hierarchy
-- Terms recruiters do not search for
-
 ## Checklist
 
 Role first. 3-5 keywords, highest search value leading. Under 220 characters. One role, two only

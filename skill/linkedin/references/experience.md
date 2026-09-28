@@ -34,10 +34,10 @@ Responsibilities:
 - Management of performance indicators (KPIs) and preparation of executive reports
 
 Results / Impact:
-- Led budget processes exceeding $500M, ensuring alignment across areas and reducing variance
+- Led budget processes exceeding $500M across all business areas
 - Implemented a forecast model that cut budget variance by 20%
-- Built Power BI dashboards, reducing data consolidation time for board presentations by 40%
 - Supported contract negotiations that produced $10M in annual savings
+- Replaced manual data consolidation for board presentations with Power BI dashboards
 ```
 
 ## Best practices
