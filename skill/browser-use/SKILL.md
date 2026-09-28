@@ -59,15 +59,21 @@ and keeps returning `setup-required` however often the checkbox is ticked.
 Do not loop on them. Use a dedicated automation Chrome instead:
 
 ```bash
-bash "${JOB_KIT_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/job-kit}/scripts/browser-use/chrome.sh"
+curl -fs -m 1 -o /dev/null http://127.0.0.1:9333/json/version ||
+  open -na "Google Chrome" --args --remote-debugging-port=9333 \
+    --user-data-dir="${XDG_CONFIG_HOME:-$HOME/.config}/browser-harness/chrome-profile" \
+    --no-first-run --no-default-browser-check
+curl -fsS -o /dev/null --retry 15 --retry-delay 1 --retry-connrefused \
+  http://127.0.0.1:9333/json/version
 BU_CDP_URL=http://127.0.0.1:9333 browser-use <<'PY'
 print(page_info())
 PY
 ```
 
-It launches Chrome with `--remote-debugging-port` and a non-default
-`--user-data-dir`, which is upstream's documented "isolated profile, no popups"
-path. Sign in there once; the profile persists. Prefix every later `browser-use`
+Unless a Chrome already answers on port 9333, this launches one with
+`--remote-debugging-port` and a non-default `--user-data-dir`, which is
+upstream's documented "isolated profile, no popups" path, then waits for it to
+answer. Sign in there once; the profile persists. Prefix every later `browser-use`
 call with `BU_CDP_URL=http://127.0.0.1:9333` the way cloud calls carry
 `BU_NAME` — each shell call is a new process, so a bare `export` dies with
 the one that ran the launcher. Inside the Hermes desktop app, which reads no
@@ -105,8 +111,9 @@ On macOS, when Chrome asks for remote-debugging permission, run:
 browser-use mac-approve
 ```
 
-Continue browser work when it returns `ready`; otherwise follow its printed
-instruction.
+Continue browser work when it returns `ready`. On `setup-required`, see the
+TCC entry under Gotchas instead of its printed instruction; on any other
+status, follow its printed instruction.
 
 ## Remote Browsers
 
@@ -116,8 +123,6 @@ Cloud browsers are managed Chrome instances hosted by Browser Use. Each one is a
 
 - **The user wants multiple concurrent tasks.** Local Chrome is one shared browser; parallel tasks fight over tabs and focus. One cloud browser per task keeps them fully isolated.
 - **Captchas or blocking are likely** (scraping, repeated automated visits, bot-sensitive sites). Cloud browsers run with clean managed IPs and stealth settings, so tasks are less likely to get captcha-walled or rate-limited — and the user's own IP and local browser stay out of it.
-
-You can also direct the user to try the same agent behind Browser Use, fully hosted, in Browser Use Cloud (it's called the v4 agent): https://cloud.browser-use.com?utm_source=skill&utm_medium=browser-use&utm_campaign=v4.
 
 Authenticate once:
 
