@@ -4,10 +4,7 @@ description: >
   Draft structured GitHub issues from loose notes, review comments, or partially
   written issue text. Use when you need to create, rewrite, or standardize a
   GitHub issue with a separate title and a concise body using Situation,
-  Direction, Acceptance Criteria, Validation, and optional References. Trigger
-  this skill for requests such as create an issue, structure this issue, turn
-  notes into an issue, write acceptance criteria, write validation steps, or
-  make an issue body clearer and objectively verifiable.
+  Direction, Acceptance Criteria, Validation, and optional References.
 disable-model-invocation: true
 ---
 

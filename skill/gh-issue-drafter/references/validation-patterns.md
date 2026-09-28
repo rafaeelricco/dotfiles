@@ -22,7 +22,7 @@
 
 ## Structural or documentation refactors
 
-- Shared rules must appear in one canonical location only.
-- Portal- or role-specific documents must retain only their local deviations.
-- Cross-references must point to the shared source of truth where applicable.
-- Terminology must remain consistent across all affected artifacts.
+- When the affected documents are searched for a shared rule, it must appear in one canonical location only.
+- When a portal- or role-specific document is read, every rule it keeps must be a local deviation.
+- When a document relies on a shared rule, it must link to the canonical source instead of restating it.
+- When the affected documents are compared, each concept must use the same term everywhere.

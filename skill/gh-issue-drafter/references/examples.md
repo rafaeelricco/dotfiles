@@ -85,9 +85,9 @@ Portal models
 
 ## Validation
 
-- [ ] Shared authentication rules appear in exactly one canonical model document.
-- [ ] Shared account-management rules appear in exactly one canonical model document.
-- [ ] Each portal model retains only role- or platform-specific deviations (no duplicated password/profile rules).
-- [ ] Cross-references from portal models point to the shared source of truth where applicable.
-- [ ] Terminology for password and profile management is consistent across the shared model and portals.
+- [ ] When every portal model is searched for password rules, they appear only in the shared auth model.
+- [ ] When every portal model is searched for profile-management rules, they appear only in the shared auth model.
+- [ ] When each portal model is read end to end, every rule it keeps applies to that portal alone.
+- [ ] When a portal model relies on a shared rule, it links to the shared auth model instead of restating it.
+- [ ] When the shared model and each portal model are compared, password and profile terms match.
 ````
