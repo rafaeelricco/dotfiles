@@ -1,8 +1,9 @@
 # Evaluation cases
 
 Run when changing verify. Use fresh temporary repositories, never the user's
-working tree. Give each evaluating agent the skill, the scenario's user request,
-and raw fixture files. Keep this evaluation rubric outside its context.
+working tree. Give each evaluating agent the skill without its `evals/`
+directory, the scenario's user request, and raw fixture files. Keep this
+evaluation rubric outside its context.
 
 Observe executed checks, assertions, file changes, target selection, and verdict.
 Do not grade matching words or headings. Product files must remain unchanged;

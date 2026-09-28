@@ -104,9 +104,9 @@ issuing a verdict. Stop once the obligations are settled.
   Identify confirmed pre-existing failures separately.
 - PARTIAL: useful evidence exists, but a material obligation or required check
   remains unresolved.
-- BLOCKED: missing prerequisites prevent decisive behavioral verification.
+- BLOCKED: missing prerequisites prevent any decisive behavioral verification.
+  When other obligations still have useful evidence, report PARTIAL and name
+  the blocked check.
 
 A disclosed coverage gap cannot justify PASS. Read
 [report](references/report.md) when presenting the result.
-
-When changing this skill, run the retained [evaluation cases](evals/cases.md).
