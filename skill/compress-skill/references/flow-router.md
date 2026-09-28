@@ -1,6 +1,6 @@
 # Compress — router
 
-Target is an existing skill. Grain is job-scout: a short `SKILL.md` that
+Target is an existing skill. Grain ("scout-grain"): a short `SKILL.md` that
 loads one flow; that flow names every other `./references/*` file.
 
 ## Draft (do not write yet)

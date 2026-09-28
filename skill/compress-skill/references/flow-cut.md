@@ -5,7 +5,8 @@ Shorten the target in place. Preserve its triggers, behavioral constraints, and 
 Cut what the agent already knows: general domain knowledge, restated defaults,
 and sentences the skill still works without. A rule keeps the reason beside it;
 a rule without its reason gets applied where it does not fit.
-One home per fact. No new sections. No hypotheticals.
+One home per fact. No new sections, even on request: adding one is an edit,
+not a cut. No hypotheticals.
 
 ## Cut
 
@@ -40,7 +41,3 @@ that cut, list it.
 2. Each cut: quote → gone because (behavior unchanged).
 3. Untouched on purpose (would change behavior).
 4. Even-behavior: skipped (why) | ran (identical or which cuts reverted).
-
-## Red flags — still no write
-
-- Reviewer asked for Philosophy, FAQ, or any new section on the **target**
