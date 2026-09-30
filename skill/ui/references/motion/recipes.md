@@ -363,7 +363,10 @@ animate(el, { y: target }, { type: "spring", bounce: 0.2, velocity: releaseVeloc
 - Move nothing until the pointer has travelled 10px; that distance decides which direction the gesture claims.
 - Springs run per axis: X and Y each get their own.
 - Capture the pointer so tracking survives leaving the element's bounds.
-- A second touch is ignored while a drag is live.
+- A second touch is ignored while a drag is live, and so is its release: only the
+  pointer that started the drag can end it. Match end events by `pointerId`, and
+  keep a `lostpointercapture` listener so a pointer that never delivers its own
+  up cannot strand the gesture.
 
 ---
 
@@ -384,7 +387,7 @@ sheet.addEventListener("pointerdown", e => {
   controls?.stop(); // grabbing mid-settle: continue from where it is on screen
   sheet.setPointerCapture(e.pointerId);
   const y = new DOMMatrixReadOnly(getComputedStyle(sheet).transform).m42;
-  drag = { x0: e.clientX, y0: e.clientY, grab: e.clientY - y, y, locked: false, v: 0, t: e.timeStamp, last: e.clientY };
+  drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, grab: e.clientY - y, y, locked: false, v: 0, t: e.timeStamp, last: e.clientY };
 });
 
 sheet.addEventListener("pointermove", e => {
@@ -421,9 +424,14 @@ const release = (canceled = false) => {
 };
 
 // Wrapped, not passed bare: a bare listener would pass the Event as `canceled`.
-// isPrimary keeps a second finger's up/cancel from ending the live drag.
-sheet.addEventListener("pointerup", e => e.isPrimary && release(false));
-sheet.addEventListener("pointercancel", e => e.isPrimary && release(true));
+// Only the pointer that started the drag may end it, by id: a second finger's
+// release must not commit, and a foreign one must not strand `drag` — a stranded
+// `drag` would make the next pointerdown resume stale geometry. The capture
+// listener is the backstop for a primary whose own up never arrives; it no-ops
+// after a normal release, which already cleared `drag`.
+sheet.addEventListener("pointerup", e => e.pointerId === drag?.id && release(false));
+sheet.addEventListener("pointercancel", e => e.pointerId === drag?.id && release(true));
+sheet.addEventListener("lostpointercapture", e => e.pointerId === drag?.id && release(true));
 ```
 
 ---
