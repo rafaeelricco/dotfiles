@@ -9,10 +9,14 @@ Read `package.json`, entry CSS, root layout, and component directory listings.
 
 - **Motion library:** `motion` or `framer-motion` present. None → the spring and
   gliding pieces need CSS or a library the user picks (`../motion/libraries.md`).
-- **Reduced motion:** `<MotionConfig reducedMotion="user">` at the root, or a
-  `prefers-reduced-motion` query. Neither → transforms ignore the OS setting.
+- **Reduced motion:** library present → `<MotionConfig reducedMotion="user">` at
+  the root; a `prefers-reduced-motion` query does not reach its transform and
+  layout animations. No library → that query. Missing → transforms ignore the
+  OS setting.
 - **Font:** variable with a weight axis (Inter: plus `opsz`). Without it, weight
-  changes shove neighbours (`patterns.md` → Weight without reflow).
+  changes snap instead of interpolating — reflow is stopped by the hidden copy,
+  not the font; bare text nodes that animate weight shove neighbours either way
+  (`patterns.md` → Weight without reflow).
 - **Tokens:** each duration, curve, surface, and size in use, mapped to the
   nearest tier or level in `system.md` (Motion tiers, Press, Sizes, Surfaces,
   Type, Scrollbars); mark the deliberate outliers.
