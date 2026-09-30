@@ -67,6 +67,8 @@ can edit it or delete it to force a fresh pass. Files forbidden → reply instea
   never overwrite local changes.
 - `.agents/fluid-functionalism.md` present, no `.agents/ui.md` → carry its
   verdicts, advice, and outcomes into `.agents/ui.md`; leave the old file.
+- Only `.claude/fluid-functionalism.md` present → same carry-over, keeping its
+  original `checked:` date; leave the old file.
 
 ## Upgrades shortlist
 
