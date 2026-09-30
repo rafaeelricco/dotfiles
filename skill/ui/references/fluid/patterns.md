@@ -28,7 +28,7 @@ Rules:
   publishes zero-size boxes; the previous full measurement is kept.
 - Mouse pointers only. Touch and pen have no hover.
 - Only click targets take part. An item with no action would light up with no action behind it, so it does not carry the marker; disabled items are
-  skipped.
+  skipped, whether they carry `aria-disabled` or the native `disabled` attribute.
 - Give each group of alternatives its own list: where a divider separates
   different kinds of rows, start a fresh container and hook call. Nested
   children join the list of the row that owns them.

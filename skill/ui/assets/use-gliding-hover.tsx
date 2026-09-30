@@ -13,7 +13,7 @@ import { exit, spring } from "./springs";
 
 type Axis = "x" | "y" | "xy";
 type Rect = { x: number; y: number; width: number; height: number };
-const ITEM = "[data-glide-item]:not([aria-disabled='true'])";
+const ITEM = "[data-glide-item]:not([aria-disabled='true']):not(:disabled)";
 
 // The item under the pointer wins; otherwise the nearest center on the list's
 // axis, so a pointer in a gap or padding still lands. Ties keep the first item.
