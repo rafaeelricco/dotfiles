@@ -388,7 +388,17 @@ sheet.addEventListener("pointerdown", e => {
   controls?.stop(); // grabbing mid-settle: continue from where it is on screen
   sheet.setPointerCapture(e.pointerId);
   const y = new DOMMatrixReadOnly(getComputedStyle(sheet).transform).m42;
-  drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, grab: e.clientY - y, y, locked: false, v: 0, t: e.timeStamp, last: e.clientY };
+  drag = {
+    id: e.pointerId,
+    x0: e.clientX,
+    y0: e.clientY,
+    grab: e.clientY - y,
+    y,
+    locked: false,
+    v: 0,
+    t: e.timeStamp,
+    last: e.clientY,
+  };
 });
 
 sheet.addEventListener("pointermove", e => {
