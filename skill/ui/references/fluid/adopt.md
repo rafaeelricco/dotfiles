@@ -54,8 +54,11 @@ can edit it or delete it to force a fresh pass. Files forbidden → reply instea
 
 ## Later runs
 
-- Trust Verdicts while `package.json` is unchanged; when it changed, redo only
-  the checks it touches.
+- Trust dependency-derived Verdicts (motion library, versions) while
+  `package.json` is unchanged; when it changed, redo only the checks it touches.
+- Source-derived Verdicts (reduced motion, font axes, token map) go stale
+  without `package.json` changing: re-read the root layout, entry CSS, or token
+  definitions when one no longer matches reality, then update that line.
 - Inventory (which components exist, which are customized) is leads, not truth:
   files change without `package.json` changing. Open them before relying on it.
 - Raise an open Advice item once, when a task touches what it affects.
