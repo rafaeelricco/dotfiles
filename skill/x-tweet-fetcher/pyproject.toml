@@ -8,7 +8,7 @@ version = "3.0.0"
 description = "Fetch X/Twitter tweets, replies, timelines, and articles without login or API keys — field tool for AI agents."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { file = "LICENSE" }
+license = { text = "MIT" }
 keywords = ["twitter", "x", "nitter", "scraper", "ai-agents"]
 classifiers = [
     "Programming Language :: Python :: 3",

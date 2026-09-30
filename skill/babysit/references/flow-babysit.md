@@ -6,7 +6,7 @@ Force-push, rebase, history rewrites, and CI workflow edits need explicit
 approval of that exact operation.
 
 Not `/code-review`, not `verify` (load it, do not reimplement),
-not `pr-body`, not `create-pr`, not `visual-recap`. Commit
+not `pr-body`, not `create-pr`, not `show-me`. Commit
 format belongs to `commit-message`. Before every commit, read
 `commit-message`'s `SKILL.md`. Invocation alone is not a load. Thread-reply
 and re-request shape live in **Comment routing** and

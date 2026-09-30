@@ -110,7 +110,7 @@ function expandSkill(command: string): string {
 }
 ```
 
-- For a visual UI, layout, state comparison, or concept too dense for Mermaid, write one focused HTML file—a diagram, infographic, or short slide deck, whichever fits the point. Match the product's colors, type, spacing, and components; use real labels and data; and support desktop and mobile. Create it in a writable workspace or artifact directory. Show it with the host's artifact-preview capability. If the host cannot preview files, return its absolute path. Do not hard-code an operating-system launcher.
+- For a visual UI, layout, state comparison, or concept too dense for Mermaid, write one focused HTML file—a diagram, infographic, or short slide deck, whichever fits the point. Match the product's colors, type, spacing, and components; use real labels and data; and support desktop and mobile. With no product style to match, avoid a cream or off-white background, italic accent words in headlines, numbered "01/02/03" section labels, monospace labels, and pill-shaped buttons. Create it in a writable workspace or artifact directory. Show it with the host's artifact-preview capability. If the host cannot preview files, return its absolute path. Do not hard-code an operating-system launcher.
 
 ## Guidance
 

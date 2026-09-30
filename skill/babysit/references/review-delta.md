@@ -1,7 +1,7 @@
 # Review delta
 
 Posted handoff of the review loop. Load when **Workflow** names this
-step. Not Report. Not `visual-recap`. Post with `gh pr comment` from
+step. Not Report. Not a `show-me` PR recap. Post with `gh pr comment` from
 `./gh-recipes.md`.
 
 ## When
