@@ -4,7 +4,7 @@
 
 **Fetch X/Twitter tweets, replies, timelines, lists, and articles — no login, no API keys.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-green.svg)](https://www.python.org)
 [![GitHub stars](https://img.shields.io/github/stars/ythx-101/x-tweet-fetcher?style=social)](https://github.com/ythx-101/x-tweet-fetcher)
 
@@ -181,7 +181,7 @@ When Nitter or X change their page structure, capture a fresh snapshot into `tes
 
 ## 📜 License
 
-[MIT](LICENSE)
+[MIT](https://opensource.org/licenses/MIT) © 2026 ythx-101
 
 ---
 

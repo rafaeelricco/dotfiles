@@ -49,7 +49,7 @@ These make text read as machine-written. Remove them from the output. When judgi
 - Decorative bold, bold-label bullet lists, Title Case headings, emoji on headings.
 - Vague sources ("experts say") and guesses dressed as facts ("while details are limited").
 
-Tells adapted from Wikipedia's "Signs of AI writing" via blader/humanizer (see LICENSE).
+Tells adapted from Wikipedia's "Signs of AI writing" via blader/humanizer (MIT, © 2025 Siqi Chen).
 
 ## Output
 
