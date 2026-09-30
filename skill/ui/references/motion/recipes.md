@@ -363,10 +363,11 @@ animate(el, { y: target }, { type: "spring", bounce: 0.2, velocity: releaseVeloc
 - Move nothing until the pointer has travelled 10px; that distance decides which direction the gesture claims.
 - Springs run per axis: X and Y each get their own.
 - Capture the pointer so tracking survives leaving the element's bounds.
-- A second touch is ignored while a drag is live, and so is its release: only the
-  pointer that started the drag can end it. Match end events by `pointerId`, and
-  keep a `lostpointercapture` listener so a pointer that never delivers its own
-  up cannot strand the gesture.
+- A second touch is ignored while a drag is live, and so are its moves and its
+  release: only the pointer that started the drag can steer or end it. Match
+  every `pointermove`, `pointerup` and `pointercancel` by `pointerId`, and keep a
+  `lostpointercapture` listener so a pointer that never delivers its own up
+  cannot strand the gesture.
 
 ---
 
@@ -391,7 +392,7 @@ sheet.addEventListener("pointerdown", e => {
 });
 
 sheet.addEventListener("pointermove", e => {
-  if (!drag) return;
+  if (!drag || e.pointerId !== drag.id) return; // a second finger must not steer this drag
   if (!drag.locked) {
     if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 10) return;
     if (Math.abs(e.clientX - drag.x0) > Math.abs(e.clientY - drag.y0)) return void (drag = null); // sideways: not ours
