@@ -167,10 +167,11 @@ Code: `../../assets/elevated.tsx` reads `--surface-N` and `--shadow-surface-N`.
   `text-wrap: wrap` when the lone last word is intended, as in some headings,
   and on text that streams in (chat replies): `pretty` re-wraps earlier lines on
   every update, while the default only appends.
-- Use a variable font with a weight axis so a weight change interpolates and
-  never reflows. Inter also has an `opsz` axis: pair the tighter optical size
-  with the heavier weight so the text keeps nearly the same width
-  (`../../assets/weight-shift.tsx` takes the pair). State weights go
+- Use a variable font with a weight axis so a weight change interpolates instead
+  of snapping; the hidden copy, not the font, is what stops reflow
+  (`patterns.md` → Weight without reflow). Inter also has an `opsz` axis: pair
+  the tighter optical size with the heavier weight so the text keeps nearly the
+  same width (`../../assets/weight-shift.tsx` takes the pair). State weights go
   from 400 to 550; do not invent other pairs.
 
 ## Scrollbars
