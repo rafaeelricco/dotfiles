@@ -403,24 +403,27 @@ sheet.addEventListener("pointermove", e => {
   drag.last = e.clientY;
 });
 
-const release = () => {
+const release = (canceled = false) => {
   if (!drag) return;
   const { y, v, locked } = drag;
   drag = null;
   if (!locked) return;
   const rest = nearest([0, dismissedY], y + project(v));
-  const dismiss = rest === dismissedY || v / 1000 > 0.11;
+  // A gesture the UA aborted was never a release: settle home, commit nothing.
+  const dismiss = !canceled && (rest === dismissedY || v / 1000 > 0.11);
   controls = animate(y, dismiss ? dismissedY : 0, {
     type: "spring",
     bounce: 0.2, // a release carries momentum, so a little overshoot is allowed
-    velocity: v,
+    velocity: canceled ? 0 : v,
     onUpdate: latest => (sheet.style.transform = `translateY(${latest}px)`),
     onComplete: () => dismiss && onDismiss(),
   });
 };
 
-sheet.addEventListener("pointerup", release);
-sheet.addEventListener("pointercancel", release);
+// Wrapped, not passed bare: a bare listener would pass the Event as `canceled`.
+// isPrimary keeps a second finger's up/cancel from ending the live drag.
+sheet.addEventListener("pointerup", e => e.isPrimary && release(false));
+sheet.addEventListener("pointercancel", e => e.isPrimary && release(true));
 ```
 
 ---
