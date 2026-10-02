@@ -29,27 +29,30 @@ Spoken (will be said aloud): one idea per sentence; light connectors (`so`, `and
 
 Written: the same plainness without imitating speech. Split any sentence over about 25 words, keeping the order of ideas. Opinion, humor, and asides fit essays and personal posts; reference, technical, and legal text stays neutral.
 
-Keep what already sounds natural, and keep human detail: odd specifics, asides, self-corrections, uneven sentence length.
+Keep what already sounds natural, and keep human detail: odd specifics, asides, self-corrections, uneven sentence length. Don't add roughness to seem human: forced fragments, a short-long seesaw, or planted slips read as machine-made too.
 
 ## Tells to remove
 
-These make text read as machine-written. Remove them from the output. When judging someone else's text, one alone proves nothing; look for clusters.
+These make text read as machine-written. Remove them from the output. When judging someone else's text, one alone proves nothing; look for clusters. Three or more in one paragraph mean the paragraph was generated: rewrite it from its facts instead of swapping words.
 
-- Stacked self-labels ("passionate, results-driven expert"). Give the example instead.
-- Inflated significance: stands as, serves as, testament, pivotal, key role, landscape, underscores, marks a shift.
-- Sales words: vibrant, seamless, stunning, leverage, boasts, groundbreaking, nestled.
-- An -ing tail that only inflates ("…, highlighting its importance").
-- "Not X, but Y", "It's not just X, it's Y", and objections nobody raised ("To be clear", "This isn't about").
+`scripts/detect.py` matches every quoted phrase below in English text; a single word also matches its longer forms (leverage, leveraging), and X, Y, Z, and … stand for any words. After editing this list, run `python3 -m unittest discover -s tests` from this folder: it checks that each phrase is caught and that the voice examples stay clean.
+
+- Stacked self-labels (passionate, results-driven expert). Give the example instead.
+- Inflated significance: "stands as", "serves as", "testament", "pivotal", "key role", "landscape", "underscore", "marks a shift".
+- Sales and stock words: "vibrant", "seamless", "stunning", "leverage", "boast", "groundbreaking", "nestled", "game-changer", "delve", "tapestry", "realm", "intricate", "utilize", "foster", "streamline", "showcase", "garner", "bolster", "meticulous", "deep dive", "move the needle".
+- An -ing tail that only inflates: ", highlighting X", ", underscoring X", ", showcasing X", ", emphasizing X".
+- "Not X, but Y", "It's not just X, it's Y", "Stop X, start Y", and objections nobody raised: "To be clear", "This isn't about".
 - Lists padded to three, or one idea under three synonyms.
-- Announcing or dramatizing: "Let's dive in", "Here's the thing", "Honestly?", "The real question is", a row of one-line punchlines.
-- Chatbot wrappers inside the artifact: "Certainly!", "You're absolutely right!", "Great question", "I hope this
-  helps", "Want me to…?", an upbeat send-off.
-- Filler and hedges on known facts: "It is important to note", "in order to", "could potentially".
-- Em and en dashes, unless the voice or sample uses them. Search the final text for `—` and `–`.
+- Announcing or dramatizing: "Let's dive in", "Here's the thing", "Here's what", "Here's why", "Here's how", "Honestly?", "Let me be honest", "Real talk", "Unpopular opinion", "The real question is", "The result?", "The catch?", "No X. No Y. Just Z.", "Let that sink in", a row of one-line punchlines.
+- Stock openers and closers: "I'm excited to announce", "I'm excited to share", "thrilled to share", "In today's fast-paced world", "In conclusion", "In summary", "To summarize", "Looking ahead", "Thoughts?", "Agree or disagree?", "Let me know in the comments", "Tag someone".
+- Chatbot wrappers inside the artifact: "Certainly!", "You're absolutely right", "Great question", "I hope this helps", "Want me to…?", an upbeat send-off.
+- Filler and hedges on known facts: "It is important to note", "It's worth noting", "in order to", "could potentially".
+- Em and en dashes, unless the voice or sample uses them.
 - Decorative bold, bold-label bullet lists, Title Case headings, emoji on headings.
-- Vague sources ("experts say") and guesses dressed as facts ("while details are limited").
+- Vague sources ("experts say", "studies show") and guesses dressed as facts ("while details are limited").
+- Generation leftovers: "oaicite", "contentReference", "turn0search", "[Your Name]", "As of my last update", "As of my knowledge cutoff".
 
-Tells adapted from Wikipedia's "Signs of AI writing" via blader/humanizer (MIT, © 2025 Siqi Chen).
+Tells adapted from Wikipedia's "Signs of AI writing" via blader/humanizer, with additions from sergebulaev/linkedin-skills.
 
 ## Output
 
@@ -59,6 +62,8 @@ Tells adapted from Wikipedia's "Signs of AI writing" via blader/humanizer (MIT, 
 
 Coaching is in the user's language; the rewrite stays in the source's language. Coaching never goes inside the artifact.
 
+Never promise the text will pass an AI detector: detectors disagree with each other on the same text.
+
 ## Before returning
 
-Reread the rewrite once. Every source fact is present, nothing new was added, no tell remains, no dash unless the voice uses one, and in the user's voice the profile's grammar corrections are applied.
+Pipe the rewrite through `python3 <skill-dir>/scripts/detect.py` (add `--allow-dashes` when the voice uses dashes) and fix each hit the voice or sample doesn't allow; hits inside names and quotations stay. Then reread it once: every source fact is present, nothing new was added, no tell remains, and in the user's voice the profile's grammar corrections are applied.
