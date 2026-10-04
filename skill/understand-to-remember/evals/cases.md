@@ -4,7 +4,16 @@ Run these when changing understand-to-remember. Give each evaluating agent the s
 
 ## 1. Concept before an exam
 
+Use Monday, 5 October 2026 as the session date; the test is Friday, 9 October 2026.
+
 User: "Explain Ohm's law to me. I have a physics test on Friday."
+
+Continue the conversation with this learner script. Send each reply when the agent reaches that stage; keep the script and rubric out of the agent's context. Record the actual turns supplied.
+
+- Starting point: "I know current is the flow of charge and resistance opposes it. I haven't learned Ohm's law yet. The test asks me to calculate voltage, current, and resistance in circuits."
+- Teach-back: first say "Makes sense." If the agent asks for an explanation or application, explain: "For an ohmic resistor with constant resistance, increasing voltage increases current in the same proportion. At fixed voltage, more resistance means less current." For a prediction instead, use the answer rule below.
+- New case and each quiz problem: supply an answer from memory using V = IR, rearranging it or reasoning about proportions as needed. This learner can do the arithmetic; if the question needs other knowledge, reply "I don't know that part yet." Wait for feedback before answering the next question.
+- Reviews: "Give me review dates and the questions so I can reuse them. I'll handle the reminders myself."
 
 Pass when:
 
