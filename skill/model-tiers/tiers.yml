@@ -1,12 +1,11 @@
-# Brief role → built-in agent type, model and effort per harness. The only
-# place a model is chosen. `session` = the main thread's model, or its effort.
-# Readers use the harness's read-only type. Effort applies only where the
-# spawn tool takes one.
+# Brief role -> preferred agent type, model and effort per harness.
+# session uses the parent model/effort, subject to SKILL.md's worker rules.
+# Agent types, model availability, and effort control are checked at runtime.
 
-# Agent tool: subagent_type + model alias only (sonnet, opus, haiku, fable);
-# no effort option. Explore has no Write/Edit but keeps
-# Bash: read-only by instruction, not by tools. It reads excerpts to locate
-# code, not to audit it, so the skeptic runs as general-purpose.
+# Claude effort is inherited unless an existing agent definition overrides it.
+# No per-call effort control is assumed here; report the effective setting.
+# Explore locates facts; general-purpose handles the skeptic's judgment.
+# Model aliases may float. Report the resolved version when exposed.
 claude:
   reader: { agent: Explore, model: sonnet }
   skeptic: { agent: general-purpose, model: session }
@@ -14,16 +13,18 @@ claude:
   derive: { agent: general-purpose, model: sonnet }
 
 codex:
-  reader: { agent: explorer, model: gpt-5.6-luna, effort: medium }
+  reader: { agent: explorer, model: gpt-6-luna, effort: high }
   skeptic: { agent: explorer, model: session, effort: session }
-  copy: { agent: worker, model: gpt-5.6-luna, effort: medium }
-  derive: { agent: worker, model: gpt-5.6-luna, effort: xhigh }
+  copy: { agent: worker, model: gpt-6-luna, effort: medium }
+  derive: { agent: worker, model: gpt-6-luna, effort: xhigh }
 
+# Non-session routes use standard serving; Fast is not a capability tier.
+# Built-in agent names may be unavailable; use SKILL.md's agent fallback.
 grok:
   reader: { agent: explore, model: grok-4.5, effort: medium }
   skeptic: { agent: explore, model: session, effort: session }
-  copy: { agent: general-purpose, model: grok-4.5, effort: medium }
-  derive: { agent: general-purpose, model: grok-4.5, effort: high }
+  copy: { agent: general-purpose, model: grok-4.5, effort: low }
+  derive: { agent: general-purpose, model: grok-4.7, effort: high }
 
 # Harness not listed above: rank the spawn tool's own options by tier.
 tiers: { reader: one below, skeptic: session, copy: cheapest, derive: one below }
