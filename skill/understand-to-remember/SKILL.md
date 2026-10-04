@@ -33,7 +33,7 @@ When the user asks only for a mnemonic or a summary, give that and stop.
 
 7. Plan spaced reviews. Propose when to quiz again. The longer the user needs to keep it, the longer the gap. Use one to three days for a test next week, and three to five weeks for something needed in a year. Offer to schedule each review with `cronjob`, carrying the questions from step 6. Done when the user has review dates, or has declined them. Reason: with the same total study time, spreading it out gives much higher recall weeks and months later.
 
-8. Use mnemonics for the arbitrary parts only. Names, symbol letters, units, and orderings carry no meaning to understand, so a phrase or acronym is the right tool there. Give it after the meaning is in place, and say what it encodes. Done when every mnemonic you gave points to something the user already understands. Reason: mnemonics work well for arbitrary links, but the keyword kind fades faster, and an acronym only helps when the items are already known.
+8. Use mnemonics for the arbitrary parts only. Use a phrase or acronym for labels or orderings only when they are arbitrary; explain meaningful units and relationships in step 3. Give it after the meaning is in place, and say what it encodes. Done when every mnemonic you gave points to something the user already understands. Reason: mnemonics work well for arbitrary links, but the keyword kind fades faster, and an acronym only helps when the items are already known.
 
 ## Pitfalls
 
