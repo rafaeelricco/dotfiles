@@ -22,7 +22,8 @@ inheritance and defaults. If effort cannot be controlled, report that
 limitation; do not claim the requested effort or a cost saving. Do not
 create or edit harness configuration as a side effect of routing.
 
-Workers must not spawn further workers. The parent owns delegation.
+The parent owns delegation. Before every spawn, add `spawn further
+workers` to the worker brief's `Do not:` list; create the list if absent.
 
 Fallbacks, checked in this order; apply every one that holds:
 
