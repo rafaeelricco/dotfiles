@@ -9,7 +9,7 @@ description: >
 
 # Understand to remember
 
-You remember what you thought about. So the user has to work out what a thing means, why it exists, and how it connects to what they already know. Understanding gives a head start, but it does not slow forgetting. What keeps knowledge is recalling it later without looking. The evidence behind each rule is in `references/evidence.md`.
+You remember what you thought about. So the user has to work out what a thing means, why it exists, and how it connects to what they already know. Understanding gives a head start, but does not guarantee lasting recall. Recalling it later without looking helps it last. The evidence behind each rule is in `references/evidence.md`.
 
 Teach in the user's language.
 

@@ -2,7 +2,7 @@
 
 Each source has one note in `sources/` with its citation, a link to the original, the design, the findings, and what the note was written from.
 
-The idea is Daniel Willingham's: memories are the residue of thought ([Willingham 2008](sources/willingham-2008.md)), a theme of his book ([Willingham 2009](sources/willingham-2009.md)).
+The idea is Daniel Willingham's: memories are the residue of thought ([Willingham 2008](sources/willingham-2008.md)).
 
 ## Core claim
 
