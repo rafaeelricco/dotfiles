@@ -1,9 +1,9 @@
 ---
 name: verify
 description: >
-  Verify a change against its requirements with real-interface checks,
-  affected regression suites, and current evidence. Use when asked to verify
-  work or when an implementation or PR-maintenance workflow needs validation.
+  Check a change against its requirements with real-interface checks and the
+  affected regression suites. Use when asked to verify work, or when an
+  implementation or PR workflow needs validation.
 ---
 
 # Verify

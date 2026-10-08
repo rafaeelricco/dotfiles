@@ -1,10 +1,8 @@
 ---
 name: linkedin
 description: >
-  Draft and audit LinkedIn profile copy and growth plans: positioning, headline, About,
-  experience, below-the-fold sections, visuals, SSI, posts, recruiter outreach, and a
-  21-day plan. Drafts only. Never post, message, or connect on the user's behalf. Not for
-  resumes, interview prep, SSI score estimates, or cover image generation.
+  Draft and audit LinkedIn profile copy and growth plans: headline, About,
+  experience, posts, recruiter outreach, and a 21-day plan.
 disable-model-invocation: true
 ---
 

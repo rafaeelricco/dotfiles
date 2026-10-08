@@ -1,11 +1,9 @@
 ---
 name: orchestrate
 description: >
-  House engineering loop for a code change: plan via scope-and-plan, then
-  verify, commit when asked, stop. Use when asked to implement, add, build,
-  fix, debug, refactor, migrate, or clean up code, or /orchestrate. Not for
-  one obvious named edit, read-only questions, bare commits, opening PRs, or
-  PR triage.
+  End-to-end loop for a code change that needs a plan: plan with
+  scope-and-plan, implement, verify, and commit when asked. Use when asked to
+  build, fix, debug, refactor, or migrate code, or on /orchestrate.
 ---
 
 ## 1. Think Before Acting

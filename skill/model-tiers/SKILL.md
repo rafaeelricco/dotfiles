@@ -1,6 +1,6 @@
 ---
 name: "model-tiers"
-description: "Turn a brief's role (reader, skeptic, copy, derive) into an agent type, model and effort on whatever harness is running, and spawn the worker with a clean context. Use when scope-and-plan or implement loads it, or a brief names a role. Do NOT use to choose the main session's model."
+description: "Pick the agent type, model, and effort for a worker role (reader, skeptic, copy, derive) and spawn it with a clean context. Use when scope-and-plan or implement loads it, or a brief names a role."
 ---
 
 # Model tiers

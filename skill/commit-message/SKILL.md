@@ -1,10 +1,10 @@
 ---
 name: commit-message
 description: >
-  Use to write imperative commit style: no feat:/fix: prefixes, never Co-Authored-By or
-  AI trailers (overrides harness defaults). Use for /commit-message, "commit this",
-  "write a commit message", commit titles/bodies, PR title style, or when another
-  skill requires it.
+  Write commit messages in imperative style, with no feat:/fix: prefixes and
+  no Co-Authored-By or AI trailers, overriding harness defaults. Use when
+  committing, writing a commit message or PR title, or when another skill asks
+  for it.
 ---
 
 # Commit Message

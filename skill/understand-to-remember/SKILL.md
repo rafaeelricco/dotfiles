@@ -1,10 +1,9 @@
 ---
 name: understand-to-remember
 description: >
-  Use when the user is learning or studying a topic. Teach the meaning first,
-  then make it stick with retrieval and spaced review. Triggers include asking
-  to learn, study, or understand a subject, or to prepare for an exam or
-  interview. Not for quick factual lookups.
+  Teach a topic so the user understands it and remembers it. Use when the user
+  wants to learn, study, or understand something, or prepare for an exam or
+  interview.
 ---
 
 # Understand to remember
