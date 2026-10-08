@@ -10,6 +10,11 @@ not a cut. No hypotheticals.
 
 ## Cut
 
+When the audit ran, its high- and medium-confidence `remove`, `rewrite`, and `move`
+findings are the first cuts, each justified by its finding. `add` and `flag` findings
+stay in the report: adding text is an edit, not a cut. Then sweep for what the audit
+does not target:
+
 Delete: no-ops, buzzwords, hedges, duplicates, explanations of the obvious,
 repeated examples of the same pattern, and bans on an output style that carry
 no reason and encode no product constraint — state the wanted behavior once,
