@@ -169,11 +169,11 @@ Pick **one** mode for each requested area:
    overall score **and all four pillar scores**, the analytics readings, and the current
    profile sections needed to name the weakest pillar and trace pillar 1. Missing → ask
    once for whatever is still missing and wait. Then
-   checklist + exactly 3 prioritized fixes. No Interview. References carry checklist items
+   checklist + the prioritized fixes the current state warrants, most important first. No Interview. References carry checklist items
    only.
 2. **Audit and rewrite** — user asked to audit/review **and** write/rewrite/improve/fix
    the same area in one request → require the current state as in mode 1, emit the mode-1
-   checklist + exactly 3 prioritized fixes, then the rewrite form for that area: generative
+   checklist + its prioritized fixes, then the rewrite form for that area: generative
    or advisory for most areas; for `plan`, the full schedule from mode 5 after the audit
    (not a second advisory-only pass). Interview follows the
    rewrite half's gate, not pure Audit. Wins over mode 4 whenever both an audit verb and a
@@ -185,7 +185,7 @@ Pick **one** mode for each requested area:
    request (mode 5) → generative or advisory form for the area. With paste, optional short
    fix list then the normal form — not audit-only. Not used when mode 2 already applies.
 5. **`plan` schedule** — user wants the 21-day routine → deliver the schedule from
-   `references/plan.md`. Use advisory “3 fixes” only when reviewing an existing routine.
+   `references/plan.md`. Use advisory fixes only when reviewing an existing routine.
 6. Otherwise by area class (below).
 
 **Exception — metrics read** overrides whichever mode was picked; its shape is fixed in
@@ -206,9 +206,10 @@ invent numbers, employers, or skills to fill a slot.
 
 **Advisory areas** (`positioning`, `visuals`, `sections`, `ssi`; `content` when the ask is
 cadence, engagement, algorithm, or strategy rather than a draft; and `plan` only when not
-delivering the schedule) → if current state is known, read it, then exactly 3 prioritized
-fixes each with a ready-to-use example. If current state is unknown: say so (or ask once);
-give 3 generic prioritized fixes — never invent “your profile currently…”.
+delivering the schedule) → if current state is known, read it, then the prioritized
+fixes it warrants, most important first, each with a ready-to-use example. If current state
+is unknown: say so (or ask once); give the area's highest-leverage generic fixes, labeled
+generic — never invent “your profile currently…”.
 
 **Close** once after the requested deliverables or staged step — variants, advisory
 fixes, audit-then-rewrite, or a full `plan` schedule — not after a chooser or the

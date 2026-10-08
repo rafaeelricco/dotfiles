@@ -24,7 +24,7 @@ Results / Impact:
 4 to 6 responsibilities, chosen as the ones job ads ask for most — not the full duty list. Fewer
 real ones beat padded ones. Blank line between the two blocks, always.
 
-## Worked example
+## Worked example (illustrative: copy the shape, not the finance wording or figures)
 
 ```text
 Responsibilities:

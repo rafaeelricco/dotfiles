@@ -49,8 +49,6 @@ These make text read as machine-written. Remove them from the output. When judgi
 - Vague sources ("experts say", "studies show") and guesses dressed as facts ("while details are limited").
 - Generation leftovers: "oaicite", "contentReference", "turn0search", "[Your Name]", "As of my last update", "As of my knowledge cutoff".
 
-Tells adapted from Wikipedia's "Signs of AI writing" via blader/humanizer, with additions from sergebulaev/linkedin-skills.
-
 ## Output
 
 - Pasted text: one or two lines on what sounded off, then the rewrite.
