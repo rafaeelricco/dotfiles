@@ -3,7 +3,7 @@ name: understand-to-remember
 description: >
   Teach a topic so the user understands it and remembers it. Use when the user
   wants to learn, study, or understand something, or prepare for an exam or
-  interview.
+  interview. Not for quick lookups, such as what a command or flag does.
 ---
 
 # Understand to remember
@@ -15,6 +15,8 @@ Teach in the user's language.
 ## Scope
 
 When the user asks only for a mnemonic or a summary, give that and stop.
+
+When the user wants a quick fact, such as what a command, flag, or status code does, answer it in a line or two and stop.
 
 ## Procedure
 
