@@ -1,10 +1,9 @@
 ---
 name: implement
 description: >
-  Write diamond for an authorized plan: group its hunks → role-matched writers
-  apply or author each group → gate each return → merge. Use when
-  scope-and-plan reaches Execute, or the user names /implement on an approved
-  plan. Do NOT use without an authorized plan — planning is orchestrate's.
+  Apply an approved plan: split its diffs into groups, hand each to a matching
+  writer agent, check each result, and merge. Use when scope-and-plan reaches
+  Execute or the user runs /implement on an approved plan.
 ---
 
 # Implement

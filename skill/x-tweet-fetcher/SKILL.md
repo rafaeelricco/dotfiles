@@ -1,11 +1,8 @@
 ---
 name: x-tweet-fetcher
 description: >
-  Fetch tweets, replies, timelines, search results, X Lists, and X Articles
-  from X/Twitter without login or API keys. Single tweets: zero dependencies
-  (FxTwitter). Timelines/search/replies: a Nitter instance (XTF_NITTER).
-  Lists/Articles: a browser driver (Camofox or Playwright). Unified JSON
-  schema across all backends; machine-readable error_code for agent branching.
+  Fetch tweets, replies, timelines, searches, Lists, and Articles from X
+  without login or API keys.
 disable-model-invocation: true
 ---
 

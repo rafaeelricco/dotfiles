@@ -72,7 +72,7 @@ can edit it or delete it to force a fresh pass. Files forbidden → reply instea
 
 ## Upgrades shortlist
 
-2-5 items, ranked; fewer than two real candidates → say so, never pad.
+A short ranked list of real candidates; with fewer than two, say so rather than padding.
 
 - **UI only.** Infrastructure findings (unused dependencies, package manager,
   toolchain migrations, icon-set changes) go under Verdicts as facts, never

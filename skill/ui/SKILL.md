@@ -1,11 +1,9 @@
 ---
 name: ui
 description: >
-  Motion and web UI craft. Use for any task that adds, reviews, audits, or
-  names motion in any medium (web, video), or that builds, restyles, or
-  prototypes interactive UI components and their hover, press, selection,
-  surface, size and type details, including before hand-writing that code.
-  Also picks UI libraries. Use when the user runs /ui.
+  Motion and web UI craft. Use when adding, reviewing, or auditing motion in
+  web or video, building or restyling interactive UI components, picking a UI
+  library, or on /ui.
 argument-hint: "[build|review|audit|hunt|prototype|lib|vocab|compose|style|adopt]"
 ---
 

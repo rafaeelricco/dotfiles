@@ -1,11 +1,9 @@
 ---
 name: pr-body
 description: >
-  Write or refresh the body of a GitHub pull request from the branch diff. Use
-  whenever a PR description is written or updated: asked for directly, or
-  before any `gh pr create` or `gh pr edit --body`, including inside
-  create-pr. Reuse supplied motivation; ask when missing. Pairs with
-  commit-message for PR title style.
+  Write or refresh a GitHub PR description from the branch diff. Use whenever
+  a PR body is written or updated, including before `gh pr create` or `gh pr
+  edit --body`.
 ---
 
 # PR Body

@@ -1,6 +1,6 @@
 ---
 name: skill-design-principles
-description: Concise, high-signal principles for writing and editing skills well. Use whenever authoring or editing a skill.
+description: Principles for writing and editing skills. Use whenever authoring or editing a skill.
 ---
 
 # Skill design principles

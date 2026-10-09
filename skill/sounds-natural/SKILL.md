@@ -1,12 +1,9 @@
 ---
 name: sounds-natural
 description: >
-  Write or rewrite prose so it sounds like a person wrote it, and like the
-  user when the text is theirs: Slack, email, LinkedIn, interview answers,
-  resume lines. Use when asked, in English or Portuguese, to write in the
-  user's voice or tone, to humanize or de-slop text, or to match a writing
-  sample. Not for code, or for changing what the source claims.
-license: MIT
+  Write or rewrite text so it sounds human, and like the user when it's
+  theirs. Use when asked to humanize or de-slop text, write in the user's
+  voice, or match a writing sample.
 ---
 
 Make the text sound like a person, not a script or a chatbot. When the text is the user's, make it sound like the user.
@@ -51,8 +48,6 @@ These make text read as machine-written. Remove them from the output. When judgi
 - Decorative bold, bold-label bullet lists, Title Case headings, emoji on headings.
 - Vague sources ("experts say", "studies show") and guesses dressed as facts ("while details are limited").
 - Generation leftovers: "oaicite", "contentReference", "turn0search", "[Your Name]", "As of my last update", "As of my knowledge cutoff".
-
-Tells adapted from Wikipedia's "Signs of AI writing" via blader/humanizer, with additions from sergebulaev/linkedin-skills.
 
 ## Output
 

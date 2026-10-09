@@ -1,12 +1,9 @@
 ---
 name: babysit
 description: >
-  Keep an open GitHub PR merge-ready: proof-check review feedback, fix reproved
-  bugs, triage failing CI and conflicts. Use when asked to babysit an open PR
-  or run another round on it, to validate or resolve its review comments, or
-  to fix or watch its CI and conflicts until it is mergeable.
-  Not for opening a PR (create-pr), PR bodies (pr-body), code review
-  (/code-review), or merging.
+  Keep an open GitHub PR merge-ready: check review feedback, fix the bugs it
+  confirms, and clear failing CI and conflicts. Use when asked to babysit a
+  PR, resolve its review comments, or get its CI green.
 ---
 
 # Babysit PR

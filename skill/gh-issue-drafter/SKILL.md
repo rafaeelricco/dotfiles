@@ -1,10 +1,9 @@
 ---
 name: gh-issue-drafter
 description: >
-  Draft structured GitHub issues from loose notes, review comments, or partially
-  written issue text. Use when you need to create, rewrite, or standardize a
-  GitHub issue with a separate title and a concise body using Situation,
-  Direction, Acceptance Criteria, Validation, and optional References.
+  Draft a GitHub issue, a title plus a structured body, from loose notes,
+  review comments, or a rough draft. Use when asked to write, rewrite, or
+  clean up an issue.
 disable-model-invocation: true
 ---
 

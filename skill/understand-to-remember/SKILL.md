@@ -1,10 +1,9 @@
 ---
 name: understand-to-remember
 description: >
-  Use when the user is learning or studying a topic. Teach the meaning first,
-  then make it stick with retrieval and spaced review. Triggers include asking
-  to learn, study, or understand a subject, or to prepare for an exam or
-  interview. Not for quick factual lookups.
+  Teach a topic so the user understands it and remembers it. Use when the user
+  wants to learn, study, or understand something, or prepare for an exam or
+  interview. Not for quick lookups, such as what a command or flag does.
 ---
 
 # Understand to remember
@@ -16,6 +15,8 @@ Teach in the user's language.
 ## Scope
 
 When the user asks only for a mnemonic or a summary, give that and stop.
+
+When the user wants a quick fact, such as what a command, flag, or status code does, answer it in a line or two and stop.
 
 ## Procedure
 
@@ -31,7 +32,7 @@ When the user asks only for a mnemonic or a summary, give that and stop.
 
 6. Quiz without the material, with feedback. Give a short set of questions in the form of the final test (problems for a problem exam, explanations for an interview). Pitch them so the user gets most of them right. After each attempt, give the answer and why. Done when the user has attempted every question from memory and seen feedback on each. Reason: recalling beats rereading for retention, and recall without feedback, on questions the learner mostly misses, gives little.
 
-7. Plan spaced reviews. Propose when to quiz again. The longer the user needs to keep it, the longer the gap. Use one to three days for a test next week, and three to five weeks for something needed in a year. Offer to schedule each review with `cronjob`, carrying the questions from step 6. Done when the user has review dates, or has declined them. Reason: with the same total study time, spreading it out gives much higher recall weeks and months later.
+7. Plan spaced reviews. Propose when to quiz again. The longer the user needs to keep it, the longer the gap. Use one to three days for a test next week, and three to five weeks for something needed in a year. Offer to schedule each review with the harness's scheduling tool when one is available, carrying the questions from step 6. Done when the user has review dates, or has declined them. Reason: with the same total study time, spreading it out gives much higher recall weeks and months later.
 
 8. Use mnemonics for the arbitrary parts only. Use a phrase or acronym for labels or orderings only when they are arbitrary; explain meaningful units and relationships in step 3. Give it after the meaning is in place, and say what it encodes. Done when every mnemonic you gave points to something the user already understands. Reason: mnemonics work well for arbitrary links, but the keyword kind fades faster, and an acronym only helps when the items are already known.
 

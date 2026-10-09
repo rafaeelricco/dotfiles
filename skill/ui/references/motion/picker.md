@@ -1,6 +1,6 @@
 # The Picker
 
-The picker's look is fixed by this file, not chosen per project. Use the markup, CSS, and wiring below as written; a run changes only the variant labels and how many there are. Never restyle it with the project's tokens, fonts, or colors.
+The picker's look is fixed by this file, not chosen per project. Use the markup, CSS, and wiring below as written; a run changes only the variant labels and count, plus the replay and position conditions under Rules. Never restyle it with the project's tokens, fonts, or colors.
 
 A floating dark pill at the bottom center. Not theme-aware.
 
@@ -138,7 +138,7 @@ In a framework, keep the class names and the structure; only how it is rendered 
 
 - **Exactly as written.** No extra shadows or borders.
 - **The highlight glides; the variant swap is immediate.** The pill eases to the new item, while the previewed variant changes with no transition. Animating `width` falls under the gliding-highlight allowance in `web.md` → Properties: the pill is 28px tall, absolutely positioned, and nothing depends on its layout. Under reduced motion the glide is dropped and the color change stays (`laws.md` → Reduced motion).
-- **One permitted change.** If a variant lives at the bottom center of the screen (toast stack, bottom sheet, dock), set `data-position="top"` and the picker stays clear of it. Nothing else about the picker may move or change.
+- **Position.** If a variant lives at the bottom center of the screen (toast stack, bottom sheet, dock), set `data-position="top"` and the picker stays clear of it.
 - **Replay is conditional.** A comparison of static variants gets a shorter pill with no replay button or divider.
 
 ## Behavior contract

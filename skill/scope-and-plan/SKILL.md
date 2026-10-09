@@ -1,9 +1,9 @@
 ---
 name: scope-and-plan
 description: >
-  Read diamond (fan-out → check → synthesize → refute), then plan as diffs,
-  confirm authorization, implement. Use when orchestrate loads it or the user
-  names scope-and-plan. Not for explore / "get context first" requests alone.
+  Read the code with parallel agents, check and challenge what they find, then
+  plan the change as diffs, get approval, and implement. Use when orchestrate
+  loads it or the user runs /scope-and-plan.
 ---
 
 # Scope and plan

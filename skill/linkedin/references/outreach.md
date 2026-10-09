@@ -15,7 +15,7 @@ This skill drafts. The user sends.
 - Name the reason for the contact in the first line. No warm-up paragraph.
 - Reference something real — the role, the company, a post they published.
 - One follow-up after about a week. Not two.
-- Never invasive, never a guilt appeal, never a mass-identical blast.
+- Written for this one recipient; nothing invasive, no pressure or guilt.
 
 ## Scenarios
 
