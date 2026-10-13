@@ -69,13 +69,13 @@ hypothesis fire, or show it does not.
 
 Return exactly:
 
-| Field          | Meaning                                                                |
-| -------------- | ---------------------------------------------------------------------- |
-| `CLUSTER`      | same id                                                                |
-| `RESULT`       | `REPRODUCED` \| `NOT_REPRODUCED` \| `UNABLE`                           |
-| `REPRO`        | the command run (test, script, or request) and its inputs              |
-| `EVIDENCE`     | that command's failing output on HEAD, plus the faulty `file:line`     |
-| `SMALLEST_FIX` | only when `REPRODUCED`                                                 |
+| Field          | Meaning                                                            |
+| -------------- | ------------------------------------------------------------------ |
+| `CLUSTER`      | same id                                                            |
+| `RESULT`       | `REPRODUCED` \| `NOT_REPRODUCED` \| `UNABLE`                       |
+| `REPRO`        | the command run (test, script, or request) and its inputs          |
+| `EVIDENCE`     | that command's failing output on HEAD, plus the faulty `file:line` |
+| `SMALLEST_FIX` | only when `REPRODUCED`                                             |
 
 Proof bar: the bug must be observed firing on HEAD. A test, script, or
 command was run and failed the way the hypothesis claims. Build any
