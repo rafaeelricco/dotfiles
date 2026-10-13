@@ -69,10 +69,14 @@ hypothesis fire, or show it does not.
 
 Phase 2 runs before the Scope Gate, so decide trust first, as `verify`
 does for `--pr`: run PR code only with existing explicit trust or in
-isolation without developer credentials. Trust means a user grant to
-run this PR's code (session message, or the invoking prompt when
-non-interactive) — pass it in the brief; review-author trust is not
-it. A worktree alone is not isolation. Neither holds → `UNABLE`.
+isolation without developer credentials. Trust means either a
+same-repo PR whose author is `OWNER` / `MEMBER` / `COLLABORATOR`
+(GraphQL `pullRequest{isCrossRepository authorAssociation}`), or a user grant to run this PR's code
+(session message, or the invoking prompt when non-interactive).
+Review-author trust is not it. Neither, and interactive → ask once
+for that grant before spawning Phase 2. Pass the outcome in the
+brief. A worktree alone is not isolation. No trust and no isolation →
+`UNABLE`.
 
 Return exactly:
 
