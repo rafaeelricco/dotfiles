@@ -63,8 +63,9 @@ Ignore reviewer P-labels for routing.
 
 ## Phase 2 — Proof (only CANDIDATE; separate agents)
 
-For each `CANDIDATE`, spawn **different** read-only sub-agent(s) than
-Phase 1. Goal: prove the hypothesis fires, or disprove it.
+For each `CANDIDATE`, spawn **different** sub-agent(s) than Phase 1.
+They may run code but never edit the PR worktree. Goal: make the
+hypothesis fire, or show it does not.
 
 Return exactly:
 
@@ -72,13 +73,18 @@ Return exactly:
 | -------------- | ---------------------------------------------------------------------- |
 | `CLUSTER`      | same id                                                                |
 | `RESULT`       | `REPRODUCED` \| `NOT_REPRODUCED` \| `UNABLE`                           |
-| `REPRO`        | steps or triggering callers/types that fire it                         |
-| `EVIDENCE`     | failing test, trace, or concrete reachable call chain with `file:line` |
+| `REPRO`        | the command run (test, script, or request) and its inputs              |
+| `EVIDENCE`     | that command's failing output on HEAD, plus the faulty `file:line`     |
 | `SMALLEST_FIX` | only when `REPRODUCED`                                                 |
 
-Proof bar: bug must be shown to fire under current callers/types
-(failing path or failing test). Reachability prose without a firing
-path is `NOT_REPRODUCED` or `UNABLE`, not ADDRESS.
+Proof bar: the bug must be observed firing on HEAD. A test, script, or
+command was run and failed the way the hypothesis claims. Build any
+repro in a throwaway worktree of HEAD (`git worktree add`), never in
+the PR worktree. A call chain, trace, or argument that it would fire
+is not reproduction. If it cannot be run here, the result is `UNABLE`.
+If it ran and did not fail, the result is `NOT_REPRODUCED`. Reason:
+reachability arguments that were never run are where false positives
+come from, and a fix with no observed failure cannot be confirmed.
 
 Final map:
 
