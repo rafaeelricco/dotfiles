@@ -69,8 +69,10 @@ hypothesis fire, or show it does not.
 
 Phase 2 runs before the Scope Gate, so decide trust first, as `verify`
 does for `--pr`: run PR code only with existing explicit trust or in
-isolation without developer credentials. A worktree alone is not
-isolation. Neither holds → `UNABLE`.
+isolation without developer credentials. Trust means a user grant to
+run this PR's code (session message, or the invoking prompt when
+non-interactive) — pass it in the brief; review-author trust is not
+it. A worktree alone is not isolation. Neither holds → `UNABLE`.
 
 Return exactly:
 
@@ -84,11 +86,12 @@ Return exactly:
 
 Proof bar: the bug must be observed firing on HEAD. A test, script, or
 command was run and failed the way the hypothesis claims. Build any
-repro in a throwaway detached worktree of HEAD at a fresh path
-(`git worktree add --detach "$(mktemp -d)" HEAD`), never in the PR
-worktree, and `git worktree remove --force` it once the result is
-recorded, even when the repro fails. A call chain, trace, or argument that it would fire
-is not reproduction. If it cannot be run here, the result is `UNABLE`.
+repro in a throwaway detached worktree of HEAD at a fresh path, never
+in the PR worktree, and remove it whatever the outcome — in one
+command, so the path is not lost:
+`wt="$(mktemp -d)" && git worktree add --detach "$wt" HEAD && (cd "$wt" && <repro>); git worktree remove --force "$wt"`.
+A call chain, trace, or argument that it would fire is not
+reproduction. If it cannot be run here, the result is `UNABLE`.
 If it ran and did not fail, the result is `NOT_REPRODUCED`. Reason:
 reachability arguments that were never run are where false positives
 come from, and a fix with no observed failure cannot be confirmed.
