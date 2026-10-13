@@ -67,6 +67,11 @@ For each `CANDIDATE`, spawn **different** sub-agent(s) than Phase 1.
 They may run code but never edit the PR worktree. Goal: make the
 hypothesis fire, or show it does not.
 
+Phase 2 runs before the Scope Gate, so decide trust first, as `verify`
+does for `--pr`: run PR code only with existing explicit trust or in
+isolation without developer credentials. A worktree alone is not
+isolation. Neither holds → `UNABLE`.
+
 Return exactly:
 
 | Field          | Meaning                                                            |
