@@ -84,8 +84,10 @@ Return exactly:
 
 Proof bar: the bug must be observed firing on HEAD. A test, script, or
 command was run and failed the way the hypothesis claims. Build any
-repro in a throwaway worktree of HEAD (`git worktree add`), never in
-the PR worktree. A call chain, trace, or argument that it would fire
+repro in a throwaway detached worktree of HEAD at a fresh path
+(`git worktree add --detach "$(mktemp -d)" HEAD`), never in the PR
+worktree, and `git worktree remove --force` it once the result is
+recorded, even when the repro fails. A call chain, trace, or argument that it would fire
 is not reproduction. If it cannot be run here, the result is `UNABLE`.
 If it ran and did not fail, the result is `NOT_REPRODUCED`. Reason:
 reachability arguments that were never run are where false positives
