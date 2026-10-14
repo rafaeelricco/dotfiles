@@ -97,9 +97,10 @@ command, so the path is not lost:
 Read the result from `repro exit: N`, not the command's own status.
 The status prints before cleanup, so a failed remove cannot hide it.
 A linked worktree shares the host repo's config, refs, and hooks, so use
-it for trusted PRs only. Untrusted code runs inside the isolation in a
-disposable clone instead, removed the same way:
-`d="$(mktemp -d)" && git clone -q --no-local --no-hardlinks "$(git rev-parse --show-toplevel)" "$d" && git -C "$d" checkout -q --detach "$(git rev-parse HEAD)" && { (cd "$d" && <repro>) && rc=0 || rc=$?; echo "repro exit: $rc"; rm -rf "$d"; }`.
+it for trusted PRs only. Untrusted code runs in a disposable clone with
+no `origin` remote, and that clone sits inside the isolation, not in
+place of it: the sandbox must still deny writes outside `$d`.
+`d="$(mktemp -d)" && git clone -q --no-local --no-hardlinks "$(git rev-parse --show-toplevel)" "$d" && git -C "$d" checkout -q --detach "$(git rev-parse HEAD)" && git -C "$d" remote remove origin && { (cd "$d" && <repro>) && rc=0 || rc=$?; echo "repro exit: $rc"; rm -rf "$d"; }`.
 A call chain, trace, or argument that it would fire is not
 reproduction. If it cannot be run here, the result is `UNABLE`.
 If it ran and did not fail, the result is `NOT_REPRODUCED`. Reason:
