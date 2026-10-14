@@ -93,9 +93,9 @@ command was run and failed the way the hypothesis claims. Build any
 repro in a throwaway detached worktree of HEAD at a fresh path, never
 in the PR worktree, and remove it whatever the outcome — in one
 command, so the path is not lost:
-`wt="$(mktemp -d)" && git worktree add --detach "$wt" HEAD && { (cd "$wt" && <repro>) && rc=0 || rc=$?; git worktree remove --force "$wt"; echo "repro exit: $rc"; }`.
-Read the result from `repro exit: N`, not the command's own status,
-which is the cleanup's. A call chain, trace, or argument that it would fire is not
+`wt="$(mktemp -d)" && git worktree add --detach "$wt" HEAD && { (cd "$wt" && <repro>) && rc=0 || rc=$?; echo "repro exit: $rc"; git worktree remove --force "$wt" || { rm -rf "$wt"; git worktree prune; }; }`.
+Read the result from `repro exit: N`, not the command's own status.
+The status prints before cleanup, so a failed remove cannot hide it. A call chain, trace, or argument that it would fire is not
 reproduction. If it cannot be run here, the result is `UNABLE`.
 If it ran and did not fail, the result is `NOT_REPRODUCED`. Reason:
 reachability arguments that were never run are where false positives
