@@ -63,22 +63,49 @@ Ignore reviewer P-labels for routing.
 
 ## Phase 2 — Proof (only CANDIDATE; separate agents)
 
-For each `CANDIDATE`, spawn **different** read-only sub-agent(s) than
-Phase 1. Goal: prove the hypothesis fires, or disprove it.
+For each `CANDIDATE`, spawn **different** sub-agent(s) than Phase 1.
+They may run code but never edit the PR worktree. Goal: make the
+hypothesis fire, or show it does not.
+
+Phase 2 runs before the Scope Gate, so decide trust first, as `verify`
+does for `--pr`: run PR code only with existing explicit trust or in
+isolation without developer credentials. Trust means either a
+same-repo PR whose author is `OWNER` / `MEMBER` / `COLLABORATOR`
+(GraphQL `pullRequest{isCrossRepository authorAssociation}`), or a user grant to run this PR's code
+(session message, or the invoking prompt when non-interactive).
+Review-author trust is not it. Neither, and interactive → ask once
+for that grant before spawning Phase 2. Pass the outcome in the
+brief. A worktree alone is not isolation. No trust and no isolation →
+`UNABLE`.
 
 Return exactly:
 
-| Field          | Meaning                                                                |
-| -------------- | ---------------------------------------------------------------------- |
-| `CLUSTER`      | same id                                                                |
-| `RESULT`       | `REPRODUCED` \| `NOT_REPRODUCED` \| `UNABLE`                           |
-| `REPRO`        | steps or triggering callers/types that fire it                         |
-| `EVIDENCE`     | failing test, trace, or concrete reachable call chain with `file:line` |
-| `SMALLEST_FIX` | only when `REPRODUCED`                                                 |
+| Field          | Meaning                                                            |
+| -------------- | ------------------------------------------------------------------ |
+| `CLUSTER`      | same id                                                            |
+| `RESULT`       | `REPRODUCED` \| `NOT_REPRODUCED` \| `UNABLE`                       |
+| `REPRO`        | the command run (test, script, or request) and its inputs          |
+| `EVIDENCE`     | that command's failing output on HEAD, plus the faulty `file:line` |
+| `SMALLEST_FIX` | only when `REPRODUCED`                                             |
 
-Proof bar: bug must be shown to fire under current callers/types
-(failing path or failing test). Reachability prose without a firing
-path is `NOT_REPRODUCED` or `UNABLE`, not ADDRESS.
+Proof bar: the bug must be observed firing on HEAD. A test, script, or
+command was run and failed the way the hypothesis claims. Build any
+repro in a throwaway detached worktree of HEAD at a fresh path, never
+in the PR worktree, and remove it whatever the outcome — in one
+command, so the path is not lost:
+`wt="$(mktemp -d)" && git worktree add --detach "$wt" HEAD && { (cd "$wt" && <repro>) && rc=0 || rc=$?; echo "repro exit: $rc"; git worktree remove --force "$wt" || { rm -rf "$wt"; git worktree prune; }; }`.
+Read the result from `repro exit: N`, not the command's own status.
+The status prints before cleanup, so a failed remove cannot hide it.
+A linked worktree shares the host repo's config, refs, and hooks, so use
+it for trusted PRs only. Untrusted code runs in a disposable clone with
+no `origin` remote, and that clone sits inside the isolation, not in
+place of it: the sandbox must still deny writes outside `$d`.
+`d="$(mktemp -d)" && git clone -q --no-local --no-hardlinks "$(git rev-parse --show-toplevel)" "$d" && git -C "$d" checkout -q --detach "$(git rev-parse HEAD)" && git -C "$d" remote remove origin && { (cd "$d" && <repro>) && rc=0 || rc=$?; echo "repro exit: $rc"; rm -rf "$d"; }`.
+A call chain, trace, or argument that it would fire is not
+reproduction. If it cannot be run here, the result is `UNABLE`.
+If it ran and did not fail, the result is `NOT_REPRODUCED`. Reason:
+reachability arguments that were never run are where false positives
+come from, and a fix with no observed failure cannot be confirmed.
 
 Final map:
 
