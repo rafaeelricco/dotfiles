@@ -95,7 +95,12 @@ in the PR worktree, and remove it whatever the outcome — in one
 command, so the path is not lost:
 `wt="$(mktemp -d)" && git worktree add --detach "$wt" HEAD && { (cd "$wt" && <repro>) && rc=0 || rc=$?; echo "repro exit: $rc"; git worktree remove --force "$wt" || { rm -rf "$wt"; git worktree prune; }; }`.
 Read the result from `repro exit: N`, not the command's own status.
-The status prints before cleanup, so a failed remove cannot hide it. A call chain, trace, or argument that it would fire is not
+The status prints before cleanup, so a failed remove cannot hide it.
+A linked worktree shares the host repo's config, refs, and hooks, so use
+it for trusted PRs only. Untrusted code runs inside the isolation in a
+disposable clone instead, removed the same way:
+`d="$(mktemp -d)" && git clone -q --no-local --no-hardlinks "$(git rev-parse --show-toplevel)" "$d" && git -C "$d" checkout -q --detach "$(git rev-parse HEAD)" && { (cd "$d" && <repro>) && rc=0 || rc=$?; echo "repro exit: $rc"; rm -rf "$d"; }`.
+A call chain, trace, or argument that it would fire is not
 reproduction. If it cannot be run here, the result is `UNABLE`.
 If it ran and did not fail, the result is `NOT_REPRODUCED`. Reason:
 reachability arguments that were never run are where false positives
