@@ -108,15 +108,15 @@ if (Install-RequiredWingetApp -Id 'JanDeDobbeleer.OhMyPosh' -CommandProbe 'oh-my
     }
 }
 
-foreach ($module in @('posh-git', 'Get-ChildItemColor', 'DockerCompletion')) {
-    if (Install-RequiredModule -Name $module) {
-        try {
-            Import-Module $module -ErrorAction Stop
-        } catch {
-            Write-Warning "Failed to import module $($module): $($_.Exception.Message)"
-        }
-    }
+# Completion-only modules: import after the first prompt is drawn so they don't block startup.
+$__deferredModules = @('posh-git', 'DockerCompletion') | Where-Object { Install-RequiredModule -Name $_ }
+if ($__deferredModules) {
+    # OnIdle drops -MessageData, so the module names are baked into the action.
+    $null = Register-EngineEvent -SourceIdentifier PowerShell.OnIdle -MaxTriggerCount 1 -Action (
+        [ScriptBlock]::Create("Import-Module $($__deferredModules -join ', ') -Global -ErrorAction SilentlyContinue")
+    )
 }
+Remove-Variable __deferredModules -ErrorAction SilentlyContinue
 
 if (-not (Get-Module -Name PSReadLine)) {
     try {
