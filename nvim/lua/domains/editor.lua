@@ -166,10 +166,10 @@ return {
   },
   --]]
 
-  -- In-buffer Markdown preview, loaded from the local checkout.
+  -- In-buffer Markdown preview.
   {
     "rafaeelricco/preview.nvim",
-    dir = "/Users/rafaelricco/Projects/personal/preview.nvim",
+    branch = "main",
     ft = "markdown",
     event = {
       "BufReadPost *.[mM][dD]",
