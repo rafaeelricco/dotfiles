@@ -305,6 +305,15 @@ function Resolve-DotfilesSelection {
     [pscustomobject]@{ Full = $false; Skills = $resolved }
 }
 
+$script:DotfilesCommandCache = @{}
+function Test-DotfilesCommand {
+    param([string]$Name)
+    if (-not $script:DotfilesCommandCache.ContainsKey($Name)) {
+        $script:DotfilesCommandCache[$Name] = [bool](Get-Command -Name $Name -CommandType Application, ExternalScript -ErrorAction SilentlyContinue)
+    }
+    $script:DotfilesCommandCache[$Name]
+}
+
 function Get-DotfilesManagers {
     $items = [Collections.Generic.List[object]]::new()
     $claude = if ($env:CLAUDE_CONFIG_DIR) { Get-DotfilesFullPath $env:CLAUDE_CONFIG_DIR } else { Get-DotfilesFullPath (Join-Path $HOME '.claude') }
@@ -321,7 +330,7 @@ function Get-DotfilesManagers {
     )
     foreach ($def in $defs) {
         $skip = [bool]$script:Options[$def.Skip]
-        $detected = ($def.Cmd -and (Get-Command -Name $def.Cmd -CommandType Application, ExternalScript -ErrorAction SilentlyContinue)) -or
+        $detected = ($def.Cmd -and (Test-DotfilesCommand $def.Cmd)) -or
             (Test-Path -LiteralPath $def.Home -PathType Container)
         $items.Add([pscustomobject]@{ Name = $def.Name; Home = $def.Home; Skip = $skip; Detected = [bool]$detected; Guidance = $def.Guidance; SkillDir = $def.SkillDir }) | Out-Null
     }

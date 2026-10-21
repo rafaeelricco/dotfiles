@@ -70,6 +70,7 @@ class ReleaseHTTPFixture:
 
 
 class DeploymentTests(unittest.TestCase):
+    @unittest.skipIf(os.name == "nt", "deploy_release swaps a POSIX `current` symlink; deploys run only on the Linux runner")
     def test_publish_smoke_idempotence_and_immutable_history(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             parent = Path(temporary)
@@ -104,6 +105,7 @@ class DeploymentTests(unittest.TestCase):
             state = json.loads((root / deploy_release.STATE_NAME).read_text(encoding="utf-8"))
             self.assertEqual(state, {"latest_run_number": 3, "latest_sha": second_sha, "schema": 1})
 
+    @unittest.skipIf(os.name == "nt", "deploy_release swaps a POSIX `current` symlink; deploys run only on the Linux runner")
     def test_smoke_failure_rolls_current_back_and_keeps_success_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             parent = Path(temporary)
@@ -122,6 +124,7 @@ class DeploymentTests(unittest.TestCase):
             self.assertEqual((root / deploy_release.STATE_NAME).read_bytes(), before_state)
             self.assertTrue((root / "releases" / second_sha / "VERSION").is_file())
 
+    @unittest.skipIf(os.name == "nt", "deploy_release swaps a POSIX `current` symlink; deploys run only on the Linux runner")
     def test_stale_run_and_changed_existing_sha_are_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             parent = Path(temporary)
@@ -168,6 +171,7 @@ class DeploymentTests(unittest.TestCase):
             with self.assertRaisesRegex(deploy_release.DeploymentError, "loopback"):
                 deploy_release._base_url("http://example.com")
 
+    @unittest.skipIf(os.name == "nt", "deploy_release swaps a POSIX `current` symlink; deploys run only on the Linux runner")
     def test_unknown_skill_must_return_404_and_current_is_rolled_back(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             parent = Path(temporary)
@@ -180,6 +184,7 @@ class DeploymentTests(unittest.TestCase):
             self.assertFalse((root / "current").exists())
             self.assertFalse((root / deploy_release.STATE_NAME).exists())
 
+    @unittest.skipIf(os.name == "nt", "deploy_release swaps a POSIX `current` symlink; deploys run only on the Linux runner")
     def test_powershell_aliases_fetch_same_release_and_forward_arguments(self) -> None:
         pwsh = shutil.which(os.environ.get("DOTFILES_TEST_PWSH", "pwsh"))
         if not pwsh:
