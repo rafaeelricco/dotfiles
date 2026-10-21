@@ -488,6 +488,20 @@ class BashInstallers(LifecycleCases, unittest.TestCase):
         self.assertNotIn("obsolete-skill", self.names())
         self.assertEqual((self.skills / "ui").resolve(), (self.source / "skill/ui").resolve())
 
+    def test_uninstall_removes_links_under_external_agent_homes(self):
+        external = Path(tempfile.mkdtemp(prefix="dotfiles-external-")).resolve()
+        self.addCleanup(shutil.rmtree, external, ignore_errors=True)
+        for name in (".agents", ".cursor"):
+            (external / name).mkdir()
+            (self.home / name).symlink_to(external / name, target_is_directory=True)
+        self.assert_success(self.invoke(["ui", "--skip-claude", "--skip-grok", "--skip-hermes"]))
+        for name in (".agents", ".cursor"):
+            self.assertTrue((external / name / "skills/ui").is_symlink())
+        result = self.invoke(action="uninstall")
+        self.assert_success(result)
+        for name in (".agents", ".cursor"):
+            self.assertFalse((external / name / "skills/ui").is_symlink(), result.stdout)
+
 
 @unittest.skipUnless(PWSH, "PowerShell 7 runtime unavailable")
 class PowerShellInstallers(LifecycleCases, unittest.TestCase):

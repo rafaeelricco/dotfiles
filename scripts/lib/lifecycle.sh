@@ -57,7 +57,8 @@ dotfiles_path_is_home_child() {
   path_real="${parent_real}/${name}"
   case "${path_real}" in "${home_real}"/*) return 0 ;; esac
   for root in "${CLAUDE_CONFIG_DIR:-${HOME}/.claude}" "${CODEX_HOME:-${HOME}/.codex}" \
-    "${GROK_HOME:-${HOME}/.grok}" "${HERMES_HOME:-${HOME}/.hermes}"; do
+    "${GROK_HOME:-${HOME}/.grok}" "${HERMES_HOME:-${HOME}/.hermes}" \
+    "${HOME}/.agents" "${HOME}/.cursor"; do
     root="$(dotfiles_abs_path "${root}")"
     [ -d "${root}" ] && root="$(cd "${root}" 2>/dev/null && pwd -P)"
     root_real="${root%/}"
