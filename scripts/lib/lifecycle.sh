@@ -194,7 +194,10 @@ dotfiles_lock() {
   fi
   DOTFILES_LOCK_HELD=1
   printf '%s\n' "$$" > "${DOTFILES_LOCK}/pid" || { rmdir "${DOTFILES_LOCK}" 2>/dev/null || true; dotfiles_die "failed to record lifecycle lock"; }
-  trap 'dotfiles_unlock' EXIT HUP INT TERM
+  trap 'dotfiles_unlock' EXIT
+  trap 'exit 129' HUP
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
 }
 
 dotfiles_unlock() {

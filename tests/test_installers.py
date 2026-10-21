@@ -4,11 +4,14 @@ import http.server
 import json
 import os
 from pathlib import Path
+import shlex
 import shutil
+import signal
 import subprocess
 import tarfile
 import tempfile
 import threading
+import time
 import unittest
 import zipfile
 
@@ -501,6 +504,25 @@ class BashInstallers(LifecycleCases, unittest.TestCase):
         self.assert_success(result)
         for name in (".agents", ".cursor"):
             self.assertFalse((external / name / "skills/ui").is_symlink(), result.stdout)
+
+    def test_termination_signal_exits_while_holding_lock(self):
+        script = self.base / "locker.sh"
+        script.write_text("set -eo pipefail\n. " + shlex.quote(str(REPO / "scripts/lib/lifecycle.sh")) +
+                          "\ndotfiles_lock\nsleep 2\necho CONTINUED\n")
+        lock = self.state_base / "install-state.lock"
+        for sig, code in ((signal.SIGTERM, 143), (signal.SIGHUP, 129)):
+            with self.subTest(signal=sig.name):
+                proc = subprocess.Popen([BASH, str(script)], env=self.env, text=True,
+                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                deadline = time.monotonic() + 10
+                while not lock.is_dir() and time.monotonic() < deadline:
+                    time.sleep(0.05)
+                self.assertTrue(lock.is_dir())
+                proc.send_signal(sig)
+                out, err = proc.communicate(timeout=10)
+                self.assertNotIn("CONTINUED", out, err)
+                self.assertEqual(proc.returncode, code, out + err)
+                self.assertFalse(lock.exists())
 
 
 @unittest.skipUnless(PWSH, "PowerShell 7 runtime unavailable")
