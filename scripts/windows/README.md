@@ -2,7 +2,9 @@
 
 These files configure PowerShell and WSL.
 `install.ps1` copies `powershell/Microsoft.PowerShell_profile.ps1` to `$PROFILE`.
-Reinstalling keeps the existing profile unless you use `-Override`.
+Reinstalling preserves the existing profile. Full setup also links the theme and
+records managed Windows Terminal changes; selected-skill installation leaves
+profiles and terminal settings untouched. See the [setup guide](../../docs/setup.md).
 
 | Topic                                                       | Purpose                                            |
 | ----------------------------------------------------------- | -------------------------------------------------- |
@@ -14,8 +16,11 @@ On Windows, install Docker Desktop. This repository no longer installs or shims 
 
 ### After a clean Windows install
 
-1. Install Windows 11, PowerShell 7, and Git. Enable Developer Mode for symlinks.
-2. Run `.\install.ps1 -Local` to set up the PowerShell profile and Windows Terminal keys.
+1. Install Windows 11 and PowerShell 7. Enable Developer Mode for symlinks.
+   Install Git if you will clone or develop this checkout.
+2. Run `.\install.ps1` from the checkout for full profile and Windows Terminal
+   setup, or run the [published full installer](../../README.md#full-setup).
+   A selected command such as `.\install.ps1 orchestrate` installs skills only.
 3. Install WSL2 and the distro as Admin. Reboot if needed:
 
    ```powershell
