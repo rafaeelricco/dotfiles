@@ -473,6 +473,21 @@ class BashInstallers(LifecycleCases, unittest.TestCase):
         self.assertFalse((actual / "skills/ui").is_symlink())
         self.assertTrue((self.home / ".claude").is_symlink())
 
+    def test_full_install_directory_link_migration_drops_obsolete_skill(self):
+        old = self.home / "old-dotfiles"
+        shutil.copytree(self.source, old)
+        (old / "skill/obsolete-skill").mkdir()
+        (old / "skill/obsolete-skill/SKILL.md").write_text("# Obsolete\n")
+        self.skills.parent.mkdir(parents=True)
+        self.skills.symlink_to(old / "skill", target_is_directory=True)
+        self.state_base.mkdir(parents=True, exist_ok=True)
+        (self.state_base / "local-install-state").write_text(
+            "dotfiles-local-lifecycle-state-v1\nsource\t" + str(old) + "\n")
+        self.assert_success(self.invoke(self.skip_flags()))
+        self.assertFalse(self.skills.is_symlink())
+        self.assertNotIn("obsolete-skill", self.names())
+        self.assertEqual((self.skills / "ui").resolve(), (self.source / "skill/ui").resolve())
+
 
 @unittest.skipUnless(PWSH, "PowerShell 7 runtime unavailable")
 class PowerShellInstallers(LifecycleCases, unittest.TestCase):

@@ -177,7 +177,7 @@ plan_skill_directory() {
       fi
     done
   fi
-  if [ "${kind}" = migrate-directory-link ]; then
+  if [ "${kind}" = migrate-directory-link ] && [ "${FULL_INSTALL}" -eq 0 ]; then
     local root name wanted
     root="${INSTALL_ROOT}/skill"
     if [ -L "${dir}" ]; then
@@ -187,7 +187,6 @@ plan_skill_directory() {
         ;;
       esac
     fi
-    for wanted in "${SELECTED_SKILLS[@]}"; do :; done
     for name in "${root}"/*; do
       [ -f "${name}/SKILL.md" ] || continue
       wanted="$(basename "${name}")"
