@@ -218,5 +218,51 @@ class DeploymentTests(unittest.TestCase):
                     self.assertIn(expected, result.stdout, script)
 
 
+class RunnerJobGuardTests(unittest.TestCase):
+    GUARD = Path(__file__).resolve().parents[1] / "scripts/hosting/runner-job-guard.sh"
+    RELEASE = {
+        "GITHUB_REPOSITORY": "rafaeelricco/dotfiles",
+        "GITHUB_WORKFLOW_REF": "rafaeelricco/dotfiles/.github/workflows/release.yml@refs/heads/main",
+        "GITHUB_REF": "refs/heads/main",
+        "GITHUB_EVENT_NAME": "push",
+    }
+
+    def run_guard(self, **overrides: str) -> subprocess.CompletedProcess[str]:
+        bash = shutil.which("bash")
+        if not bash or os.name == "nt":
+            self.skipTest("the runner hook targets the Linux runner's Bash")
+        environment = {"PATH": os.environ.get("PATH", "")}
+        environment.update(self.RELEASE)
+        environment.update(overrides)
+        return subprocess.run([bash, str(self.GUARD)], env=environment, capture_output=True, text=True)
+
+    def test_release_workflow_on_main_is_allowed(self) -> None:
+        for event in ("push", "workflow_dispatch"):
+            with self.subTest(event=event):
+                self.assertEqual(self.run_guard(GITHUB_EVENT_NAME=event).returncode, 0)
+
+    def test_other_jobs_are_refused(self) -> None:
+        cases = {
+            "other workflow": {"GITHUB_WORKFLOW_REF": "rafaeelricco/dotfiles/.github/workflows/evil.yml@refs/heads/main"},
+            "pull request": {
+                "GITHUB_EVENT_NAME": "pull_request",
+                "GITHUB_REF": "refs/pull/9/merge",
+                "GITHUB_WORKFLOW_REF": "rafaeelricco/dotfiles/.github/workflows/release.yml@refs/pull/9/merge",
+            },
+            "pull_request_target": {"GITHUB_EVENT_NAME": "pull_request_target"},
+            "other branch": {
+                "GITHUB_REF": "refs/heads/feature",
+                "GITHUB_WORKFLOW_REF": "rafaeelricco/dotfiles/.github/workflows/release.yml@refs/heads/feature",
+            },
+            "other repository": {"GITHUB_REPOSITORY": "someone/dotfiles"},
+            "missing context": {"GITHUB_WORKFLOW_REF": ""},
+        }
+        for name, overrides in cases.items():
+            with self.subTest(name=name):
+                result = self.run_guard(**overrides)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("runner-job-guard: refusing job", result.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()

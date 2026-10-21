@@ -44,10 +44,25 @@ One-time administrative setup on `root@r1cco.com`:
    systemctl reload nginx
    ```
 
+6. Install [the job guard](../scripts/hosting/runner-job-guard.sh) as a root-owned
+   job-started hook, then restart the runner service:
+
+   ```bash
+   install -o root -g root -m 0755 scripts/hosting/runner-job-guard.sh /usr/local/libexec/dotfiles-runner-job-guard.sh
+   echo 'ACTIONS_RUNNER_HOOK_JOB_STARTED=/usr/local/libexec/dotfiles-runner-job-guard.sh' >> /srv/r1cco-dotfiles-runner/.env
+   systemctl restart actions.runner.rafaeelricco-dotfiles.VPS-Runner-dotfiles.service
+   ```
+
 The runner is repository-scoped. Existing job-kit/portfolio runners cannot pick
 up dotfiles jobs. It uses the existing service account; this is not a separate
-security boundary from other processes using that account. Only trusted `main`
-deployment jobs run here; pull-request tests use GitHub-hosted runners.
+security boundary from other processes using that account.
+
+GitHub routes jobs to a self-hosted runner by label, not by workflow, so any
+workflow in this public repository, including one added by an approved fork pull
+request, can request `dotfiles-deploy`. The job guard runs before every job's
+steps and fails the job unless it is `release.yml` on `refs/heads/main`, started
+by `push` or `workflow_dispatch`. Pull-request tests use GitHub-hosted runners.
+A refused job fails with `runner-job-guard: refusing job` in its setup log.
 
 Inspect the runner from its directory:
 
