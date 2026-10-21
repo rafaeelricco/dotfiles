@@ -1,35 +1,18 @@
-<div align="center">
-
 # x-tweet-fetcher
 
-**Fetch X/Twitter tweets, replies, timelines, lists, and articles — no login, no API keys.**
+Fetch X/Twitter tweets, replies, timelines, lists, and articles without logging in or using API keys.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-green.svg)](https://www.python.org)
 [![GitHub stars](https://img.shields.io/github/stars/ythx-101/x-tweet-fetcher?style=social)](https://github.com/ythx-101/x-tweet-fetcher)
 
-_Three backends · Auto fallback · Unified JSON schema · Built for AI agents_
+It uses three backends with automatic fallback and a shared JSON schema for AI agents.
 
 [Quick Start](#-quick-start) · [Backends](#-three-backends) · [Capabilities](#-capabilities) · [Python API](#-python-api) · [Self-hosted Nitter](#-self-hosted-nitter) · [Migrating from v1](#-migrating-from-v1)
 
-</div>
+<a id="-quick-start"></a>
 
----
-
-## 😤 Problem
-
-```
-You: fetch that tweet / list / article for me
-AI:  I can't access X/Twitter. Please copy-paste the content manually.
-
-You: ...seriously?
-```
-
-X has no free API. Scraping gets you blocked. Browser automation is fragile in headless environments.
-
-**x-tweet-fetcher** solves this with **smart backend routing**: FxTwitter for single tweets (zero deps), Nitter for timelines and search (direct HTTP), a browser driver for everything else — with automatic fallback between them.
-
-## 🚀 Quick Start
+## Quick start
 
 ```bash
 git clone https://github.com/ythx-101/x-tweet-fetcher
@@ -49,16 +32,18 @@ xtf --search "openclaw" --limit 10
 xtf --user elonmusk --text-only
 ```
 
-Prefer not to install? `python3 scripts/fetch_tweet.py --url ...` works straight from the clone (same flags).
+To run without installing, use `python3 scripts/fetch_tweet.py --url ...` from the clone. It accepts the same flags.
 
-## 🔀 Three Backends
+<a id="-three-backends"></a>
 
-| Backend            | Deps                    | Speed | Covers                                        |
-| ------------------ | ----------------------- | ----- | --------------------------------------------- |
-| **fxtwitter**      | None (stdlib)           | ⚡⚡  | Single tweets, user profiles                  |
-| **nitter**         | A Nitter instance       | ⚡    | Timeline, search, replies, mentions           |
-| **browser**        | Camofox _or_ Playwright | 🐢    | Everything above + **Lists** + **X Articles** |
-| **auto** (default) | Best available          | ⚡→🐢 | Nitter first, browser fallback                |
+## Backends
+
+| Backend        | Deps                    | Speed | Covers                                |
+| -------------- | ----------------------- | ----- | ------------------------------------- |
+| fxtwitter      | None (stdlib)           | ⚡⚡  | Single tweets, user profiles          |
+| nitter         | A Nitter instance       | ⚡    | Timeline, search, replies, mentions   |
+| browser        | Camofox _or_ Playwright | 🐢    | Everything above + Lists + X Articles |
+| auto (default) | Best available          | ⚡→🐢 | Nitter first, browser fallback        |
 
 ```bash
 xtf --user elonmusk                    # auto (default)
@@ -66,14 +51,16 @@ xtf --user elonmusk --backend nitter   # direct HTTP only
 xtf --list 1455045069516357634         # lists always use the browser
 ```
 
-**Browser driver** defaults to Camofox (`localhost:9377`). Playwright users:
+The browser driver defaults to Camofox (`localhost:9377`). To use Playwright:
 
 ```bash
 pip install ".[playwright]"            # from the clone
 export XTF_BROWSER=playwright          # or: --browser-driver playwright
 ```
 
-## 📊 Capabilities
+<a id="-capabilities"></a>
+
+## Capabilities
 
 | Feature                                       | Flag              | Backend            |
 | --------------------------------------------- | ----------------- | ------------------ |
@@ -86,11 +73,28 @@ export XTF_BROWSER=playwright          # or: --browser-driver playwright
 | X Article full text                           | `--article`       | browser            |
 | Mentions monitor (incremental, cron-friendly) | `--monitor`       | nitter / browser   |
 
-**Exit codes** (cron-friendly): `0` success / no new mentions · `1` error / new mentions found · `2` monitor setup error.
+Exit codes for cron jobs:
 
-**Errors are machine-readable.** Every failure carries `error` (human message) plus `error_code` — one of `invalid_input`, `not_found`, `rate_limited`, `upstream_down`, `backend_unavailable`, `all_backends_failed` — so agents can branch on it. `all_backends_failed` additionally includes per-backend `error_causes`.
+| Code | Meaning                     |
+| ---- | --------------------------- |
+| `0`  | Success / no new mentions.  |
+| `1`  | Error / new mentions found. |
+| `2`  | Monitor setup error.        |
 
-## 🐍 Python API
+Every failure includes `error` with a human-readable message and an `error_code` that agents can branch on:
+
+- `invalid_input`
+- `not_found`
+- `rate_limited`
+- `upstream_down`
+- `backend_unavailable`
+- `all_backends_failed`
+
+`all_backends_failed` also includes per-backend `error_causes`.
+
+<a id="-python-api"></a>
+
+## Python API
 
 ```python
 from xtf import Router, NotFound, RateLimited
@@ -106,11 +110,14 @@ for tw in tweets:
     print(tw.to_dict())                            # JSON-ready
 ```
 
-All backends normalize into one `Tweet` / `Reply` / `Profile` / `Article` schema — your downstream prompt only ever needs to describe one shape.
+All backends use one `Tweet` / `Reply` / `Profile` / `Article` schema.
+A downstream prompt only needs to describe one data shape.
 
-## ⚙️ Configuration
+<a id="-configuration"></a>
 
-Everything is an environment variable (CLI flags override):
+## Configuration
+
+Use environment variables to configure the tool. CLI flags override them:
 
 | Variable           | Default                 | Meaning                                                        |
 | ------------------ | ----------------------- | -------------------------------------------------------------- |
@@ -120,11 +127,14 @@ Everything is an environment variable (CLI flags override):
 | `XTF_LANG`         | `zh`                    | Message language: `zh` or `en`                                 |
 | `XTF_CACHE_DIR`    | `~/.x-tweet-fetcher`    | Mentions-monitor cache                                         |
 
-`NITTER_URL` (the v1 name) is still honored as a fallback for `XTF_NITTER`.
+`NITTER_URL`, the v1 name, still works as a fallback for `XTF_NITTER`.
 
-## 🏗 Self-hosted Nitter
+<a id="-self-hosted-nitter"></a>
 
-Public Nitter instances are unreliable and frequently dead. **Self-hosting is strongly recommended** for timeline/search/replies:
+## Self-hosted Nitter
+
+Use a self-hosted Nitter instance for timelines, search, and replies.
+Public instances are unreliable and often go offline:
 
 ```bash
 # See https://github.com/zedeus/nitter for full setup
@@ -132,15 +142,19 @@ docker run -d -p 8788:8080 --name nitter zedeus/nitter:latest
 export XTF_NITTER=http://127.0.0.1:8788
 ```
 
-Multiple instances failover automatically:
+Configure multiple instances for automatic failover:
 
 ```bash
 export XTF_NITTER=http://127.0.0.1:8788,https://your-backup-instance.example
 ```
 
-If no instance is reachable, you get a clear error (`error_code: "all_backends_failed"`, with each backend's reason — e.g. `backend_unavailable` — under `error_causes`) telling you exactly what to set. Never a silent empty result.
+If no instance is reachable, the request fails rather than returning an empty result.
+The response includes `error_code: "all_backends_failed"` and each backend's reason, such as `backend_unavailable`, under `error_causes`.
+The error tells you what to configure.
 
-## 📁 Project Structure
+<a id="-project-structure"></a>
+
+## Project structure
 
 ```
 src/xtf/
@@ -157,11 +171,21 @@ scripts/fetch_tweet.py   # v1-compatible entry point (thin shim)
 tests/fixtures/          # captured page structures — regression protection
 ```
 
-## 🔄 Migrating from v1
+<a id="-migrating-from-v1"></a>
 
-`python3 scripts/fetch_tweet.py` still works with all v1 flags and exit codes, and JSON fields are unchanged for every mode **except `--search`**, whose per-tweet schema is now unified with `--user` (fields renamed, `url`/`has_media`/`media_urls` dropped). See [MIGRATION.md](MIGRATION.md) for the full list, including where the analytics/China/Obsidian scripts went (spoiler: their own repos — this project is now purely about fetching tweets; the old world lives at the `v1-legacy` tag).
+## Migrating from v1
 
-## 🧪 Development
+`python3 scripts/fetch_tweet.py` still accepts all v1 flags and exit codes.
+JSON fields are unchanged except for `--search`, which now uses the `--user` tweet schema.
+Some fields were renamed; `url`/`has_media`/`media_urls` were removed.
+
+See [MIGRATION.md](MIGRATION.md) for the full changes and where the analytics/China/Obsidian scripts moved.
+Those scripts have their own repositories. This project now focuses on fetching tweets.
+The old version remains at the `v1-legacy` tag.
+
+<a id="-development"></a>
+
+## Development
 
 ```bash
 pip install -e ".[dev]"
@@ -169,26 +193,40 @@ pytest          # all parsers locked by fixture tests
 ruff check src tests
 ```
 
-When Nitter or X change their page structure, capture a fresh snapshot into `tests/fixtures/` — the failing test will show exactly which parser and field broke.
+When Nitter or X change their page structure, capture a fresh snapshot in `tests/fixtures/`.
+The failing test identifies which parser and field broke.
 
-## 🙏 Acknowledgments
+<a id="-problem"></a>
 
-- **[Nitter](https://github.com/zedeus/nitter)** by [zedeus](https://github.com/zedeus) — self-hosted Twitter frontend
-- **[FxTwitter](https://github.com/FxEmbed/FxEmbed)** — public API for single tweet data
-- **[Camofox](https://github.com/openclaw/camofox)** — anti-fingerprint browser, default browser driver
-- **[Playwright](https://github.com/microsoft/playwright)** — alternative browser automation driver
-- **[OpenClaw](https://github.com/openclaw/openclaw)** — AI agent framework this tool grew up in
+## Background
 
-## 📜 License
+```
+You: fetch that tweet / list / article for me
+AI:  I can't access X/Twitter. Please copy-paste the content manually.
+
+You: ...seriously?
+```
+
+X has no free API. Scraping gets you blocked. Browser automation is fragile in headless environments.
+
+FxTwitter handles single tweets without dependencies.
+Nitter uses direct HTTP for timelines and search.
+A browser driver handles other requests. The router falls back automatically between backends.
+
+<a id="-acknowledgments"></a>
+
+## Acknowledgments
+
+- [Nitter](https://github.com/zedeus/nitter) by [zedeus](https://github.com/zedeus): self-hosted Twitter frontend
+- [FxTwitter](https://github.com/FxEmbed/FxEmbed): public API for single tweet data
+- [Camofox](https://github.com/openclaw/camofox): anti-fingerprint browser, default browser driver
+- [Playwright](https://github.com/microsoft/playwright): alternative browser automation driver
+- [OpenClaw](https://github.com/openclaw/openclaw): AI agent framework this tool grew up in
+
+<a id="-license"></a>
+
+## License
 
 [MIT](https://opensource.org/licenses/MIT) © 2026 ythx-101
 
----
-
-<div align="center">
-
-_Three backends. Auto fallback. Built for AI agents._
-
-**[GitHub](https://github.com/ythx-101/x-tweet-fetcher)** · **[Issues](https://github.com/ythx-101/x-tweet-fetcher/issues)** · **[#22 Teahouse](https://github.com/ythx-101/openclaw-qa/discussions/22)** · **[Agent Waystation](https://github.com/ythx-101/openclaw-qa)**
-
-</div>
+[GitHub](https://github.com/ythx-101/x-tweet-fetcher) · [Issues](https://github.com/ythx-101/x-tweet-fetcher/issues) · [#22 Teahouse](https://github.com/ythx-101/openclaw-qa/discussions/22) · [Agent Waystation](https://github.com/ythx-101/openclaw-qa)
