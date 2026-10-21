@@ -326,6 +326,19 @@ class LifecycleCases:
         self.assertTrue((self.source / "skill" / "ui" / "SKILL.md").exists())
         self.assertTrue((self.source / "skill" / "orchestrate" / "SKILL.md").exists())
 
+    def test_missing_recorded_source_is_dropped_and_its_links_preserved(self):
+        other = self.base / "other"
+        shutil.copytree(self.source, other, symlinks=True)
+        self.assert_success(self.invoke(["ui"] + self.skip_flags(), script=other / ("scripts/install.sh" if self.runtime == "bash" else "install.ps1")))
+        self.assert_success(self.invoke(["orchestrate"] + self.skip_flags()))
+        shutil.rmtree(other)
+        result = self.invoke(["orchestrate"] + self.skip_flags())
+        self.assert_success(result)
+        self.assertIn("lifecycle source is unavailable or invalid", result.stderr)
+        self.assert_success(self.invoke(action="uninstall"))
+        self.assertEqual(self.names(), {"ui"})
+        self.assertTrue((self.skills / "ui").is_symlink())
+
     def test_remote_fixture_preview_install_and_corrupt_update(self):
         if not self.release:
             self.skipTest("requires DOTFILES_TEST_RELEASE_DIR built artifact")

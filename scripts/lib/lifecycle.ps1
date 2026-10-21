@@ -185,8 +185,11 @@ function Read-DotfilesState {
         if ($parts[0] -eq 'terminaldelta' -and $parts[2] -notmatch '\A[A-Za-z0-9+/]*={0,2}\z') { throw "malformed terminal delta at line $($i + 1)" }
         Add-DotfilesRecord -State $State -Type $parts[0] -Fields @($parts[1..($parts.Count - 1)])
     }
-    foreach ($source in $State.Sources) {
-        if (-not (Test-DotfilesValidSourceRoot $source)) { throw "untrusted source root in lifecycle state: $source" }
+    foreach ($source in @($State.Sources)) {
+        if (Test-DotfilesValidSourceRoot $source) { continue }
+        [Console]::Error.WriteLine("warning: lifecycle source is unavailable or invalid; links to it will be preserved: $source")
+        $State.Sources.Remove($source) | Out-Null
+        $State.Records.RemoveAll([Predicate[object]]{ param($r) $r.Type -eq 'source' -and $r.Fields[0] -ceq $source }) | Out-Null
     }
 }
 
