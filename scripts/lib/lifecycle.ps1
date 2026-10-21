@@ -423,7 +423,10 @@ function Get-DotfilesLinkPlan {
         }
     }
     $legacyPaths = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    $skillSource = Join-Path $Root 'skill'
     foreach ($target in @($targets.ToArray())) {
+        # Only skill directories migrate; guidance and theme parents are agent or profile homes.
+        if (-not (Test-DotfilesSamePath (Split-Path -Parent $target.Target) $skillSource)) { continue }
         $skillHome = Split-Path -Parent $target.Destination
         if (-not $legacyPaths.Add($skillHome)) { continue }
         $parentItem = Get-DotfilesItem $skillHome

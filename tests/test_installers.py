@@ -160,6 +160,16 @@ class LifecycleCases:
         self.assertTrue(guidance.is_symlink())
         self.assertEqual(guidance.resolve(), (self.source / "INSTRUCTIONS.md").resolve())
 
+    def test_full_install_keeps_symlinked_agent_home(self):
+        real = self.base / "real-codex"
+        real.mkdir()
+        (real / "config.toml").write_text("keep")
+        (self.home / ".codex").symlink_to(real, target_is_directory=True)
+        self.assert_success(self.invoke(self.skip_flags()))
+        self.assertTrue((self.home / ".codex").is_symlink())
+        self.assertEqual((real / "config.toml").read_text(), "keep")
+        self.assertEqual((real / "AGENTS.md").resolve(), (self.source / "INSTRUCTIONS.md").resolve())
+
     def test_dry_run_does_not_install(self):
         option = "--dry-run" if self.runtime == "bash" else "-DryRun"
         self.assert_success(self.invoke(["orchestrate", option] + self.skip_flags()))
