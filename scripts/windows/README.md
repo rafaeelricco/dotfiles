@@ -1,58 +1,50 @@
 # Windows helpers
 
-Terminal / WSL pieces live here and in `powershell/Microsoft.PowerShell_profile.ps1`
-(copied by `install.ps1` → `$PROFILE`; re-install keeps the existing file unless `-Override`).
+These files configure PowerShell and WSL.
+`install.ps1` copies `powershell/Microsoft.PowerShell_profile.ps1` to `$PROFILE`.
+Reinstalling keeps the existing profile unless you use `-Override`.
 
-| Topic                                                       | Goal                                                                 |
-| ----------------------------------------------------------- | -------------------------------------------------------------------- |
-| [Node / pnpm via WSL](#node--pnpm-via-wsl-pc-reset-runbook) | `bash …` from PowerShell uses **Linux** node/pnpm, not Windows shims |
+| Topic                                                       | Purpose                                            |
+| ----------------------------------------------------------- | -------------------------------------------------- |
+| [Node / pnpm via WSL](#node--pnpm-via-wsl-pc-reset-runbook) | Use Linux Node/pnpm with `bash …` from PowerShell. |
 
-**Docker:** install **Docker Desktop** on Windows. This repo no longer installs or
-shims docker-ce inside WSL.
-
----
+On Windows, install Docker Desktop. This repository no longer installs or shims docker-ce inside WSL.
 
 ## Node / pnpm via WSL (PC reset runbook)
 
-### Why this approach
+### After a clean Windows install
 
-Windows and WSL share `PATH` via interop. A Windows Node install appears inside
-WSL as `/mnt/*/Program Files/nodejs/`. Its `pnpm` shim is a POSIX script that
-runs `exec node`, but WSL only has `node.exe` → **`exec: node: not found`**.
+1. Install Windows 11, PowerShell 7, and Git. Enable Developer Mode for symlinks.
+2. Run `.\install.ps1 -Local` to set up the PowerShell profile and Windows Terminal keys.
+3. Install WSL2 and the distro as Admin. Reboot if needed:
 
-That breaks any **non-interactive** bash started from PowerShell, e.g.:
+   ```powershell
+   wsl --install -d Ubuntu-24.04
+   ```
 
-```powershell
-bash utils.sh install
-bash -c 'pnpm install'
-```
+4. Set up Homebrew, Node/pnpm, and the environment once as the Linux user, not root:
 
-Non-interactive bash does **not** load `~/.bashrc`, so Homebrew (where Linux
-Node/pnpm live) never enters `PATH`, and the Windows shim wins.
+   ```powershell
+   wsl -d Ubuntu-24.04 -- bash /mnt/<drive>/.../dotfiles/scripts/windows/setup-wsl-node.sh
+   ```
 
-**Chosen fix (global, not per-repo):**
+   The script stops if brew is missing. Install Homebrew first ([brew.sh](https://brew.sh)), then run it again.
 
-1. Keep real Node/pnpm **inside WSL** via Homebrew (`/home/linuxbrew/...`).
-2. One env file: `~/.wsl_dev_env` → `eval "$(brew shellenv)"` (template in this folder).
-3. PowerShell `$PROFILE` sets `BASH_ENV` + `WSLENV` so **every** non-interactive
-   bash from Windows sources that file first.
-4. Interactive WSL shells source the same file from `~/.bashrc` / `~/.profile`.
-5. Same profile lists `GITHUB_TOKEN` and `GH_TOKEN` on `WSLENV` so project
-   `.npmrc` lines like `_authToken=${GITHUB_TOKEN}` expand inside WSL bash/pnpm
-   (WSL does not inherit arbitrary Windows process env vars otherwise).
+   The manual equivalent is:
 
-**Rejected alternatives:**
+   ```bash
+   # inside WSL
+   brew install node pnpm
+   cp /mnt/<drive>/.../dotfiles/scripts/windows/wsl_dev_env ~/.wsl_dev_env
+   # ensure ~/.bashrc and ~/.profile source ~/.wsl_dev_env (setup script does this)
+   ```
 
-| Idea                                            | Why not                                                  |
-| ----------------------------------------------- | -------------------------------------------------------- |
-| Patch each project `utils.sh`                   | Not portable; forgotten on every new repo                |
-| PowerShell `pnpm` wrapper with silent WSL retry | Never runs for `pnpm` _inside_ a bash script             |
-| Uninstall Windows Node                          | Optional; Windows tooling can keep its own Node          |
-| Filter Windows paths out of WSL `PATH`          | Breaks on spaces (`Program Files`); brew-first is enough |
-| Rely on Windows User env alone for tokens       | Still missing in WSL unless listed on `WSLENV`           |
+5. Reload the PowerShell profile. The installer copies it once; keep secrets only in the live `$PROFILE`.
+   Start a new session or run:
 
-Windows `pnpm` / `node` in a pure PowerShell session stay unchanged. Only bash
-launched from Windows is steered toward Linux toolchain.
+   ```powershell
+   . $PROFILE
+   ```
 
 ### Assumptions (match current profile)
 
@@ -64,47 +56,54 @@ launched from Windows is steered toward Linux toolchain.
 | `WSLENV` extras       | `BASH_ENV/u`, `GITHUB_TOKEN`, `GH_TOKEN` |
 | Homebrew              | `/home/linuxbrew/.linuxbrew`             |
 
-If the Linux username differs after a reset, change `$env:BASH_ENV` in
-`powershell/Microsoft.PowerShell_profile.ps1` to match `$HOME/.wsl_dev_env`.
+If the Linux username changes after a reset, update `$env:BASH_ENV` in `powershell/Microsoft.PowerShell_profile.ps1` to match `$HOME/.wsl_dev_env`.
 
-### After a clean Windows install
+### Why this approach
 
-1. **Prereqs:** Windows 11, PowerShell 7, Git, Developer Mode (symlinks).
-2. **Dotfiles:** `.\install.ps1 -Local` (profile + Windows Terminal keys).
-3. **WSL2 + distro** (Admin; reboot if needed):
+Windows and WSL share `PATH` through interop.
+A Windows Node installation appears inside WSL as `/mnt/*/Program Files/nodejs/`.
+Its `pnpm` shim is a POSIX script that runs `exec node`.
+WSL only has `node.exe`, so the shim fails with `exec: node: not found`.
 
-   ```powershell
-   wsl --install -d Ubuntu-24.04
-   ```
+This breaks non-interactive Bash started from PowerShell, for example:
 
-4. **Homebrew + Node/pnpm + wire env** (once, as Linux user — not root):
+```powershell
+bash utils.sh install
+bash -c 'pnpm install'
+```
 
-   ```powershell
-   wsl -d Ubuntu-24.04 -- bash /mnt/<drive>/.../dotfiles/scripts/windows/setup-wsl-node.sh
-   ```
+Non-interactive Bash does not load `~/.bashrc`.
+Linux Homebrew Node/pnpm never enters `PATH`, so the Windows shim runs instead.
 
-   Script will fail fast if brew is missing. Install Homebrew first
-   ([brew.sh](https://brew.sh)), then re-run.
+### How it works
 
-   Manual equivalent:
+This setup applies globally:
 
-   ```bash
-   # inside WSL
-   brew install node pnpm
-   cp /mnt/<drive>/.../dotfiles/scripts/windows/wsl_dev_env ~/.wsl_dev_env
-   # ensure ~/.bashrc and ~/.profile source ~/.wsl_dev_env (setup script does this)
-   ```
+1. Node/pnpm runs inside WSL through Homebrew (`/home/linuxbrew/...`).
+2. The `~/.wsl_dev_env` file runs `eval "$(brew shellenv)"`. Its template lives in this folder.
+3. PowerShell `$PROFILE` sets `BASH_ENV` and `WSLENV` so every non-interactive Bash from Windows loads that file first.
+4. Interactive WSL shells load the same file from `~/.bashrc` / `~/.profile`.
+5. The profile also lists `GITHUB_TOKEN` and `GH_TOKEN` on `WSLENV`.
+   This lets project `.npmrc` lines such as `_authToken=${GITHUB_TOKEN}` expand inside WSL Bash/pnpm.
+   WSL does not otherwise inherit arbitrary Windows process environment variables.
 
-5. **Reload PowerShell profile** (install copies it once; secrets only on live `$PROFILE`; new session or):
+Windows `pnpm` / `node` in a plain PowerShell session stay unchanged.
+Only Bash launched from Windows uses the Linux toolchain.
 
-   ```powershell
-   . $PROFILE
-   ```
+### Rejected alternatives
+
+| Idea                                              | Why it was rejected                                               |
+| ------------------------------------------------- | ----------------------------------------------------------------- |
+| Patch each project `utils.sh`                     | Not portable and easy to miss in new repositories.                |
+| PowerShell `pnpm` wrapper with silent WSL retry   | Does not run for `pnpm` inside a Bash script.                     |
+| Uninstall Windows Node                            | Optional; Windows tooling can keep its own Node.                  |
+| Filter Windows paths out of WSL `PATH`            | Breaks on spaces (`Program Files`); putting brew first is enough. |
+| Rely on Windows User environment alone for tokens | Tokens are missing in WSL unless listed on `WSLENV`.              |
 
 ### Files
 
-| Path                 | Role                                            |
-| -------------------- | ----------------------------------------------- |
-| `setup-wsl-node.sh`  | Install/wire Linux node+pnpm + `~/.wsl_dev_env` |
-| `wsl_dev_env`        | Template sourced via `BASH_ENV`                 |
-| `system-cleanup.bat` | Unrelated disk/DISM cleanup                     |
+| Path                 | Purpose                                                 |
+| -------------------- | ------------------------------------------------------- |
+| `setup-wsl-node.sh`  | Install Linux node+pnpm and configure `~/.wsl_dev_env`. |
+| `wsl_dev_env`        | Template loaded through `BASH_ENV`.                     |
+| `system-cleanup.bat` | Disk/DISM cleanup, separate from WSL setup.             |
