@@ -398,6 +398,7 @@ function Get-DotfilesLinkPlan {
     $rows = [Collections.Generic.List[object]]::new()
     $targets = [Collections.Generic.List[object]]::new()
     $legacySkillDirs = [Collections.Generic.List[object]]::new()
+    $foreignSkillDirs = [Collections.Generic.List[string]]::new()
     $guidance = Join-Path $Root 'INSTRUCTIONS.md'
     $managers = @(Get-DotfilesManagers)
     if ($Selection.Full) {
@@ -428,7 +429,11 @@ function Get-DotfilesLinkPlan {
         $parentItem = Get-DotfilesItem $skillHome
         if (-not (Test-DotfilesLink $parentItem)) { continue }
         $legacyTarget = Get-DotfilesLinkTarget $parentItem
-        if (-not (Test-DotfilesAllowedSourceShape $skillHome $legacyTarget $script:State)) { continue }
+        if (-not (Test-DotfilesAllowedSourceShape $skillHome $legacyTarget $script:State)) {
+            $foreignSkillDirs.Add($skillHome) | Out-Null
+            $rows.Add([pscustomobject]@{ Kind='conflict'; Action='back up foreign directory link'; Destination=$skillHome; Target=$legacyTarget }) | Out-Null
+            continue
+        }
         $legacySkillDirs.Add([pscustomobject]@{ Destination=$skillHome; Target=$legacyTarget }) | Out-Null
         $rows.Add([pscustomobject]@{ Kind='migrate'; Action='migrate legacy skill directory'; Destination=$skillHome; Target=$legacyTarget }) | Out-Null
         if (-not $Selection.Full) {
@@ -456,6 +461,7 @@ function Get-DotfilesLinkPlan {
     }
     $migratingParents = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
     foreach ($legacy in $legacySkillDirs) { $migratingParents.Add($legacy.Destination) | Out-Null }
+    foreach ($foreign in $foreignSkillDirs) { $migratingParents.Add($foreign) | Out-Null }
     foreach ($target in $targets) {
         if ($migratingParents.Contains((Split-Path -Parent $target.Destination))) { continue }
         $item = Get-DotfilesItem $target.Destination
@@ -478,6 +484,7 @@ function Get-DotfilesLinkPlan {
         }
         if (-not $script:Options.SkipCodex -and ($managers | Where-Object { $_.Name -eq 'Codex' -and $_.Detected })) { $dirs.Add((Join-Path $HOME '.agents/skills')) | Out-Null }
         foreach ($dir in $dirs) {
+            if ($foreignSkillDirs.Contains($dir)) { continue }
             foreach ($entry in @(Get-ChildItem -LiteralPath $dir -Force -ErrorAction SilentlyContinue)) {
                 if ($selectedNames.Contains($entry.Name) -or -not (Test-DotfilesLink $entry)) { continue }
                 $linkTarget = Get-DotfilesLinkTarget $entry
@@ -489,7 +496,7 @@ function Get-DotfilesLinkPlan {
             }
         }
     }
-    [pscustomobject]@{ Rows = @($rows); Targets = @($targets); LegacySkillDirs = @($legacySkillDirs) }
+    [pscustomobject]@{ Rows = @($rows); Targets = @($targets); LegacySkillDirs = @($legacySkillDirs); ForeignSkillDirs = @($foreignSkillDirs) }
 }
 
 function Get-WindowsTerminalSettingsPath {
@@ -708,6 +715,10 @@ function Install-DotfilesPlan {
         $item = Get-DotfilesItem $legacy.Destination
         if (Test-DotfilesLink $item) { Remove-DotfilesLink $item }
         Add-DotfilesCreatedDirectory -Path $legacy.Destination -State $script:State
+    }
+    foreach ($foreign in $Plan.ForeignSkillDirs) {
+        if (Test-DotfilesLink (Get-DotfilesItem $foreign)) { Move-DotfilesConflictToBackup $foreign $script:State }
+        Add-DotfilesCreatedDirectory -Path $foreign -State $script:State
     }
     foreach ($target in $Plan.Targets) { Invoke-DotfilesLink -Destination $target.Destination -Target $target.Target -State $script:State }
     if ($Selection.Full -and $IsWindows -and -not $script:Options.SkipTerminal) {

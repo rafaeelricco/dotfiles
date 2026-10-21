@@ -326,6 +326,18 @@ class LifecycleCases:
         self.assertTrue((self.source / "skill" / "ui" / "SKILL.md").exists())
         self.assertTrue((self.source / "skill" / "orchestrate" / "SKILL.md").exists())
 
+    def test_foreign_skill_directory_link_blocks_unattended_install(self):
+        foreign = self.base / "foreign"
+        foreign.mkdir()
+        (foreign / "keep.txt").write_text("keep")
+        self.skills.parent.mkdir(parents=True)
+        self.skills.symlink_to(foreign, target_is_directory=True)
+        result = self.invoke(["ui"] + self.skip_flags())
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("foreign destinations block unattended installation", result.stdout + result.stderr)
+        self.assertTrue(self.skills.is_symlink())
+        self.assertEqual(sorted(p.name for p in foreign.iterdir()), ["keep.txt"])
+
     def test_missing_recorded_source_is_dropped_and_its_links_preserved(self):
         other = self.base / "other"
         shutil.copytree(self.source, other, symlinks=True)
