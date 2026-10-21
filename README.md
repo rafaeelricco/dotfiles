@@ -1,98 +1,107 @@
 # dotfiles
 
-My Neovim, PowerShell, and shell configuration, with shared AI instructions and skills.
-Supports Claude Code, Codex, Grok, Cursor, and Hermes.
+My shared coding-agent skills, instructions, and development configuration.
+Skills are linked into detected Claude Code, Codex, Grok, Cursor, and Hermes installations.
 
-Agent instructions and skills are linked from one `INSTRUCTIONS.md` and one `skill/` tree.
+## Install a skill
 
-## Install
-
-Requires Git. Windows also requires PowerShell 7 and Developer Mode or an elevated shell when symlinks are needed.
-Run the installer as your normal user. On macOS and Linux, do not use `sudo`.
-
-macOS and Linux:
+Run as your normal user on macOS or Linux:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/scripts/install.sh | bash
+curl -fsSL https://r1cco.com/skills/orchestrate | bash
 ```
 
-Windows PowerShell:
+In PowerShell 7:
 
 ```powershell
-& ([scriptblock]::Create((irm 'https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/install.ps1')))
+irm https://r1cco.com/skills/orchestrate.ps1 | iex
 ```
 
-The installer clones to `~/.dotfiles` and configures available agents.
-It does not install or authenticate agent CLIs.
-On Windows, it also sets up the PowerShell profile, theme, and managed Windows Terminal settings.
+Companion skills are included automatically. `orchestrate` installs seven skills:
+`orchestrate`, `scope-and-plan`, `plan-format`, `model-tiers`, `implement`,
+`verify`, and `commit-message`. Replace `orchestrate` in the URL with another
+available skill. Selected installation preserves other skill links, instructions,
+and terminal settings.
 
-See the [setup guide](docs/setup.md) for agent requirements, options, and installed paths.
+To select several skills, preview changes, or list available skills:
+
+```bash
+curl -fsSL https://r1cco.com/dotfiles/install.sh | bash -s -- orchestrate ui
+curl -fsSL https://r1cco.com/dotfiles/install.sh | bash -s -- orchestrate --dry-run
+curl -fsSL https://r1cco.com/dotfiles/install.sh | bash -s -- --help
+```
+
+```powershell
+& ([scriptblock]::Create((irm 'https://r1cco.com/dotfiles/install.ps1'))) orchestrate ui
+& ([scriptblock]::Create((irm 'https://r1cco.com/dotfiles/install.ps1'))) orchestrate -DryRun
+& ([scriptblock]::Create((irm 'https://r1cco.com/dotfiles/install.ps1'))) -Help
+```
+
+## Full setup
+
+Omit the skill names to install all skills and shared agent instructions.
+On Windows, full setup also copies the PowerShell profile when absent, links
+the theme, and applies managed Windows Terminal settings.
+
+```bash
+curl -fsSL https://r1cco.com/dotfiles/install.sh | bash
+```
+
+```powershell
+& ([scriptblock]::Create((irm 'https://r1cco.com/dotfiles/install.ps1')))
+```
+
+The remote installer downloads a verified release bundle. Keep its cache:
+`${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles`, or the equivalent user-home
+location on Windows. `DOTFILES_HOME` can override it.
+The installer configures available agents; it does not install or authenticate their CLIs.
 
 ## Update
 
-Managed update resets the clone to GitHub `main`, discarding local changes.
-It also deletes untracked and ignored files, including nested repositories.
-
-macOS and Linux:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/scripts/update.sh | bash
-```
-
-Windows PowerShell:
-
-```powershell
-& ([scriptblock]::Create((irm 'https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/update.ps1')))
-```
-
-For a local installation, use the commands under [Development](#development).
-
-## Documentation
-
-| Topic                                                                             | Purpose                                                         |
-| --------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| [Setup guide](docs/setup.md)                                                      | Options, installed paths, lifecycle rules, and troubleshooting. |
-| [Skills](skill/)                                                                  | Shared agent workflows.                                         |
-| [Neovim](nvim/)                                                                   | Configuration and setup guides.                                 |
-| [PowerShell](powershell/)                                                         | Profile and terminal theme.                                     |
-| [Zsh](.zshrc)                                                                     | Shell configuration.                                            |
-| [Windows helpers](scripts/windows/)                                               | Node/pnpm through WSL and system cleanup.                       |
-| [Colima](scripts/macos/setup-colima.sh)                                           | Docker setup on Apple Silicon.                                  |
-| [Maestro](scripts/install-maestro.sh) / [uninstall](scripts/uninstall-maestro.sh) | Manual Maestro CLI and MCP setup.                               |
-| [MCP tools](scripts/mcp/)                                                         | Manual Exa and Codex Claude Code plugin setup.                  |
+Repeat the same install command to update. Selection controls which skill links
+are installed; refreshing the shared bundle also updates the contents used by
+skills already linked into that bundle.
 
 ## Uninstall
 
-Managed uninstall removes installed links, recorded backups, and the clone.
-Backups are deleted, not restored. Move any backup you want to keep elsewhere first.
-These remote commands require the confirmation flag:
-
-macOS and Linux:
-
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/scripts/uninstall.sh | bash -s -- --yes
+curl -fsSL https://r1cco.com/dotfiles/install.sh | bash -s -- uninstall
 ```
-
-Windows PowerShell:
 
 ```powershell
-& ([scriptblock]::Create((irm 'https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/uninstall.ps1'))) -Yes
+& ([scriptblock]::Create((irm 'https://r1cco.com/dotfiles/install.ps1'))) uninstall
 ```
 
-Local uninstall preserves the checkout. It still deletes recorded backups.
-See the [setup guide](docs/setup.md#uninstall-behavior) for confirmation and cleanup details.
+Uninstall removes verified managed links and reversible recorded terminal changes.
+It preserves checkouts, cached bundles, copied profiles, and backups.
+Add `--dry-run` or `-DryRun` to preview removal.
 
 ## Development
 
-Run these commands from the primary checkout:
+Run the checked-out scripts directly. They resolve the checkout from their own
+location and never fetch, reset, or clean Git state.
 
-| Action       | macOS / Linux                       | Windows PowerShell       |
-| ------------ | ----------------------------------- | ------------------------ |
-| Install      | `bash scripts/install.sh --local`   | `.\install.ps1 -Local`   |
-| Update links | `bash scripts/update.sh --local`    | `.\update.ps1 -Local`    |
-| Uninstall    | `bash scripts/uninstall.sh --local` | `.\uninstall.ps1 -Local` |
+| Action                       | macOS / Linux                                   | PowerShell 7                        |
+| ---------------------------- | ----------------------------------------------- | ----------------------------------- |
+| Install selected skills      | `bash scripts/install.sh orchestrate`           | `.\install.ps1 orchestrate`         |
+| Full setup / reconcile links | `bash scripts/install.sh`                       | `.\install.ps1`                     |
+| Preview                      | `bash scripts/install.sh orchestrate --dry-run` | `.\install.ps1 orchestrate -DryRun` |
+| Uninstall                    | `bash scripts/uninstall.sh`                     | `.\uninstall.ps1`                   |
 
-Local mode links directly to this checkout without cloning or changing Git state.
-Edits to existing skills take effect immediately. Run local update after adding or removing a skill.
+Edits to linked checkout skills take effect immediately. Rerun installation after
+adding or removing skills. The existing update scripts are compatibility entrypoints.
 
-Managed and local installations cannot coexist. Uninstall the managed installation before switching to local mode.
+## Documentation
+
+| Topic                                                                                         | Purpose                                                                          |
+| --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| [Setup guide](docs/setup.md)                                                                  | Commands, flags, prerequisites, installed paths, migration, and troubleshooting. |
+| [Deployment](docs/deployment.md)                                                              | Verified releases, VPS runner, Nginx, and recovery.                              |
+| [Skills](skill/)                                                                              | Shared agent workflows.                                                          |
+| [Neovim](nvim/)                                                                               | Configuration and setup guides.                                                  |
+| [PowerShell](powershell/)                                                                     | Profile and terminal theme.                                                      |
+| [Zsh](.zshrc)                                                                                 | Shell configuration.                                                             |
+| [Windows helpers](scripts/windows/)                                                           | Node/pnpm through WSL and system cleanup.                                        |
+| [Colima](scripts/macos/setup-colima.sh)                                                       | Docker setup on Apple Silicon.                                                   |
+| [Maestro installer](scripts/install-maestro.sh) / [uninstaller](scripts/uninstall-maestro.sh) | Manual Maestro CLI and MCP setup.                                                |
+| [MCP tools](scripts/mcp/)                                                                     | Manual Exa and Codex Claude Code plugin setup.                                   |

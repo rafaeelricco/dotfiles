@@ -1,0 +1,7 @@
+# Skill followed by its companions, including conditional workflow steps.
+orchestrate scope-and-plan verify commit-message
+scope-and-plan plan-format model-tiers implement
+implement model-tiers
+babysit verify commit-message
+create-pr plan-format commit-message pr-body
+pr-body commit-message

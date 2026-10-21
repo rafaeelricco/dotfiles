@@ -1,780 +1,350 @@
 #!/usr/bin/env bash
-# Install this repository's Claude Code, Codex, Grok, Cursor, and Hermes configuration when present.
-# Compatible with the Bash 3.2 shipped by macOS.
-set -euo pipefail
+# Install selected dotfiles skills into detected agent homes. Bash 3.2 compatible.
+set -eo pipefail
+
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+case "${SCRIPT_PATH}" in /*) ;; *) SCRIPT_PATH="$(pwd -P)/${SCRIPT_PATH}" ;; esac
+SOURCE_ROOT="$(cd "$(dirname "${SCRIPT_PATH}")/.." && pwd -P)"
+. "${SOURCE_ROOT}/scripts/lib/lifecycle.sh"
 
 usage() {
-  cat <<'EOF'
-Install agent instructions and skills for detected Claude Code, Codex, Grok, Cursor, and Hermes.
-Uses repository INSTRUCTIONS.md for vendor CLAUDE.md and AGENTS.md destinations.
-Hermes gets skills only.
+  cat <<EOF
+Install dotfiles instructions and skills for detected agents.
 
-Usage: install.sh [options]
+Usage: install.sh [skill ...] [options]
+       install.sh uninstall [options]
+
+No skill names, or "all", installs every available skill. Named skills include
+their dependencies. Existing links for unrequested skills are retained.
 
 Options:
-  -y, --yes         Back up conflicts without prompting.
-      --override    Remove conflicts without backup or prompting.
-      --skip-claude Do not configure Claude Code.
-      --skip-codex  Do not configure Codex.
-      --skip-grok   Do not configure Grok.
-      --skip-cursor Do not configure Cursor.
-      --skip-hermes Do not configure Hermes.
-      --local       Use this checkout without cloning or changing Git state.
-      --dir PATH    Override $DOTFILES_DIR / ~/.dotfiles.
-  -h, --help        Show this help.
+  --dry-run       Show the complete plan without changing files.
+  --skip-claude   Skip Claude Code.
+  --skip-codex    Skip Codex.
+  --skip-grok     Skip Grok.
+  --skip-cursor   Skip Cursor.
+  --skip-hermes   Skip Hermes.
+  -h, --help      Show this help and available skills.
 
 Environment:
-  DOTFILES_DIR       Clone destination (default: ~/.dotfiles).
-  CLAUDE_CONFIG_DIR  Claude user configuration directory.
-  CODEX_HOME         Codex user configuration directory.
-  GROK_HOME          Grok user configuration directory.
-  HERMES_HOME        Hermes user configuration directory.
+  DOTFILES_HOME       Active release bundle (default: \$XDG_DATA_HOME/dotfiles).
+  DOTFILES_TARGET_ROOT Stable cache target used by the remote installer.
+  CLAUDE_CONFIG_DIR, CODEX_HOME, GROK_HOME, HERMES_HOME configure agent homes.
+
+Legacy --yes, --override, --local, and --dir options were removed. Run this
+script from a checkout to install directly from that checkout.
 EOF
-}
-
-timestamp() {
-  date +%Y%m%d%H%M%S
-}
-
-STATE_HEADER="dotfiles-lifecycle-state-v1"
-LOCAL_STATE_HEADER="dotfiles-local-lifecycle-state-v1"
-STATE_READY=0
-PENDING_CREATED_DIRS=()
-
-local_state_file() {
-  printf '%s/dotfiles/local-install-state\n' "${XDG_STATE_HOME:-${HOME}/.local/state}"
-}
-
-absolute_path() {
-  case "$1" in
-    /*) printf '%s\n' "$1" ;;
-    *) printf '%s/%s\n' "$(pwd -P)" "$1" ;;
-  esac
-}
-
-validate_state_field() {
-  case "$1" in
-    /*) ;;
-    *) echo "error: lifecycle state paths must be absolute" >&2; exit 1 ;;
-  esac
-  case "$1" in
-    *$'\t'*|*$'\r'*|*$'\n'*|'')
-      echo "error: lifecycle state paths cannot contain tabs or newlines" >&2
-      exit 1
-      ;;
-  esac
-}
-
-state_record() {
-  local type="$1" first="$2" second="${3:-}" line tmp
-  [ "${STATE_READY}" -eq 1 ] || return 0
-  validate_state_field "${first}"
-  if [ -n "${second}" ]; then
-    validate_state_field "${second}"
-    line="${type}"$'\t'"${first}"$'\t'"${second}"
-  else
-    line="${type}"$'\t'"${first}"
-  fi
-  grep -Fqx -- "${line}" "${STATE_FILE}" && return 0
-  tmp="${STATE_FILE}.tmp.$$"
-  if ! cp "${STATE_FILE}" "${tmp}" || ! printf '%s\n' "${line}" >> "${tmp}" ||
-     ! chmod 600 "${tmp}" || ! mv "${tmp}" "${STATE_FILE}"; then
-    rm -f "${tmp}"
-    echo "error: failed to update lifecycle state: ${STATE_FILE}" >&2
-    exit 1
-  fi
-}
-
-validate_state_file() {
-  local header type first second extra line_number=1 source_count=0
-  IFS= read -r header < "${STATE_FILE}" || header=""
-  [ "${header}" = "${EXPECTED_STATE_HEADER}" ] || {
-    echo "error: invalid lifecycle state header: ${STATE_FILE}" >&2
-    exit 1
-  }
-  while IFS=$'\t' read -r type first second extra; do
-    line_number=$((line_number + 1))
-    [ -n "${type}" ] || continue
-    case "${type}" in
-      source)
-        [ "${header}" = "${LOCAL_STATE_HEADER}" ] && [ -n "${first}" ] && [ -z "${second}" ] && [ -z "${extra}" ] || {
-          echo "error: malformed lifecycle state at line ${line_number}" >&2
-          exit 1
-        }
-        validate_state_field "${first}"
-        LOCAL_STATE_SOURCE="${first}"
-        source_count=$((source_count + 1))
-        ;;
-      link|backup)
-        [ -n "${first}" ] && [ -n "${second}" ] && [ -z "${extra}" ] || {
-          echo "error: malformed lifecycle state at line ${line_number}" >&2
-          exit 1
-        }
-        validate_state_field "${first}"
-        validate_state_field "${second}"
-        ;;
-      dir)
-        [ -n "${first}" ] && [ -z "${second}" ] && [ -z "${extra}" ] || {
-          echo "error: malformed lifecycle state at line ${line_number}" >&2
-          exit 1
-        }
-        validate_state_field "${first}"
-        ;;
-      *)
-        echo "error: unknown lifecycle state record at line ${line_number}" >&2
-        exit 1
-        ;;
-    esac
-  done < <(sed '1d' "${STATE_FILE}")
-  if [ "${header}" = "${LOCAL_STATE_HEADER}" ] && [ "${source_count}" -ne 1 ]; then
-    echo "error: local lifecycle state must contain exactly one source" >&2
-    exit 1
-  fi
-}
-
-init_state_file() {
-  local header="$1" source="${2:-}" tmp dir
-  EXPECTED_STATE_HEADER="${header}"
-  if [ -e "${STATE_FILE}" ] || [ -L "${STATE_FILE}" ]; then
-    [ -f "${STATE_FILE}" ] && [ ! -L "${STATE_FILE}" ] || {
-      echo "error: lifecycle state is not a regular file: ${STATE_FILE}" >&2
-      exit 1
-    }
-  else
-    tmp="${STATE_FILE}.tmp.$$"
-    if ! (umask 077 && {
-      printf '%s\n' "${header}"
-      [ -z "${source}" ] || printf 'source\t%s\n' "${source}"
-    } > "${tmp}") ||
-       ! mv "${tmp}" "${STATE_FILE}"; then
-      rm -f "${tmp}"
-      echo "error: failed to initialize lifecycle state: ${STATE_FILE}" >&2
-      exit 1
-    fi
-  fi
-  validate_state_file
-  STATE_READY=1
-  if [ "${#PENDING_CREATED_DIRS[@]}" -gt 0 ]; then
-    for dir in "${PENDING_CREATED_DIRS[@]}"; do
-      state_record dir "${dir}"
-    done
-  fi
-  PENDING_CREATED_DIRS=()
-}
-
-init_state() {
-  if [ "${LOCAL_MODE}" -eq 1 ]; then
-    STATE_FILE="$(local_state_file)"
-    mkdir -p "$(dirname "${STATE_FILE}")"
-    init_state_file "${LOCAL_STATE_HEADER}" "${DOTFILES_DIR}"
-    [ "${LOCAL_STATE_SOURCE}" = "${DOTFILES_DIR}" ] || {
-      echo "error: local installation belongs to another checkout: ${LOCAL_STATE_SOURCE}" >&2
-      exit 1
-    }
-  else
-    STATE_FILE="${DOTFILES_DIR}/.git/dotfiles-lifecycle-state"
-    init_state_file "${STATE_HEADER}"
-  fi
-}
-
-ensure_directory() {
-  local requested="$1" parent index created
-  local -a missing
-  missing=()
-  [ -d "${requested}" ] && return 0
-  parent="${requested}"
-  while [ ! -e "${parent}" ] && [ ! -L "${parent}" ]; do
-    missing+=("${parent}")
-    [ "${parent}" != "/" ] || break
-    parent="$(dirname "${parent}")"
+  echo
+  printf 'Available skills:'
+  local skill name
+  for skill in "${SOURCE_ROOT}"/skill/*; do
+    [ -f "${skill}/SKILL.md" ] || continue
+    name="$(basename "${skill}")"
+    printf ' %s' "${name}"
   done
-  [ -d "${parent}" ] || {
-    echo "error: directory path is obstructed: ${parent}" >&2
-    exit 1
-  }
-  index=$((${#missing[@]} - 1))
-  while [ "${index}" -ge 0 ]; do
-    if ! mkdir "${missing[${index}]}"; then
-      echo "error: failed to create directory: ${missing[${index}]}" >&2
-      exit 1
-    fi
-    created="$(cd "${missing[${index}]}" && pwd -P)"
-    if [ -d "${HOME}" ] && [ "${created}" = "$(cd "${HOME}" && pwd -P)" ]; then
-      index=$((index - 1))
-      continue
-    fi
-    if [ "${STATE_READY}" -eq 1 ]; then
-      state_record dir "${created}"
-    else
-      PENDING_CREATED_DIRS+=("${created}")
-    fi
-    index=$((index - 1))
-  done
+  echo
 }
 
-backup_name() {
-  local path="$1" candidate index
-  candidate="${path}.backup-$(timestamp)"
-  index=1
-  while [ -e "${candidate}" ] || [ -L "${candidate}" ]; do
-    candidate="${path}.backup-$(timestamp)-${index}"
-    index=$((index + 1))
-  done
-  printf '%s\n' "${candidate}"
+fail_usage() { echo "error: $*" >&2; usage >&2; exit 2; }
+
+all_skill_names() {
+  local path
+  for path in "${SOURCE_ROOT}"/skill/*; do [ -f "${path}/SKILL.md" ] && basename "${path}"; done
 }
 
-parse_args() {
+skill_exists() {
+  [[ "$1" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] || return 1
+  [ -f "${SOURCE_ROOT}/skill/$1/SKILL.md" ]
+}
+
+SELECTED_SKILLS=()
+REQUESTED_SKILLS=()
+FULL_INSTALL=0
+add_selected() {
+  local name="$1" item
+  for item in "${SELECTED_SKILLS[@]}"; do [ "${item}" != "${name}" ] || return 0; done
+  SELECTED_SKILLS+=("${name}")
+}
+
+resolve_skill() {
+  local name="$1" line root deps dep found=0 item
+  skill_exists "${name}" || fail_usage "unknown skill: ${name}"
+  for item in "${SELECTED_SKILLS[@]}"; do [ "${item}" != "${name}" ] || return 0; done
+  # Add before walking dependencies, which also makes accidental cycles safe.
+  add_selected "${name}"
+  [ -f "${SOURCE_ROOT}/skill/dependencies.txt" ] || return 0
+  while IFS= read -r line || [ -n "${line}" ]; do
+    case "${line}" in ''|\#*) continue ;; esac
+    root="${line%%[[:space:]]*}"
+    [ "${root}" = "${name}" ] || continue
+    deps="${line#"${root}"}"
+    found=1
+    for dep in ${deps}; do resolve_skill "${dep}"; done
+  done < "${SOURCE_ROOT}/skill/dependencies.txt"
+  [ "${found}" -eq 1 ] || return 0
+}
+
+parse_arguments() {
+  local positional=0 arg
+  SKIP_CLAUDE=0; SKIP_CODEX=0; SKIP_GROK=0; SKIP_CURSOR=0; SKIP_HERMES=0; DRY_RUN=0
   while [ "$#" -gt 0 ]; do
-    case "$1" in
-      -y|--yes) ASSUME_YES=1 ;;
-      --override) OVERRIDE=1 ;;
+    arg="$1"
+    case "${arg}" in
+      --dry-run) DRY_RUN=1 ;;
       --skip-claude) SKIP_CLAUDE=1 ;;
       --skip-codex) SKIP_CODEX=1 ;;
       --skip-grok) SKIP_GROK=1 ;;
       --skip-cursor) SKIP_CURSOR=1 ;;
       --skip-hermes) SKIP_HERMES=1 ;;
-      --local) LOCAL_MODE=1 ;;
-      --dir)
-        shift
-        [ "$#" -gt 0 ] || { echo "error: --dir requires a path" >&2; exit 2; }
-        DIR_OVERRIDE="$1"
-        ;;
       -h|--help) usage; exit 0 ;;
-      *) echo "error: unknown option: $1" >&2; usage >&2; exit 2 ;;
+      --yes|-y|--override|--local|--dir|--dir=*) fail_usage "removed or unsupported option: ${arg}; skill names are positional" ;;
+      --*) fail_usage "unknown option: ${arg}" ;;
+      *)
+        if [ "${positional}" -eq 0 ] && [ "${arg}" = uninstall ]; then
+          shift
+          exec bash "${SOURCE_ROOT}/scripts/uninstall.sh" "$@"
+        fi
+        REQUESTED_SKILLS+=("${arg}")
+        ;;
     esac
-    shift
+    positional=$((positional + 1)); shift
   done
-  if [ "${LOCAL_MODE}" -eq 1 ] && [ -n "${DIR_OVERRIDE}" ]; then
-    echo "error: --local and --dir cannot be combined" >&2
-    exit 2
-  fi
 }
 
-repo_url_is_allowed() {
-  case "$1" in
-    https://github.com/rafaeelricco/dotfiles|\
-    https://github.com/rafaeelricco/dotfiles.git|\
-    git@github.com:rafaeelricco/dotfiles|\
-    git@github.com:rafaeelricco/dotfiles.git|\
-    ssh://git@github.com/rafaeelricco/dotfiles|\
-    ssh://git@github.com/rafaeelricco/dotfiles.git) return 0 ;;
-    *) return 1 ;;
-  esac
-}
+contains_word() { local wanted="$1" item; shift; for item in "$@"; do [ "${item}" != "${wanted}" ] || return 0; done; return 1; }
 
-resolve_local_repo() {
-  local script source_dir repo
-  script="${BASH_SOURCE[0]}"
-  case "${script}" in /*) ;; *) script="$(pwd -P)/${script}" ;; esac
-  [ -f "${script}" ] || {
-    echo "error: --local requires running the checked-out scripts/install.sh" >&2
-    exit 1
-  }
-  source_dir="$(cd "$(dirname "${script}")" && pwd -P)"
-  repo="$(cd "${source_dir}/.." && pwd -P)"
-  [ "${script}" = "${repo}/scripts/install.sh" ] || {
-    echo "error: --local requires running the checked-out scripts/install.sh" >&2
-    exit 1
-  }
-  printf '%s\n' "${repo}"
-}
-
-assert_local_repo() {
-  local dir="$1" url top home
-  [ -d "${dir}" ] && [ ! -L "${dir}" ] || { echo "error: local checkout must be a real directory: ${dir}" >&2; exit 1; }
-  [ -d "${dir}/.git" ] && [ ! -L "${dir}/.git" ] || {
-    echo "error: --local must run from the primary checkout, not a linked worktree" >&2
-    exit 1
-  }
-  top="$(git -C "${dir}" rev-parse --show-toplevel 2>/dev/null || true)"
-  [ -n "${top}" ] || { echo "error: not a git checkout: ${dir}" >&2; exit 1; }
-  top="$(cd "${top}" && pwd -P)"
-  [ "${top}" = "${dir}" ] || { echo "error: local checkout is not the repository root: ${dir}" >&2; exit 1; }
-  home="$(cd "${HOME}" && pwd -P)"
-  [ "${dir}" != "/" ] && [ "${dir}" != "${home}" ] || { echo "error: unsafe local checkout: ${dir}" >&2; exit 1; }
-  case "${home}/" in "${dir}/"*) echo "error: local checkout cannot contain HOME: ${dir}" >&2; exit 1 ;; esac
-  url="$(git -C "${dir}" config --get remote.origin.url 2>/dev/null || true)"
-  url="${url%/}"
-  repo_url_is_allowed "${url}" || { echo "error: ${dir} does not use an allowed rafaeelricco/dotfiles origin" >&2; exit 1; }
-}
-
-assert_no_local_install() {
-  local state
-  state="$(local_state_file)"
-  [ ! -e "${state}" ] && [ ! -L "${state}" ] || {
-    echo "error: a local installation is active; run scripts/uninstall.sh --local first" >&2
-    exit 1
-  }
-}
-
-assert_no_managed_install() {
-  local candidate managed_state
-  candidate="${MANAGED_DIR_CANDIDATE}"
-  case "${candidate}" in /*) ;; *) candidate="$(pwd -P)/${candidate}" ;; esac
-  if [ -e "${candidate}" ] || [ -L "${candidate}" ]; then
-    if [ -d "${candidate}" ] && [ ! -L "${candidate}" ] && [ "$(cd "${candidate}" && pwd -P)" = "${DOTFILES_DIR}" ]; then
-      managed_state="${DOTFILES_DIR}/.git/dotfiles-lifecycle-state"
-      [ ! -e "${managed_state}" ] && [ ! -L "${managed_state}" ] || {
-        echo "error: a managed installation is active at ${candidate}; run scripts/uninstall.sh first" >&2
-        exit 1
-      }
-      return 0
-    fi
-    echo "error: managed clone exists at ${candidate}; uninstall it before using --local" >&2
-    exit 1
-  fi
-}
-
-assert_managed_repo() {
-  local dir="$1" url top home worktree_count worktree_path
-  [ -d "${dir}" ] && [ ! -L "${dir}" ] || {
-    echo "error: clone path must be a real directory: ${dir}" >&2
-    exit 1
-  }
-  [ -d "${dir}/.git" ] && [ ! -L "${dir}/.git" ] || {
-    echo "error: clone must have its own .git directory: ${dir}" >&2
-    exit 1
-  }
-  top="$(git -C "${dir}" rev-parse --show-toplevel 2>/dev/null || true)"
-  [ -n "${top}" ] || { echo "error: not a git checkout: ${dir}" >&2; exit 1; }
-  top="$(cd "${top}" && pwd -P)"
-  [ "${top}" = "${dir}" ] || {
-    echo "error: clone path is not the repository root: ${dir}" >&2
-    exit 1
-  }
-  home="$(cd "${HOME}" && pwd -P)"
-  [ "${dir}" != "/" ] && [ "${dir}" != "${home}" ] || {
-    echo "error: unsafe clone path: ${dir}" >&2
-    exit 1
-  }
-  case "${home}/" in
-    "${dir}/"*) echo "error: clone cannot contain HOME: ${dir}" >&2; exit 1 ;;
-  esac
-  url="$(git -C "${dir}" config --get remote.origin.url 2>/dev/null || true)"
-  url="${url%/}"
-  repo_url_is_allowed "${url}" || {
-    echo "error: ${dir} does not use an allowed rafaeelricco/dotfiles origin" >&2
-    exit 1
-  }
-  worktree_count="$(git -C "${dir}" worktree list --porcelain | awk '/^worktree / { count++ } END { print count + 0 }')"
-  worktree_path="$(git -C "${dir}" worktree list --porcelain | sed -n 's/^worktree //p')"
-  [ "${worktree_count}" -eq 1 ] && [ "${worktree_path}" = "${dir}" ] || {
-    echo "error: linked worktrees are not supported for the managed clone" >&2
-    exit 1
-  }
-}
-
-ensure_repo() {
-  local dir="$1"
-  if [ -e "${dir}" ] || [ -L "${dir}" ]; then
-    [ -d "${dir}" ] && [ ! -L "${dir}" ] || { echo "error: ${dir} is not a real directory" >&2; exit 1; }
-    dir="$(cd "${dir}" && pwd -P)"
-    assert_managed_repo "${dir}"
-    echo "Using existing clone: ${dir}"
+select_skills() {
+  local all=0 name
+  for name in "${REQUESTED_SKILLS[@]}"; do
+    [ "${name}" = all ] && continue
+    skill_exists "${name}" || fail_usage "unknown or invalid skill name: ${name}"
+  done
+  if [ "${#REQUESTED_SKILLS[@]}" -eq 0 ]; then all=1; fi
+  for name in "${REQUESTED_SKILLS[@]}"; do [ "${name}" != all ] || all=1; done
+  if [ "${all}" -eq 1 ]; then
+    FULL_INSTALL=1
+    while IFS= read -r name; do [ -n "${name}" ] && add_selected "${name}"; done <<EOF
+$(all_skill_names)
+EOF
   else
-    ensure_directory "$(dirname "${dir}")"
-    echo "Cloning https://github.com/rafaeelricco/dotfiles.git -> ${dir}"
-    git clone https://github.com/rafaeelricco/dotfiles.git "${dir}"
-    dir="$(cd "${dir}" && pwd -P)"
-    assert_managed_repo "${dir}"
+    for name in "${REQUESTED_SKILLS[@]}"; do resolve_skill "${name}"; done
   fi
-  DOTFILES_DIR="${dir}"
+  [ "${#SELECTED_SKILLS[@]}" -gt 0 ] || fail_usage "no skills found in ${SOURCE_ROOT}/skill"
 }
 
-is_managed_target() {
-  local target="$1" root
-  for root in "${DOTFILES_DIR}" "${DOTFILES_DIR_INPUT}"; do
-    case "${target}" in
-      "${root}/INSTRUCTIONS.md"|\
-      "${root}/CLAUDE.md"|\
-      "${root}/skill"|"${root}/skill/"*|\
-      "${root}/.claude/CLAUDE.md"|\
-      "${root}/.claude/skills"|"${root}/.claude/skills/"*|\
-      "${root}/.claude/agents/"*|\
-      "${root}/.codex/AGENTS.md"|\
-      "${root}/.grok/AGENTS.md") return 0 ;;
+absolute_env_path() { dotfiles_abs_path "$1"; }
+selected_target() {
+  local base="$1" name
+  for name in "${SELECTED_SKILLS[@]}"; do plan_link "${base}/${name}" "${INSTALL_ROOT}/skill/${name}"; done
+}
+
+plan_link() {
+  local dest="$1" target="$2" kind current parent
+  parent="$(dirname "${dest}")"
+  if [ -L "${parent}" ] && dotfiles_is_known_source "$(readlink "${parent}")"; then
+    # A managed directory-link migration will remove the apparent child path
+    # before links are applied. Plan the child as a new link in the real dir.
+    kind=link
+  elif [ -L "${dest}" ]; then
+    current="$(readlink "${dest}")"
+    if [ "${current}" = "${target}" ]; then kind=current
+    elif dotfiles_is_known_source "${current}"; then kind=relink
+    else kind=conflict
+    fi
+  elif [ -e "${dest}" ]; then kind=conflict
+  else kind=link
+  fi
+  [ "${kind}" = current ] || dotfiles_add_plan "${kind}" "${dest}" "${target}"
+}
+
+plan_skill_directory() {
+  local dir="$1" current kind entry name
+  if [ -L "${dir}" ]; then
+    current="$(readlink "${dir}")"
+    if dotfiles_is_known_source "${current}"; then kind=migrate-directory-link; else kind=conflict-directory; fi
+  elif [ -e "${dir}" ] && [ ! -d "${dir}" ]; then kind=conflict-directory
+  else kind=directory
+  fi
+  [ "${kind}" = directory ] || dotfiles_add_plan "${kind}" "${dir}" ""
+  if [ "${FULL_INSTALL}" -eq 1 ] && [ "${kind}" = directory ]; then
+    for entry in "${dir}"/*; do
+      [ -L "${entry}" ] || continue
+      name="$(basename "${entry}")"
+      [ -f "${SOURCE_ROOT}/skill/${name}/SKILL.md" ] && continue
+      current="$(readlink "${entry}")"
+      if dotfiles_is_known_source "${current}"; then
+        dotfiles_add_plan prune "${entry}" "${current}"
+      fi
+    done
+  fi
+  if [ "${kind}" = migrate-directory-link ] && [ "${FULL_INSTALL}" -eq 0 ]; then
+    local root name wanted
+    root="${INSTALL_ROOT}/skill"
+    if [ -L "${dir}" ]; then
+      current="$(readlink "${dir}")"
+      case "${current}" in */skill|*/.claude/skills)
+        root="${current}"
+        ;;
+      esac
+    fi
+    for name in "${root}"/*; do
+      [ -f "${name}/SKILL.md" ] || continue
+      wanted="$(basename "${name}")"
+      if contains_word "${wanted}" "${SELECTED_SKILLS[@]}"; then continue; fi
+      dotfiles_add_plan link "${dir}/${wanted}" "${name}"
+    done
+  fi
+}
+
+discover_targets() {
+  local claude codex grok hermes cursor
+  claude="$(absolute_env_path "${CLAUDE_CONFIG_DIR:-${HOME}/.claude}")"
+  codex="$(absolute_env_path "${CODEX_HOME:-${HOME}/.codex}")"
+  grok="$(absolute_env_path "${GROK_HOME:-${HOME}/.grok}")"
+  hermes="$(absolute_env_path "${HERMES_HOME:-${HOME}/.hermes}")"
+  cursor="${HOME}/.cursor"
+
+  if [ "${SKIP_CLAUDE}" -eq 0 ] && dotfiles_have claude; then
+    if [ "${FULL_INSTALL}" -eq 1 ]; then plan_link "${claude}/CLAUDE.md" "${INSTALL_ROOT}/INSTRUCTIONS.md"; fi
+    plan_skill_directory "${claude}/skills"
+    selected_target "${claude}/skills"
+  fi
+  if [ "${SKIP_CODEX}" -eq 0 ] && dotfiles_have codex; then
+    if [ "${FULL_INSTALL}" -eq 1 ]; then plan_link "${codex}/AGENTS.md" "${INSTALL_ROOT}/INSTRUCTIONS.md"; fi
+    plan_skill_directory "${HOME}/.agents/skills"
+    selected_target "${HOME}/.agents/skills"
+  fi
+  if [ "${SKIP_GROK}" -eq 0 ] && dotfiles_have grok; then
+    if [ "${FULL_INSTALL}" -eq 1 ]; then plan_link "${grok}/AGENTS.md" "${INSTALL_ROOT}/INSTRUCTIONS.md"; fi
+    plan_skill_directory "${grok}/skills"
+    selected_target "${grok}/skills"
+  fi
+  if [ "${SKIP_HERMES}" -eq 0 ] && dotfiles_have hermes; then
+    plan_skill_directory "${hermes}/skills"
+    selected_target "${hermes}/skills"
+  fi
+  if [ "${SKIP_CURSOR}" -eq 0 ] && [ -d "${cursor}" ]; then
+    plan_skill_directory "${cursor}/skills"
+    selected_target "${cursor}/skills"
+  fi
+}
+
+render_plan() {
+  local i kind dest target
+  echo "Dotfiles installation plan"
+  echo "  Source: ${SOURCE_ROOT}"
+  if [ "${REMOTE_STAGE}" -eq 1 ]; then echo "  Bundle cache: ${INSTALL_ROOT} (updated after acceptance)"; fi
+  echo "  Skills: ${SELECTED_SKILLS[*]}"
+  echo
+  if [ "${#DOTFILES_PLAN_KINDS[@]}" -eq 0 ]; then echo "  No link changes are needed."; fi
+  for i in "${!DOTFILES_PLAN_KINDS[@]}"; do
+    kind="${DOTFILES_PLAN_KINDS[${i}]}"; dest="${DOTFILES_PLAN_DESTS[${i}]}"; target="${DOTFILES_PLAN_TARGETS[${i}]}"
+    case "${kind}" in
+      link) printf '  link       %s -> %s\n' "${dest}" "${target}" ;;
+      relink) printf '  update     %s -> %s\n' "${dest}" "${target}" ;;
+      conflict) printf '  backup + link %s -> %s\n' "${dest}" "${target}" ;;
+      directory) printf '  create directory %s\n' "${dest}" ;;
+      migrate-directory-link) printf '  migrate skill directory link %s\n' "${dest}" ;;
+      conflict-directory) printf '  backup + create directory %s\n' "${dest}" ;;
+      prune) printf '  remove stale managed link %s\n' "${dest}" ;;
+      bundle) printf '  refresh verified bundle %s\n' "${dest}" ;;
     esac
   done
-  return 1
+  echo "------------------------------------------------------------"
 }
 
-resolve_conflict() {
-  local path="$1" answer backup action="${CONFLICT_MODE}"
-  if [ "${action}" = "prompt" ]; then
-    printf 'Conflict: %s\n' "${path}"
-    printf '  [b]ackup, [o]verride, [s]kip, or [a]bort? '
-    if ! IFS= read -r answer < /dev/tty; then
-      answer="a"
-    fi
-    case "${answer}" in
-      b|B) action="backup" ;;
-      o|O) action="override" ;;
-      s|S) echo "skipped: ${path}"; return 1 ;;
-      *) echo "aborted at: ${path}" >&2; exit 1 ;;
-    esac
-  fi
-
-  if [ "${action}" = "override" ]; then
-    remove_conflict "${path}"
-    echo "overridden: ${path}"
-  else
-    backup="$(backup_name "${path}")"
-    if ! mv "${path}" "${backup}"; then
-      echo "error: failed to back up conflict: ${path}" >&2
-      exit 1
-    fi
-    state_record backup "${path}" "${backup}"
-    echo "backed up: ${path} -> ${backup}"
+confirm_plan() {
+  local answer conflicts=0 i kind dest
+  [ "${DRY_RUN}" -eq 0 ] || { echo "--dry-run: no changes made."; return 1; }
+  [ "${#DOTFILES_PLAN_KINDS[@]}" -gt 0 ] || { echo "Nothing to install."; return 1; }
+  [ -t 0 ] && [ -r /dev/tty ] && [ -w /dev/tty ] || { for kind in "${DOTFILES_PLAN_KINDS[@]}"; do case "${kind}" in conflict|conflict-directory) conflicts=$((conflicts + 1));; esac; done; [ "${conflicts}" -eq 0 ] || dotfiles_die "foreign destinations block unattended installation; rerun from a terminal and type yes to replace them"; return 0; }
+  printf 'Proceed with these changes? [Y/n] ' > /dev/tty
+  IFS= read -r answer < /dev/tty || answer=""
+  case "${answer}" in ''|y|Y|yes|YES) ;; *) echo "Installation cancelled; no changes were made."; return 1 ;; esac
+  for kind in "${DOTFILES_PLAN_KINDS[@]}"; do case "${kind}" in conflict|conflict-directory) conflicts=$((conflicts + 1));; esac; done
+  if [ "${conflicts}" -gt 0 ]; then
+    echo "Foreign destinations will be moved to timestamped backups." > /dev/tty
+    printf 'Type yes to replace all listed conflicts: ' > /dev/tty
+    IFS= read -r answer < /dev/tty || answer=""
+    [ "${answer}" = yes ] || { echo "Installation cancelled; no changes were made."; return 1; }
   fi
   return 0
 }
 
-remove_conflict() {
-  local path="$1"
-  if [ -d "${path}" ] && [ ! -L "${path}" ]; then
-    if ! rm -rf "${path}"; then
-      echo "error: failed to remove conflict: ${path}" >&2
-      exit 1
-    fi
-  elif ! rm -f "${path}"; then
-    echo "error: failed to remove conflict: ${path}" >&2
-    exit 1
-  fi
-}
-
-link_one() {
-  local src="$1" dst="$2" current parent name
-  [ -e "${src}" ] || { echo "error: source missing: ${src}" >&2; exit 1; }
-  parent="$(dirname "${dst}")"
-  name="$(basename "${dst}")"
-  ensure_directory "${parent}"
-  dst="$(cd "${parent}" && pwd -P)/${name}"
-
-  if [ -L "${dst}" ]; then
-    current="$(readlink "${dst}")"
-    if [ "${current}" = "${src}" ]; then
-      state_record link "${dst}" "${src}"
-      echo "up to date: ${dst}"
-      return 0
-    fi
-    if is_managed_target "${current}"; then
-      if ! rm -f "${dst}"; then
-        echo "error: failed to remove managed link: ${dst}" >&2
-        exit 1
-      fi
-    elif ! resolve_conflict "${dst}"; then
-      return 0
-    fi
-  elif [ -e "${dst}" ]; then
-    if ! resolve_conflict "${dst}"; then
-      return 0
-    fi
-  fi
-
-  ln -s "${src}" "${dst}"
-  state_record link "${dst}" "${src}"
-  echo "linked: ${dst} -> ${src}"
-}
-
-prepare_skill_dir() {
-  local dir="$1" label="$2" current
-  if [ -L "${dir}" ]; then
-    current="$(readlink "${dir}")"
-    if is_managed_target "${current}"; then
-      if ! rm -f "${dir}"; then
-        echo "error: failed to remove managed link: ${dir}" >&2
-        exit 1
-      fi
-    elif ! resolve_conflict "${dir}"; then
-      echo "${label} skills skipped."
-      return 1
-    fi
-  elif [ -e "${dir}" ] && [ ! -d "${dir}" ]; then
-    if ! resolve_conflict "${dir}"; then
-      echo "${label} skills skipped."
-      return 1
-    fi
-  fi
-  ensure_directory "${dir}"
-}
-
-prune_stale_skill_links() {
-  local dir="$1" entry name target
-  for entry in "${dir}"/*; do
-    [ -L "${entry}" ] || continue
-    name="$(basename "${entry}")"
-    [ -f "${SKILLS_SRC}/${name}/SKILL.md" ] && continue
-    target="$(readlink "${entry}")"
-    if is_managed_target "${target}"; then
-      rm -f "${entry}"
-      echo "pruned stale skill link: ${entry}"
-    fi
-  done
-}
-
-link_skill_set() {
-  local dir="$1" label="$2" skill name count
-  prepare_skill_dir "${dir}" "${label}" || return 0
-  count=0
-  for skill in "${SKILLS_SRC}"/*; do
-    [ -d "${skill}" ] || continue
-    [ -f "${skill}/SKILL.md" ] || continue
-    name="$(basename "${skill}")"
-    link_one "${skill}" "${dir}/${name}"
-    count=$((count + 1))
-  done
-  [ "${count}" -gt 0 ] || { echo "error: no skills found in ${SKILLS_SRC}" >&2; exit 1; }
-  prune_stale_skill_links "${dir}"
-}
-
-cleanup_managed_skill_dir() {
-  local dir="$1" entry target
-  if [ -L "${dir}" ]; then
-    target="$(readlink "${dir}")"
-    if is_managed_target "${target}"; then
-      rm -f "${dir}"
-      echo "removed legacy managed link: ${dir}"
-    fi
-    return 0
-  fi
-  [ -d "${dir}" ] || return 0
-  for entry in "${dir}"/*; do
-    [ -L "${entry}" ] || continue
-    target="$(readlink "${entry}")"
-    if is_managed_target "${target}"; then
-      rm -f "${entry}"
-      echo "removed legacy managed link: ${entry}"
-    fi
-  done
-}
-
-remove_managed_link() {
-  local path="$1" target
-  [ -L "${path}" ] || return 0
-  target="$(readlink "${path}")"
-  if is_managed_target "${target}"; then
-    rm -f "${path}"
-    echo "removed legacy managed link: ${path}"
-  fi
-}
-
-cleanup_legacy_agents() {
-  local home="$1"
-  remove_managed_link "${home}/agents/advisor.md"
-  remove_managed_link "${home}/agents/opus-advisor.md"
-}
-
-validate_sources() {
-  local skill count
-  if [ ! -f "${GUIDANCE_SRC}" ]; then
-    if [ -f "${DOTFILES_DIR}/CLAUDE.md" ]; then
-      echo "error: ${DOTFILES_DIR} is an outdated clone (CLAUDE.md was renamed to INSTRUCTIONS.md)" >&2
-      echo "hint: update it first: curl -fsSL https://raw.githubusercontent.com/rafaeelricco/dotfiles/main/scripts/update.sh | bash" >&2
-      exit 1
-    fi
-    echo "error: source missing: ${GUIDANCE_SRC}" >&2
-    exit 1
-  fi
-  [ -d "${SKILLS_SRC}" ] || { echo "error: source missing: ${SKILLS_SRC}" >&2; exit 1; }
-  count=0
-  for skill in "${SKILLS_SRC}"/*; do
-    [ -f "${skill}/SKILL.md" ] || continue
-    count=$((count + 1))
-  done
-  [ "${count}" -gt 0 ] || { echo "error: no skills found in ${SKILLS_SRC}" >&2; exit 1; }
-}
-
-cli_is_present() {
-  type -P "$1" >/dev/null 2>&1
-}
-
-cursor_is_present() {
-  [ -d "${CURSOR_HOME_DIR}" ]
-}
-
-validate_codex_skill_destination() {
-  local dir="${HOME}/.agents/skills" probe parent
-  if [ -d "${dir}" ] && [ ! -L "${dir}" ]; then
-    probe="${dir}"
+apply_plan() {
+  local i kind dest target current backup parent name
+  if [ "${REMOTE_STAGE}" -eq 1 ]; then
+    dotfiles_activate_stage "${SOURCE_ROOT}" "${INSTALL_ROOT}"
+    dotfiles_append_unique DOTFILES_SOURCES "${INSTALL_ROOT}"
   else
-    probe="$(dirname "${dir}")"
-    while [ ! -d "${probe}" ]; do
-      if [ -e "${probe}" ] || [ -L "${probe}" ]; then
-        break
+    dotfiles_append_unique DOTFILES_SOURCES "${INSTALL_ROOT}"
+  fi
+  dotfiles_state_record source "${INSTALL_ROOT}"
+  dotfiles_state_write
+  for i in "${!DOTFILES_PLAN_KINDS[@]}"; do
+    kind="${DOTFILES_PLAN_KINDS[${i}]}"; dest="${DOTFILES_PLAN_DESTS[${i}]}"; target="${DOTFILES_PLAN_TARGETS[${i}]}"
+    case "${kind}" in current|bundle) continue ;; esac
+    if [ -e "${dest}" ] || [ -L "${dest}" ]; then
+      if [ -L "${dest}" ]; then
+        current="$(readlink "${dest}")"
+        if dotfiles_is_known_source "${current}"; then rm -f "${dest}" || dotfiles_die "failed to remove previous managed link: ${dest}"
+        else
+          backup="$(dotfiles_backup_name "${dest}")"
+          mv "${dest}" "${backup}" || dotfiles_die "failed to back up conflict: ${dest}"
+          dotfiles_state_record backup "${dest}" "${backup}"; dotfiles_state_write
+        fi
+      elif [ "${kind}" = conflict ] || [ "${kind}" = conflict-directory ]; then
+        backup="$(dotfiles_backup_name "${dest}")"
+        mv "${dest}" "${backup}" || dotfiles_die "failed to back up conflict: ${dest}"
+        dotfiles_state_record backup "${dest}" "${backup}"; dotfiles_state_write
       fi
-      parent="$(dirname "${probe}")"
-      [ "${parent}" != "${probe}" ] || break
-      probe="${parent}"
-    done
-  fi
-
-  if [ ! -d "${probe}" ] || [ ! -w "${probe}" ] || [ ! -x "${probe}" ]; then
-    echo "error: Codex skills destination is not writable: ${probe}" >&2
-    echo "fix its ownership or permissions, then rerun install.sh" >&2
-    exit 1
-  fi
-}
-
-install_claude() {
-  local default_home="${HOME}/.claude"
-  if [ "${CLAUDE_HOME}" != "${default_home}" ]; then
-    remove_managed_link "${default_home}/CLAUDE.md"
-    cleanup_managed_skill_dir "${default_home}/skills"
-    cleanup_legacy_agents "${default_home}"
-  fi
-  cleanup_legacy_agents "${CLAUDE_HOME}"
-  link_one "${GUIDANCE_SRC}" "${CLAUDE_HOME}/CLAUDE.md"
-  link_skill_set "${CLAUDE_HOME}/skills" "Claude"
-}
-
-install_codex() {
-  local default_home="${HOME}/.codex"
-  if [ "${CODEX_HOME_DIR}" != "${default_home}" ]; then
-    remove_managed_link "${default_home}/AGENTS.md"
-    cleanup_managed_skill_dir "${default_home}/skills"
-  fi
-  cleanup_managed_skill_dir "${CODEX_HOME_DIR}/skills"
-  link_one "${GUIDANCE_SRC}" "${CODEX_HOME_DIR}/AGENTS.md"
-  link_skill_set "${HOME}/.agents/skills" "Codex"
-}
-
-install_grok() {
-  local default_home="${HOME}/.grok"
-  if [ "${GROK_HOME_DIR}" != "${default_home}" ]; then
-    remove_managed_link "${default_home}/AGENTS.md"
-    cleanup_managed_skill_dir "${default_home}/skills"
-  fi
-  link_one "${GUIDANCE_SRC}" "${GROK_HOME_DIR}/AGENTS.md"
-  link_skill_set "${GROK_HOME_DIR}/skills" "Grok"
-}
-
-install_cursor() {
-  link_skill_set "${CURSOR_HOME_DIR}/skills" "Cursor"
-}
-
-install_hermes() {
-  local default_home="${HOME}/.hermes"
-  if [ "${HERMES_HOME_DIR}" != "${default_home}" ]; then
-    cleanup_managed_skill_dir "${default_home}/skills"
-  fi
-  link_skill_set "${HERMES_HOME_DIR}/skills" "Hermes"
+    fi
+    case "${kind}" in
+      directory|migrate-directory-link|conflict-directory)
+        dotfiles_created_dir "${dest}"
+        ;;
+      prune)
+        dotfiles_forget_link "${dest}"
+        dotfiles_state_write
+        ;;
+      link|relink|conflict|legacy-skill-retain)
+        parent="$(dirname "${dest}")"; name="$(basename "${dest}")"
+        dotfiles_created_dir "${parent}"
+        dest="$(cd "${parent}" && pwd -P)/${name}"
+        ln -s "${target}" "${dest}" || dotfiles_die "failed to create link: ${dest}"
+        dotfiles_state_record link "${dest}" "${target}"; dotfiles_state_write
+        ;;
+    esac
+  done
+  echo "Dotfiles installation completed from ${INSTALL_ROOT}."
 }
 
 main() {
-  ASSUME_YES=0
-  OVERRIDE=0
-  SKIP_CLAUDE=0
-  SKIP_CODEX=0
-  SKIP_GROK=0
-  SKIP_CURSOR=0
-  SKIP_HERMES=0
-  DIR_OVERRIDE=""
-  LOCAL_MODE=0
-  LOCAL_STATE_SOURCE=""
-  MANAGED_DIR_CANDIDATE="${DOTFILES_DIR:-${HOME}/.dotfiles}"
-  INTERACTIVE=0
-  parse_args "$@"
-
-  if [ "${ASSUME_YES}" -eq 1 ] && [ "${OVERRIDE}" -eq 1 ]; then
-    echo "error: --yes and --override cannot be used together" >&2
-    exit 2
-  fi
-
-  command -v git >/dev/null 2>&1 || { echo "error: git is required" >&2; exit 1; }
-
-  if [ "${LOCAL_MODE}" -eq 1 ]; then
-    DOTFILES_DIR="$(resolve_local_repo)"
-    assert_local_repo "${DOTFILES_DIR}"
-    assert_no_managed_install
-    DOTFILES_DIR_INPUT="${DOTFILES_DIR}"
+  parse_arguments "$@"
+  select_skills
+  [ -f "${SOURCE_ROOT}/INSTRUCTIONS.md" ] && [ -d "${SOURCE_ROOT}/skill" ] || dotfiles_die "source checkout is missing INSTRUCTIONS.md or skill/"
+  INSTALL_ROOT="${SOURCE_ROOT}"
+  REMOTE_STAGE="${DOTFILES_REMOTE_STAGE:-0}"
+  if [ "${REMOTE_STAGE}" = 1 ]; then
+    INSTALL_ROOT="$(dotfiles_strip_slash "${DOTFILES_TARGET_ROOT:-}")"
+    [ -n "${INSTALL_ROOT}" ] || dotfiles_die "remote installer did not provide DOTFILES_TARGET_ROOT"
   else
-    assert_no_local_install
-    if [ -n "${DIR_OVERRIDE}" ]; then
-      DOTFILES_DIR="${DIR_OVERRIDE}"
-    elif [ -n "${DOTFILES_DIR:-}" ]; then
-      DOTFILES_DIR="${DOTFILES_DIR}"
-    else
-      DOTFILES_DIR="${HOME}/.dotfiles"
-    fi
+    REMOTE_STAGE=0
   fi
-
-  if [ "${ASSUME_YES}" -eq 0 ] && [ "${OVERRIDE}" -eq 0 ] && [ -t 1 ] && [ -r /dev/tty ]; then
-    INTERACTIVE=1
-  fi
-  if [ "${OVERRIDE}" -eq 1 ]; then
-    CONFLICT_MODE="override"
-  elif [ "${INTERACTIVE}" -eq 1 ]; then
-    CONFLICT_MODE="prompt"
+  if [ "${DRY_RUN}" -eq 1 ]; then
+    dotfiles_state_load
   else
-    CONFLICT_MODE="backup"
+    dotfiles_lock
+    dotfiles_state_load
   fi
-
-  if [ "${LOCAL_MODE}" -eq 0 ]; then
-    case "${DOTFILES_DIR}" in
-      /*) DOTFILES_DIR_INPUT="${DOTFILES_DIR}" ;;
-      *) DOTFILES_DIR_INPUT="$(pwd -P)/${DOTFILES_DIR}" ;;
-    esac
-    ensure_repo "${DOTFILES_DIR_INPUT}"
-  fi
-  GUIDANCE_SRC="${DOTFILES_DIR}/INSTRUCTIONS.md"
-  SKILLS_SRC="${DOTFILES_DIR}/skill"
-  CLAUDE_HOME="$(absolute_path "${CLAUDE_CONFIG_DIR:-${HOME}/.claude}")"
-  CODEX_HOME_DIR="$(absolute_path "${CODEX_HOME:-${HOME}/.codex}")"
-  GROK_HOME_DIR="$(absolute_path "${GROK_HOME:-${HOME}/.grok}")"
-  HERMES_HOME_DIR="$(absolute_path "${HERMES_HOME:-${HOME}/.hermes}")"
-  CURSOR_HOME_DIR="${HOME}/.cursor"
-  validate_sources
-  if [ "${SKIP_CODEX}" -eq 0 ] && cli_is_present codex; then
-    validate_codex_skill_destination
-  fi
-  init_state
-
-  if [ "${SKIP_CLAUDE}" -eq 1 ]; then
-    echo "Claude Code: skipped (--skip-claude)."
-  elif cli_is_present claude; then
-    echo "== Claude Code =="
-    install_claude
-  else
-    echo "Claude Code: not detected on PATH; skipping."
-  fi
-
-  if [ "${SKIP_CODEX}" -eq 1 ]; then
-    echo "Codex: skipped (--skip-codex)."
-  elif cli_is_present codex; then
-    echo "== Codex =="
-    install_codex
-  else
-    echo "Codex: not detected on PATH; skipping."
-  fi
-
-  if [ "${SKIP_GROK}" -eq 1 ]; then
-    echo "Grok: skipped (--skip-grok)."
-  elif cli_is_present grok; then
-    echo "== Grok =="
-    install_grok
-  else
-    echo "Grok: not detected on PATH; skipping."
-  fi
-
-  if [ "${SKIP_HERMES}" -eq 1 ]; then
-    echo "Hermes: skipped (--skip-hermes)."
-  elif cli_is_present hermes; then
-    echo "== Hermes =="
-    install_hermes
-  else
-    echo "Hermes: not detected on PATH; skipping."
-  fi
-
-  if [ "${SKIP_CURSOR}" -eq 1 ]; then
-    echo "Cursor: skipped (--skip-cursor)."
-  elif cursor_is_present; then
-    echo "== Cursor =="
-    install_cursor
-  else
-    echo "Cursor: ${CURSOR_HOME_DIR} not found; skipping."
-  fi
-
-  echo "Dotfiles setup completed from ${DOTFILES_DIR}"
+  dotfiles_append_unique DOTFILES_SOURCES "${INSTALL_ROOT}"
+  discover_targets
+  if [ "${REMOTE_STAGE}" -eq 1 ]; then dotfiles_add_plan bundle "${INSTALL_ROOT}" "${SOURCE_ROOT}"; fi
+  render_plan
+  if [ "${DRY_RUN}" -eq 1 ]; then echo "--dry-run: no changes made."; return 0; fi
+  confirm_plan || return 0
+  apply_plan
+  dotfiles_state_write
 }
 
 main "$@"
