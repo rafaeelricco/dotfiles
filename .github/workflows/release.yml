@@ -1,0 +1,91 @@
+name: Dotfiles release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dotfiles-production
+  cancel-in-progress: false
+  queue: max
+
+jobs:
+  package:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build deterministic release
+        run: python scripts/package_release.py --version "$GITHUB_SHA" --output "$RUNNER_TEMP/dotfiles-release"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dotfiles-release
+          path: ${{ runner.temp }}/dotfiles-release
+          if-no-files-found: error
+          retention-days: 7
+
+  verify:
+    needs: package
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: dotfiles-release
+          path: ${{ runner.temp }}/dotfiles-release
+      - name: Verify the downloaded release on this native platform
+        env:
+          DOTFILES_TEST_RELEASE_DIR: ${{ runner.temp }}/dotfiles-release
+        run: python -m unittest discover -s tests
+
+  deploy:
+    needs: [package, verify]
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, linux, x64, dotfiles-deploy]
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: dotfiles-release
+          path: ${{ runner.temp }}/dotfiles-release
+      - name: Validate, publish, and smoke-test the release
+        run: >-
+          python3.12 scripts/deploy_release.py
+          --release "${{ runner.temp }}/dotfiles-release"
+          --root /var/www/r1cco.com/dotfiles
+          --run-number "${GITHUB_RUN_NUMBER}"
