@@ -4,6 +4,7 @@ description: >
   End-to-end loop for a code change that needs a plan: plan with
   scope-and-plan, implement, verify, and commit when asked. Use when asked to
   build, fix, debug, refactor, or migrate code, or on /orchestrate.
+disable-model-invocation: true
 ---
 
 ## 1. Think Before Acting
