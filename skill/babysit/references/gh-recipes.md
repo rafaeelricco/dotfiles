@@ -58,14 +58,8 @@ gh pr checks N --json name,state,bucket,link,workflow || true
 `gh pr checks` exits non-zero when checks are pending or failing. Without
 `|| true` the command reads as an error on exactly the path that matters.
 
-Higher tiers clear and checks still running — wait once:
-
-```bash
-gh pr checks N --watch --fail-fast
-```
-
-`--fail-fast` exits watch mode on the first failed check, so a failure goes
-straight back to Gather instead of waiting on the slowest job in the matrix.
+Use **Wait gate** in `./flow-babysit.md` for pending work and continuation.
+Check results alone do not establish that reviews have finished.
 
 ## Failed job logs
 

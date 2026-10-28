@@ -6,7 +6,7 @@ step. Not Report. Not a `show-me` PR recap. Post with `gh pr comment` from
 
 ## When
 
-After **Watch** (skip Watch when no checks are running), before
+After **Watch** clears **Wait gate** in `./flow-babysit.md`, before
 **Re-request**, once this cycle, when this cycle pushed at least one
 commit **and** Gather has a trusted non-PENDING review submission.
 Otherwise skip.

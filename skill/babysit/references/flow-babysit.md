@@ -18,8 +18,6 @@ verification belong in the invoking prompt.
 
 ## Autonomy
 
-One scope gate, then run.
-
 | Autonomous once scope is approved                                              | Requires explicit authorization                           |
 | ------------------------------------------------------------------------------ | --------------------------------------------------------- |
 | Read, diagnose, fetch job logs, watch in-flight checks, run local verification | Replying to a **human** thread — authorize the exact text |
@@ -77,9 +75,40 @@ conflict and comment pushes restart checks. A tier blocked on a human does
 not block the tiers below it.
 
 1. **Gather** → **Scope Gate** → **Fix** → **Verify** (`verify`) → **Push, reply, resolve** (Comment routing) → **Watch** → **Review delta** (`./review-delta.md`) → **Re-request** → **Report**.
-2. Nothing actionable at Scope Gate **and** no checks running → end the cycle.
-3. Refresh checks after every push — a PASS locally is not remote green. Checks running with no other work → watch to completion (`gh pr checks --watch --fail-fast`). A failure that lands after your push re-enters at **Gather**; it is inside the approved scope when branch-related.
+2. Apply **Wait gate** during Gather, before validation or PR changes, whenever Watch is reached, and after Re-request.
+3. Refresh checks after every push — a PASS locally is not remote green. Once the Wait gate clears, newly arrived findings or failures re-enter at **Gather**; branch-related failures remain inside the approved scope.
 4. One commit per **ADDRESS cluster**. Run `verify` once per push batch: after the last fix cluster in that batch **and** after any merge-conflict resolution that lands in the same batch, then push. Not once forever; not once per commit unless each commit is its own push.
+
+## Wait gate
+
+Defer fixes, pushes, replies, resolutions, and reruns while any current-head
+check, review, or related automation is queued or running. Use provider status,
+workflow runs, and explicit bot progress signals; an unanswered human review
+request alone is not evidence of running work.
+
+Allow 20 minutes after PR creation, a push, or a review re-request for delayed
+automation to appear. During that grace period, an empty snapshot or green CI
+without an expected review is not completion. Use repo configuration, explicit
+requests, or prior runs to identify providers, but expect a current-head review
+only after its applicable trigger occurred. A reviewer that requires a mention
+is not pending merely because it reviewed an earlier head: let Watch clear and
+send the eligible Re-request first. Start its grace when that request is sent;
+do not assume every known bot is installed.
+
+While waiting, have the harness recheck in 5 minutes, reusing an existing
+scheduled continuation rather than creating duplicates. Preserve the PR,
+head SHA, trigger time, and pending work in the handoff; refresh them on resume.
+If scheduling is unavailable, report that limitation and the next check time.
+Report waiting, never merge-ready, and suspend this cycle until the continuation.
+Carry its Scope Gate decisions, trusted review context, pushed commits, addressed
+sources/reviewers, and pending/completed post-push steps. A continuation resumes
+the same logical cycle: “this cycle” eligibility includes its earlier invocations.
+Refresh remote state before resuming outstanding steps; do not replay completed
+posts or re-requests. Finish owed steps before reporting the cycle complete.
+
+The grace period bounds missing startup only. After it expires, report missing
+expected results; continue only when no work is running. Refresh all review/check
+sources before proceeding; a new head restarts the gate. Failed or cancelled automation is terminal, not running.
 
 ## Gather
 
@@ -205,10 +234,9 @@ Every cycle ends. It ends early when a blocker needs a human:
 An UNSURE (bug-vs-intent) finding is not an early-stop: report it, leave
 that thread blocked, and finish granted ADDRESS and SKIP work.
 
-Green + mergeable ends the cycle: report it and stop. Review comments still
-arrive — the next scheduled cycle picks them up. "Green" requires at least one
-**completed** check; a PR with zero checks is not green, so report that state and
-stop rather than wait for a check to appear. Pending is not green — watch it.
+After **Wait gate** clears, green + mergeable ends the cycle.
+"Green" requires at least one **completed** check; report zero checks or
+missing expected results without claiming merge-ready.
 Report merge-ready only off a fresh read showing mergeable and required checks
 green.
 
