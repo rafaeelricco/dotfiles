@@ -96,7 +96,12 @@ While waiting, have the harness recheck in 5 minutes, reusing an existing
 scheduled continuation rather than creating duplicates. Preserve the PR,
 head SHA, trigger time, and pending work in the handoff; refresh them on resume.
 If scheduling is unavailable, report that limitation and the next check time.
-Report waiting, never merge-ready, and end this cycle.
+Report waiting, never merge-ready, and suspend this cycle until the continuation.
+Carry its Scope Gate decisions, trusted review context, pushed commits, addressed
+sources/reviewers, and pending/completed post-push steps. A continuation resumes
+the same logical cycle: “this cycle” eligibility includes its earlier invocations.
+Refresh remote state before resuming outstanding steps; do not replay completed
+posts or re-requests. Finish owed steps before reporting the cycle complete.
 
 The grace period bounds missing startup only. After it expires, report missing
 expected results; continue only when no work is running. Refresh all review/check
