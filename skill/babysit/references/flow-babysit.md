@@ -75,7 +75,7 @@ conflict and comment pushes restart checks. A tier blocked on a human does
 not block the tiers below it.
 
 1. **Gather** → **Scope Gate** → **Fix** → **Verify** (`verify`) → **Push, reply, resolve** (Comment routing) → **Watch** → **Review delta** (`./review-delta.md`) → **Re-request** → **Report**.
-2. Apply **Wait gate** during Gather, before validation or PR changes, and whenever Watch is reached.
+2. Apply **Wait gate** during Gather, before validation or PR changes, whenever Watch is reached, and after Re-request.
 3. Refresh checks after every push — a PASS locally is not remote green. Once the Wait gate clears, newly arrived findings or failures re-enter at **Gather**; branch-related failures remain inside the approved scope.
 4. One commit per **ADDRESS cluster**. Run `verify` once per push batch: after the last fix cluster in that batch **and** after any merge-conflict resolution that lands in the same batch, then push. Not once forever; not once per commit unless each commit is its own push.
 
@@ -88,9 +88,12 @@ request alone is not evidence of running work.
 
 Allow 20 minutes after PR creation, a push, or a review re-request for delayed
 automation to appear. During that grace period, an empty snapshot or green CI
-without an expected review is not completion. Derive expected automation from
-repo configuration, explicit requests, or prior runs; do not assume every
-known bot is installed.
+without an expected review is not completion. Use repo configuration, explicit
+requests, or prior runs to identify providers, but expect a current-head review
+only after its applicable trigger occurred. A reviewer that requires a mention
+is not pending merely because it reviewed an earlier head: let Watch clear and
+send the eligible Re-request first. Start its grace when that request is sent;
+do not assume every known bot is installed.
 
 While waiting, have the harness recheck in 5 minutes, reusing an existing
 scheduled continuation rather than creating duplicates. Preserve the PR,
