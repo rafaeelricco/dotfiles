@@ -96,7 +96,8 @@
       } // flush child, parent clips it
       if (actual >= pill - 0.5 && expected >= pill - 0.5) continue; // pill inside a big curve: fine
       if (Math.abs(actual - expected) <= tolerance) continue;
-      if (actual >= pill - 0.5) {
+      // Pill that cannot shrink to the concentric value: fine while it fits the outer curve.
+      if (actual >= pill - 0.5 && actual <= outer + tolerance) {
         skipped.pill++;
         continue;
       }
