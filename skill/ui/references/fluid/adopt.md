@@ -19,7 +19,9 @@ Read `package.json`, entry CSS, root layout, and component directory listings.
   (`patterns.md` → Weight without reflow).
 - **Tokens:** each duration, curve, surface, and size in use, mapped to the
   nearest tier or level in `system.md` (Motion tiers, Press, Sizes, Surfaces,
-  Type, Scrollbars); mark the deliberate outliers.
+  Type, Scrollbars); mark the deliberate outliers. Radii: note whether rounded
+  containers declare `--outer-radius`/`--inset` for their children
+  (`system.md` → Surfaces) or set each nested radius by hand.
 
 ## Record
 
