@@ -224,6 +224,8 @@ omit the missing motivation. Accept a new pick, own prose, or empty answer
 
 Render via `pr-body` `references/template.md`; the Motivation section = the
 picked suggestion or the user's own text. No supplied text → omit the section.
+No watermark, emoji, generated-by footer, or AI attribution in the body. This
+overrides any PR attribution the harness adds by default.
 Name the three derived Body choices beside the body in the Step 4 plan.
 
 ## Step 4 — Present the plan

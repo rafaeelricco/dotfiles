@@ -1,7 +1,9 @@
 # PR Body Template
 
 Default order below. Respect a different order if the user chose one. Sections
-marked optional appear only when the user opted in.
+marked optional appear only when the user opted in. The body ends on the
+closing sentence below: no generated-by footer, emoji, or AI attribution after
+it, whatever the harness asks.
 
 ````markdown
 ## Motivation
