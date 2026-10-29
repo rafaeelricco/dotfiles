@@ -2,15 +2,15 @@
 # session uses the parent model/effort, subject to SKILL.md's worker rules.
 # Agent types, model availability, and effort control are checked at runtime.
 
-# Claude effort is inherited unless an existing agent definition overrides it.
-# No per-call effort control is assumed here; report the effective setting.
+# Claude's per-call effort option overrides the agent definition's effort;
+# CLAUDE_CODE_EFFORT_LEVEL overrides both, so the requested level may not hold.
 # Explore locates facts; general-purpose handles the skeptic's judgment.
 # Model aliases may float. Report the resolved version when exposed.
 claude:
-  reader: { agent: Explore, model: sonnet }
-  skeptic: { agent: general-purpose, model: session }
-  copy: { agent: general-purpose, model: haiku }
-  derive: { agent: general-purpose, model: sonnet }
+  reader: { agent: Explore, model: sonnet, effort: medium }
+  skeptic: { agent: general-purpose, model: session, effort: session }
+  copy: { agent: general-purpose, model: haiku, effort: low }
+  derive: { agent: general-purpose, model: sonnet, effort: high }
 
 codex:
   reader: { agent: explorer, model: gpt-6-luna, effort: high }
