@@ -12,8 +12,30 @@
     ["bottom-left", "borderBottomLeftRadius", (c, p) => [c.left - p.left, p.bottom - c.bottom]],
   ];
   const visible = (el, cs, r) => r.width > 0 && r.height > 0 && cs.display !== "none" && cs.visibility !== "hidden";
-  // Effective radius: the first value of each corner, clamped to half the box.
-  const radius = (cs, prop, r) => Math.min(px(cs[prop].split(" ")[0]), r.width / 2, r.height / 2);
+  // Used radius per corner (CSS Backgrounds 3, overlapping curves): resolve percentages
+  // against the box, scale every corner by one factor when adjacent radii overflow a side,
+  // then take the smaller of the horizontal and vertical radius.
+  const radius = (cs, r) => {
+    const len = (v, size) => (v.endsWith("%") ? (parseFloat(v) / 100) * size : px(v));
+    const [tl, tr, br, bl] = CORNERS.map(([, p]) => {
+      const [h, v = h] = cs[p].split(" ");
+      return [len(h, r.width), len(v, r.height)];
+    });
+    const fit = (side, a, b) => (a + b > side ? side / (a + b) : 1);
+    const f = Math.min(
+      fit(r.width, tl[0], tr[0]),
+      fit(r.width, bl[0], br[0]),
+      fit(r.height, tl[1], bl[1]),
+      fit(r.height, tr[1], br[1]),
+    );
+    const used = ([h, v]) => Math.min(h, v) * f;
+    return {
+      borderTopLeftRadius: used(tl),
+      borderTopRightRadius: used(tr),
+      borderBottomRightRadius: used(br),
+      borderBottomLeftRadius: used(bl),
+    };
+  };
   const draws = (el, cs) =>
     (cs.backgroundColor !== "rgba(0, 0, 0, 0)" && cs.backgroundColor !== "transparent")
     || cs.backgroundImage !== "none"
@@ -53,8 +75,10 @@
     }
     if (!parent || parent === document.documentElement) continue;
     const pill = Math.min(r.width, r.height) / 2;
+    const outers = radius(pcs, pr);
+    const actuals = radius(cs, r);
     for (const [corner, prop, gaps] of CORNERS) {
-      const outer = radius(pcs, prop, pr);
+      const outer = outers[prop];
       if (outer <= 0) continue;
       const [gx, gy] = gaps(r, pr);
       if (gx < -0.5 || gy < -0.5 || gx >= outer || gy >= outer) continue; // outside the corner zone
@@ -63,7 +87,7 @@
         continue;
       }
       const gap = (gx + gy) / 2;
-      const actual = radius(cs, prop, r);
+      const actual = actuals[prop];
       const expected = Math.max(0, outer - gap);
       if (gap < 0.5 && clips(pcs)) {
         skipped.clipped++;
