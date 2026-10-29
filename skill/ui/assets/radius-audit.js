@@ -77,6 +77,7 @@
     const pill = Math.min(r.width, r.height) / 2;
     const outers = radius(pcs, pr);
     const actuals = radius(cs, r);
+    let worst = null; // one row per element: keep the worst corner
     for (const [corner, prop, gaps] of CORNERS) {
       const outer = outers[prop];
       if (outer <= 0) continue;
@@ -99,7 +100,8 @@
         skipped.pill++;
         continue;
       }
-      findings.push({
+      if (worst && Math.abs(actual - expected) <= Math.abs(worst.delta)) continue;
+      worst = {
         element: path(el),
         parent: label(parent),
         corner,
@@ -109,16 +111,11 @@
         expected: +expected.toFixed(1),
         delta: +(actual - expected).toFixed(1),
         latent: !draws(el, cs), // radius set but no fill yet (hover/selected state)
-      });
+      };
     }
+    if (worst) findings.push(worst);
   }
-  // One row per element+parent pair: keep the worst corner.
-  const byKey = new Map();
-  for (const f of findings) {
-    const k = f.element + "|" + f.parent;
-    if (!byKey.has(k) || Math.abs(f.delta) > Math.abs(byKey.get(k).delta)) byKey.set(k, f);
-  }
-  const rows = [...byKey.values()].sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+  const rows = findings.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
   console.table(rows);
   return { findings: rows, skipped };
 })();
