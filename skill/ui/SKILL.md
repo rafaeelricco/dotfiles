@@ -4,7 +4,7 @@ description: >
   Motion and web UI craft. Use when adding, reviewing, or auditing motion in
   web or video, building or restyling interactive UI components, picking a UI
   library, or on /ui.
-argument-hint: "[build|review|audit|hunt|prototype|lib|vocab|compose|style|adopt]"
+argument-hint: "[build|review|audit|hunt|prototype|lib|vocab|compose|style|shape|adopt]"
 ---
 
 # UI
@@ -26,6 +26,7 @@ run explicitly requested jobs in order, keeping each job's scope and gates.
 | what's it called when…                                  | `vocab`     | `references/motion/vocabulary.md` |
 | build or restyle a component, list, menu, dialog, shell | `compose`   | `references/fluid/components.md`  |
 | hover, press, selection, surfaces, sizes, type          | `style`     | `references/fluid/patterns.md`    |
+| radius, corners, nested surfaces, audit the corners     | `shape`     | `references/fluid/shape.md`       |
 | set up the system in a project                          | `adopt`     | `references/fluid/adopt.md`       |
 
 No row fits → ask which. One ambiguous request → the job they led with; both
@@ -40,6 +41,10 @@ Highest wins:
 2. The project's own tokens.
 3. `references/fluid/system.md` — default web UI tokens.
 
+Geometry is not a token: project radii set the outermost surface, and every
+rounded surface nested inside it follows `system.md` → Surfaces (concentric
+corners), whatever radius the project assigns that component on its own.
+
 A job that needs a number loads `references/motion/laws.md`; web work (a browser UI) also loads
 `references/motion/web.md` and `references/fluid/system.md`. A `build` that
 matches a recipe (button press, popover and dropdown, tooltip, modal, toast, drawer, accordion,
@@ -48,4 +53,4 @@ drag to dismiss, crossfade mask, programmatic WAAPI) also loads `references/moti
 `references/motion/picker.md`; `audit` writing a plan loads
 `references/motion/plan.md`. `compose` and `style` start from `assets/`
 (copy, then adapt), and in a project with no `.agents/ui.md` they run `adopt`
-first.
+first. Both finish with the `shape` check on what they touched.

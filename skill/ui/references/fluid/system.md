@@ -151,8 +151,14 @@ shadow values are starting defaults; tune them per project.
 - Nested rounded surfaces use concentric corners, so the inner radius is the
   outer one minus the gap between the two edges (usually the parent's padding)
   and minus the parent's border width. The formula stops holding once the outer radius
-  exceeds 24px, the gaps differ from side to side, or the inner surface stops
-  short of the corner; size each layer on its own and adjust visually.
+  exceeds 24px, the gap reaches about three quarters of the outer radius, the gaps
+  differ from side to side, or the inner surface stops short of the corner; size
+  each layer on its own and adjust visually. An inner radius larger than its
+  parent's is never right.
+- Write the relationship, not the result: the parent declares `--outer-radius`
+  and `--inset`, the children compute theirs, so a changed padding or radius
+  keeps the corners concentric. Hover and selected fills, tab thumbs and focus
+  rings are nested surfaces too, even while they are invisible.
 
 ```css
 --inner-radius: max(0px, calc(var(--outer-radius) - var(--inset) - var(--border)));
