@@ -77,6 +77,7 @@
     const pill = Math.min(r.width, r.height) / 2;
     const outers = radius(pcs, pr);
     const actuals = radius(cs, r);
+    const isPill = CORNERS.every(([, prop]) => actuals[prop] >= pill - 0.5);
     let worst = null; // one row per element: keep the worst corner
     for (const [corner, prop, gaps] of CORNERS) {
       const outer = outers[prop];
@@ -94,10 +95,10 @@
         skipped.clipped++;
         continue;
       } // flush child, parent clips it
-      if (actual >= pill - 0.5 && expected >= pill - 0.5) continue; // pill inside a big curve: fine
+      if (isPill && expected >= pill - 0.5) continue; // pill inside a big curve: fine
       if (Math.abs(actual - expected) <= tolerance) continue;
       // Pill that cannot shrink to the concentric value: fine while it fits the outer curve.
-      if (actual >= pill - 0.5 && actual <= outer + tolerance) {
+      if (isPill && actual <= outer + tolerance) {
         skipped.pill++;
         continue;
       }
