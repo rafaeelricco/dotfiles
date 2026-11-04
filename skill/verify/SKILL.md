@@ -82,8 +82,10 @@ For changes involving cross-module/runtime interactions, shared contracts or
 configuration, stateful failure/recovery behavior, or unresolved coverage
 assumptions, use one fresh verifier when delegation is available and permitted.
 
-Give it the original requirements, target identity, source paths, and raw check
-evidence. Ask it to identify missing requirements, unexercised paths, and
+Start it with a clean context containing only the original requirements,
+target identity, source paths, and raw check evidence. Set the spawn tool's
+context isolation option explicitly (`fork_turns="none"` in Codex).
+Ask it to identify missing requirements, unexercised paths, and
 unsupported conclusions. It may inspect and run checks, but must not edit,
 invoke this skill recursively, or delegate further.
 

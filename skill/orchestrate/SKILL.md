@@ -1,8 +1,8 @@
 ---
 name: orchestrate
 description: >
-  End-to-end loop for a code change that needs a plan: plan with
-  scope-and-plan, implement, verify, and commit when asked. Use when asked to
+  End-to-end loop for a code change that needs a plan. Plan and execute with
+  scope-and-plan, verify, and commit when asked. Use when asked to
   build, fix, debug, refactor, or migrate code, or on /orchestrate.
 disable-model-invocation: true
 ---
@@ -15,7 +15,7 @@ When this skill loads, load `scope-and-plan` and stop routing.
 
 When choosing an approach — not before every tool call — if a simpler one exists, say so.
 
-Independent work ships in one message; two independent concerns are two workers. A read that never uses a prior result is the same step, not a later one.
+During planning, independent concerns go to separate readers in one message. A read that never uses a prior result is the same step, not a later one.
 
 After parallel reads, before using them: drop empty, off-task, and mutually impossible claims.
 

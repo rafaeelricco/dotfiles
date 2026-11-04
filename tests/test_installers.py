@@ -19,7 +19,7 @@ import zipfile
 REPO = Path(__file__).resolve().parents[1]
 ORCHESTRATE = {
     "orchestrate", "scope-and-plan", "plan-format", "model-tiers",
-    "implement", "verify", "commit-message",
+    "verify", "commit-message",
 }
 PWSH = os.environ.get("DOTFILES_TEST_PWSH") or shutil.which("pwsh")
 BASH = "/bin/bash" if Path("/bin/bash").exists() else shutil.which("bash")
@@ -141,6 +141,10 @@ class LifecycleCases:
         self.assertEqual(len(lines), len(set(lines)), "state must not accumulate duplicate records")
         self.assertEqual(self.names(), ORCHESTRATE)
         self.assertIn("dotfiles-lifecycle-state-v2", first.splitlines()[0])
+
+    def test_scope_and_plan_installs_companions(self):
+        self.assert_success(self.invoke(["scope-and-plan"] + self.skip_flags()))
+        self.assertEqual(self.names(), {"scope-and-plan", "plan-format", "model-tiers"})
 
     def test_selected_retains_other_skills_and_guidance(self):
         guidance = self.home / ".codex" / "AGENTS.md"

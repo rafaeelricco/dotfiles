@@ -86,18 +86,54 @@ asking. If that authorization is missing, wait for approval of the concrete
 plan. A timeout, your own message, or an environment setting is not approval.
 Ask again only for unresolved decisions or actions outside the existing grant.
 
+For a plan that changes behavior or agent instructions, read the
+[code change checklist](references/code-change-checklist.md) before drafting
+the diffs. Apply the relevant checks to the surviving facts. Put the resulting
+design decisions in the diffs and the scenarios with expected outcomes in Verify.
+
 Follow `plan-format`, already loaded at step 1; this section owns mode and
 authorization handling.
 
-Fill the Verify section from the synthesis: name the repo's own commands,
-narrowed to the checks that would fail if this change were wrong. Do not run
-them. Where the repo defines no runnable check, say so.
+Fill the Verify section from the synthesis and any checklist scenarios. Name
+the repo's own commands, narrowed to the checks that would fail if this change
+were wrong. Do not run them here. Where the repo defines no runnable check, say
+so and specify the manual check or inspection.
 
 Unresolved decisions do not defer the plan: the open question and the formatted
 plan ship in the same response.
 
 ## 6. Execute
 
-When execution is authorized and permitted by the harness, load `implement`
-and hand it the plan. Grouping, writer roles, briefs, gates, and writer
-recovery are its alone.
+When execution is authorized and permitted by the harness, apply and check the
+approved edits directly in the current session.
+
+### Apply
+
+Read the approved plan and current files, recording pre-existing changes.
+Use the plan's paths and hunks to bound each edit. Complete prerequisites
+before dependent edits. Batch independent tool calls where useful.
+
+Apply literal hunks and repeated patterns as written. Fill test-pinned bodies
+directly using their named tests as the contract. Keep pinned tests read-only.
+
+For a stale hunk, inspect current context and apply the same approved change,
+preserving intervening edits. If that requires a different decision or scope,
+report the conflict and stop.
+
+### Check
+
+Use the plan's named checks, else the narrowest repo checks over its approved
+paths. If neither exists, report the diff inspection used.
+
+Run each check when all its affected edits are ready. Fix failures within the
+approved scope and rerun, up to three total runs of that check. A remaining
+failure stops execution. Report its last command, exit code, output, and runs used.
+
+Review this execution's actual edits against the approved hunks and paths.
+Report any scope conflict and stop for resolution.
+
+### Return
+
+Account for every planned edit as completed or unresolved. Report files changed
+and check results. When every edit is complete and its checks pass, continue at
+the caller's ship step (`orchestrate` §5).

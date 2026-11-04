@@ -1,8 +1,8 @@
 # Worker brief
 
 Step 1 readers and the step 4 skeptic are read-only. A worker that edits while
-siblings are reading invalidates every other worker's snapshot. Writers belong
-to `implement`, which starts after every reader has returned.
+siblings are reading invalidates every other worker's snapshot. Inline
+implementation starts after every reader has returned.
 
 Brief each reader with:
 
