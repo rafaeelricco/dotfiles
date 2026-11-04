@@ -510,7 +510,6 @@ I’m a software engineer with a design background, building AI products with Py
 
 A fresh read-only verifier checked the final runtime, snapshot hashes, source preservation, legacy samples, deleted files, and all response sets. It independently reran the validator, packaging suite and whitespace check. Its conclusion agrees with PARTIAL: the implementation matches the requested rules; the final New facts response retains an unsupported name placeholder; consequential ambiguity and several unchanged contracts remain unexercised. It found no concrete source-fact leak in the other seven final responses.
 
-
 ## PR #79 review regression: redacted slots
 
 ### Scope and evidence
@@ -525,14 +524,14 @@ Local evidence directory: `/private/tmp/pr79-placeholder-eval-20261104`; baselin
 
 ### Runtime identity
 
-| Runtime file | SHA-256 |
-| --- | --- |
-| `SKILL.md` | `0e131105b372e557771c2c7bbc21128e1f927be6105821d6e24a139d4c82a6bb` |
+| Runtime file                    | SHA-256                                                            |
+| ------------------------------- | ------------------------------------------------------------------ |
+| `SKILL.md`                      | `0e131105b372e557771c2c7bbc21128e1f927be6105821d6e24a139d4c82a6bb` |
 | `references/voice/catalogue.md` | `b8f0fe34a478e0ef15d2eda7cc16b8f4246cbfc83443e1ca7811ba5943333532` |
-| `references/voice/chat.md` | `be7cbdb6fa109af38c76970dbff2336f018dfc8477560b6d59291c987cbd5acd` |
-| `references/voice/profile.md` | `b905efeecdf1bc7693429c6f49e6e1f144262385d6cd21de19136eb59b9fa544` |
-| `references/voice/spoken.md` | `533cb4ebcfc3bd50acb1cd32bc156eabefeaa199e02d2d03e6b7210668f177c9` |
-| `references/voice/written.md` | `7f2747025cdd9be5e8bb8241c82b4f0752f5c5085cb8d9938c6b6f7d1bd68d35` |
+| `references/voice/chat.md`      | `be7cbdb6fa109af38c76970dbff2336f018dfc8477560b6d59291c987cbd5acd` |
+| `references/voice/profile.md`   | `b905efeecdf1bc7693429c6f49e6e1f144262385d6cd21de19136eb59b9fa544` |
+| `references/voice/spoken.md`    | `533cb4ebcfc3bd50acb1cd32bc156eabefeaa199e02d2d03e6b7210668f177c9` |
+| `references/voice/written.md`   | `7f2747025cdd9be5e8bb8241c82b4f0752f5c5085cb8d9938c6b6f7d1bd68d35` |
 
 ### Checks
 
@@ -548,7 +547,6 @@ Local evidence directory: `/private/tmp/pr79-placeholder-eval-20261104`; baselin
 
 ### Unedited follow-up outputs
 
-
 #### Introduction
 
 ```text
@@ -556,7 +554,6 @@ Hey, I'm a senior software engineer focused on building AI products, and my main
 ```
 
 Requested removal of 2021 is respected; the supplied role, main languages, design background, product perspective and architecture remain. No redacted slots appear.
-
 
 #### New facts
 
@@ -566,7 +563,6 @@ Hey, I'm a software engineer, and I'm currently building internal tools using Go
 
 The three supplied facts remain, with no imported name, duration, design background, Python, TypeScript or AI-product claim. No unfilled slot appears.
 
-
 #### Technical explanation
 
 ```text
@@ -575,7 +571,6 @@ Eu tive um problema com um agente de voz que ficava ouvindo a própria resposta,
 
 PARTIAL: the response preserves the main source facts but imports catalogue wording: “para identificar se a pessoa estava falando ou não” and the stronger result “muito mais natural”. The latter exceeds the source’s “mais natural”. This remains a source-fidelity limitation; the raw output is retained.
 
-
 #### Delivery update
 
 ```text
@@ -583,7 +578,6 @@ Não vou conseguir entregar hoje. Boa parte da página já está funcional, mas 
 ```
 
 No delivery today, working portion, remaining review/finalization, presentation option and lack of ETA remain; no deadline is invented.
-
 
 #### Disagreement
 
@@ -594,7 +588,6 @@ Mas se tu trouxer um benchmark ou alguma evidência concreta desse benefício, a
 ```
 
 Current solution, missing benchmark, risk of bugs and openness to concrete evidence remain.
-
 
 #### Recruiter email
 
@@ -608,7 +601,6 @@ Obrigado!
 
 Salary and remote/on-site questions precede scheduling; no attachment or recruiter-publication claim is introduced.
 
-
 #### Ambiguous delivery
 
 ```text
@@ -616,7 +608,6 @@ Oi, eu sou engenheiro de software e trabalho com produtos de IA.
 ```
 
 A short general introduction is returned. This still does not decisively exercise materially consequential delivery ambiguity.
-
 
 #### Caller constraints
 
@@ -626,7 +617,6 @@ I'm a software engineer with a background in design. I've been building AI produ
 
 Returns only an English draft, preserves supplied facts and stays within the 500-character limit (112 characters excluding the final newline).
 
-
 #### Supplied name
 
 ```text
@@ -635,7 +625,6 @@ Hey, I'm Alex. I'm a software engineer, and I now build internal tools using Go.
 
 Alex is used rather than omitted or replaced by a slot. Role, QA background and internal tools using Go remain; no time claim appears.
 
-
 #### Requested template
 
 ```text
@@ -643,7 +632,6 @@ Hey, I'm [name]. I'm a [role], and I mainly work with [main programming language
 ```
 
 Keeps exactly the requested editable name, role and main-language slots; no catalogue biography is imported.
-
 
 ### Follow-up verdict
 
