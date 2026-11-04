@@ -10,7 +10,7 @@ Use: an introduction written to be read aloud.
 
 > Hey, I'm [name]. I'm a senior software engineer, and [source time phrase] I've been focused on building AI products using Python and TypeScript. One thing that's good to mention is that I started in design, so I naturally think about the whole product, how the UX and UI solve the customer's problem. And also, with the engineering background I've built through my career, I'm able to build the systems behind it, the architecture, the system design, and so on.
 
-The time placeholder does not establish a calendar year or a rolling period.
+Handle redacted slots under the [Facts rules](../../SKILL.md#facts).
 
 ## Delivery update
 

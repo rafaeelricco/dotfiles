@@ -509,3 +509,144 @@ I’m a software engineer with a design background, building AI products with Py
 ## Independent review
 
 A fresh read-only verifier checked the final runtime, snapshot hashes, source preservation, legacy samples, deleted files, and all response sets. It independently reran the validator, packaging suite and whitespace check. Its conclusion agrees with PARTIAL: the implementation matches the requested rules; the final New facts response retains an unsupported name placeholder; consequential ambiguity and several unchanged contracts remain unexercised. It found no concrete source-fact leak in the other seven final responses.
+
+
+## PR #79 review regression: redacted slots
+
+### Scope and evidence
+
+The historical before/after run above is preserved unchanged. This follow-up addresses Cursor comment `4469315962` on PR #79, based on parent revision `47fd95b9326d22e8fcad9549e96b9ccf40407d6e`. The runtime now treats example redactions as optional fields whose values come from the current source; requested templates may keep them. The catalogue points to that single rule.
+
+Baseline reproduction was a recorded-generation replay, not fresh baseline inference. A failing assertion in a detached worktree rejected the preserved New facts response for its unsupported `[name]`; all six recorded final runtime hashes matched that HEAD. The worktree was removed.
+
+After the correction, all eight existing cases and two added boundary cases ran once each in ten fresh agent contexts (`fork_turns=none`), using the same snapshot. Each generator received only its exact request, the runtime snapshot and output-file instructions, not expectations, review text or other responses. Model and effort inherited the parent settings; the spawn response did not expose their resolved values. This follow-up is not a controlled model-matched comparison with the earlier run. No generated output was manually repaired, retried or selected from multiple candidates.
+
+Local evidence directory: `/private/tmp/pr79-placeholder-eval-20261104`; baseline replay script/log: `/private/tmp/placeholder-proof-47fd95b.py` and `/private/tmp/placeholder-proof-47fd95b.log`. The portable evidence is the frozen requests in `voice.md`, runtime hashes and unedited outputs below.
+
+### Runtime identity
+
+| Runtime file | SHA-256 |
+| --- | --- |
+| `SKILL.md` | `0e131105b372e557771c2c7bbc21128e1f927be6105821d6e24a139d4c82a6bb` |
+| `references/voice/catalogue.md` | `b8f0fe34a478e0ef15d2eda7cc16b8f4246cbfc83443e1ca7811ba5943333532` |
+| `references/voice/chat.md` | `be7cbdb6fa109af38c76970dbff2336f018dfc8477560b6d59291c987cbd5acd` |
+| `references/voice/profile.md` | `b905efeecdf1bc7693429c6f49e6e1f144262385d6cd21de19136eb59b9fa544` |
+| `references/voice/spoken.md` | `533cb4ebcfc3bd50acb1cd32bc156eabefeaa199e02d2d03e6b7210668f177c9` |
+| `references/voice/written.md` | `7f2747025cdd9be5e8bb8241c82b4f0752f5c5085cb8d9938c6b6f7d1bd68d35` |
+
+### Checks
+
+- The baseline replay exited 1 with `AssertionError: Finished source-only spoken introduction must have no unsupported placeholders; observed ['[name]']`. This confirms the historical generated-output failure at the matching runtime snapshot.
+
+- `python3 /private/tmp/pr79-placeholder-eval-20261104/check_responses.py` passed. It checked snapshot identity, absence of placeholder slots in nine finished drafts, retention of all three requested template slots, supplied-name preservation, the no-name source facts and the caller character limit. These are narrow assertions, not an all-case semantic-fidelity verdict.
+
+- `quick_validate.py skill/sounds-natural` passed.
+
+- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_packaging.py'` passed: three tests passed and one native-artifact case skipped because `DOTFILES_TEST_RELEASE_DIR` was not supplied.
+
+- `git diff --check` passed.
+
+### Unedited follow-up outputs
+
+
+#### Introduction
+
+```text
+Hey, I'm a senior software engineer focused on building AI products, and my main languages are Python and TypeScript. One thing that's good to mention is that I started in design, so I naturally think about the whole product, how the UX and UI solve the customer's problem. And I also think about the architecture and the systems behind it.
+```
+
+Requested removal of 2021 is respected; the supplied role, main languages, design background, product perspective and architecture remain. No redacted slots appear.
+
+
+#### New facts
+
+```text
+Hey, I'm a software engineer, and I'm currently building internal tools using Go. One thing that's good to mention is that I started in QA.
+```
+
+The three supplied facts remain, with no imported name, duration, design background, Python, TypeScript or AI-product claim. No unfilled slot appears.
+
+
+#### Technical explanation
+
+```text
+Eu tive um problema com um agente de voz que ficava ouvindo a própria resposta, e isso tornava a aplicação inutilizável. Daí eu peguei a captura de áudio e o cancelamento de ruído no front-end e unifiquei tudo em um contexto de áudio, que passou a fazer as duas coisas. E movi também a identificação de fala para um serviço de terceiro no back-end, para identificar se a pessoa estava falando ou não. E isso fez com que a conversa ficasse muito mais natural.
+```
+
+PARTIAL: the response preserves the main source facts but imports catalogue wording: “para identificar se a pessoa estava falando ou não” and the stronger result “muito mais natural”. The latter exceeds the source’s “mais natural”. This remains a source-fidelity limitation; the raw output is retained.
+
+
+#### Delivery update
+
+```text
+Não vou conseguir entregar hoje. Boa parte da página já está funcional, mas algumas partes ainda precisam ser revisadas e finalizadas. A gente pode apresentar o que já está funcionando, mas ainda não tenho uma previsão confirmada para a entrega.
+```
+
+No delivery today, working portion, remaining review/finalization, presentation option and lack of ETA remain; no deadline is invented.
+
+
+#### Disagreement
+
+```text
+Bom, a primeira coisa é entender se a gente realmente precisa reescrever essa parte do sistema. Do jeito que tá hoje já resolve o problema que a gente tem, e ainda não tem um benchmark mostrando que essa mudança traria um benefício funcional.
+
+Mas se tu trouxer um benchmark ou alguma evidência concreta desse benefício, a gente pode reconsiderar e colocar isso pra frente. A minha posição é que a gente precisa de um argumento sólido pra fazer essa mudança, dado que cada alteração pode introduzir algum novo bug.
+```
+
+Current solution, missing benchmark, risk of bugs and openness to concrete evidence remain.
+
+
+#### Recruiter email
+
+```text
+Oi, tudo bem?
+
+Eu li a vaga e achei um bom fit com o meu perfil. Só fiquei com algumas dúvidas em relação à faixa salarial e se a vaga é remota ou presencial. Você poderia me passar essas informações antes de a gente marcar uma conversa?
+
+Obrigado!
+```
+
+Salary and remote/on-site questions precede scheduling; no attachment or recruiter-publication claim is introduced.
+
+
+#### Ambiguous delivery
+
+```text
+Oi, eu sou engenheiro de software e trabalho com produtos de IA.
+```
+
+A short general introduction is returned. This still does not decisively exercise materially consequential delivery ambiguity.
+
+
+#### Caller constraints
+
+```text
+I'm a software engineer with a background in design. I've been building AI products using Python and TypeScript.
+```
+
+Returns only an English draft, preserves supplied facts and stays within the 500-character limit (112 characters excluding the final newline).
+
+
+#### Supplied name
+
+```text
+Hey, I'm Alex. I'm a software engineer, and I now build internal tools using Go. One thing that's good to mention is that I started in QA.
+```
+
+Alex is used rather than omitted or replaced by a slot. Role, QA background and internal tools using Go remain; no time claim appears.
+
+
+#### Requested template
+
+```text
+Hey, I'm [name]. I'm a [role], and I mainly work with [main programming language].
+```
+
+Keeps exactly the requested editable name, role and main-language slots; no catalogue biography is imported.
+
+
+### Follow-up verdict
+
+The placeholder correction passes the observed no-name, supplied-name and requested-template cases, and no unsupported slots appear in the other finished drafts. A fresh independent verifier checked all snapshot hashes and raw responses and agreed with that narrow finding.
+
+Broader verdict remains PARTIAL. The technical explanation still transfers a qualifier and explanatory wording from its example. Meaningful delivery ambiguity, current-sample precedence, substantial grammar repair, calibration, and native release behavior remain unexercised. One generation per case cannot establish general reliability or stylistic improvement. The historical failure and the new fidelity limitation remain visible rather than being rewritten into passing evidence.

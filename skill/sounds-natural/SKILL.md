@@ -20,6 +20,10 @@ qualifiers, and relationships. Draft from that inventory; examples supply
 expression and structure, not assertions. Leave anything the source does
 not establish unspecified.
 
+Redacted slots in voice examples are not required output structure. Fill them
+only from the current source; otherwise omit the slot and recast its surrounding
+wording. Retain placeholders only when the user requests a template.
+
 Before returning, reconcile the draft with the inventory in both directions:
 every retained source assertion is represented, and every factual clause
 in the draft is supported by it. Recast unsupported clauses using only what
