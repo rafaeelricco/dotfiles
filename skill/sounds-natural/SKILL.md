@@ -1,64 +1,77 @@
 ---
 name: sounds-natural
 description: >
-  Write or rewrite text so it sounds human, and like the user when it's
-  theirs. Use when asked to humanize or de-slop text, write in the user's
-  voice, or match a writing sample.
+  Write or rewrite in the user's voice from their examples, including
+  scripts written to be spoken aloud. Use when asked to sound natural,
+  write like the user, or match a supplied voice sample.
 ---
 
-Make the text sound like a person, not a script or a chatbot. When the text is the user's, make it sound like the user.
+Compose from the user's communication patterns: how they introduce,
+connect, develop, and finish ideas.
 
 ## Facts
 
-Keep every fact in the source and add none. A name, number, date, quote, source, outcome, or scope counts as a fact; take it only from the source or the user. If a sentence needs a detail you do not have, ask, or cut the claim. Opinion and reaction are fine when the voice calls for them. Fiction is exempt: invented detail is the task.
+Preserve the current source's facts except details the user explicitly asks
+to remove or replace. Add none.
+
+Before reading voice examples, make an internal inventory of the current
+source's assertions: names, actors, actions, dates, numbers, outcomes, scope,
+qualifiers, and relationships. Draft from that inventory; examples supply
+expression and structure, not assertions. Leave anything the source does
+not establish unspecified.
+
+Before returning, reconcile the draft with the inventory in both directions:
+every retained source assertion is represented, and every factual clause
+in the draft is supported by it. Recast unsupported clauses using only what
+the source says. This check includes subordinate clauses and qualifiers.
+Ask for a missing detail only when needed; otherwise omit the unsupported
+claim. Opinion and reaction may follow the requested voice. Fiction is exempt.
 
 Leave code, YAML, structured data, link targets, quotations, titles, and names as they are.
 
 ## Voice
 
-1. **The user's own text** (a message, email, post, resume line, or answer they will send or say): read `references/voice/profile.md`, then only the `##` section of the example file it names for this register and situation. The profile adds to the defaults below and wins wherever they conflict, including the tell list.
-2. **A writing sample from the user**: match its sentence length, openings, punctuation, and quirks. The sample wins over the defaults.
-3. **Anyone else's text**: the defaults.
+For the user's voice, read `references/voice/profile.md` and the relevant
+example sections it identifies.
 
-## Defaults
+Use this evidence order:
 
-Spoken (will be said aloud): one idea per sentence; light connectors (`so`, `and`) when they help; no fake hesitation. If the source has a speaking time, keep it and tell the user to time it aloud.
+1. The user's current instructions, corrections, and supplied sample.
+2. A user-approved catalogue example for the relevant situation.
+3. An elicited catalogue answer for that situation.
+4. Original samples for the relevant register.
+5. Profile observations where the examples leave a gap.
 
-Written: the same plainness without imitating speech. Split any sentence over about 25 words, keeping the order of ideas. Opinion, humor, and asides fit essays and personal posts; reference, technical, and legal text stays neutral.
+In legacy Raw/Polished examples, use Raw as voice evidence. Polished
+versions and Rule labels are editorial transformations, not generation rules.
 
-Keep what already sounds natural, and keep human detail: odd specifics, asides, self-corrections, uneven sentence length. Don't add roughness to seem human: forced fragments, a short-long seesaw, or planted slips read as machine-made too.
+For another person's voice, follow the supplied sample and source.
+Do not substitute the user's personal voice.
 
-## Tells to remove
+## Compose
 
-These make text read as machine-written. Remove them from the output. When judging someone else's text, one alone proves nothing; look for clusters. Three or more in one paragraph mean the paragraph was generated: rewrite it from its facts instead of swapping words.
+Follow the matched example's sequence, transitions, rhythm, and level of
+detail while using the current task's facts. Draft directly in that voice.
 
-`scripts/detect.py` matches every quoted phrase below in English text; a single word also matches its longer forms (leverage, leveraging), and X, Y, Z, and … stand for any words. After editing this list, run `python3 -m unittest discover -s tests` from this folder: it checks that each phrase is caught and that the voice examples stay clean.
-
-- Stacked self-labels (passionate, results-driven expert). Give the example instead.
-- Inflated significance: "stands as", "serves as", "testament", "pivotal", "key role", "landscape", "underscore", "marks a shift".
-- Sales and stock words: "vibrant", "seamless", "stunning", "leverage", "boast", "groundbreaking", "nestled", "game-changer", "delve", "tapestry", "realm", "intricate", "utilize", "foster", "streamline", "showcase", "garner", "bolster", "meticulous", "deep dive", "move the needle".
-- An -ing tail that only inflates: ", highlighting X", ", underscoring X", ", showcasing X", ", emphasizing X".
-- "Not X, but Y", "It's not just X, it's Y", "Stop X, start Y", and objections nobody raised: "To be clear", "This isn't about".
-- Lists padded to three, or one idea under three synonyms.
-- Announcing or dramatizing: "Let's dive in", "Here's the thing", "Here's what", "Here's why", "Here's how", "Honestly?", "Let me be honest", "Real talk", "Unpopular opinion", "The real question is", "The result?", "The catch?", "No X. No Y. Just Z.", "Let that sink in", a row of one-line punchlines.
-- Stock openers and closers: "I'm excited to announce", "I'm excited to share", "thrilled to share", "In today's fast-paced world", "In conclusion", "In summary", "To summarize", "Looking ahead", "Thoughts?", "Agree or disagree?", "Let me know in the comments", "Tag someone".
-- Chatbot wrappers inside the artifact: "Certainly!", "You're absolutely right", "Great question", "I hope this helps", "Want me to…?", an upbeat send-off.
-- Filler and hedges on known facts: "It is important to note", "It's worth noting", "in order to", "could potentially".
-- Em and en dashes, unless the voice or sample uses them.
-- Decorative bold, bold-label bullet lists, Title Case headings, emoji on headings.
-- Vague sources ("experts say", "studies show") and guesses dressed as facts ("while details are limited").
-- Generation leftovers: "oaicite", "contentReference", "turn0search", "[Your Name]", "As of my last update", "As of my knowledge cutoff".
+When voice calibration is requested, elicit concrete situations and retain
+the user's actual answers. Distinguish dictated examples from finished
+written messages. Mark an example approved only after explicit confirmation.
+Save catalogue changes when updating the skill or catalogue is requested.
 
 ## Output
 
-- Pasted text: one or two lines on what sounded off, then the rewrite.
-- A named file: that note plus a unified diff. Edit the file only when the user has authorized edits; approving an earlier diff counts.
-- Called from another task or skill: only the rewritten text.
+- Drafting or pasted text: return the draft or rewrite. Explain choices only
+  when requested.
+- A named file: provide a unified diff. Edit only when authorized; an earlier
+  approved diff counts.
+- Called from another task or skill: return only the requested text and
+  respect the caller's structure, length, and fact-selection constraints.
 
 Coaching is in the user's language; the rewrite stays in the source's language. Coaching never goes inside the artifact.
 
-Never promise the text will pass an AI detector: detectors disagree with each other on the same text.
-
 ## Before returning
 
-Pipe the rewrite through `python3 <skill-dir>/scripts/detect.py` (add `--allow-dashes` when the voice uses dashes) and fix each hit the voice or sample doesn't allow; hits inside names and quotations stay. Then reread it once: every source fact is present, nothing new was added, no tell remains, and in the user's voice the profile's grammar corrections are applied.
+Compare the draft with the selected example for continuity, rhythm, and
+register. For spoken work, read it mentally aloud. Check grammar and source
+fidelity, including requested factual removals. Respect any supplied speaking
+time and ask the user to time the final script aloud.
