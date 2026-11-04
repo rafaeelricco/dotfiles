@@ -1,7 +1,7 @@
 # The user's voice
 
 Measured from 3,633 Slack messages (Jun 2025 to Aug 2026), 10 interview transcripts, and 7 written samples
-(Sep 2026). These are the rules; the example files only show them.
+(Sep 2026). These are observations, not mandatory templates.
 
 The example files are public. They leave out names, employers, pay, contracts, dates, offers, and availability,
 and put a `[placeholder]` where one of those would go.
@@ -11,8 +11,22 @@ and put a `[placeholder]` where one of those would go.
 | Output                                            | Register | Examples   |
 | ------------------------------------------------- | -------- | ---------- |
 | Slack, DM, PR comment, chat                       | chat     | chat.md    |
-| Interview answer, call, video                     | spoken   | spoken.md  |
+| Interview answer, call, video, read-aloud script  | spoken   | spoken.md  |
 | Email, LinkedIn post or About, cover note, resume | written  | written.md |
+
+Infer the register from the intended delivery, not from whether the request
+was typed or dictated. Ask only when ambiguity materially changes the result.
+
+Situation-specific examples in `catalogue.md`:
+
+- Spoken introduction
+- Delivery update
+- Technical disagreement
+- Recruiter email
+- Spoken technical explanation
+
+Use the corresponding section when relevant; otherwise use an original
+sample from the register file above.
 
 ## Every register
 
@@ -24,20 +38,21 @@ and put a `[placeholder]` where one of those would go.
   - Plural uncountables: "informations", "researchs" → "information", "research".
   - Plural with an apostrophe: "PR's" → "PRs".
   - Calques: "confirm some doubts" → "clear up some questions"; "search by courses" → "search for courses".
-- Plain words. The user's own filler to cut: "basically", "it's important to mention", "and things like that".
+- Correct grammar and remove involuntary hesitations and abandoned restarts.
+  Preserve connective phrases, meaningful repetition, and idea development
+  shown in the matched example. Do not plant hesitations or errors.
 - Says why: "I'm raising this because…", "The reason is…".
 - Hedges opinions lightly ("I think", "I feel", "maybe"), never facts.
-- "We" and "must" for shared work, even in notes to self.
-- No self-ratings: never "expert", "strong", "entire", "passionate". Name what was built.
-- Disagrees first, then acknowledges, then names the shared goal: "I disagree. I understand why you see it that
-  way, but…".
+- Often uses "we" for shared work and explains what was built.
+- In technical disagreement, may first examine the need, explain the current
+  view, consider evidence, and name the risk. Match the situation rather than
+  requiring a fixed opening.
 
 ## Chat
 
-- Short. Median 8 to 11 words; about a third of messages are 5 words or fewer. A long thought goes out as a burst
-  of 2 to 4 messages, not one paragraph.
-- Opens warm, then the ask: "Good morning! How's it going?", "Yooo", "Hey [name]!".
-- Softens every ask: "pls take a look when you can", "could you please", "no worries".
+- Observed messages are often short and sometimes arrive in bursts. Use the
+  relevant example's length; do not manufacture a message count or word budget.
+- Often opens warmly and softens requests; match the relationship and context.
 - Heads-up: "Just to let you know, …". Approval: "Approved :white_check_mark:" or "yep".
 - Tag questions: "right?", "sounds good?", "What do you think?".
 - Owns mistakes plainly: "Oh, my bad", "Sorry for the delay".
@@ -54,18 +69,20 @@ and put a `[placeholder]` where one of those would go.
 
 ## Spoken
 
-- Leads with a decision, a problem, or a result, not a title or a stack list.
-- Plain words over acronyms: "answers from the agency's own listings", not "RAG".
+- Follow the example's progression. Introductions may begin with identity and
+  current work; explanations may develop context, problem, change, and result.
+- Keep technical terms at the audience's level, as demonstrated by the example.
 - "I" only for the user's own work, with its scope.
-- Answers in the first sentence; never praises the question.
-- Ends on the reason or the result, then stops. Never "that's it" or "that's pretty much it".
+- Write for the user to read aloud, with connected clauses and natural pauses.
+  Sentence length follows the thought and breathing, without a fixed word cap.
+- Preserve natural continuation and list endings where the example uses them.
 - Keeps the warmth: "I actually started in design", "That's why this role caught my attention".
 
 ## Written
 
-- Introduces in three steps: who ("I'm a senior software engineer with [years] of experience, most of it on
-  [area]"), the most recent work, then "Now I'm looking for…". Years and area come from the source, never from here.
-- Emails open "Hi!" or "Hi," and close warm: "If you need anything else, please just ping me." and "Best, [full name]".
+- Match the relevant written example's introduction, greeting, and closing.
+  Dictated email examples establish intent and progression; spontaneous
+  speech markers are not automatically part of the written message.
 - Sets up a point with a colon: "The main problem was: …", "I forgot to mention something important: …".
 - Stories run in order: the problem, what the client asked for, each challenge, the result.
-- A stack list moves to its own sentence after the intro.
+- Place technologies where they fit the example's explanation.
