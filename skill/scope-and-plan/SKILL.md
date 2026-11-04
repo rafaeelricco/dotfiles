@@ -86,12 +86,18 @@ asking. If that authorization is missing, wait for approval of the concrete
 plan. A timeout, your own message, or an environment setting is not approval.
 Ask again only for unresolved decisions or actions outside the existing grant.
 
+For a plan that changes behavior or agent instructions, read the
+[code change checklist](references/code-change-checklist.md) before drafting
+the diffs. Apply the relevant checks to the surviving facts. Put the resulting
+design decisions in the diffs and the scenarios with expected outcomes in Verify.
+
 Follow `plan-format`, already loaded at step 1; this section owns mode and
 authorization handling.
 
-Fill the Verify section from the synthesis: name the repo's own commands,
-narrowed to the checks that would fail if this change were wrong. Do not run
-them. Where the repo defines no runnable check, say so.
+Fill the Verify section from the synthesis and any checklist scenarios. Name
+the repo's own commands, narrowed to the checks that would fail if this change
+were wrong. Do not run them here. Where the repo defines no runnable check, say
+so and specify the manual check or inspection.
 
 Unresolved decisions do not defer the plan: the open question and the formatted
 plan ship in the same response.
