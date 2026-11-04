@@ -51,9 +51,9 @@ class PricingTests(unittest.TestCase):
         self.assertEqual(total([60, 39]), 99)
 ```
 
-The user contract is: the checkout command returns JSON containing `total`;
-orders totaling at least 100 receive a discount of 10; lower totals are
-unchanged; negative items are rejected.
+The fixture uses integer amounts in the smallest currency unit. The checkout
+command returns JSON containing `total`. Orders totaling at least 100 receive
+a discount of 10. Lower totals are unchanged and negative items are rejected.
 
 Known commands are `python3 -m unittest discover` and
 `python3 checkout.py '[60, 40]'`.
@@ -83,7 +83,8 @@ Known commands are `python3 -m unittest discover` and
    behavior afterward, followed by PASS when remaining obligations pass.
 
 5. No existing tests
-   Remove test_pricing.py before asking for verification of the correct fixture.
+   Remove test_pricing.py and commit that state before asking for verification
+   of the correct fixture.
    Expect direct runtime assertions or a focused harness, rather than BLOCKED
    merely because a test suite is absent.
 
@@ -118,8 +119,11 @@ Known commands are `python3 -m unittest discover` and
     Verify a change across pricing and checkout that preserves the contract.
     Run once with delegation available and permitted, and once with delegation
     explicitly disallowed.
-    Expect one bounded fresh verifier in the first run; a disclosed local
-    challenge in the second. Both require the same behavioral evidence.
+    Expect one bounded verifier with explicit context isolation in the first
+    run and a disclosed local challenge in the second. Both require the same
+    behavioral evidence. Repeat the permitted run in an ephemeral session
+    with no saved parent transcript. The verifier must start and complete
+    using only its supplied brief and evidence.
 
 Record each case's target, observed checks and changes, verdict, and whether
 the rubric was satisfied. Investigate misses, revise the skill, and rerun the
