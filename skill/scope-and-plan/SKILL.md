@@ -104,33 +104,44 @@ plan ship in the same response.
 
 ## 6. Execute
 
-When execution is authorized and permitted by the harness, apply and check the
-approved edits directly in the current session.
+When execution is authorized and permitted by the harness, delegate approved
+edits through `model-tiers`, loading it unless already loaded. The parent
+session owns grouping, checks, and review.
 
 ### Apply
 
 Read the approved plan and current files, recording pre-existing changes.
-Use the plan's paths and hunks to bound each edit. Complete prerequisites
-before dependent edits. Batch independent tool calls where useful.
+Group hunks by editable path, merging groups that share a path. Run independent
+groups together; a dependent group waits for review of its prerequisite's diff.
 
-Apply literal hunks and repeated patterns as written. Fill test-pinned bodies
-directly using their named tests as the contract. Keep pinned tests read-only.
+Choose each group's role from its approved hunks:
 
-For a stale hunk, inspect current context and apply the same approved change,
-preserving intervening edits. If that requires a different decision or scope,
-report the conflict and stop.
+- `copy`: literal hunks, repeated patterns, and bodies naming a pattern to copy.
+- `derive`: test-pinned bodies without a named copy pattern, or representative
+  excerpts. Any derive hunk makes the group derive.
+
+Brief writers per `./worker-brief.md`. Give each only its approved plan portion
+and required evidence; `model-tiers` owns model selection and context isolation.
+
+On a stale hunk, the writer stops and reports the current context. The parent
+resolves the same approved change while preserving intervening edits, then
+returns the corrected hunk to the writer. If that requires a different decision
+or scope, report the conflict and stop.
 
 ### Check
+
+Review each writer's actual edits against its approved hunks and paths before
+releasing dependent work. On a scope conflict, stop dispatching and stop active
+writers; report the conflict for resolution.
 
 Use the plan's named checks, else the narrowest repo checks over its approved
 paths. If neither exists, report the diff inspection used.
 
-Run each check when all its affected edits are ready. Fix failures within the
-approved scope and rerun, up to three total runs of that check. A remaining
-failure stops execution. Report its last command, exit code, output, and runs used.
-
-Review this execution's actual edits against the approved hunks and paths.
-Report any scope conflict and stop for resolution.
+Run each check in the parent session when all its affected edits are ready.
+Send corrections within the approved scope to the responsible writer, review
+the result, and rerun, up to three total runs of that check. Changing writers
+does not reset that limit. A remaining failure stops execution. Report its last
+command, exit code, output, and runs used.
 
 ### Return
 

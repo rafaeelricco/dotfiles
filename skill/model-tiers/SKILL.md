@@ -1,6 +1,6 @@
 ---
 name: "model-tiers"
-description: "Pick the agent type, model, and effort for a worker role (reader, skeptic) and spawn it with a clean context. Use when scope-and-plan loads it, or a brief names a role."
+description: "Pick the agent type, model, and effort for a worker role (reader, skeptic, copy, derive) and spawn it with a clean context. Use when scope-and-plan loads it, or a brief names a role."
 ---
 
 # Model tiers
@@ -29,8 +29,10 @@ Fallbacks, checked in this order; apply every one that holds:
 
 - No spawn tool → do the work inline, in the same order. Nothing below applies.
 - Harness not in `tiers.yml` → use the role's `tiers` entry and rank the
-  tool's own options. `one below` is the next cheaper. Resolve `session` as above.
-- Agent type not on the spawn list: prefer an available read-only type, then a generic
+  tool's own options: `one below` is the next cheaper, `cheapest` the
+  cheapest. Resolve `session` as above.
+- Agent type not on the spawn list: copy and derive use a generic agent.
+  Reader and skeptic prefer an available read-only type, then a generic
   agent with read-only restrictions when supported. Preserve the brief's
   `Do not:` line and disclose when read-only behavior is instruction-only.
 - No model option: spawn without one and report the inherited/default
