@@ -26,9 +26,10 @@ Status: elicited, dictated in Portuguese; excerpts.
 
 ## Recruiter email
 
-Status: elicited in Portuguese, dictated as an email; excerpts.
+Status: elicited in Portuguese, dictated as an email; excerpts. Situation
+details are redacted; handle the slots under the [Facts rules](../../SKILL.md#facts).
 
-> Eu li […] a vaga que você postou e pra mim parece um excelente fit com o meu perfil. Só fiquei com algumas dúvidas em relação a salário e se […] a vaga é remoto ou é presencial. […] Vou anexar também aqui o meu currículo para que tu dê uma olhada no meu perfil para ver se faz sentido. […] Você poderia me falar […] quando a gente poderia marcar uma entrevista, um meet, para a gente conversar sobre a vaga.
+> Eu li […] a vaga [como encontrei a vaga] e pra mim parece [avaliação do fit] com o meu perfil. Só fiquei com algumas dúvidas em relação a salário e se […] a vaga é remoto ou é presencial. […] [anexo, se houver] […] Você poderia me falar […] quando a gente poderia marcar [formato da conversa] para a gente conversar sobre a vaga.
 
 ## Spoken technical explanation
 

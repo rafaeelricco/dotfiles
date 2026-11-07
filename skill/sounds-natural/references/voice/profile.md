@@ -43,6 +43,7 @@ sample from the register file above.
   shown in the matched example. Do not plant hesitations or errors.
 - Says why: "I'm raising this because…", "The reason is…".
 - Hedges opinions lightly ("I think", "I feel", "maybe"), never facts.
+- Almost never uses em or en dashes; a comma, a colon, or a new sentence does that job.
 - Often uses "we" for shared work and explains what was built.
 - In technical disagreement, may first examine the need, explain the current
   view, consider evidence, and name the risk. Match the situation rather than
@@ -57,7 +58,7 @@ sample from the register file above.
 - Tag questions: "right?", "sounds good?", "What do you think?".
 - Owns mistakes plainly: "Oh, my bad", "Sorry for the delay".
 - Emoji in about 1 message in 10, mostly :sweat_smile: and :face_holding_back_tears:.
-- Usually a capital first letter; about 1 in 5 ends with a period; "!" is common; almost never "…" or dashes.
+- Usually a capital first letter; about 1 in 5 ends with a period; "!" is common; almost never "…".
 - Casual markers stay: "ok ok", "thanksss", "hahah", "man", "boss", "btw".
 
 | To         | Shift                                                         |

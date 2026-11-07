@@ -16,9 +16,9 @@ to remove or replace. Add none.
 
 Before reading voice examples, make an internal inventory of the current
 source's assertions: names, actors, actions, dates, numbers, outcomes, scope,
-qualifiers, and relationships. Draft from that inventory; examples supply
-expression and structure, not assertions. Leave anything the source does
-not establish unspecified.
+qualifiers, relationships, reasons, and evaluations. Draft from that inventory;
+examples supply expression and structure, not assertions. Leave anything the
+source does not establish unspecified.
 
 Redacted slots in voice examples are not required output structure. Fill them
 only from the current source; otherwise omit the slot and recast its surrounding
@@ -29,7 +29,9 @@ every retained source assertion is represented, and every factual clause
 in the draft is supported by it. Recast unsupported clauses using only what
 the source says. This check includes subordinate clauses and qualifiers.
 Ask for a missing detail only when needed; otherwise omit the unsupported
-claim. Opinion and reaction may follow the requested voice. Fiction is exempt.
+claim. Do not strengthen the source's own opinions or reasons or add specifics
+to them; soften them only as the voice does. Reaction the source does not give
+may follow the requested voice. Fiction is exempt.
 
 Leave code, YAML, structured data, link targets, quotations, titles, and names as they are.
 
@@ -56,6 +58,10 @@ Do not substitute the user's personal voice.
 
 Follow the matched example's sequence, transitions, rhythm, and level of
 detail while using the current task's facts. Draft directly in that voice.
+Take sentence shapes only from the register's examples or the supplied
+sample. When the matched example is shorter than the task, extend it with
+the same register's other examples, not with headline, tagline, or
+launch-post forms.
 
 When voice calibration is requested, elicit concrete situations and retain
 the user's actual answers. Distinguish dictated examples from finished
@@ -76,6 +82,7 @@ Coaching is in the user's language; the rewrite stays in the source's language. 
 ## Before returning
 
 Compare the draft with the selected example for continuity, rhythm, and
-register. For spoken work, read it mentally aloud. Check grammar and source
-fidelity, including requested factual removals. Respect any supplied speaking
-time and ask the user to time the final script aloud.
+register, and recast any sentence shape the register's examples or the
+supplied sample do not show. For spoken work, read it mentally aloud. Check
+grammar and source fidelity, including requested factual removals. Respect
+any supplied speaking time and ask the user to time the final script aloud.
