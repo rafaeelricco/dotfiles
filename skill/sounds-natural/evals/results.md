@@ -1,10 +1,146 @@
 # Before/after results
 
-## Verdict: PARTIAL
+## 2026-11-07: source reasons and evaluations stay as stated
+
+### Verdict: IMPROVED on Recruiter email and probes, no regressions
+
+The change adds reasons and evaluations to the Facts inventory, forbids
+strengthening the source's own opinions or reasons while allowing the voice's
+light hedges, and redacts the situation details in the catalogue Recruiter
+email excerpt. In the final arm, Recruiter email passed by majority in 7 of 8
+responses, against 0 of 8 before the change, and no response copies "excelente
+fit", "meet", or "postou".
+
+A first fixed arm required the source's opinions to keep their strength. Graders
+then failed the user's light hedge ("pra mim, ela parece perfeita") as
+weakening. The user confirmed the hedge is their voice, so the final arm
+(fixed2) and the rubric allow it.
+
+### Final arm
+
+Same rubric with the light-hedge allowance for both arms; `fixed2/SKILL.md`
+SHA-256 `2d7e4feed735138a75871f06f0d7848910ed9dae5ba5f55dc40daff703fc378b`,
+other files as in Fixed below.
+
+| Case                       | After | Fixed2 | Note                                                      |
+| -------------------------- | ----- | ------ | --------------------------------------------------------- |
+| Recruiter email            | 0/8   | 7/8    | The failure asks for a meeting time with the answers.     |
+| Probe: source gives reason | 0/4   | 4/4    | After escalates the fit; fixed2 keeps the given reason.   |
+| Probe: strong opinion      | 3/4   | 4/4    |                                                           |
+| Probe: another voice       | 0/4   | 2/4    | Fixed2 failures add urgency in Ana's style ("Bora…logo"). |
+| Regression rows, total     | 5/19  | 7/19   | Per row within one response of each other.                |
+
+### First fixed arm
+
+### Run details
+
+- Arms: after (previous change), verbatim (Facts changes only), fixed (Facts
+  changes plus catalogue redaction). Generators: `claude-opus-5-5`, fresh
+  contexts, request and snapshot only. Graders: three per response, effort
+  `high`, with the voice.md rubric rule.
+- The rubric was checked first by regrading the 24 stored responses from the
+  previous run: all 16 before and after responses failed, and among those
+  without the catalogue entry, only the one that added no reason passed.
+- The strict rubric lowers absolute pass rates for every row in both arms, for
+  example "I naturally think" fails as stronger than "I think". Regression rows
+  therefore compare after and fixed under the same rubric.
+
+### Snapshot identity
+
+| Arm      | File                            | SHA-256                                                            |
+| -------- | ------------------------------- | ------------------------------------------------------------------ |
+| After    | `SKILL.md`                      | `6ee757cb21ac0067728a9a66aece872ba4cb52f91204eb3cbf8dcf283834a850` |
+| After    | `references/voice/catalogue.md` | `b8f0fe34a478e0ef15d2eda7cc16b8f4246cbfc83443e1ca7811ba5943333532` |
+| Verbatim | `SKILL.md`                      | `629dd5b8554cbf74b14f883200459a6bad7ca6e5abb3ee2eee509be455fb6deb` |
+| Verbatim | `references/voice/catalogue.md` | `b8f0fe34a478e0ef15d2eda7cc16b8f4246cbfc83443e1ca7811ba5943333532` |
+| Fixed    | `SKILL.md`                      | `629dd5b8554cbf74b14f883200459a6bad7ca6e5abb3ee2eee509be455fb6deb` |
+| Fixed    | `references/voice/catalogue.md` | `c02e37acf6a80ff02b5ef2824ecf7b473021d2c33fd6041bb37ca3064c2ac83f` |
+
+### Results
+
+Majority pass (at least two of three graders) per response.
+
+| Case                       | After | Verbatim | Fixed | Note                                                    |
+| -------------------------- | ----- | -------- | ----- | ------------------------------------------------------- |
+| Recruiter email            | 0/8   | 1/8      | 5/8   | Fixed fails on "parece" hedging or the closing request. |
+| Probe: source gives reason | 0/4   |          | 0/4   | Reason kept in all fixed responses; fit hedged.         |
+| Probe: strong opinion      | 1/4   |          | 0/4   | "parece perfeita" in every fixed response.              |
+| Probe: another voice       | 0/4   |          | 2/4   | After escalates "razoável"; fixed adds "Bora ver isso". |
+| Regression rows, total     | 7/19  |          | 8/19  | Per row within one response of each other.              |
+
+The Tagline-style source row went from 3/3 to 2/3; the failing response scopes
+"most of the time" over the code as well as the tests, as in the earlier run.
+
+## 2026-11-07: sentence shapes from the examples only
+
+### Verdict: IMPROVED on the target case, no regressions
+
+The change takes sentence shapes only from the register's examples or a supplied
+sample, and moves the dash observation to every register. The Tagline-style
+source case left the standalone "Mostly." kicker in 5 of 5 baseline responses
+and in none of 3 updated responses. Two of the updated responses pass; the third
+attaches "mostly" to the wrong clause. Caller constraints improved because the
+spoken marker "One thing that's good to mention:" no longer reaches a written
+About. Ambiguous delivery fails in both versions, as it did before this change.
+
+### Run details
+
+- Repository baseline: `37da03a5e1c3c21edcb35191f5f53744e1f7866c`; target: working-tree changes.
+- Generators: `claude-opus-5-5`, session effort, fresh contexts; each received only
+  the request and its snapshot (`SKILL.md` and `references/`, no evals). Graders,
+  effort `high`, received the request, expectation, and output, not the version.
+- First response per sample; no best-of selection or manual repair.
+- Gate: a candidate Launch post row (LinkedIn launch facts, uncapped and at most
+  200 characters) showed no generated-copy shape in 5 of 5 baseline responses,
+  so it was dropped before the skill changed.
+- Recruiter email: an early resample gave 3 of 4 on each side, but its graders
+  accepted "excelente fit" as opinion. A follow-up of 8 responses per version,
+  each graded three times with escalation counted as a failure, gave 0 of 24
+  votes on both sides, unanimously. All 16 responses copy "excelente fit" from
+  the catalogue Recruiter email excerpt over the source's "compatível", and 9
+  copy "meet". "A vaga que você postou" appears in 3 of 8 before and 0 of 8 after.
+  With that catalogue entry removed, 0 of 8 copy those phrases. 7 of 8 add a
+  reason the source does not give, close to the written.md follow-up example,
+  yet graders pass 4 of 8, three of them with that reason.
+
+### Snapshot identity
+
+| Version | File                          | SHA-256                                                            |
+| ------- | ----------------------------- | ------------------------------------------------------------------ |
+| Before  | `SKILL.md`                    | `0e131105b372e557771c2c7bbc21128e1f927be6105821d6e24a139d4c82a6bb` |
+| Before  | `references/voice/profile.md` | `b905efeecdf1bc7693429c6f49e6e1f144262385d6cd21de19136eb59b9fa544` |
+| After   | `SKILL.md`                    | `6ee757cb21ac0067728a9a66aece872ba4cb52f91204eb3cbf8dcf283834a850` |
+| After   | `references/voice/profile.md` | `c17f8c3c7e8c66c35e8f8ed137bf99ee51109ee511fc8952df0951f807ba2eaf` |
+
+The other reference files are identical in both versions.
+
+### Results
+
+| Case                  | Before | After | Note                                                       |
+| --------------------- | ------ | ----- | ---------------------------------------------------------- |
+| Introduction          | 1/1    | 1/1   |                                                            |
+| New facts             | 1/1    | 1/1   |                                                            |
+| Technical explanation | 1/1    | 1/1   |                                                            |
+| Delivery update       | 1/1    | 1/1   |                                                            |
+| Disagreement          | 1/1    | 1/1   |                                                            |
+| Recruiter email       | 0/8    | 0/8   | Strict grading; copies "excelente fit" from the catalogue. |
+| Ambiguous delivery    | 0/1    | 0/1   | Neither asks about spoken or written delivery.             |
+| Caller constraints    | 0/1    | 1/1   | Before carried a spoken marker into the written About.     |
+| Supplied name         | 1/1    | 1/1   |                                                            |
+| Requested template    | 1/1    | 1/1   |                                                            |
+| Tagline-style source  | 0/5    | 2/3   | Before kept "Mostly."; one after scoped "mostly" wrongly.  |
+| Short chat reply      | 3/3    | 1/1   | "Sim, vou revisar agora!" in both.                         |
+
+Before counts for Tagline-style source and Short chat reply include the two
+baseline-gate responses.
+
+## Earlier run
+
+### Verdict: PARTIAL
 
 The approved repository changes are implemented and structural/package checks passed. The final paired generations show more connected development in the introduction, technical explanation, and disagreement, but not uniform improvement. One final response retains an unfilled `[name]` placeholder, and materially consequential delivery clarification was not exercised. No generated response was manually repaired.
 
-## Run details
+### Run details
 
 - Repository baseline: `f317c99c0acca15dcb71d857e8500ae35b90572f`.
 - Target: local sounds-natural changes in the working tree, without a new commit.
@@ -17,7 +153,7 @@ The approved repository changes are implemented and structural/package checks pa
 - Two correction rounds were used, then repairs stopped at the approved limit. The initial updated email and round-1 email both imported the recruiter-publication relationship from the catalogue. The final facts section adds source-assertion inventory and two-direction reconciliation; the final email avoids the attribution.
 - The pre-existing untracked `skill/spec-builder/` was not changed by this work.
 
-## Snapshot identity
+### Snapshot identity
 
 | Version              | Snapshot directory | Runtime file                    | SHA-256                                                            |
 | -------------------- | ------------------ | ------------------------------- | ------------------------------------------------------------------ |
@@ -47,7 +183,7 @@ The approved repository changes are implemented and structural/package checks pa
 | Final / correction 2 | `after-fixed`      | `references/voice/spoken.md`    | `533cb4ebcfc3bd50acb1cd32bc156eabefeaa199e02d2d03e6b7210668f177c9` |
 | Final / correction 2 | `after-fixed`      | `references/voice/written.md`   | `7f2747025cdd9be5e8bb8241c82b4f0752f5c5085cb8d9938c6b6f7d1bd68d35` |
 
-## Check results
+### Check results
 
 | Phase       | Command                                                                                                                                                       | Exit | Result                                     |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- | ------------------------------------------ |
@@ -178,11 +314,11 @@ OK (skipped=1)
 (no output)
 ```
 
-## Final comparison
+### Final comparison
 
 Before uses the preserved original skill; After uses the final updated skill. Responses below are unedited.
 
-## Case: Introduction
+### Case: Introduction
 
 ### Request
 
@@ -206,7 +342,7 @@ I'm a senior software engineer, and I'm focused on building AI products using Py
 
 A anterior dividiu a apresentação em quatro frases. A final usa três e incorpora o encadeamento “One thing that's good to mention … so I naturally … And I also”. As duas removem 2021. A final preserva explicitamente que Python e TypeScript são as linguagens principais, nuance omitida nas duas primeiras tentativas atualizadas. Melhora de cadência observada neste exemplo, sem prova de melhora universal.
 
-## Case: New facts
+### Case: New facts
 
 ### Request
 
@@ -230,7 +366,7 @@ Hey, I'm [name]. I'm a software engineer, and now I build internal tools using G
 
 QA, ferramentas internas e Go foram preservados, sem importar design, IA, Python, TypeScript ou duração. Porém a final copiou o placeholder “[name]” do catálogo, embora a fonte não tenha fornecido nome. A saída ficou incompleta para uso direto. É uma limitação remanescente, não corrigida editorialmente.
 
-## Case: Technical explanation
+### Case: Technical explanation
 
 ### Request
 
@@ -257,7 +393,7 @@ Eu tive um problema com o agente de voz: ele ouvia a própria resposta, e isso d
 
 A final mantém problema, impacto, contexto de áudio no front-end, identificação de fala no back-end e resultado. Usa “Então” e “E isso fez com que” para conectar o desenvolvimento. Diferentemente da primeira tentativa, não acrescenta que as etapas antes ficavam separadas no front-end.
 
-## Case: Delivery update
+### Case: Delivery update
 
 ### Request
 
@@ -281,7 +417,7 @@ Não vou conseguir entregar hoje. Boa parte da página já está funcional, mas 
 
 As duas indicam impossibilidade de entregar hoje, parte funcional apresentável, revisão/finalização pendentes e ausência de previsão. Nenhuma inventa prazo. A mudança de voz é pequena.
 
-## Case: Disagreement
+### Case: Disagreement
 
 ### Request
 
@@ -305,7 +441,7 @@ Bom, acho que a primeira coisa é entender se a gente realmente precisa reescrev
 
 A anterior abre pela decisão (“Eu não reescreveria agora”). A final começa examinando a necessidade, explica a solução atual, a falta de benchmark, a abertura à evidência e o risco. A progressão acompanha mais de perto o exemplo elicitado, com os fatos preservados.
 
-## Case: Recruiter email
+### Case: Recruiter email
 
 ### Request
 
@@ -335,7 +471,7 @@ Eu li a vaga e, pra mim, parece compatível com o meu perfil. Só fiquei com alg
 
 Ambas perguntam salário e formato antes de marcar conversa e não afirmam anexo. A final usa a progressão “pra mim … Só fiquei com algumas dúvidas … antes de a gente marcar”. As tentativas atualizadas anteriores atribuíram indevidamente a publicação da vaga ao recrutador; a final diz apenas “Eu li a vaga”. A voz é uma avaliação qualitativa; a versão anterior também era adequada.
 
-## Case: Ambiguous delivery
+### Case: Ambiguous delivery
 
 ### Request
 
@@ -359,7 +495,7 @@ Oi, sou engenheiro de software e trabalho com produtos de IA.
 
 As duas produzem uma apresentação curta sem perguntar o destino. O texto serve a múltiplos usos; este caso não exercita de forma decisiva a condição de ambiguidade que mudaria materialmente a resposta. A regra de esclarecimento continua sem comprovação comportamental neste conjunto.
 
-## Case: Caller constraints
+### Case: Caller constraints
 
 ### Request
 
@@ -385,7 +521,7 @@ As duas retornam somente um About em inglês com os quatro fatos fornecidos e ab
 
 Character counts excluding final newlines: before 100, after 105.
 
-## Appendix: Initial updated outputs
+### Appendix: Initial updated outputs
 
 Retained in full so failed attempts and variation remain visible. Requests are identical to the corresponding cases above.
 
@@ -441,7 +577,7 @@ Oi, eu sou engenheiro de software e trabalho com produtos de IA.
 I’m a software engineer with a background in design. I’m building AI products with Python and TypeScript, bringing both design and engineering into the work.
 ```
 
-## Appendix: Correction-round-1 outputs
+### Appendix: Correction-round-1 outputs
 
 Retained in full so failed attempts and variation remain visible. Requests are identical to the corresponding cases above.
 
@@ -497,7 +633,7 @@ Oi, eu sou engenheiro de software e trabalho com produtos de IA.
 I’m a software engineer with a design background, building AI products with Python and TypeScript.
 ```
 
-## Remaining limits
+### Remaining limits
 
 - Final New facts output contains an unfilled `[name]` placeholder, despite no name supplied. It is retained exactly as generated.
 - The conditional clarification branch, current-sample precedence, and substantial grammar/restart repair were not directly exercised by the eight frozen prompts.
@@ -506,11 +642,11 @@ I’m a software engineer with a design background, building AI products with Py
 - Style judgments are qualitative, based on one final paired run per case. The user should judge the read-aloud cadence from the actual outputs.
 - Native release-artifact verification was skipped by its existing environment gate.
 
-## Independent review
+### Independent review
 
 A fresh read-only verifier checked the final runtime, snapshot hashes, source preservation, legacy samples, deleted files, and all response sets. It independently reran the validator, packaging suite and whitespace check. Its conclusion agrees with PARTIAL: the implementation matches the requested rules; the final New facts response retains an unsupported name placeholder; consequential ambiguity and several unchanged contracts remain unexercised. It found no concrete source-fact leak in the other seven final responses.
 
-## PR #79 review regression: redacted slots
+### PR #79 review regression: redacted slots
 
 ### Scope and evidence
 
