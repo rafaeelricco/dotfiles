@@ -15,7 +15,7 @@ return {
   -- Autoformatting
   {
     "stevearc/conform.nvim",
-    lazy = false,
+    cmd = "ConformInfo",
     keys = {
       {
         "<leader>f",

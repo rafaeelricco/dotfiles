@@ -25,9 +25,20 @@ return {
     "NeogitOrg/neogit",
     dependencies = {
       "nvim-lua/plenary.nvim", -- Required dependency
-      "sindrets/diffview.nvim", -- Optional: enhanced diff viewing
+      {
+        "sindrets/diffview.nvim", -- Optional: enhanced diff viewing
+        cmd = {
+          "DiffviewOpen",
+          "DiffviewFileHistory",
+          "DiffviewClose",
+          "DiffviewFocusFiles",
+          "DiffviewToggleFiles",
+          "DiffviewRefresh",
+          "DiffviewLog",
+        },
+      },
     },
-    lazy = false, -- Load at startup for instant `:Neogit` open
+    cmd = { "Neogit", "NeogitResetState", "NeogitLogCurrent", "NeogitCommit" },
     keys = {
       { "<leader>gs", "<cmd>Neogit<cr>", desc = "Git Status (Neogit)" },
     },
