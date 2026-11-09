@@ -348,6 +348,20 @@ return {
         },
       })
 
+      -- Use the project's .venv even when nvim wasn't started from an activated shell.
+      vim.lsp.config('pyright', {
+        before_init = function(_, config)
+          local bin = vim.fn.has("win32") == 1 and "/.venv/Scripts/python.exe" or "/.venv/bin/python"
+          local python = (config.root_dir or vim.fn.getcwd()) .. bin
+          if vim.uv.fs_stat(python) then
+            -- Mutate in place: the client holds a reference to this settings table.
+            config.settings = config.settings or {}
+            config.settings.python = config.settings.python or {}
+            config.settings.python.pythonPath = python
+          end
+        end,
+      })
+
       -- Enable all language servers using the modern approach
       vim.lsp.enable('pyright')
       vim.lsp.enable('ts_ls')
