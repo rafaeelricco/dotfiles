@@ -4,6 +4,46 @@
 -- experience for various programming languages.
 
 return {
+  -- Better diagnostics, references, and quickfix list interface
+  {
+    "folke/trouble.nvim",
+    dependencies = { "DaikyXendo/nvim-material-icon" },
+    opts = {},
+    cmd = "Trouble",
+    keys = {
+      {
+        "<leader>xx",
+        "<cmd>Trouble diagnostics toggle<cr>",
+        desc = "Diagnostics (Trouble)",
+      },
+      {
+        "<leader>xX",
+        "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
+        desc = "Buffer Diagnostics (Trouble)",
+      },
+      {
+        "<leader>cs",
+        "<cmd>Trouble symbols toggle focus=false<cr>",
+        desc = "Symbols (Trouble)",
+      },
+      {
+        "<leader>cl",
+        "<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
+        desc = "LSP Definitions / references / ... (Trouble)",
+      },
+      {
+        "<leader>xL",
+        "<cmd>Trouble loclist toggle<cr>",
+        desc = "Location List (Trouble)",
+      },
+      {
+        "<leader>xQ",
+        "<cmd>Trouble qflist toggle<cr>",
+        desc = "Quickfix List (Trouble)",
+      },
+    },
+  },
+
   -- LSP Plugins
   {
     -- Configures `nvim-lspconfig`, the core plugin for managing Language Servers.
@@ -20,46 +60,6 @@ return {
 
       "williamboman/mason-lspconfig.nvim",
       "WhoIsSethDaniel/mason-tool-installer.nvim",
-
-      -- Better diagnostics, references, and quickfix list interface
-      {
-        "folke/trouble.nvim",
-        dependencies = { "DaikyXendo/nvim-material-icon" },
-        opts = {},
-        cmd = "Trouble",
-        keys = {
-          {
-            "<leader>xx",
-            "<cmd>Trouble diagnostics toggle<cr>",
-            desc = "Diagnostics (Trouble)",
-          },
-          {
-            "<leader>xX",
-            "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
-            desc = "Buffer Diagnostics (Trouble)",
-          },
-          {
-            "<leader>cs",
-            "<cmd>Trouble symbols toggle focus=false<cr>",
-            desc = "Symbols (Trouble)",
-          },
-          {
-            "<leader>cl",
-            "<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
-            desc = "LSP Definitions / references / ... (Trouble)",
-          },
-          {
-            "<leader>xL",
-            "<cmd>Trouble loclist toggle<cr>",
-            desc = "Location List (Trouble)",
-          },
-          {
-            "<leader>xQ",
-            "<cmd>Trouble qflist toggle<cr>",
-            desc = "Quickfix List (Trouble)",
-          },
-        },
-      },
 
       -- Allows extra capabilities provided by nvim-cmp
       -- "saghen/blink.cmp",
@@ -117,6 +117,22 @@ return {
         end
       end, { desc = "LSP Hover (safe fallback)" })
 
+      local highlight_augroup = vim.api.nvim_create_augroup("kickstart-lsp-highlight", { clear = false })
+      vim.api.nvim_create_autocmd("LspDetach", {
+        group = vim.api.nvim_create_augroup("kickstart-lsp-detach", { clear = true }),
+        callback = function(event)
+          local clients = vim.lsp.get_clients({
+            bufnr = event.buf,
+            method = vim.lsp.protocol.Methods.textDocument_documentHighlight,
+          })
+          for _, client in ipairs(clients) do
+            if client.id ~= event.data.client_id then return end
+          end
+          vim.api.nvim_buf_call(event.buf, vim.lsp.buf.clear_references)
+          vim.api.nvim_clear_autocmds({ group = highlight_augroup, buffer = event.buf })
+        end,
+      })
+
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
         callback = function(event)
@@ -171,8 +187,8 @@ return {
             vim.keymap.set("i", "<C-@>", function() vim.lsp.completion.get() end, opts)
             vim.keymap.set("i", "<C-;>", function() vim.lsp.completion.get() end, opts)
           end
-          if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
-            local highlight_augroup = vim.api.nvim_create_augroup("kickstart-lsp-highlight", { clear = false })
+          if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf)
+              and #vim.api.nvim_get_autocmds({ group = highlight_augroup, buf = event.buf }) == 0 then
             vim.api.nvim_create_autocmd("CursorHold", {
               buffer = event.buf,
               group = highlight_augroup,
@@ -188,13 +204,6 @@ return {
               callback = vim.lsp.buf.clear_references,
             })
 
-            vim.api.nvim_create_autocmd("LspDetach", {
-              group = vim.api.nvim_create_augroup("kickstart-lsp-detach", { clear = true }),
-              callback = function(event2)
-                vim.lsp.buf.clear_references()
-                vim.api.nvim_clear_autocmds({ group = "kickstart-lsp-highlight", buffer = event2.buf })
-              end,
-            })
           end
 
           -- The following code creates a keymap to toggle inlay hints in your
@@ -331,7 +340,7 @@ return {
             runtime = { version = "LuaJIT" },
             diagnostics = { globals = { "vim" } },
             workspace = {
-              library = vim.api.nvim_get_runtime_file("", true),
+              library = { vim.env.VIMRUNTIME .. "/lua" },
               checkThirdParty = false,
             },
             telemetry = { enable = false },
