@@ -13,7 +13,7 @@ return {
       local setup_icons = function()
         require('nvim-web-devicons').setup {
           -- Enable different highlight colors per icon for file types
-          color_icons = true,
+          color_icons = false,
           -- Enable default icons for unknown file types
           default = true,
           -- Custom icon overrides to preserve folder colors
