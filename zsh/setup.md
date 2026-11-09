@@ -6,11 +6,11 @@ the same approach can be repeated on another server. Done 2026-09-04/05.
 The idea: one tracked file per concern, symlinked into `$HOME`, mirroring the
 macOS `.zshrc` section by section so the two configs stay comparable.
 
-| Tracked file       | Linked to      | Purpose                                              |
-| ------------------ | -------------- | ---------------------------------------------------- |
-| `zsh/linux.zshenv` | `~/.zshenv`    | Stops Ubuntu's global `compinit` from running early  |
-| `zsh/linux.zsh`    | `~/.zshrc`     | The actual shell config                              |
-| `zsh/starship.toml`| `~/.config/starship.toml` | Prompt config (copied, currently unused)  |
+| Tracked file        | Linked to                 | Purpose                                             |
+| ------------------- | ------------------------- | --------------------------------------------------- |
+| `zsh/linux.zshenv`  | `~/.zshenv`               | Stops Ubuntu's global `compinit` from running early |
+| `zsh/linux.zsh`     | `~/.zshrc`                | The actual shell config                             |
+| `zsh/starship.toml` | `~/.config/starship.toml` | Prompt config (copied, currently unused)            |
 
 ## 1. Prerequisites
 
