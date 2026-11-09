@@ -118,7 +118,7 @@ vim.opt.paste = false
 vim.opt.formatoptions:remove({ "c", "r", "o" })
 
 -- Soft-wraps long lines on screen without inserting physical line breaks.
-vim.opt.wrap = true
+vim.opt.wrap = false
 
 -- Native insert completion (vim.lsp.completion). menuone + noselect + popup
 -- is the official recipe; CTRL-Y accepts. |complete_CTRL-Y|
