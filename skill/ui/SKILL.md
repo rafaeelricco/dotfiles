@@ -28,10 +28,12 @@ run explicitly requested jobs in order, keeping each job's scope and gates.
 | hover, press, selection, surfaces, sizes, type          | `style`     | `references/fluid/patterns.md`    |
 | radius, corners, nested surfaces, audit the corners     | `shape`     | `references/fluid/shape.md`       |
 | set up the system in a project                          | `adopt`     | `references/fluid/adopt.md`       |
+| website, landing page, page design, looks generic or AI | `taste`     | load the `taste` skill            |
 
 No row fits → ask which. One ambiguous request → the job they led with; both
 asked → both, in order. `build` adds motion to something that exists;
-`compose` makes the thing.
+`compose` makes the thing. For a whole page or site, load `taste` and follow it;
+its motion still answers to `references/motion/laws.md`.
 
 ## Values
 

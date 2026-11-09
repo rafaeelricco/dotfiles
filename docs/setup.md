@@ -58,6 +58,7 @@ The source of truth is [`skill/dependencies.txt`](../skill/dependencies.txt).
 | `babysit`        | `verify`, `commit-message`                   |
 | `create-pr`      | `plan-format`, `commit-message`, `pr-body`   |
 | `pr-body`        | `commit-message`                             |
+| `ui`             | `taste`                                      |
 
 Transitive resolution makes a fresh `orchestrate` install contain exactly six
 skills. Companion installation includes conditional workflow steps such as commits.

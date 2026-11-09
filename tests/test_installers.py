@@ -21,6 +21,7 @@ ORCHESTRATE = {
     "orchestrate", "scope-and-plan", "plan-format", "model-tiers",
     "verify", "commit-message",
 }
+UI = {"ui", "taste"}
 PWSH = os.environ.get("DOTFILES_TEST_PWSH") or shutil.which("pwsh")
 BASH = "/bin/bash" if Path("/bin/bash").exists() else shutil.which("bash")
 
@@ -152,7 +153,7 @@ class LifecycleCases:
         guidance.write_text("My existing instructions\n")
         self.assert_success(self.invoke(["ui"] + self.skip_flags()))
         self.assert_success(self.invoke(["orchestrate"] + self.skip_flags()))
-        self.assertEqual(self.names(), ORCHESTRATE | {"ui"})
+        self.assertEqual(self.names(), ORCHESTRATE | UI)
         self.assertEqual(guidance.read_text(), "My existing instructions\n")
         self.assertFalse(guidance.is_symlink())
 
@@ -362,7 +363,7 @@ class LifecycleCases:
         self.assert_success(result)
         self.assertIn("lifecycle source is unavailable or invalid", result.stderr)
         self.assert_success(self.invoke(action="uninstall"))
-        self.assertEqual(self.names(), {"ui"})
+        self.assertEqual(self.names(), UI)
         self.assertTrue((self.skills / "ui").is_symlink())
 
     def test_remote_fixture_preview_install_and_corrupt_update(self):
@@ -414,7 +415,7 @@ class LifecycleCases:
         self.assert_success(self.invoke(["orchestrate"] + self.skip_flags(), script=remote, env=env))
         self.assertEqual((cache / "VERSION").read_text().strip(), version)
         self.assertEqual((self.skills / "ui/SKILL.md").read_text(), "# Updated unrequested skill\n")
-        self.assertEqual(self.names(), ORCHESTRATE | {"ui"})
+        self.assertEqual(self.names(), ORCHESTRATE | UI)
         self.assert_success(self.invoke(["uninstall"], script=remote, env=env))
         self.assertEqual(self.names(), set())
         self.assertTrue((cache / "VERSION").is_file())
