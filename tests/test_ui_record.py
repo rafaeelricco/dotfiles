@@ -183,6 +183,31 @@ class UiRecord(unittest.TestCase):
             self.assertIn("--font-text: system-ui, sans-serif;", out)
 
     @unittest.skipUnless(shutil.which("node"), "node is not installed")
+    def test_kit_drops_a_face_that_would_close_its_style(self):
+        import json
+
+        capture = json.loads(CAPTURE.read_text(encoding="utf-8"))
+        bad = "x</style><b id=pwn>"
+        capture["type"] = [
+            {"role": "h1", "family": bad, "size": 64, "line": 64, "weight": 500, "tracking": "0"},
+            {"role": "body", "family": bad, "size": 17, "line": 24, "weight": 400, "tracking": "0"},
+        ]
+        with tempfile.TemporaryDirectory() as root:
+            source = Path(root) / "capture.json"
+            source.write_text(json.dumps(capture), encoding="utf-8")
+            self.assertEqual(record(root, "--from", str(source), "--name", "evil").returncode, 0)
+            self.assertNotIn("pwn", (Path(root) / "evil/design-system.txt").read_text(encoding="utf-8"))
+            text = (Path(root) / "evil/design-system.txt").read_text(encoding="utf-8")
+            (Path(root) / "evil/design-system.txt").write_text(
+                text.replace("`inherited`", f"`{bad}`") + "\nPrimary button shadow: `0 0 0 1px red; } </style><b id=pwn>`\n",
+                encoding="utf-8",
+            )
+            out = record(root, "kit", "evil").stdout
+            self.assertIn("<style>", out)
+            self.assertNotIn("pwn", out)
+            self.assertEqual(out.count("</style>"), 1)
+
+    @unittest.skipUnless(shutil.which("node"), "node is not installed")
     def test_css_prints_light_and_dark_blocks(self):
         with tempfile.TemporaryDirectory() as root:
             record(root, "--from", str(CAPTURE), "--name", "sample")

@@ -217,7 +217,9 @@ function merge(captures) {
 
   const type = new Map();
   for (const c of widest) {
-    for (const r of c.type) {
+    for (const t of c.type) {
+      // a recorded site names its own faces: one that could close the kit's <style> or <link> is not kept
+      const r = SAFE_FAMILY.test(t.family || "") ? t : { ...t, family: "" };
       const key = [r.role, r.family, r.size, r.line, r.weight, r.tracking].join("|");
       const row = type.get(key) || { ...r, at: [] };
       if (!row.at.includes(c.viewport[0])) row.at.push(c.viewport[0]);
@@ -744,6 +746,8 @@ const googleName = f =>
   GENERIC.test(f) ? f.toLowerCase()
   : (f.includes(" ") ? f : f.replace(/([a-z])([A-Z])/g, "$1 $2")).replace(/^./, c => c.toUpperCase());
 const quoted = f => (GENERIC.test(f) ? f : `"${f}"`);
+// a family name the kit may print in its <link> and <style>: letters, digits, spaces, dots, hyphens, underscores
+const SAFE_FAMILY = /^-?[\p{L}\p{N}][\p{L}\p{N} ._-]{0,63}$/u;
 
 function tableRows(text, heading) {
   const at = text.indexOf(`\n${heading}\n`);
@@ -811,7 +815,10 @@ function kit(text, name, manifest = null) {
     "inv-action-ink": actionInk,
   };
 
-  const type = tableRows(text, "## Typography")?.rows ?? [];
+  // a pack written by hand, or before names were checked on record, still never prints an unsafe face
+  const type = (tableRows(text, "## Typography")?.rows ?? []).map(r =>
+    SAFE_FAMILY.test(r[1] || "") ? r : [r[0], "inherited", ...r.slice(2)],
+  );
   const px = v => parseFloat(v) || 0;
   const h1 = type.filter(r => r[0] === "h1").sort((a, b) => px(b[2]) - px(a[2]))[0];
   const body = type.find(r => r[0] === "body" && !/mono/i.test(r[1])) || type.find(r => r[0] === "body") || h1;
@@ -836,7 +843,7 @@ function kit(text, name, manifest = null) {
     families.length ?
       "https://fonts.googleapis.com/css2?"
       + families
-        .map(f => `family=${f.replace(/ /g, "+")}:wght@${[...(weights.get(f) || [400])].sort((a, b) => a - b).join(";")}`)
+        .map(f => `family=${encodeURIComponent(f).replace(/%20/g, "+")}:wght@${[...(weights.get(f) || [400])].sort((a, b) => a - b).join(";")}`)
         .join("&")
       + "&display=swap"
     : "";
@@ -890,7 +897,8 @@ function kit(text, name, manifest = null) {
   const bodyBig = sizeAt("body", 1440);
   const tText = line("body", 15, 24);
   const btnH = /Primary button: [^\n]*? at (\d+)px high/.exec(text);
-  const btnShadow = /Primary button shadow: `([^`\n]+)`/.exec(text)?.[1] || "";
+  const shadowAt = /Primary button shadow: `([^`\n]+)`/.exec(text)?.[1] || "";
+  const btnShadow = /[;{}<>]/.test(shadowAt) ? "" : shadowAt;
   const btnHeight = btnH && +btnH[1] >= 36 && +btnH[1] <= 56 ? +btnH[1] : 0;
   const sizes = [
     tH1 && `  --t-h1: ${tH1};`,
