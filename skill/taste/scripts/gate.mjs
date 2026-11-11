@@ -768,7 +768,7 @@ function staticChecks(page, html, proj, files, taste) {
 // (photo-<id> in its markup) has its line on the credits page the footer's one credits link opens, the footer line
 // names every source those photographs come from, and no author is a Commons category name. FAIL: rerun
 // photos.mjs credits --out . --write and paste its footer line.
-function creditChecks(page, html) {
+function creditChecks(page, html, root) {
   const F = [];
   if (!page || !html) return F;
   const dir = path.dirname(page);
@@ -808,7 +808,8 @@ function creditChecks(page, html) {
   let cp = "";
   if (href && !/^[a-z]+:/i.test(href))
     try {
-      cp = fs.readFileSync(path.resolve(dir, href), "utf8");
+      // a root-relative link is served from the site's root, not the filesystem's
+      cp = fs.readFileSync(href.startsWith("/") ? path.join(root || dir, href) : path.resolve(dir, href), "utf8");
     } catch {
       /* none */
     }
@@ -2187,7 +2188,7 @@ if (state.fp === FP && state.found && Array.isArray(state.found.crashed) && !sta
       } catch {
         kitBlock = "";
       }
-    const stat = [...staticChecks(P.file, html, projDir, files, opts.taste), ...creditChecks(P.file, html)];
+    const stat = [...staticChecks(P.file, html, projDir, files, opts.taste), ...creditChecks(P.file, html, root)];
     const b = await browserChecks(target, projDir, opts, gateDir);
     const c = copyChecks(P, kind, html, path.join(gateDir, "consistency", "rendered.html"));
     const mo = motionChecks(P, kind, html, path.join(gateDir, "consistency", "rendered.html"));
