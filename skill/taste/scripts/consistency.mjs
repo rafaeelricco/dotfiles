@@ -295,7 +295,7 @@ import { join, resolve, dirname, basename, extname, relative, sep, isAbsolute } 
 import { fileURLToPath } from "node:url";
 import { inflateSync } from "node:zlib";
 import { readCatalogue } from "./moments.mjs";
-import { assetRoots, climbRoot, inside, itemDir } from "./roots.mjs";
+import { assetRoots, climbRoot, itemDir, servable } from "./roots.mjs";
 import { sleep, argv, opt, has, TASTE } from "./consistency/cli.mjs";
 import { isTreatment, sceneFitsKind } from "./consistency/fit.mjs";
 import { visualMod } from "./consistency/modules/visuals.mjs";
@@ -470,7 +470,8 @@ function listenFree(srv, from, to) {
 let url = target,
   server = null,
   outDir,
-  serveRoot = null;
+  serveRoot = null,
+  serveHome = null;
 // the crops and report.json go to --out, else beside the page (a file) or to a temp folder (a URL): never into the
 // current directory
 const slug = u =>
@@ -506,6 +507,7 @@ else {
     }
   }
   serveRoot = root;
+  serveHome = dirname(file);
   server = createServer((req, res) => {
     try {
       let f = resolve(join(root, decodeURIComponent(new URL(req.url, "http://x").pathname)));
@@ -514,7 +516,7 @@ else {
         return res.end();
       }
       if (statSync(f).isDirectory()) f = join(f, "index.html");
-      if (!inside(root, f)) throw new Error("outside the served root");
+      if (!servable(root, f, serveHome)) throw new Error("outside the served root");
       res.writeHead(200, {
         "content-type": MIME[extname(f).toLowerCase()] || "application/octet-stream",
         "content-length": statSync(f).size,
@@ -578,7 +580,7 @@ async function pageExists(u) {
     if (server && serveRoot) {
       let f = resolve(join(serveRoot, decodeURIComponent(p.pathname)));
       if (existsSync(f) && statSync(f).isDirectory()) f = join(f, "index.html");
-      return existsSync(f) || existsSync(f + ".html");
+      return [f, f + ".html"].some(g => existsSync(g) && servable(serveRoot, g, serveHome));
     }
     if (!isLocal()) return true;
     const r = await fetch(u, { method: "GET", redirect: "follow" });
@@ -1978,7 +1980,7 @@ async function shaderLint(GI, base) {
       let text = null;
       if (server && serveRoot) {
         const f = resolve(join(serveRoot, decodeURIComponent(x.pathname)));
-        if (inside(serveRoot, f) && statSync(f).size < 3e6) text = readFileSync(f, "utf8");
+        if (servable(serveRoot, f, serveHome) && statSync(f).size < 3e6) text = readFileSync(f, "utf8");
       } else {
         const r = await fetch(u);
         if (r.ok) text = (await r.text()).slice(0, 3e6);

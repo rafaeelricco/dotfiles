@@ -58,6 +58,29 @@ export function inside(root, file) {
   const f = real(file);
   return !!f && [real(root), real(SKILL), real(tastesDir())].some(d => d && within(d, f));
 }
+// What a preview server may send: a file inside() the root that is not, or is not under, a dot-named folder or file
+// (.env, .git, .npmrc), bar .well-known. A served root can be the page's project, and the page's own script reads
+// whatever it is served. The test runs on the file's real path as the disk names it (realpathSync.native), so a short
+// name (ENV~1 for .env on a Windows volume with 8.3 names) or a link to a dotfile does not get past it. It counts the
+// dot names from home, the page's own folder (a page in .output/public or .vitepress/dist still loads, and so do its
+// ../ files there), or from the kit or the taste packs when the file lies in them (a staged part's link).
+const realNative = p => {
+  try {
+    return fs.realpathSync.native(p);
+  } catch {
+    return null;
+  }
+};
+export function servable(root, file, home = root) {
+  if (!inside(root, file)) return false;
+  const f = realNative(file);
+  if (!f) return false;
+  const kit = [realNative(SKILL), realNative(tastesDir())].find(d => d && within(d, f));
+  const from = kit || realNative(home) || realNative(root);
+  if (!from) return false;
+  const rel = path.relative(from, f);
+  return !rel.split(path.sep).some(s => s.startsWith(".") && s !== ".." && s !== ".well-known");
+}
 // How high a preview served without --root climbs for the page's ../ references: up to the page's project (the
 // nearest folder above it holding .taste-skill, .git or package.json; this skill for its own demo pages) and never
 // above it, so a page cannot have the folders around its project served to its own script.

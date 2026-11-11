@@ -30,7 +30,7 @@ import os from "node:os";
 import http from "node:http";
 import { spawn, execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { chromeOrExit, climbRoot, inside } from "./roots.mjs";
+import { chromeOrExit, climbRoot, servable } from "./roots.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const LAYOUT = path.join(here, "..", "assets", "layout");
@@ -134,7 +134,7 @@ if (!/^https?:\/\//i.test(target)) {
       let p = decodeURIComponent(new URL(req.url, "http://x").pathname);
       if (p.endsWith("/")) p += "index.html";
       const f = path.join(root, p);
-      if (!inside(root, f) || fs.statSync(f).isDirectory()) {
+      if (!servable(root, f, path.dirname(file)) || fs.statSync(f).isDirectory()) {
         res.writeHead(404);
         res.end("not found");
         return;

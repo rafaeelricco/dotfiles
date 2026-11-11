@@ -32,7 +32,7 @@ import http from "node:http";
 import zlib from "node:zlib";
 import os from "node:os";
 import { spawn, execFileSync } from "node:child_process";
-import { chromeOrExit, inside } from "./roots.mjs";
+import { chromeOrExit, servable } from "./roots.mjs";
 
 const args = process.argv.slice(2);
 const pos = [],
@@ -166,7 +166,7 @@ async function serve(root) {
     let p = decodeURIComponent(req.url.split("?")[0]);
     if (p.endsWith("/")) p += "index.html";
     const file = path.join(root, p);
-    if (!inside(root, file) || fs.statSync(file).isDirectory()) {
+    if (!servable(root, file) || fs.statSync(file).isDirectory()) {
       res.writeHead(404);
       res.end("not found");
       return;

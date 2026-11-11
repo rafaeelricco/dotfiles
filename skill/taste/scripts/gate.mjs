@@ -1384,7 +1384,8 @@ async function browserChecks(target, proj, opts, gateDir) {
   const widths = plan ? plan.widths : "1440,390",
     sizes = plan ? plan.sizes : "1440x900,390x844";
   // no root of its own: the checkers serve the page's folder, climbing for its ../ references no higher than its
-  // project (roots.mjs climbRoot), so a build in dist/ never has the project's .env served beside it
+  // project (roots.mjs climbRoot), and never send a dot-named file (roots.mjs servable), so the project's .env and
+  // .git are never served to the page
   const root = opts.root && !isUrl(target) ? ["--root", opts.root] : [];
   // consistency.mjs, with what step 6 passes it
   {
