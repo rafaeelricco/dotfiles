@@ -228,6 +228,22 @@ class Packs(Sandbox):
                 self.assertEqual(sorted(p.name for p in outside.iterdir()), ["canary.txt"])
 
     @needs_node
+    def test_kit_copy_refuses_a_part_outside_the_kit(self):
+        bad = [({"moments": [{"id": "../../.."}]}, []), ({"signature": [{"family": "..", "id": ".."}]}, []),
+               ({"signature": [{"family": "ui", "id": "C:/x"}]}, []), ({}, ["--add", "ui/..\\..\\.."])]
+        for i, (extra, add) in enumerate(bad):
+            with self.subTest(deal=extra, add=add):
+                outer = self.tmp / f"outer-{i}"
+                site = outer / "site"
+                (site / ".taste-skill").mkdir(parents=True)
+                deal = {"taste": None, "moments": [], "scene": None, "effect": None, **extra}
+                (site / ".taste-skill/deal.json").write_text(json.dumps(deal), encoding="utf-8")
+                out = self.run_node("kit-copy.mjs", "--to", "assets", *add, cwd=site)
+                self.assertEqual(out.returncode, 2, out.stdout)
+                self.assertEqual(sorted(p.name for p in outer.iterdir()), ["site"])
+                self.assertFalse((site / "assets").exists())
+
+    @needs_node
     def test_signature_spans_the_families(self):
         signature = ["moments/pack-moment", "scenes/pack-scene", "effects/pack-fx", "ui/chat"]
         pack = make_pack(self.tmp, "sample", signature=signature)

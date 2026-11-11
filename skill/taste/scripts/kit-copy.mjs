@@ -28,6 +28,29 @@ const stat = { files: 0, bytes: 0 };
 const replaced = [];
 const seen = new Set(); // destination files already handled in this run
 
+// A part is <family>/<id> from deal.json, --add or a part's meta.json, and becomes a path under each root and under
+// --to, so both halves are checked before any path is built. The family is a folder of the kit's assets, or objects
+// (the house pack's own family). The id is a lowercase name, or a shared runtime path under one (_print-core/auto.js):
+// every segment starts with a letter, digit or _, so none is "." or "..", and no drive, colon or backslash gets through.
+const FAMILIES = new Set([
+  ...fs
+    .readdirSync(assetsRoot, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name),
+  "objects",
+]);
+const ID = /^[a-z0-9_][a-z0-9_.-]*(\/[a-z0-9_][a-z0-9_.-]*)*$/;
+function checkPart(family, id, from) {
+  if (typeof family !== "string" || !FAMILIES.has(family))
+    die(`${from} names family ${JSON.stringify(family)}; families: ${[...FAMILIES].sort().join(", ")}`);
+  if (typeof id !== "string" || !ID.test(id)) die(`${from} names ${family}/${JSON.stringify(id)}, which is not a part id`);
+}
+// p lies strictly inside base: below it, never base itself or a path that climbs out of it
+const below = (base, p) => {
+  const r = path.relative(base, p);
+  return !!r && r.split(path.sep)[0] !== ".." && !path.isAbsolute(r);
+};
+
 // Never write through a link: a symlink or junction committed in the project at the --to folder, a folder under it or
 // the file itself would send the kit's bytes to wherever it points and overwrite what is there. Every part from the
 // working folder (or from --to's parent, when --to lies outside it) down to p is checked.
@@ -93,27 +116,30 @@ function report(label, g) {
 // the deal's parts plus --add, as [family, id] pairs; the taste is the deal's unless --taste names one
 function parts(deal, add) {
   const out = [];
-  const push = (family, id) => {
+  const push = (family, id, from) => {
+    checkPart(family, id, from);
     if (!out.some(p => p[0] === family && p[1] === id)) out.push([family, id]);
   };
   if (deal) {
-    for (const m of deal.moments || []) push("moments", m.id);
-    if (deal.scene) push("scenes", deal.scene.id);
-    if (deal.effect) push("effects", deal.effect.id);
-    for (const s of deal.signature || []) push(s.family, s.id);
+    for (const m of deal.moments || []) push("moments", m?.id, "deal.json moments");
+    if (deal.scene) push("scenes", deal.scene.id, "deal.json scene");
+    if (deal.effect) push("effects", deal.effect.id, "deal.json effect");
+    for (const s of deal.signature || []) push(s?.family, s?.id, "deal.json signature");
   }
   for (const a of add) {
     const i = a.indexOf("/");
     const family = a.slice(0, i),
       id = a.slice(i + 1);
     if (i < 1 || !id || a.split("/").some(s => s === ".." || s === ".")) die(`--add needs <family>/<id>, got "${a}"`);
-    push(family, id);
+    push(family, id, "--add");
   }
   return out;
 }
 
 // one item folder → <to>/<family>/<id>/, minus SKIP
 function copyItem(family, id, taste, to) {
+  const dest = path.join(to, family, id);
+  if (!below(to, dest)) die(`${family}/${id} would be copied to ${dest}, outside ${to}`);
   // an item folder, else any file or folder at that path in a root (a family's shared runtime: objects/_print-core)
   const dir =
     itemDir(family, id, taste)
@@ -124,8 +150,9 @@ function copyItem(family, id, taste, to) {
     const roots = assetRoots(taste).map(r => "  " + path.join(r, family, id, "meta.json"));
     die(`no ${family}/${id} in any root; searched:\n${roots.join("\n")}`);
   }
+  if (!assetRoots(taste).some(r => below(r, dir))) die(`${family}/${id} resolves to ${dir}, outside every root`);
   const g = newGroup();
-  copyTree(dir, path.join(to, family, id), g);
+  copyTree(dir, dest, g);
   return g;
 }
 
@@ -269,7 +296,7 @@ for (const [family, id] of items) {
   scan.push(...g.js);
   // appended parts are copied by this same loop
   for (const e of effectsOf(family, id))
-    if (!items.some(p => p[0] === "effects" && p[1] === e) && itemDir("effects", e, taste)) items.push(["effects", e]);
+    if (!items.some(p => p[0] === "effects" && p[1] === e) && ID.test(e) && itemDir("effects", e, taste)) items.push(["effects", e]);
 }
 
 report("imports", closeImports(to, taste, scan));
