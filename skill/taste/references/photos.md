@@ -62,7 +62,7 @@ A maker of a physical thing (a bike, a chair, a lamp, a stroller, a device) with
 **no library frame** and **no mood stock**: no forest for "the ride", no groceries for "what it carries", no other
 trade dealt to fill the page. `pick --product-without-photos` (or a maker's, brand's or company's word: "backpack
 brand", "electric scooter") says so and prints the search. **The product is still shown, never hidden, in
-photographs** (in testing: a cargo bike's page that never showed the bike scored 3 of 10): a picture the brief
+photographs**: a picture the brief
 supplies first (a cut-out, a CAD view, its own render; one it names but does not supply counts as missing), else
 **stand-ins** from `photos.mjs search "<the thing in plain words>"`: the same kind of thing whole and in use (a cargo
 bicycle for a cargo bike brand, never a wheel for a bicycle), close-ups of the parts the page names, where it lives;
@@ -281,7 +281,7 @@ node <skill>/scripts/photos.mjs credits --out . --write     # the footer line an
 No caption, label or description sits under or on any picture (house rule), and no credit, "sample" or example note: a sold
 item's name and price sit inside its card's padding (`copy.md`), never as a line under a bare picture. The place's name
 goes in the alt text. **Credits are ONE footer line** in the legal row that links or opens the credits list, never a
-link per photograph in the footer (in testing: 18 and 20 credit links read as a credit wall). `photos.mjs credits --out .`
+link per photograph in the footer. `photos.mjs credits --out .`
 prints the line, "Photographs via Unsplash and Wikimedia Commons" (the sources used, never the photographers; at
 most 110 characters), and the list; paste the line in the footer and the list on its own page: `--write` makes `credits.html` in the site's legal-page shell, `--href <page>` points the line elsewhere. The list gives each photographer, licence and
 source page, `adapted` after any frame cropped beyond its frame (`--adapted id`). A

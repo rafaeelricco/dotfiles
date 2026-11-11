@@ -50,8 +50,7 @@ A card holds a picture, and the picture holds the product. That is all:
 - **card > panel (a lit picture) > fragment.** The panel must read as a picture, not as a box: a
   soft field with no border lines, grid, ruling or dots of its own, so the fragment sits _on a
   picture_, not in a frame in a frame.
-- Never card > patterned panel > white UI card (in testing, "card, grid-paper panel, white UI card"
-  read as three nested boxes). Never a fragment that is itself a card holding cards of text.
+- Never card > patterned panel > white UI card. Never a fragment that is itself a card holding cards of text.
 - Never a card inside a card for text, never glass.
 
 ## The panel
@@ -302,8 +301,7 @@ every other fragment holds its finished picture.**
 - A loop over 5 s with no pause button; a spinner, caret or pulse running on in a still picture.
 - A card or panel that moves with scroll or lights up when it scrolls into view.
 - One WebGL context per panel, or a still ground left running its frame loop.
-- A "sample", "example" or "to follow" note anywhere, even one line in the footer (in testing:
-  "Names and figures on this page are examples" read as an apology), a caption under a visual
+- A "sample", "example" or "to follow" note anywhere, even one line in the footer, a caption under a visual
   that explains or apologises, and a placeholder (`[Name]`, `Example Street 1`, a `.example`
   address, lorem ipsum). Licence credits go in one footer line.
 - Small grey card text (15px muted): card text is 16px in the ink.

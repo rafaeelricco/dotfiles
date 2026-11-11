@@ -18,9 +18,7 @@ section 2) and, on tech, the section that holds the effect, the scene or a momen
   half a tile or more, 50/50 in a split, a whole screen as a layer. The close is its own picture (a
   photograph, the big button or the name set wide).
 - **What the brief asks for is built, never a mailto in its place.** Under the section lines the
-  plan lists each ask as `brief asks -> element`, and the page has every element (in testing: "book
-  a repair slot" was a free text box, "see the rooms" had no room choice, "sell beans online" was a
-  mailto, a product had no price):
+  plan lists each ask as `brief asks -> element`, and the page has every element:
 
   | Brief asks                              | Element on the page                                                                                                                                                |
   | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -36,8 +34,7 @@ section 2) and, on tech, the section that holds the effect, the scene or a momen
 
 - **Each photograph is picked against its heading's claim, not its keyword** (`photos.md`): the plan
   writes one line per photograph, `heading says X, picture shows Y`, and X and Y must agree.
-- **One object never carries the page** (in testing: a robot arm in six sections and a game's
-  salvage rig in six, each "one object six times", both capped at 4 to 4.5). The object shown whole
+- **One object never carries the page.** The object shown whole
   (the product's photograph, a game's key art) leads the hero and **at most two
   more sections**; every other picture section is carried by another kind of visual the brief
   supports, from its row below, no kind more than twice. A new angle, a recolour or a crop of the
@@ -167,7 +164,7 @@ tools it works with. The effect, moments and scene as `effects-usage.md` deals t
 Nav `nav-mega|nav-cards|nav-centre` · footer `footer-dark|footer-statement|footer-columns` · close
 `close-type|close-word` · rhythm `dark-band|surface-pairs|space` · buttons `solid|pill|tonal|arrow`.
 Never: stock people at screens; an object render in place of the product; a page whose product
-shows only as small fragments centred on coloured panels (in testing: about 3.5 points under Linear).
+shows only as small fragments centred on coloured panels.
 
 **Gaming** (a game, a studio launching its game; page type software, site-kind gaming). nav, hero
 (the game, named), [the trailer frame], the world (one or two sections, full bleed), what you do
@@ -227,9 +224,7 @@ product (site-kind tech) may take the effect; any other product takes no effect;
 either only when the brief asks for 3D or a render (below).
 
 - **The product is the hero, not every frame.** The bar is Figure and 1X: where the product is
-  shown whole it fills the frame at large scale, and its use, parts and place carry the rest. In testing, a rendered product page scored 5.5,
-  creativity 4.5 ("a safe grey template"), because every visual was a mid-size product in a grey
-  rounded panel on a grey ground, five pictures in three poses, one structure three times. With
+  shown whole it fills the frame at large scale, and its use, parts and place carry the rest. With
   photographs or with the render alike:
   1. **Big.** In the hero and at least one more section the product fills most of its frame (its
      long side 80 to 100% of the frame's width, or cropped so it runs off an edge) or stands on the
@@ -277,9 +272,7 @@ id>"` and `value="<colour id>"` (an id of the spec's `colors`), and `auto.js` sw
   7. **Buttons step on hover and press on click.** The motion layer does it (`motion.md`,
      Button); no page CSS sets a `.btn`'s `transform` or `transition`. A feature card that leads
      somewhere is a linked card (it lifts 2px, its picture zooms 1.03).
-- **No photographs: the product is shown, never hidden, in photographs** (in testing: a cargo
-  bike's page that never showed the bike scored 3 of 10, and pages carried by renders and their
-  props read as random 3D objects). A picture the brief gives (a cut-out, a CAD view, its own
+- **No photographs: the product is shown, never hidden, in photographs.** A picture the brief gives (a cut-out, a CAD view, its own
   render) goes on the hero's stage. Else **stand-ins**: `photos.mjs pick --product-without-photos`
   prints the search, and `photos.mjs search "<the thing in plain words>"` (a cargo bicycle, a desk
   lamp, a robot arm), then its parts and the places it is used, finds licensed photographs. Keep a
@@ -293,8 +286,7 @@ id>"` and `value="<colour id>"` (an id of the spec's `colors`), and `auto.js` sw
   order. A colour the stand-ins cannot show stays a named swatch in the order card and goes on the
   report's shot list (rule 5 waits for the client's photographs). Every frame is a stand-in: the
   report lists each one with the photograph to shoot in its place (`photos.md`); nothing on the page
-  says so. **Hardware without photographs goes here too** (in testing: a robot arm's page with a
-  silk shader and an order form lost): stand-ins of the same kind of machine at work; CAD renders,
+  says so. **Hardware without photographs goes here too**: stand-ins of the same kind of machine at work; CAD renders,
   an exploded model or a film the brief names but does not supply each get their slot (section 1,
   client slots). Never a `split` hero holding only an order form or the effect in place of the
   product; the order card is its own section, last.
@@ -369,8 +361,7 @@ The nav is not a screen; `footer.closing` is one; a 2-screen section counts two.
   when any frame fits:** the lead `pick` returns (a cafe's bar); a place whose trade leads with land
   (a guesthouse, a lodge, a remote inn) and whose brief names its region (Westfjords, Lofoten, the
   Lake District, a town) passes that region as `--place "<region as written>"`, and the landscape
-  of that region leads, because a remote place is sold by where it stands (in testing: a remote
-  guesthouse shown as a type band scored 3.5). The `statement` hero on `.ground-brand` only when
+  of that region leads, because a remote place is sold by where it stands. The `statement` hero on `.ground-brand` only when
   the library holds no frame of the region and no lead. Every frame is listed in the report as a
   stand-in to replace; nothing on the page says so. **The count decides, not the trade:** after
   the words are repeated until `pick` answers "no new motif left" and a live search
@@ -400,8 +391,7 @@ dark band (`.ground-inverse`, the palette's dark ink) the showcase, its photogra
 ### Designed variety without effects
 
 A place earns its creativity from photographs, their arrangement and one moment of type, never
-from an effect (in testing: correct cafe and guesthouse pages scored creativity 2.5 to 4 and motion 3
-to 4.5 because every section was text beside one picture and nothing answered the pointer).
+from an effect.
 
 - **Never two sections built round one picture the same way.** Each section takes the composition
   the deal printed (`sections-library.md`, Compositions: split 7/5, 5/7, 6/6, mirrored, bleed-panel,
@@ -442,8 +432,7 @@ letter-spacing: -0.03em }`, one or two lines on the `.wrap`'s left line, the dra
   directions is never repeated: the hero's one button and the phone bar's (and the nav's button on a desktop: two on a
   screen at most, `action-repeat`); the nav says "Visit"
   as a word to `#visit`, the visit block adds no second button for it, and the footer gives the
-  address linked to the map, never a button (in testing: Get directions in the bar, the hero and the
-  footer read as clutter).
+  address linked to the map, never a button.
 - **List text at 16px:** menu rows, descriptions, room facts and hours at 16/24 at least (the muted
   colour, never a smaller size, marks a description); 13px only for a group label.
 - **Credits:** the one footer line that links the credits list (`photos.md`, Credits), never one

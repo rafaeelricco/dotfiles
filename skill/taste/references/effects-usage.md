@@ -64,8 +64,7 @@ photographs is shown in stand-in photographs (`photos.md`).
 | Loops              | inside card visuals, one per card group                                                                                                                                                                                                                                   | inside card visuals                                                                                                  | inside card visuals                                      |
 | CSS grounds        | 0 to 2 (`backgrounds.md`)                                                                                                                                                                                                                                                 | flat tokens                                                                                                          | flat tokens                                              |
 
-**The subject before the effect** (in testing: a robot arm shown as a silk shader and an order form,
-and an unnamed game shown as an abstract effect, both lost to pages that showed the thing). An
+**The subject before the effect.** An
 effect never stands where the product, the device or the game's world should be. Hardware with no
 photographs or client renders takes stand-in photographs of the same kind of machine at work, and
 a game with no art files its name set large over stand-in photographs of its setting (`photos.md`,

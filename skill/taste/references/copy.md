@@ -184,7 +184,7 @@ line is a line with no fact; a hero form is a choice with its fact beside it.)
   the footer aside. Long copy goes to sub-pages.
 - **The tech word budget** (software, gaming, hardware): 60 to 80 words a screen at 1440, counted
   outside UI mocks, diagrams and code (headings, lines, card titles and bodies, buttons, labels);
-  over 80 the checker WARNs (in testing: a fintech page at 117 words a screen read as wordy). Cut in
+  over 80 the checker WARNs. Cut in
   this order: a second sentence under a heading, card bodies to one sentence of 12 to 18 words, a
   fourth card, a list a fragment already shows. The UI says the rest.
 - **Numbers** sit in sentences with their unit ("4.5 hours a week"), uneven where real (212, 38%).
@@ -237,7 +237,7 @@ data-assumed>`); the checker lists every one for the report [assumed], and assum
   photographers: "Photographs via Unsplash and Wikimedia Commons" (as `photos.mjs credits` prints
   it; 110 characters at most, one line from 1024) that links or opens the credits list. Paste the
   line and the list exactly as `photos.mjs credits` prints them; never write a credit link per
-  photograph into the footer (in testing: 18 and 20 credit links in a footer read as a credit wall).
+  photograph into the footer.
   Map data credits join it. A page that shows real logos
   adds "Product names and logos are trademarks of their owners".
 - **Each fact once:** an opening time, a price or an address has one value and one wording,

@@ -35,8 +35,7 @@ same order at 390. Photograph layers and the tech grounds below do not count amo
 
 - **The dealt bands** (every kind): `start.mjs deal` prints one or two bands under LAYOUT (`tint`:
   `.ground-surface`, `dark`: `.ground-inverse`, `brand`: `.ground-brand`), so a page of one ground
-  throughout gets a change of pace (in testing, one cobalt band behind the work was the only ground
-  change on four pages, and it gave the page its beat). The rules above hold for each: one dark
+  throughout gets a change of pace. The rules above hold for each: one dark
   body section at most, never right under the hero, never two bands side by side. A place's dark
   band is the palette's own dark ink (`--p-inv-bg`), never near-black on a light cafe.
 

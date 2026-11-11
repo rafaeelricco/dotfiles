@@ -121,7 +121,7 @@ picture or the visual of one split section.
 - Under reduced motion it is one still picture with no context and no pause button; without WebGL a
   line drawing of the same object, its accent part filled.
 - It is a drawing of the product, never a filter: no photograph is ever dithered, halftoned or
-  printed (in testing: a halftone over the hero photograph read as broken and low-res at every width).
+  printed.
 
 ## Street map of the place (`fx-map`)
 

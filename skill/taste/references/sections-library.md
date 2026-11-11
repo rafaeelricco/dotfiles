@@ -6,18 +6,17 @@ checker or a reviewer catches. A place page follows `sections.md` section 4 wher
 
 ## What every recipe assumes
 
-- **Frame.** `system.css` at 1440: `.wrap` 1280 at x 80 (a place 1200 at x 120), gutter 24, h1 72,
-  h2 48; at 390: 342 at x 24. Every section is one or two screens, its h2 first, `--padt` under its
-  top (`layout-v4.md`). Never add a number the system lacks; a missing value becomes a token.
+- **Frame.** Equal edges and the grid: `layout-v4.md`, "Equal edges and the grid"; the sizes:
+  "Type"; the section's screens, its h2 first, `--padt` under its top: "One section per screen".
+  Never add a number the system lacks; a missing value becomes a token.
 - **Splits** are the page's one split pair, text left and the visual right, top-aligned
   (`.grid`, never `.grid--middle` on a split), mirrored only where the deal says so, once a page
   (Compositions); on a phone text first.
 - **Cards.** `cards.md` builds the card, its panel, the ground and the UI on it, and wins over
   anything here except the depth rule: two boxes at most. A card whose panel holds UI is
   `.card--open` (no box: its words on the page ground, the panel under them with four round
-  corners) or runs its panel flush (`.panel--flush`); an inset panel holds only a picture. From 640
-  to 1023 a card with a panel takes the full row; from 1024 to 1279 span-4 cards with a panel go
-  two-up, so a span-4 panel is never under 304px.
+  corners) or runs its panel flush (`.panel--flush`); an inset panel holds only a picture. Panel
+  cards by width: `layout-v4.md`, "Equal edges and the grid"; a span-4 panel is never under 304px.
 - **Grounds in frames (tech).** The page has one effect and one card group's still grounds
   (`effects-usage.md`). Where a recipe below says "the card ground", it means that group's dealt id
   with its own seed per panel; "the effect" means the page's one effect, only in the hero or the one
@@ -29,9 +28,9 @@ checker or a reviewer catches. A place page follows `sections.md` section 4 wher
   sample text: drafts only). They sit in a `.stage` at their true size (`meta.json` `size`,
   `fluid`), never scaled, at the place the recipe names (else `meta.json`'s `place`). A `.fit` slot
   takes only a fragment whose minimum width fits it (`cards.md`): 324 in a 2x2 card at 1024, 256 in
-  a span-4 card. The edge rule (every edge 24px clear, or cut by 24px or more with a fade) holds at
-  1440, 1280, 1024 and 768; move `--ax`/`--ay` until it does. On the phone cards.css places each
-  fragment 16px in, its top at `--ay-sm` (24px unless set).
+  a span-4 card. The edge rule (`cards.md`, "Edges and fades", which gives the phone's 16px side
+  too) holds at 1440, 1280, 1024 and 768; move `--ax`/`--ay` until it does. On the phone the
+  fragment's top is `--ay-sm` (24px unless set).
 - **Motion.** Fragments hold their finished picture; the one loop of a card group, split or wide
   frame carries `data-ui-loop` and its pause button; below the hero two loops are never on one
   screen; nothing moves because the page scrolled. Every timing: `motion.md`. Other kinds: no loops.
@@ -44,16 +43,15 @@ checker or a reviewer catches. A place page follows `sections.md` section 4 wher
 - **Names** in the examples (Ferrow, Rotaro, Kestrow, Ledgewick, Clausewise, Fenn, Halden...) are
   invented to show the form. Copy how they are written, never the words. Proof, quotes, customers
   and figures come only from the brief (`copy.md`).
-- **Logo, buttons, links.** `.nav__logo` holds the client's SVG, else the dealt mark and the name
-  (the same in the footer). Buttons take the dealt look from `<html data-buttons>`; the nav's main
-  action is `.btn.btn--primary` at the one button height (`system.md` Nav). Nav words, buttons and footer links go to `#ids`, the logo
-  to `#top`, Contact to `#contact`; Privacy and Imprint to pages you write, or left out.
+- **Logo, buttons, links.** `.nav__logo` holds the logo, the buttons take the dealt look and the
+  nav's main action is `.btn.btn--primary`: `system.md`, "Nav" and "Radius and buttons". Nav words,
+  buttons and footer links go to `#ids`, the logo to `#top`, Contact to `#contact`; Privacy and
+  Imprint to pages you write, or left out.
 
 # Navigation
 
-All four share the bar in `system.md`: fixed, opaque, 72px (56 on a phone), a 1px hairline, the
-same at every depth; a panel opens after 150ms of hover with a fade and a 6px drop, a click on the
-word goes to its section, never `preventDefault`. system.js adds the phone sheet, Esc and
+All four share the bar in `system.md`, "Nav" (and `motion.md` for the panel). A click on the word
+goes to its section, never `preventDefault`; system.js adds the phone sheet, Esc and
 `aria-expanded`; never write a second handler.
 
 ## nav-mega
@@ -438,9 +436,7 @@ readable rows; repeats that change the template.
 
 **Job and use.** The product itself, big, the way Linear, Cursor and Vercel show it: one real app
 window across the `.wrap`, the list beside the open item, the app's own chrome. Every software page
-has one, in the hero or within the first three sections (in testing: a code-review page whose review
-was one small diff card centred on a sage panel scored about 3.5 points under Linear, whose review
-band puts the pull-request list beside a full-width diff in one app frame). Never on gaming,
+has one, in the hero or within the first three sections. Never on gaming,
 product, service or place.
 
 **The two panes** (kit fragments, rewritten to the client's names; the list is always `window`):
@@ -859,7 +855,7 @@ Live search), one grade across the strip, no two of one place or one series, cro
 world spec, the frame itself the `[data-product]` element (`div.frame.slot`, page CSS
 `.frame.slot[data-product] { --ratio: 56.25%; background: <the world's water, fog or night colour> }`:
 `layout.css` clears a `.frame[data-product]`'s ground, so a weaker selector leaves the render on
-white), a still, never `data-product-fill` over 1 (in testing the frame drew empty). As the "what
+white), a still, never `data-product-fill` over 1. As the "what
 you do" cards it is three to five open cards, each a verb over its capture.
 
 **CAD or render frame.** The client's CAD render of the whole product: the product section's
@@ -961,8 +957,7 @@ picture.
 **At 1440.** `.closing__cta.close--type`: the h2 (at most eight words, on the left line), set
 large from the screen's height by system.css (up to 120px), an optional `.t-small.muted` line (the
 trial terms, the opening hours), then `a.btn.btn--primary.btn--xl` at the row's foot, at most half
-the `.wrap` (640 wide, 72 tall). Never across the `.wrap`: in testing that button was the most
-templated part of every page. `.btn--wide` is the larger size: at most 720px wide, taller, with a larger label (`system.md`).
+the `.wrap` (640 wide, 72 tall). Never across the `.wrap`. `.btn--wide` is the larger size: at most 720px wide, taller, with a larger label (`system.md`).
 
 **At 390.** The button full width, 48px tall with an 18px label.
 
@@ -1041,8 +1036,7 @@ photograph on the other six, both down to the links. **At 390.** The panel, then
 ## close-form
 
 **Job and use.** A page whose last section would be a booking or order form: the form is the close,
-so the page never asks twice in a row (in testing: "Book your repair slot" right under "Book a
-repair slot").
+so the page never asks twice in a row.
 
 ```html
 <div class="closing__cta close--form">

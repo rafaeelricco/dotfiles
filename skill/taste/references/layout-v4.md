@@ -126,8 +126,7 @@ fails a section that is not one or two screens at the tablet too (the default ru
   - a bleed: a photograph or ground filling its frame (`.frame--photo`, `object-fit: cover`), or a
     fragment in `.frame > .stage` cut by the frame's bottom through 96px or more of its rows under
     `.stage--fade-b`, the point (the comment, the button, the row worked on) above the fade.
-    Never a card, window or diff in a wrapper of your own whose lower edge the fold slices (in testing:
-    a 480x688 diff in `div.hero__art` lost its lower edge at 820, `fold-card` FAIL); never 1 to 95px
+    Never a card, window or diff in a wrapper of your own whose lower edge the fold slices (`fold-card` FAIL); never 1 to 95px
     of a box under the fold. Below 1024 `.at-over` pieces hide; give the main piece a `.fit` width
     (it narrows), never a fixed one. Shoot 820x1180 and 768x1024 and read the first screen's foot.
 - **Docked strip:** software and product may dock one row under the hero's content (real customer
