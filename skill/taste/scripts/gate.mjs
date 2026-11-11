@@ -520,6 +520,28 @@ function sourceFiles(proj) {
   return out;
 }
 
+// the copied kit next to system.js: it loads ui/ui.js, effects/fx.js, moments and each <name>/fragment.js through
+// import(new URL(...)), which walk() cannot follow, so its modules and fragment files are listed by folder instead
+function kitTree(walked) {
+  const out = [];
+  const go = (d, depth) => {
+    if (out.length >= 1500 || depth > 6) return;
+    let es;
+    try {
+      es = fs.readdirSync(d, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const e of es) {
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) go(p, depth + 1);
+      else if (e.isFile() && /\.(m?js|css|html?|json)$/i.test(e.name)) out.push(p);
+    }
+  };
+  for (const d of new Set(walked.filter(f => path.basename(f) === "system.js").map(f => path.dirname(f)))) go(d, 0);
+  return out;
+}
+
 // ---------------------------------------------------------------- the kit, by content
 // a format-on-save pass changes whitespace, quotes and semicolons, never what a kit file does
 const norm = t =>
@@ -2064,7 +2086,11 @@ const opts = {
 };
 const walked = P.file ? walk(P.file, root || path.dirname(P.file)) : [];
 const files = [
-  ...new Set([...walked, ...(P.url || fs.existsSync(path.join(projDir, "package.json")) ? sourceFiles(projDir) : [])]),
+  ...new Set([
+    ...walked,
+    ...kitTree(walked),
+    ...(P.url || fs.existsSync(path.join(projDir, "package.json")) ? sourceFiles(projDir) : []),
+  ]),
 ];
 // the page, what it loads and what the checks are told; waivers are applied after the checks, so a new waiver needs no new run
 const fp = crypto.createHash("sha1");
