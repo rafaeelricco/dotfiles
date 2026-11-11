@@ -746,8 +746,9 @@ const googleName = f =>
   GENERIC.test(f) ? f.toLowerCase()
   : (f.includes(" ") ? f : f.replace(/([a-z])([A-Z])/g, "$1 $2")).replace(/^./, c => c.toUpperCase());
 const quoted = f => (GENERIC.test(f) ? f : `"${f}"`);
-// a family name the kit may print in its <link> and <style>: letters, digits, spaces, dots, hyphens, underscores
-const SAFE_FAMILY = /^-?[\p{L}\p{N}][\p{L}\p{N} ._-]{0,63}$/u;
+// a family name the kit may print in its <link> and <style>: letters (with their accents), digits, spaces, dots,
+// hyphens, underscores (next/font names a face __Inter_aaf875)
+const SAFE_FAMILY = /^[\p{L}\p{M}\p{N}._-][\p{L}\p{M}\p{N} ._-]{0,63}$/u;
 
 function tableRows(text, heading) {
   const at = text.indexOf(`\n${heading}\n`);
@@ -847,7 +848,7 @@ function kit(text, name, manifest = null) {
         .join("&")
       + "&display=swap"
     : "";
-  const tracking = h1 && h1[4] !== "0" ? h1[4] : "0em";
+  const tracking = h1 && h1[4] !== "0" && /^-?\d*\.?\d+(?:em|rem|px)?$/.test(h1[4]) ? h1[4] : "0em";
 
   const primary = /Primary button: (\d+(?:\.\d+)?)px radius|Primary button: pill/.exec(text);
   const btn =

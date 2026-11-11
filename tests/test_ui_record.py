@@ -199,13 +199,31 @@ class UiRecord(unittest.TestCase):
             self.assertNotIn("pwn", (Path(root) / "evil/design-system.txt").read_text(encoding="utf-8"))
             text = (Path(root) / "evil/design-system.txt").read_text(encoding="utf-8")
             (Path(root) / "evil/design-system.txt").write_text(
-                text.replace("`inherited`", f"`{bad}`") + "\nPrimary button shadow: `0 0 0 1px red; } </style><b id=pwn>`\n",
+                text.replace("`inherited`", f"`{bad}`").replace("| 500 | 0 |", "| 500 | 0</style><b id=pwn> |")
+                + "\nPrimary button shadow: `0 0 0 1px red; } </style><b id=pwn>`\n",
                 encoding="utf-8",
             )
             out = record(root, "kit", "evil").stdout
             self.assertIn("<style>", out)
             self.assertNotIn("pwn", out)
             self.assertEqual(out.count("</style>"), 1)
+
+    @unittest.skipUnless(shutil.which("node"), "node is not installed")
+    def test_record_keeps_accented_and_next_font_names(self):
+        import json
+
+        capture = json.loads(CAPTURE.read_text(encoding="utf-8"))
+        capture["type"] = [
+            {"role": "h1", "family": "So\u0308hne", "size": 64, "line": 64, "weight": 500, "tracking": "0"},
+            {"role": "body", "family": "__Inter_aaf875", "size": 17, "line": 24, "weight": 400, "tracking": "0"},
+        ]
+        with tempfile.TemporaryDirectory() as root:
+            source = Path(root) / "capture.json"
+            source.write_text(json.dumps(capture), encoding="utf-8")
+            self.assertEqual(record(root, "--from", str(source), "--name", "names").returncode, 0)
+            text = (Path(root) / "names/design-system.txt").read_text(encoding="utf-8")
+            self.assertIn("`So\u0308hne`", text)
+            self.assertIn("`__Inter_aaf875`", text)
 
     @unittest.skipUnless(shutil.which("node"), "node is not installed")
     def test_css_prints_light_and_dark_blocks(self):
