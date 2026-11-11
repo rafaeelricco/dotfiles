@@ -308,7 +308,7 @@ function merge(captures) {
   // the capture's own pick of the primary action, from the widest page; the table keeps it in view
   components.primary = widest.map(c => c.components.primary).find(Boolean) || null;
   if (components.primary) {
-    const { shadow, ...row } = components.primary;
+    const { shadow, blur, ...row } = components.primary;
     const same = v => JSON.stringify(v) === JSON.stringify(row);
     if (!components.button.some(same)) components.button = [row, ...components.button].slice(0, 6);
   }
@@ -528,9 +528,19 @@ function render(m, name) {
     : "Square: no rounded corners were measured.",
     primary ?
       `Primary button: ${radiusText(primary.radius, primary.h)} radius at ${primary.h}px high`
-      + (HEX.test(primary.bg || "") ? `, fill \`${hex6(primary.bg)}\`, text \`${hex6(primary.color)}\`.` : ".")
+      + (HEX.test(primary.bg || "") ?
+        // a translucent key keeps its alpha: the fill is a tint over whatever ground it sits on
+        `, fill \`${primary.bg.length === 9 ? primary.bg.toLowerCase() : hex6(primary.bg)}\`, text \`${hex6(primary.color)}\`.`
+      : ".")
     : "",
     primary?.shadow && primary.shadow !== "none" ? `Primary button shadow: \`${primary.shadow}\`.` : "",
+    (
+      typeof primary?.blur === "string"
+      && /blur\(/.test(primary.blur)
+      && /^[a-z0-9().,%\s-]{1,120}$/i.test(primary.blur.trim())
+    ) ?
+      `Primary button backdrop: \`${primary.blur.trim()}\` (a frosted key: its fill is translucent).`
+    : "",
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -743,7 +753,8 @@ const inkOn = h => (luminance(h) > 0.4 ? "#000000" : "#ffffff");
 const GENERIC =
   /^(?:-apple-system|blinkmacsystemfont|system-ui|ui-(?:sans-serif|serif|monospace|rounded)|sans-serif|serif|monospace|cursive|fantasy|math|emoji|fangsong|inherit|inherited|initial)$/i;
 const googleName = f =>
-  GENERIC.test(f) ? f.toLowerCase()
+  GENERIC.test(f) ?
+    f.toLowerCase()
   : (f.includes(" ") ? f : f.replace(/([a-z])([A-Z])/g, "$1 $2")).replace(/^./, c => c.toUpperCase());
 const quoted = f => (GENERIC.test(f) ? f : `"${f}"`);
 // a family name the kit may print in its <link> and <style>: letters (with their accents), digits, spaces, dots,
@@ -783,20 +794,39 @@ function kit(text, name, manifest = null) {
   const accent = role("accent", 1) || ink;
 
   // the primary: the line under Shape when the taste names its fill, else picked from the Button table
-  const named = /Primary button: [^\n]*?fill `(#[0-9a-f]{6})`, text `(#[0-9a-f]{6})`/i.exec(text);
+  const named = /Primary button: [^\n]*?fill `(#[0-9a-f]{6}(?:[0-9a-f]{2})?)`, text `(#[0-9a-f]{6})`/i.exec(text);
   const rows = (tableRows(text, "### Button")?.rows ?? []).map(r => ({
     h: parseFloat(r[0]) || 0,
     fill: r[3],
     text: r[4],
   }));
   const button = named ? { fill: named[1], text: named[2] } : pickPrimary(rows, accent, bg);
-  const action = button ? hex(button.fill) : accent;
-  const actionInk = (button && hex(button.text ?? "")) || inkOn(action);
+  // a translucent key (fill #rrggbbaa) is a tint over its ground: the palette takes its opaque look on the page
+  // ground, and on the inverse band the same tint of the inverse ink (light-dark keys flip that way)
+  const tint =
+    button && HEX.test(button.fill || "") && button.fill.length === 9 ? parseInt(button.fill.slice(7), 16) / 255 : 1;
+  const action =
+    button ?
+      tint < 1 ?
+        mixHex(bg, hex(button.fill), tint)
+      : hex(button.fill)
+    : accent;
+  // a tint can vanish into the ground (a white glass key over a photograph, read on a white page): its measured
+  // text then has no contrast left on the opaque look, and the kit inks it for the ground instead
+  const contrastOf = (a, b) => {
+    const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p);
+    return (x + 0.05) / (y + 0.05);
+  };
+  const measuredInk = button && hex(button.text ?? "");
+  const actionInk = measuredInk && (tint === 1 || contrastOf(action, measuredInk) >= 3) ? measuredInk : inkOn(action);
   const accentInk = action === accent ? actionInk : inkOn(accent);
 
   // the inverse band: the other scheme when the taste has two, else a raised step of its one scheme
   const invBg = (two && role("bg", 2)) || surface;
   const invInk = (two && role("ink", 2)) || ink;
+  const fill6 = button && tint < 1 ? hex(button.fill) : null;
+  const inkTint = fill6 && rgbOf(fill6).reduce((d, v, i) => d + Math.abs(v - rgbOf(ink)[i]), 0) <= 60;
+  const invAction = !fill6 ? action : mixHex(invBg, inkTint ? invInk : fill6, tint);
   const p = {
     bg,
     surface,
@@ -812,8 +842,10 @@ function kit(text, name, manifest = null) {
     "inv-muted": (two && role("muted", 2)) || (two ? mixHex(invInk, invBg, 0.45) : muted),
     "inv-accent": (two && role("accent", 2)) || accent,
     "inv-accent-ink": accentInk,
-    "inv-action": action,
-    "inv-action-ink": actionInk,
+    // a translucent key of the ink's own colour flips with the scheme (the ink tint on light, the inverse ink's
+    // on the inverse band); a coloured one keeps its hue over the inverse ground
+    "inv-action": invAction,
+    "inv-action-ink": tint < 1 ? inkOn(invAction) : actionInk,
   };
 
   // a pack written by hand, or before names were checked on record, still never prints an unsafe face
@@ -844,7 +876,10 @@ function kit(text, name, manifest = null) {
     families.length ?
       "https://fonts.googleapis.com/css2?"
       + families
-        .map(f => `family=${encodeURIComponent(f).replace(/%20/g, "+")}:wght@${[...(weights.get(f) || [400])].sort((a, b) => a - b).join(";")}`)
+        .map(
+          f =>
+            `family=${encodeURIComponent(f).replace(/%20/g, "+")}:wght@${[...(weights.get(f) || [400])].sort((a, b) => a - b).join(";")}`,
+        )
         .join("&")
       + "&display=swap"
     : "";
