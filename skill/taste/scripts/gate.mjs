@@ -1383,10 +1383,9 @@ async function browserChecks(target, proj, opts, gateDir) {
   plan = QUICK ? quickPlan(state && state.open) : null;
   const widths = plan ? plan.widths : "1440,390",
     sizes = plan ? plan.sizes : "1440x900,390x844";
-  // no root of its own: serve the project, never as high as the page's ../ references climb (a page could reach the
-  // folders above it and its script read them)
-  const served = opts.root || (inside(proj, target) ? proj : null);
-  const root = served && !isUrl(target) ? ["--root", served] : [];
+  // no root of its own: the checkers serve the page's folder, climbing for its ../ references no higher than its
+  // project (roots.mjs climbRoot), so a build in dist/ never has the project's .env served beside it
+  const root = opts.root && !isUrl(target) ? ["--root", opts.root] : [];
   // consistency.mjs, with what step 6 passes it
   {
     const prof = freshProfile("consistency"),
