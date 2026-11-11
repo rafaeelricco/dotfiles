@@ -736,8 +736,14 @@ const luminance = h =>
     .map(v => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
     .reduce((s, v, i) => s + v * [0.2126, 0.7152, 0.0722][i], 0);
 const inkOn = h => (luminance(h) > 0.4 ? "#000000" : "#ffffff");
+// CSS's own family keywords and the system faces: never a Google Fonts family, never quoted ("inherited" is how the
+// pack writes a row with no family of its own)
+const GENERIC =
+  /^(?:-apple-system|blinkmacsystemfont|system-ui|ui-(?:sans-serif|serif|monospace|rounded)|sans-serif|serif|monospace|cursive|fantasy|math|emoji|fangsong|inherit|inherited|initial)$/i;
 const googleName = f =>
-  (f.includes(" ") ? f : f.replace(/([a-z])([A-Z])/g, "$1 $2")).replace(/^./, c => c.toUpperCase());
+  GENERIC.test(f) ? f.toLowerCase()
+  : (f.includes(" ") ? f : f.replace(/([a-z])([A-Z])/g, "$1 $2")).replace(/^./, c => c.toUpperCase());
+const quoted = f => (GENERIC.test(f) ? f : `"${f}"`);
 
 function tableRows(text, heading) {
   const at = text.indexOf(`\n${heading}\n`);
@@ -825,13 +831,15 @@ function kit(text, name, manifest = null) {
     weights.set(f, (weights.get(f) || new Set()).add(Number(r[3]) || 400));
   }
   if (!monoRow) weights.set(mono, new Set([400, 500]));
-  const families = [...new Set([h1Face, display, textFace, mono])].filter(f => f !== "system-ui");
+  const families = [...new Set([h1Face, display, textFace, mono])].filter(f => !GENERIC.test(f));
   const link =
-    "https://fonts.googleapis.com/css2?"
-    + families
-      .map(f => `family=${f.replace(/ /g, "+")}:wght@${[...(weights.get(f) || [400])].sort((a, b) => a - b).join(";")}`)
-      .join("&")
-    + "&display=swap";
+    families.length ?
+      "https://fonts.googleapis.com/css2?"
+      + families
+        .map(f => `family=${f.replace(/ /g, "+")}:wght@${[...(weights.get(f) || [400])].sort((a, b) => a - b).join(";")}`)
+        .join("&")
+      + "&display=swap"
+    : "";
   const tracking = h1 && h1[4] !== "0" ? h1[4] : "0em";
 
   const primary = /Primary button: (\d+(?:\.\d+)?)px radius|Primary button: pill/.exec(text);
@@ -847,7 +855,12 @@ function kit(text, name, manifest = null) {
   const md = above.length ? above[Math.floor((above.length - 1) / 2)] : sm;
   const lg = above.length ? above[above.length - 1] : md;
 
-  const stack = (f, tail) => (f === "system-ui" ? tail : `"${f}", ${tail}`);
+  const stack = (f, tail) =>
+    GENERIC.test(f) ?
+      tail.split(", ").includes(f) ?
+        tail
+      : `${f}, ${tail}`
+    : `"${f}", ${tail}`;
   const fallback = f =>
     (
       /serif|garamond|times|georgia|playfair|caslon|baskerville|bodoni|fraunces|lora|merriweather/i.test(f)
@@ -895,9 +908,13 @@ function kit(text, name, manifest = null) {
   return [
     // the gate reads the taste's Kit overrides through this name
     `<meta name="taste" content="${name}">`,
-    '<link rel="preconnect" href="https://fonts.googleapis.com">',
-    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
-    `<link href="${link}" rel="stylesheet">`,
+    ...(link ?
+      [
+        '<link rel="preconnect" href="https://fonts.googleapis.com">',
+        '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
+        `<link href="${link}" rel="stylesheet">`,
+      ]
+    : []),
     ...KIT_SHEETS.map(s => `<link rel="stylesheet" href="assets/${s}.css">`),
     "<!-- the taste's own tokens (ui → references/record.md, Apply): in place of start.mjs css or brand; keep this <style> after the links -->",
     "<style>",
@@ -905,7 +922,7 @@ function kit(text, name, manifest = null) {
     ...Object.entries(p).map(([k, v]) => `  --p-${k}: ${v};`),
     `  --font-display: ${stack(display, fallback(display))};`,
     `  --font-text: ${stack(textFace, "system-ui, sans-serif")};`,
-    `  --font-mono: "${mono}", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;`,
+    `  --font-mono: ${quoted(mono)}, ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;`,
     `  --display-weight: ${Number(h1?.[3]) || 500};`,
     `  --display-tracking: ${tracking};`,
     `  --display-tracking-xl: ${tracking};`,

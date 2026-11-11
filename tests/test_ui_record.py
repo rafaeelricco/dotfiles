@@ -165,6 +165,24 @@ class UiRecord(unittest.TestCase):
             self.assertIn("--r-btn: 12px;", out)
 
     @unittest.skipUnless(shutil.which("node"), "node is not installed")
+    def test_kit_keeps_generic_families_out_of_google_fonts(self):
+        import json
+
+        capture = json.loads(CAPTURE.read_text(encoding="utf-8"))
+        capture["type"] = [
+            {"role": "h1", "family": "system-ui", "size": 64, "line": 70, "weight": 600, "tracking": "0"},
+            {"role": "body", "family": "system-ui", "size": 16, "line": 24, "weight": 400, "tracking": "0"},
+        ]
+        with tempfile.TemporaryDirectory() as root:
+            source = Path(root) / "capture.json"
+            source.write_text(json.dumps(capture), encoding="utf-8")
+            self.assertEqual(record(root, "--from", str(source), "--name", "sysui").returncode, 0)
+            out = record(root, "kit", "sysui").stdout
+            self.assertNotIn("System-ui", out)
+            self.assertIn("family=JetBrains+Mono:wght@400;500&display=swap", out)
+            self.assertIn("--font-text: system-ui, sans-serif;", out)
+
+    @unittest.skipUnless(shutil.which("node"), "node is not installed")
     def test_css_prints_light_and_dark_blocks(self):
         with tempfile.TemporaryDirectory() as root:
             record(root, "--from", str(CAPTURE), "--name", "sample")
