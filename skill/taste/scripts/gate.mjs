@@ -1814,7 +1814,7 @@ function applyFlags(m) {
     const r = path.resolve(base, str("root"));
     if (!inside(projDir, r)) {
       console.log(`gate: --root ${str("root")} is not a folder inside ${projDir}`);
-      console.log("GATE: SETUP (--root leaves the project)");
+      console.log("GATE: SETUP (--root is not a folder in the project)");
       process.exit(3);
     }
     m.root = slash(path.relative(projDir, r)) || ".";

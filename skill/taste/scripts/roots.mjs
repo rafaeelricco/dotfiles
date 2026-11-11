@@ -41,17 +41,22 @@ export function readTaste(taste) {
     return null;
   }
 }
-// A preview server sends a file only when it is inside the served root once symlinks are resolved: the lexical check
-// alone lets a link committed in the project (escape -> /etc) reach the rest of the disk, and the page's own script
-// can read whatever it is served.
-export function inside(root, file) {
+// A preview server sends a file only when it is inside the served root, and, once symlinks are resolved, still
+// inside it or inside the kit itself (stageItem links a staged part's folder to this skill's assets and the taste
+// packs): the lexical check alone lets a link committed in the project (escape -> /etc) reach the rest of the disk,
+// and the page's own script can read whatever it is served.
+const within = (dir, f) => f === dir || f.startsWith(dir.endsWith(path.sep) ? dir : dir + path.sep);
+const real = p => {
   try {
-    const r = fs.realpathSync(root),
-      f = fs.realpathSync(file);
-    return f === r || f.startsWith(r + path.sep);
+    return fs.realpathSync(p);
   } catch {
-    return false;
+    return null;
   }
+};
+export function inside(root, file) {
+  if (!within(path.resolve(root), path.resolve(file))) return false;
+  const f = real(file);
+  return !!f && [real(root), real(SKILL), real(tastesDir())].some(d => d && within(d, f));
 }
 // a path as the PLAN prints it
 export const refOf = p =>
