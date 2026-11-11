@@ -22,6 +22,12 @@
     "js": {
       "type": "boolean"
     },
+    "effects": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "place": {
       "type": "string"
     },

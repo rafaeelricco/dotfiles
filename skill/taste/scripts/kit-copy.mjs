@@ -224,10 +224,28 @@ for (const rel of corePaths) {
 report("core", coreGroup);
 scan.push(...coreGroup.js);
 
+// the effects a part mounts by id (fx.mount(el, "orb-sphere")): fx.js builds that module's URL at run time, so no
+// import names it. A ui fragment lists them in its meta.json "effects"; a component mounts its "default".
+function effectsOf(family, id) {
+  if (family !== "ui" && family !== "components") return [];
+  const dir = itemDir(family, id, taste);
+  let m;
+  try {
+    m = dir ? JSON.parse(fs.readFileSync(path.join(dir, "meta.json"), "utf8")) : null;
+  } catch {
+    return [];
+  }
+  const ids = family === "ui" ? m?.effects : [m?.default];
+  return (Array.isArray(ids) ? ids : []).filter(e => typeof e === "string" && e && e !== "none");
+}
+
 for (const [family, id] of items) {
   const g = copyItem(family, id, taste, to);
   report(`${family}/${id}`, g);
   scan.push(...g.js);
+  // appended parts are copied by this same loop
+  for (const e of effectsOf(family, id))
+    if (!items.some(p => p[0] === "effects" && p[1] === e) && itemDir("effects", e, taste)) items.push(["effects", e]);
 }
 
 report("imports", closeImports(to, taste, scan));
