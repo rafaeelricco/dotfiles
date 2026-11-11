@@ -103,20 +103,6 @@ export const refOf = p =>
     "<skill>/" + path.relative(SKILL, p).split(path.sep).join("/")
   : "<ui skill>/tastes/" + path.relative(tastesDir(), p).split(path.sep).join("/");
 
-// A part dealt again on its own joins the deal the plan wrote, beside the history file: kit-copy.mjs copies from
-// that deal and the gate reads it. No deal there yet (no plan was run): nothing to keep in step.
-export function updateDeal(historyFile, patch) {
-  if (typeof historyFile !== "string") return;
-  const file = path.join(path.dirname(path.resolve(historyFile)), "deal.json");
-  let deal;
-  try {
-    deal = JSON.parse(fs.readFileSync(file, "utf8"));
-  } catch {
-    return;
-  }
-  fs.writeFileSync(file, JSON.stringify({ ...deal, ...patch }, null, 1) + "\n");
-}
-
 // A pack's item is written as if it sat in the kit (its code imports ../fx.js, its demo links ../../system.css),
 // and on a page kit-copy.mjs puts it there. To load or show it where it lies, stage it: a temp folder whose assets/
 // is the kit's by symlink, with the item's family folder holding the kit's entries, the pack's shared ones and a

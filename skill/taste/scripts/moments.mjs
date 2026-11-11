@@ -81,7 +81,8 @@ import http from "node:http";
 import crypto from "node:crypto";
 import { spawn, execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { assetRoots, chromeOrExit, packDirs, readTaste, refOf, tasteName, tastesDir, updateDeal } from "./roots.mjs";
+import { assertSafeWritePath, writeDealerState } from "./build-state.mjs";
+import { assetRoots, chromeOrExit, packDirs, readTaste, refOf, tasteName, tastesDir } from "./roots.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DIR = path.join(ROOT, "assets", "moments");
@@ -484,9 +485,10 @@ function rng(seed) {
   };
 }
 function readHistory(file) {
-  if (!file || file === true || !fs.existsSync(file)) return {};
+  if (!file || file === true) return {};
+  const historyPath = assertSafeWritePath(file);
   try {
-    const h = JSON.parse(fs.readFileSync(file, "utf8"));
+    const h = JSON.parse(fs.readFileSync(historyPath, "utf8"));
     return h && typeof h === "object" && !Array.isArray(h) ? h : {};
   } catch {
     return {};
@@ -733,11 +735,6 @@ function tasteArg(a) {
   }
 }
 const seedArg = a => (a.seed != null && a.seed !== true ? String(a.seed) : undefined);
-function writeHistory(file, hist) {
-  if (!file || file === true) return;
-  fs.mkdirSync(path.dirname(path.resolve(file)), { recursive: true });
-  fs.writeFileSync(file, JSON.stringify(hist, null, 1) + "\n");
-}
 function pageArg(a, cmd) {
   const pg = pageKind(a.page || a.type);
   if (!pg)
@@ -783,8 +780,8 @@ function cmdScene(a) {
   const tone = toneArg(a, page);
   const hist = readHistory(a.history);
   const out = sceneFor(a, page, tone, hist, taste);
-  writeHistory(a.history, hist);
-  updateDeal(a.history, { scene: out.scene ? { id: out.scene.id, dir: out.scene.dir || null } : null });
+  if (typeof a.history === "string")
+    writeDealerState(a.history, hist, { scene: out.scene ? { id: out.scene.id, dir: out.scene.dir || null } : null });
   if (a.json)
     console.log(
       JSON.stringify({
@@ -858,10 +855,9 @@ function cmdPick(a) {
   if (a.history && a.history !== true) {
     const at = new Date().toISOString();
     hist.moments = [...(hist.moments || []), ...out.picks.map(p => ({ id: p.id, at, seed: out.seed }))].slice(-200);
-    writeHistory(a.history, hist);
     // a pick run again on its own replaces the plan's moments (and its scene, when this run dealt one or none)
     const part = x => ({ id: x.id, dir: x.dir || null });
-    updateDeal(a.history, {
+    writeDealerState(a.history, hist, {
       moments: out.picks.map(part),
       ...(dealtScene ? { scene: dealtScene.scene ? part(dealtScene.scene) : null } : {}),
     });

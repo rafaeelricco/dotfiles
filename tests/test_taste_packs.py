@@ -171,6 +171,80 @@ class Sandbox(unittest.TestCase):
         return site, out.stdout, deal
 
 
+class StandaloneDealerHistory(Sandbox):
+    dealers = (
+        ("layout-deal.mjs", ("--type", "software"), "heroes", None),
+        ("moments.mjs", ("pick", "--page", "software"), "moments", "moments"),
+        ("moments.mjs", ("scene", "--page", "software"), "scenes", "scene"),
+        ("effects.mjs", ("pick", "--page", "software", "--palette", "light", "--slots", "hero"), "picks", "effect"),
+        ("backgrounds-pick.mjs", ("--type", "software", "--roles", "hero,body,proof,close"), "grounds", None),
+        ("photos.mjs", ("pick", "--trade", "cafe"), "photos", None),
+    )
+
+    @needs_node
+    def test_dealers_preserve_and_update_regular_history(self):
+        for script, args, history_key, deal_key in self.dealers:
+            with self.subTest(script=script, args=args):
+                state = self.tmp / history_key
+                state.mkdir()
+                history = state / "history.json"
+                history.write_text('{"existing": true}', encoding="utf-8")
+                deal = state / "deal.json"
+                deal.write_text('{"existing": true}', encoding="utf-8")
+
+                out = self.run_node(script, *args, "--history", str(history), "--seed", "s2", "--json", cwd=self.tmp)
+
+                self.assertEqual(out.returncode, 0, out.stderr or out.stdout)
+                saved_history = json.loads(history.read_text(encoding="utf-8"))
+                self.assertIs(saved_history["existing"], True)
+                self.assertTrue(saved_history[history_key])
+                if deal_key:
+                    saved_deal = json.loads(deal.read_text(encoding="utf-8"))
+                    self.assertIs(saved_deal["existing"], True)
+                    if deal_key == "moments":
+                        self.assertEqual([part["id"] for part in saved_deal[deal_key]],
+                                         [part["id"] for part in saved_history[history_key]])
+                    else:
+                        self.assertEqual(saved_deal[deal_key]["id"], saved_history[history_key][-1]["id"])
+
+    @needs_node
+    def test_first_deal_creates_history_without_a_plan(self):
+        history = self.tmp / "new-state/history.json"
+        out = self.run_node("moments.mjs", "pick", "--page", "software", "--history", str(history), "--seed", "s2",
+                            "--json", cwd=self.tmp)
+        self.assertEqual(out.returncode, 0, out.stderr or out.stdout)
+        self.assertTrue(json.loads(history.read_text(encoding="utf-8"))["moments"])
+        self.assertFalse(history.with_name("deal.json").exists())
+
+    @needs_node
+    def test_dealers_reject_nonfile_history_and_deal_destinations(self):
+        history_dir = self.tmp / "blocked-history.json"
+        history_dir.mkdir()
+        history = self.tmp / "history.json"
+        initial_history = '{"existing": true}'
+        history.write_text(initial_history, encoding="utf-8")
+        deal_dir = self.tmp / "deal.json"
+        deal_dir.mkdir()
+
+        for script, args, _, deal_key in self.dealers:
+            destinations = ((history_dir, history_dir),)
+            if deal_key:
+                destinations += ((history, deal_dir),)
+            for history_path, rejected_path in destinations:
+                with self.subTest(script=script, args=args, destination=rejected_path.name):
+                    out = self.run_node(script, *args, "--history", str(history_path), "--seed", "s2", "--json",
+                                        cwd=self.tmp)
+
+                    self.assertNotEqual(out.returncode, 0, out.stdout)
+                    diagnostic = out.stderr + out.stdout
+                    self.assertIn("target is not a regular file", diagnostic)
+                    self.assertIn(rejected_path.name, diagnostic)
+                    if script == "photos.mjs":
+                        self.assertIn("target is not a regular file", json.loads(out.stdout)["error"])
+                    self.assertTrue(rejected_path.is_dir())
+                    self.assertEqual(history.read_text(encoding="utf-8"), initial_history)
+
+
 class Packs(Sandbox):
     def test_tastes_are_not_tracked(self):
         if not shutil.which("git"):

@@ -33,6 +33,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { assertSafeWritePath, writeJsonSafe } from "./build-state.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 export const TYPES = ["software", "product", "place", "service"];
@@ -280,9 +281,10 @@ if (process.argv[1] && realOf(process.argv[1]) === realOf(fileURLToPath(import.m
   };
   const histFile = opt("history") && opt("history") !== true ? opt("history") : null;
   let hist = {};
-  if (histFile && fs.existsSync(histFile)) {
+  if (histFile) {
+    const historyPath = assertSafeWritePath(histFile);
     try {
-      hist = JSON.parse(fs.readFileSync(histFile, "utf8"));
+      hist = JSON.parse(fs.readFileSync(historyPath, "utf8"));
     } catch {
       hist = {};
     }
@@ -308,8 +310,7 @@ if (process.argv[1] && realOf(process.argv[1]) === realOf(fileURLToPath(import.m
     const at = new Date().toISOString();
     hist.grounds.push(...out.picks.filter(p => p.ground).map(p => ({ id: p.ground, at, seed: out.seed })));
     hist.grounds = hist.grounds.slice(-200);
-    fs.mkdirSync(path.dirname(path.resolve(histFile)), { recursive: true });
-    fs.writeFileSync(histFile, JSON.stringify(hist, null, 1) + "\n");
+    writeJsonSafe(histFile, hist);
   }
   if (opt("json")) console.log(JSON.stringify(out));
   else {

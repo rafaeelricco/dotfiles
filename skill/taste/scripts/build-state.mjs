@@ -52,6 +52,21 @@ export function writeJsonSafe(file, value, { spaces = 1, newline = true } = {}) 
   return writeFileSafe(file, JSON.stringify(value, null, spaces) + suffix, "utf8");
 }
 
+/** Persist a standalone deal's history and keep an existing plan in step. */
+export function writeDealerState(historyFile, history, patch) {
+  const file = path.join(path.dirname(path.resolve(historyFile)), "deal.json");
+  assertSafeWritePath(file);
+  writeJsonSafe(historyFile, history);
+
+  let deal;
+  try {
+    deal = JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch {
+    return;
+  }
+  writeJsonSafe(file, { ...deal, ...patch });
+}
+
 /** Arm a new build or join the nearest open parent build, matching start.mjs's historic behavior. */
 export function armBuild(page, cwd = process.cwd()) {
   const read = file => {

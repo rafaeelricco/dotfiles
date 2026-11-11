@@ -44,6 +44,7 @@ import http from "node:http";
 import { spawn, execFileSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { pick as dealEffects, filterEffects, SLOTS, KINDS } from "../assets/effects/pick.js";
+import { assertSafeWritePath, writeDealerState } from "./build-state.mjs";
 import { pageKind, fitsKind, FIT, TONES, INTENSITIES } from "./moments.mjs";
 import {
   assetRoots,
@@ -53,7 +54,6 @@ import {
   stageItem,
   tasteName,
   tastesDir,
-  updateDeal,
 } from "./roots.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -307,9 +307,10 @@ async function list(a) {
 /* ------------------------------------------------------------------ pick */
 
 function readHistory(file) {
-  if (!file || !fs.existsSync(file)) return { picks: [] };
+  if (!file || file === true) return { picks: [] };
+  const historyPath = assertSafeWritePath(file);
   try {
-    const h = JSON.parse(fs.readFileSync(file, "utf8"));
+    const h = JSON.parse(fs.readFileSync(historyPath, "utf8"));
     if (Array.isArray(h)) return { picks: h.map(x => (typeof x === "string" ? { id: x } : x)) };
     // the file is shared with start.mjs and moments.mjs (palettes, layout, moments, scenes, entrances): keep their keys
     return { ...(h && typeof h === "object" ? h : {}), picks: Array.isArray(h.picks) ? h.picks : [] };
@@ -437,11 +438,9 @@ async function pick(a) {
     const at = new Date().toISOString();
     hist.picks.push(...out.map(id => ({ id, at, seed })));
     hist.picks = hist.picks.slice(-500);
-    fs.mkdirSync(path.dirname(path.resolve(a.history)), { recursive: true });
-    fs.writeFileSync(a.history, JSON.stringify(hist, null, 1) + "\n");
     // an effect dealt again on its own replaces the plan's
     const first = dealt.picks[0];
-    updateDeal(a.history, {
+    writeDealerState(a.history, hist, {
       effect: first ? { id: first.id, slot: slots ? slots[0] : null, dir: first.dir || null } : null,
     });
   }

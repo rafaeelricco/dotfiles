@@ -39,6 +39,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { assertSafeWritePath, writeJsonSafe } from "./build-state.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const LAYOUT = path.join(here, "..", "assets", "layout");
@@ -98,12 +99,14 @@ const only =
   : [];
 const histFile = opt("history");
 let hist = { heroes: [] };
-if (histFile)
+if (typeof histFile === "string") {
+  const historyPath = assertSafeWritePath(histFile);
   try {
-    hist = { heroes: [], ...JSON.parse(fs.readFileSync(histFile, "utf8")) };
+    hist = { heroes: [], ...JSON.parse(fs.readFileSync(historyPath, "utf8")) };
   } catch {
     /* a new history */
   }
+}
 
 // weighted draw, away from the recent ones while others are left
 function draw(list, weight, recent) {
@@ -223,8 +226,7 @@ if (histFile && !opt("hero")) {
     hist.heroes = hist.heroes.slice(-20);
   }
   if (placeForm && !opt("form")) hist.placeForms = [...(hist.placeForms || []), placeForm.id].slice(-12);
-  fs.mkdirSync(path.dirname(path.resolve(histFile)), { recursive: true });
-  fs.writeFileSync(histFile, JSON.stringify(hist, null, 1));
+  writeJsonSafe(histFile, hist, { newline: false });
 }
 
 if (opt("json")) {

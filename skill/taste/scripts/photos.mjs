@@ -78,6 +78,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { assertSafeWritePath, writeJsonSafe } from "./build-state.mjs";
 import { assetRoots } from "./roots.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -479,9 +480,10 @@ function rngFrom(seed) {
 // ------------------------------------------------------------------ history
 function readHistory(file) {
   if (!file || file === true) return { data: {}, deals: [] };
+  const historyPath = assertSafeWritePath(file);
   let data = {};
   try {
-    data = JSON.parse(fs.readFileSync(file, "utf8"));
+    data = JSON.parse(fs.readFileSync(historyPath, "utf8"));
   } catch {
     /* new file */
   }
@@ -493,8 +495,7 @@ function writeHistory(file, hist, deal) {
   hist.data.photos = [...hist.deals, deal].slice(-40);
   // the file is shared with start.mjs, which reads palettes and types without a default
   for (const k of ["palettes", "types"]) if (!Array.isArray(hist.data[k])) hist.data[k] = [];
-  fs.mkdirSync(path.dirname(path.resolve(file)), { recursive: true });
-  fs.writeFileSync(file, JSON.stringify(hist.data, null, 1) + "\n");
+  writeJsonSafe(file, hist.data);
 }
 
 // ------------------------------------------------------------------ pick
@@ -591,7 +592,12 @@ function pick() {
     : [];
   for (const s of setting) if (!TERRAINS.includes(s)) die(`--setting takes ${TERRAINS.join(", ")}`);
   const histFile = opt("history");
-  const hist = readHistory(histFile);
+  let hist;
+  try {
+    hist = readHistory(histFile);
+  } catch (error) {
+    return die(error.message);
+  }
   const mine = hist.deals.filter(d => d.trade === trade);
   const rnd = rngFrom(`${seed}|${trade}|${mine.length}`);
 
@@ -1066,7 +1072,11 @@ function pick() {
     seed,
     at: new Date().toISOString(),
   };
-  writeHistory(histFile, hist, deal);
+  try {
+    writeHistory(histFile, hist, deal);
+  } catch (error) {
+    return die(error.message);
+  }
   if (recentLog && deal.ids.length) {
     recentLog.photos = [
       ...(Array.isArray(recentLog.photos) ? recentLog.photos : []),
