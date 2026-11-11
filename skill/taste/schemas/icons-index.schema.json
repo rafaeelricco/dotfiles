@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "assets/icons/index.json",
+  "type": "object",
+  "required": ["apps", "boxes", "files", "note", "sets", "ui", "version"],
+  "properties": {
+    "version": {
+      "type": "number"
+    },
+    "note": {
+      "type": "string"
+    },
+    "sets": {
+      "type": "object"
+    },
+    "apps": {
+      "type": "array"
+    },
+    "files": {
+      "type": "array"
+    },
+    "ui": {
+      "type": "array"
+    },
+    "boxes": {
+      "type": "object"
+    }
+  }
+}

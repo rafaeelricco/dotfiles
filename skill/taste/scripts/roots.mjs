@@ -87,3 +87,62 @@ export function stageItem(dir) {
   fs.cpSync(dir, path.join(fam, id), { recursive: true });
   return { dir: path.join(fam, id), root, done: () => fs.rmSync(tmp, { recursive: true, force: true }) };
 }
+
+// the browser every checker drives: CHROME_PATH (CHROME too), then installed Chrome, Edge or Chromium, then the newest
+// Playwright Chromium in its cache. One list for every script.
+export function findChrome() {
+  for (const v of [process.env.CHROME_PATH, process.env.CHROME]) if (v && fs.existsSync(v)) return v;
+  const pf = process.env.PROGRAMFILES || "C:\\Program Files",
+    pf86 = process.env["PROGRAMFILES(X86)"] || "C:\\Program Files (x86)",
+    local = process.env.LOCALAPPDATA || "",
+    home = os.homedir();
+  const fixed = [
+    path.join(pf, "Google/Chrome/Application/chrome.exe"),
+    path.join(pf86, "Google/Chrome/Application/chrome.exe"),
+    local && path.join(local, "Google/Chrome/Application/chrome.exe"),
+    path.join(pf86, "Microsoft/Edge/Application/msedge.exe"),
+    path.join(pf, "Microsoft/Edge/Application/msedge.exe"),
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "/Applications/Chromium.app/Contents/MacOS/Chromium",
+    path.join(home, "Applications/Google Chrome.app/Contents/MacOS/Google Chrome"),
+    "/usr/bin/google-chrome",
+    "/usr/bin/google-chrome-stable",
+    "/usr/bin/chromium",
+    "/usr/bin/chromium-browser",
+    "/snap/bin/chromium",
+  ];
+  const hit = fixed.find(p => p && fs.existsSync(p));
+  if (hit) return hit;
+  const cache =
+    process.env.PLAYWRIGHT_BROWSERS_PATH
+    || (process.platform === "darwin" ? path.join(home, "Library/Caches/ms-playwright")
+    : process.platform === "win32" ? path.join(local, "ms-playwright")
+    : path.join(home, ".cache/ms-playwright"));
+  const exe = {
+    darwin: ["chrome-mac-arm64", "chrome-mac"].flatMap(d => [
+      `${d}/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing`,
+      `${d}/Chromium.app/Contents/MacOS/Chromium`,
+    ]),
+    win32: ["chrome-win/chrome.exe", "chrome-win64/chrome.exe"],
+  }[process.platform] || ["chrome-linux/chrome", "chrome-linux64/chrome"];
+  let dirs = [];
+  try {
+    dirs = fs
+      .readdirSync(cache)
+      .filter(d => /^chromium-\d+$/.test(d))
+      .sort((a, b) => b.split("-")[1] - a.split("-")[1]);
+  } catch {
+    /* no cache */
+  }
+  for (const d of dirs) for (const e of exe) if (fs.existsSync(path.join(cache, d, e))) return path.join(cache, d, e);
+  return null;
+}
+// a script that cannot run without a browser: the path, or a message naming CHROME_PATH and a non-zero exit
+export function chromeOrExit(tag, code = 1) {
+  const exe = findChrome();
+  if (exe) return exe;
+  console.error(
+    `${tag}: no Chrome, Edge or Chromium found (nor a Playwright Chromium); set CHROME_PATH to its executable`,
+  );
+  process.exit(code);
+}

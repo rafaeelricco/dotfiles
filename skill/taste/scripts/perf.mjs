@@ -32,6 +32,7 @@ import http from "node:http";
 import zlib from "node:zlib";
 import os from "node:os";
 import { spawn, execFileSync } from "node:child_process";
+import { chromeOrExit } from "./roots.mjs";
 
 const args = process.argv.slice(2);
 const pos = [],
@@ -137,20 +138,6 @@ async function hostLoad(ms = 1200) {
 }
 
 /* ---------------------------------------------------------------- chrome + server */
-function findChrome() {
-  const c = [
-    process.env.CHROME_PATH,
-    "C:/Program Files/Google/Chrome/Application/chrome.exe",
-    "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
-    "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-    "/usr/bin/google-chrome",
-    "/usr/bin/chromium",
-  ];
-  const f = c.find(p => p && fs.existsSync(p));
-  if (!f) throw new Error("no Chrome found (set CHROME_PATH)");
-  return f;
-}
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript",
@@ -707,7 +694,7 @@ try {
 }
 const loadBefore = await hostLoad();
 const child = spawn(
-  findChrome(),
+  chromeOrExit("perf"),
   [
     "--headless=new",
     `--user-data-dir=${profile}`,

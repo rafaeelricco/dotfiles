@@ -56,6 +56,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { chromeOrExit } from "./roots.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const INDEX = path.resolve(HERE, "..", "assets", "icons", "index.json");
@@ -941,18 +942,7 @@ async function measureCmd() {
     return to;
   };
   const profile = opt("profile") ? inProject(opt("profile"), "icons") : path.resolve(defaultProfile());
-  const chromePath = [
-    process.env.CHROME_PATH,
-    "C:/Program Files/Google/Chrome/Application/chrome.exe",
-    "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
-    "/usr/bin/google-chrome",
-    "/usr/bin/chromium",
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-  ].find(p => p && fs.existsSync(p));
-  if (!chromePath) {
-    console.error("icons: no Chrome found (set CHROME_PATH)");
-    process.exit(1);
-  }
+  const chromePath = chromeOrExit("icons");
   const seen = new Set(),
     items = [];
   for (const a of [...idx.apps, ...idx.files]) {
@@ -1148,9 +1138,10 @@ if (process.argv[1] && here(process.argv[1]) === here(fileURLToPath(import.meta.
     if (cmd === "list" || cmd === "apps") return listCmd();
     if (cmd === "check") return checkCmd();
     if (cmd === "measure") return measureCmd();
-    console.log(
+    (cmd ? console.error : console.log)(
       "usage: icons.mjs find <words> | apps [--tag t] | list --set logos --tag storage | fetch <app|set:name ...> --out <dir> [--size 24] [--tile] [--mono] [--mask] [--colour] [--base /assets/icons] | scan <page.html ...> --out <dir> | check | measure",
     );
+    process.exitCode = cmd ? 1 : 0;
   })().catch(e => {
     console.error("icons:", e.message);
     process.exit(1);

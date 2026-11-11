@@ -18,6 +18,7 @@ import zlib from "node:zlib";
 import http from "node:http";
 import { fileURLToPath } from "node:url";
 import { spawn, execFileSync } from "node:child_process";
+import { chromeOrExit } from "./roots.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SKILL = path.resolve(HERE, "..");
@@ -143,15 +144,6 @@ const lum = (r, g, b) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
 const ratio = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 
 /* ---------------------------------------------------------------- Chrome */
-const findChrome = () =>
-  [
-    "C:/Program Files/Google/Chrome/Application/chrome.exe",
-    "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
-    process.env.CHROME_PATH,
-    "/usr/bin/google-chrome",
-    "/usr/bin/chromium",
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-  ].find(p => p && fs.existsSync(p));
 const prof = path.resolve(profile);
 fs.mkdirSync(prof, { recursive: true });
 const portFile = path.join(prof, "DevToolsActivePort");
@@ -161,7 +153,7 @@ try {
   /* none */
 }
 const child = spawn(
-  findChrome(),
+  chromeOrExit("backgrounds-check"),
   [
     "--headless=new",
     `--user-data-dir=${prof}`,

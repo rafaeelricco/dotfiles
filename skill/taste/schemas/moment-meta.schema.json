@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "assets/moments/<id>/meta.json (18 when written)",
+  "type": "object",
+  "required": [
+    "avoidWith",
+    "cost",
+    "fits",
+    "id",
+    "intensity",
+    "kind",
+    "look",
+    "maxPerPage",
+    "name",
+    "needs",
+    "phone",
+    "reduced",
+    "states",
+    "tones",
+    "trigger",
+    "webgl",
+    "weight"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string"
+    },
+    "fits": {
+      "type": "array"
+    },
+    "trigger": {
+      "type": "string"
+    },
+    "cost": {
+      "type": "string"
+    },
+    "webgl": {
+      "type": "number"
+    },
+    "tones": {
+      "type": "array"
+    },
+    "intensity": {
+      "type": "string"
+    },
+    "look": {
+      "type": "string"
+    },
+    "reduced": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "maxPerPage": {
+      "type": "number"
+    },
+    "weight": {
+      "type": "number"
+    },
+    "needs": {
+      "type": "object"
+    },
+    "avoidWith": {
+      "type": "array"
+    },
+    "states": {
+      "type": "object"
+    },
+    "retired": {
+      "type": "string"
+    },
+    "phoneRuns": {
+      "type": "boolean"
+    },
+    "height": {
+      "type": "string"
+    }
+  }
+}

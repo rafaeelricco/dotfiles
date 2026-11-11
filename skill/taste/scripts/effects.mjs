@@ -45,7 +45,7 @@ import { spawn, execFileSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { pick as dealEffects, filterEffects, SLOTS, KINDS } from "../assets/effects/pick.js";
 import { pageKind, fitsKind, FIT, TONES, INTENSITIES } from "./moments.mjs";
-import { assetRoots, readTaste, stageItem, tasteName, tastesDir, updateDeal } from "./roots.mjs";
+import { assetRoots, chromeOrExit, readTaste, stageItem, tasteName, tastesDir, updateDeal } from "./roots.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const FX = path.join(ROOT, "assets", "effects");
@@ -670,20 +670,6 @@ function serve(a) {
 
 /* ------------------------------------------------------------------ chrome (shot, perf) */
 
-function findChrome() {
-  const c = [
-    process.env.CHROME,
-    "C:/Program Files/Google/Chrome/Application/chrome.exe",
-    "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-    "/usr/bin/google-chrome",
-    "/usr/bin/chromium",
-  ].filter(Boolean);
-  const f = c.find(p => fs.existsSync(p));
-  if (!f) die("no Chrome found (set CHROME=path)");
-  return f;
-}
-
 class CDP {
   constructor(ws) {
     this.ws = ws;
@@ -756,7 +742,7 @@ async function launch(a) {
   if (a.gpu) args.push("--enable-gpu", "--ignore-gpu-blocklist", "--use-angle=d3d11", "--enable-unsafe-webgpu");
   else args.push("--disable-gpu", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"); // WebGL on the CPU: several GPU Chromes at once crashed an integrated GPU
   args.push("about:blank");
-  const child = spawn(findChrome(), args, { stdio: "ignore", windowsHide: true });
+  const child = spawn(chromeOrExit("effects"), args, { stdio: "ignore", windowsHide: true });
   let port = null;
   for (let i = 0; i < 150 && !port; i++) {
     await sleep(100);

@@ -18,6 +18,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { chromeOrExit } from "../../taste/scripts/roots.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const CAPTURE = fs.readFileSync(path.join(here, "record-capture.js"), "utf8");
@@ -933,27 +934,6 @@ function kit(text, name, manifest = null) {
   ].join("\n");
 }
 
-/* ---------------------------------------------------------------- Chrome over raw CDP */
-// CHROME_PATH, then the usual Chrome, Edge and Chromium paths
-function findChrome() {
-  const local =
-    process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, "Google/Chrome/Application/chrome.exe") : null;
-  const candidates = [
-    process.env.CHROME_PATH,
-    "C:/Program Files/Google/Chrome/Application/chrome.exe",
-    "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
-    local,
-    "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-    "/usr/bin/google-chrome",
-    "/usr/bin/chromium",
-    "/Applications/Chromium.app/Contents/MacOS/Chromium",
-  ];
-  const found = candidates.find(p => p && fs.existsSync(p));
-  if (!found) throw new Error("no Chrome found (set CHROME_PATH)");
-  return found;
-}
-
 /* ---------------------------------------------------------------- the motion pass */
 // Evaluated in the page: tags up to 12 controls with data-rec-hover and says what each is
 const hoverPick = primaryBg => {
@@ -979,7 +959,7 @@ const hoverPick = primaryBg => {
   const out = [];
   const seen = new Set();
   const tagged = new Set();
-  const add = (role, selector, max, test = () => true) => {
+  const add = (role, selector, max, test = (_el, _cs, _r) => true) => {
     let n = 0;
     let added = 0;
     for (const el of document.querySelectorAll(selector)) {
@@ -1201,7 +1181,7 @@ async function motionPass(S, capture, dir, sheets) {
 // <dir>/capture; returns the four captures (each tagged with its scheme).
 async function captureUrl(url, dir) {
   const shotsDir = path.join(dir, "shots");
-  const chrome = findChrome();
+  const chrome = chromeOrExit("record");
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), "record-"));
   const child = spawn(
     chrome,
@@ -1581,7 +1561,7 @@ async function main() {
       captures.push(norm(json));
     }
   } else {
-    findChrome(); // no browser: stop before the old shots and capture are removed
+    chromeOrExit("record"); // no browser: stop before the old shots and capture are removed
     fs.rmSync(path.join(dir, "shots"), { recursive: true, force: true });
     fs.rmSync(path.join(dir, "capture"), { recursive: true, force: true });
     for (const url of urls) captures.push(...(await captureUrl(url, dir)).map(norm));

@@ -81,7 +81,7 @@ import http from "node:http";
 import crypto from "node:crypto";
 import { spawn, execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { assetRoots, packDirs, readTaste, refOf, tasteName, tastesDir, updateDeal } from "./roots.mjs";
+import { assetRoots, chromeOrExit, packDirs, readTaste, refOf, tasteName, tastesDir, updateDeal } from "./roots.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DIR = path.join(ROOT, "assets", "moments");
@@ -970,18 +970,6 @@ function cmdGallery() {
 }
 
 /* ------------------------------------------------------------------ shoot */
-function findChrome() {
-  const c = [
-    process.env.CHROME_PATH,
-    "C:/Program Files/Google/Chrome/Application/chrome.exe",
-    "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
-    "/usr/bin/google-chrome",
-    "/usr/bin/chromium",
-  ];
-  const f = c.find(p => p && fs.existsSync(p));
-  if (!f) throw new Error("no Chrome found (set CHROME_PATH)");
-  return f;
-}
 // a profile stays in the OS temp folder or the project: a relative --profile that leads out of this folder (or the folder
 // itself) goes to .taste-skill/chrome-<name>
 const inProject = (p, name) => {
@@ -1032,7 +1020,7 @@ async function cmdShoot(a) {
   const W0 = widths[0],
     H0 = W0 < 600 ? 844 : 900;
   const child = spawn(
-    findChrome(),
+    chromeOrExit("moments"),
     [
       "--headless=new",
       `--user-data-dir=${profile}`,

@@ -20,7 +20,8 @@ Build the website a good company would ship: it says plainly what is sold, shows
 every screen, and looks made for this client, not from a template and not like an art piece.
 figma.com and x.ai are the bar (in words: `layout-v4.md` section 1).
 
-`<skill>` is this folder. It needs Node 22+ and Chrome, Edge or Chromium (ffmpeg optional).
+`<skill>` is this folder. It needs Node 22+ and Chrome, Edge or Chromium; the scripts also find a Playwright Chromium,
+and `CHROME_PATH` names any other (ffmpeg optional).
 
 **A brief that points at a site to follow** ("like this site", "replicate its taste") is first the `ui`
 skill's `record` job: invoke `ui` with it, then build here only if a page with this kit is what is asked.

@@ -27,6 +27,7 @@ import http from "node:http";
 import zlib from "node:zlib";
 import { spawn, execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { chromeOrExit } from "./roots.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, ".."); // the taste-skill folder
@@ -359,16 +360,6 @@ function server(port, root = ROOT) {
 }
 
 /* ------------------------------------------------------------------ Chrome */
-function findChrome() {
-  const c = [
-    process.env.CHROME_PATH,
-    "C:/Program Files/Google/Chrome/Application/chrome.exe",
-    "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
-  ];
-  const f = c.find(p => p && fs.existsSync(p));
-  if (!f) throw new Error("no Chrome found (set CHROME_PATH)");
-  return f;
-}
 async function chrome(profile, W, H) {
   fs.mkdirSync(profile, { recursive: true });
   const portFile = path.join(profile, "DevToolsActivePort");
@@ -378,7 +369,7 @@ async function chrome(profile, W, H) {
     /* none */
   }
   const child = spawn(
-    findChrome(),
+    chromeOrExit("scenes-shoot"),
     [
       "--headless=new",
       `--user-data-dir=${profile}`,

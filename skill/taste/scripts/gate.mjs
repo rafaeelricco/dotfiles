@@ -78,7 +78,7 @@
   is not local): arm the right one and run again; GATE: ERROR (...) when the checks themselves could not run;
   GATE: OFF when no build is active.
   Exit 0 PASS, OFF or DONE, 1 FAIL or OPEN, 2 ERROR, 3 SETUP.
-  --quick is a look between rounds: the checker at 1440 and 390 (and the 320 pass), the layout check at 1440, not a round, never closes the build (GATE: QUICK <n>).
+  --quick is a look between rounds: it re-checks what the last full round left open (the widths those FAILs were at, 1440 when none; a pass or the layout check only when one of its checks is open), not a round, never closes the build (GATE: QUICK <n>).
 
   Hook mode blocks with exit 0 and JSON on stdout: {"decision":"block","reason":...} for claude and codex,
   {"decision":"continue","reason":...} for antigravity; it allows by printing nothing. It never traps an agent:
@@ -1320,17 +1320,46 @@ const LAYOUT_FIX = {
     "the check fills the h1 to this hero's maxChars, not your own: take the next type pairing the deal printed (start.mjs); when the h1 is final and fits, waive it (target: section.hero h1)",
   "overflow-x": "remove what scrolls sideways",
   container: "put the content in one .wrap",
+  "finish-check":
+    "the page's finish script reported a fault: open the page, read the console line it names, fix that element",
+  "console-error":
+    "the page throws in the console: open it, fix the first error printed (a missing file or a script error)",
 };
 
 // two house rules the checker only WARNs (its own kit demos carry neither) and the gate holds: every hero enters
 // once on load, and every page deals a moment (SKILL.md house rules 5 and 8)
 // photo-repeat too: one photograph shown twice on a page (the 2.5.2 builds showed the oven, the bread twice)
 const HELD = new Set(["hero-enter", "moment-none", "photo-repeat"]);
+// which consistency passes produce which checks (consistency.mjs glFallbackPass, hiddenWalk, runSweep, narrowPass)
+const PASS_CHECKS = {
+  "no-gl-fallback": ["gl-fallback"],
+  "no-hidden": ["hidden-content"],
+  "no-sweep": ["hero-fill", "nav", "off-viewport"],
+  "no-narrow": ["off-viewport", "collide", "tap-size"],
+};
+function quickPlan(open) {
+  const list = Array.isArray(open) ? open : [];
+  const ids = new Set(list.flatMap(f => [f.check, ...(f.ids || [])]));
+  const phone = list.some(f => (f.widths || []).some(w => Number(w) < 700));
+  const skip = Object.entries(PASS_CHECKS)
+    .filter(([flag, checks]) => !checks.some(c => ids.has(c)) && !(flag === "no-narrow" && phone))
+    .map(([flag]) => "--" + flag);
+  return {
+    widths: phone ? "1440,390" : "1440",
+    sizes: phone ? "1440x900,390x844" : "1440x900",
+    skip,
+    // a layout FAIL folded into a consistency finding of its family keeps its rule id in ids
+    layout: list.some(f => f.from === "layout" || [f.check, ...(f.ids || [])].some(id => id in LAYOUT_FIX)),
+  };
+}
+let plan = null; // the --quick plan of this run (null on a full round); the head line at the end names it
 async function browserChecks(target, proj, opts, gateDir) {
   const res = { fails: [], warns: [], crashed: [], seconds: {} };
-  // 390 always, the quick look too (the phone is where sections run into each other); the 320 pass (overflow, collide, tap-size) comes with it
-  const widths = "1440,390",
-    sizes = QUICK ? "1440x900" : "1440x900,390x844";
+  // a full round: 1440 and 390 with every pass. --quick re-checks only what the last full round left open (gate.json
+  // open[]): the widths those FAILs were at (1440 when none), and a pass only when one of its checks is open
+  plan = QUICK ? quickPlan(state && state.open) : null;
+  const widths = plan ? plan.widths : "1440,390",
+    sizes = plan ? plan.sizes : "1440x900,390x844";
   const root = opts.root && !isUrl(target) ? ["--root", opts.root] : [];
   // consistency.mjs, with what step 6 passes it
   {
@@ -1347,6 +1376,7 @@ async function browserChecks(target, proj, opts, gateDir) {
       "--quick",
       "--widths",
       widths,
+      ...(plan ? plan.skip : []),
       "--json",
       "--profile",
       prof,
@@ -1387,7 +1417,9 @@ async function browserChecks(target, proj, opts, gateDir) {
     }
   }
   // layout-check.mjs: every finding fails
-  if (left() > 60000) {
+  if (plan && !plan.layout) {
+    /* --quick with no layout FAIL open: the head line says no layout-check */
+  } else if (left() > 60000) {
     const prof = freshProfile("layout"),
       t = Date.now();
     const r = await run(
@@ -2235,7 +2267,12 @@ const record = (status, extra = {}) => {
 
 if (QUICK) {
   // a look between rounds: no round, never closes the build
-  printAll(`gate (quick look at 1440 and 390): ${n} FAIL${crashed ? ", some checks did not run" : ""}`);
+  // plan is null when the last crashed result was reused and no check ran
+  const look =
+    plan ?
+      ` at ${plan.widths}${plan.skip.length ? `, skipped ${plan.skip.join(" ")}` : ""}${plan.layout ? "" : ", no layout-check"}`
+    : ", the last result reused";
+  printAll(`gate (quick look${look}): ${n} FAIL${crashed ? ", some checks did not run" : ""}`);
   if (!HOOK) {
     console.log(`GATE: QUICK ${n} (not a round; run without --quick to finish)`);
     process.exit(n ? 1 : 0);

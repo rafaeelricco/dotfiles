@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "assets/ui/index.json",
+  "type": "object",
+  "required": ["cards", "count", "fragments", "generated", "grounds", "load", "motion", "version"],
+  "properties": {
+    "version": {
+      "type": "number"
+    },
+    "generated": {
+      "type": "string"
+    },
+    "count": {
+      "type": "number"
+    },
+    "load": {
+      "type": "string"
+    },
+    "motion": {
+      "type": "string"
+    },
+    "cards": {
+      "type": "string"
+    },
+    "grounds": {
+      "type": "string"
+    },
+    "fragments": {
+      "type": "array"
+    }
+  }
+}

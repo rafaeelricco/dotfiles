@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "assets/ui/<id>/meta.json (19 when written)",
+  "type": "object",
+  "required": ["edit", "js", "loop", "name", "shows", "size", "title", "useFor"],
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "shows": {
+      "type": "string"
+    },
+    "useFor": {
+      "type": "array"
+    },
+    "size": {
+      "type": "array"
+    },
+    "js": {
+      "type": "boolean"
+    },
+    "place": {
+      "type": "string"
+    },
+    "edit": {
+      "type": "string"
+    },
+    "loop": {
+      "type": "string"
+    },
+    "prefer": {
+      "type": "string"
+    },
+    "note": {
+      "type": "string"
+    },
+    "fluid": {
+      "type": "string"
+    },
+    "icons": {
+      "type": "string"
+    }
+  }
+}

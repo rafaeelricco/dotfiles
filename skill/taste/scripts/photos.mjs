@@ -127,6 +127,7 @@ const positional = () => {
   return out;
 };
 const die = m => {
+  if (process.argv.includes("--json")) console.log(JSON.stringify({ error: m }));
   console.error("photos: " + m);
   process.exit(1);
 };

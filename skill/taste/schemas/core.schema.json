@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "assets/core.json: what kit-copy.mjs copies into every build (always) and per dealt family",
+  "type": "object",
+  "required": ["always", "family"],
+  "properties": {
+    "always": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "family": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

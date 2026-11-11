@@ -56,6 +56,7 @@ import zlib from "node:zlib";
 import { spawn, execFileSync } from "node:child_process";
 import http from "node:http";
 import { fileURLToPath } from "node:url";
+import { chromeOrExit } from "./roots.mjs";
 
 const args = process.argv.slice(2);
 const opt = (k, d) => {
@@ -215,24 +216,6 @@ if (!/^https?:\/\//i.test(url)) {
     process.exit(1);
   });
   url = `http://127.0.0.1:${port}/${path.relative(root, file).split(path.sep).map(encodeURIComponent).join("/")}`;
-}
-
-function findChrome() {
-  const local =
-    process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, "Google/Chrome/Application/chrome.exe") : null;
-  const c = [
-    process.env.CHROME_PATH,
-    "C:/Program Files/Google/Chrome/Application/chrome.exe",
-    "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
-    local,
-    "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-    "/usr/bin/google-chrome",
-    "/usr/bin/chromium",
-  ];
-  const f = c.find(p => p && fs.existsSync(p));
-  if (!f) throw new Error("no Chrome found (set CHROME_PATH)");
-  return f;
 }
 
 /* ---------------------------------------------------------------- PNG (8-bit RGB/RGBA, no interlace) */
@@ -601,7 +584,7 @@ try {
   /* none */
 }
 const child = spawn(
-  findChrome(),
+  chromeOrExit("shoot"),
   [
     "--headless=new",
     `--user-data-dir=${profile}`,

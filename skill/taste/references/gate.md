@@ -29,7 +29,8 @@ node <skill>/scripts/gate.mjs --start index.html --kind <kind> --category "<what
   instead of arming a second one.
 - **The page:** the one named, else the marker's page or URL, else `index.html`, else the only `.html`
   file, else the `index.html` of the only folder below that has one.
-- **The checks**, one at a time, each in its own headless Chrome with a fresh profile:
+- **The checks**, one at a time, each in its own headless Chrome with a fresh profile (the scripts find Chrome, Edge or
+  Chromium, else the newest Playwright Chromium in its cache; `CHROME_PATH` names any other):
   `consistency.mjs --quick --widths 1440,390` (with the kind the page declares, else the marker's, and its category, primary and
   root, as step 6 runs it) and `scripts/layout-check.mjs --sizes 1440x900,390x844`. The consistency run includes
   `empty-area` (a section over 35% empty inside its container WARNs, over 50% FAILs) and the `basics`
@@ -124,7 +125,8 @@ node <skill>/scripts/gate.mjs --start index.html --kind <kind> --category "<what
   `taste <name>:` and its reason; these never count toward the 5 waivers. Only these look checks can be
   named: `action-count`, `button-styles`, `same-action`, `heading-align`, `centre-axis`, `nesting`. Any
   other id, a reason under 12 characters, or a taste meta with no recorded taste is a FAIL
-  (`taste-overrides`).
+  (`taste-overrides`). `text-contrast` on a colour pair the taste itself declares (its `--p-*-ink` on `--p-*`) reads WARN
+  from 3:1 and FAILs under 3:1: `consistency.mjs` does that, it is not a taste override.
 
 - **Taste use.** A build dealt with `--taste <name>` (`.taste-skill/deal.json`) must carry that taste: the
   `<meta name="taste">` of that name (`taste-missing`), every token of its `record.mjs kit` block unchanged
@@ -178,8 +180,9 @@ go in the report. QUICK: a look between rounds, never the last line of a build. 
 framework's source shell, a page that is not local): arm what a browser can open (`--start`, above) and
 run it again. ERROR (the checks themselves could not run) or OFF (no build armed here): put the line in
 the report and finish; do not rerun. Above the line: every open FAIL with where it is and the fix, every
-waiver, the first WARNs. `--quick` (the checker at 1440 and 390, the layout check at 1440) is never a round. The crops are in
-`.taste-skill/gate/consistency`.
+waiver, the first WARNs. `--quick` re-checks what the last full round left open: the widths those FAILs were at (1440
+when none), and a pass (sweep, phone 320, hidden walk, GL fallback) or the layout check only when one of its checks is
+open. It is never a round, and a full run still checks everything. The crops are in `.taste-skill/gate/consistency`.
 
 ## As a hook
 

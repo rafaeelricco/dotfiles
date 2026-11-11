@@ -1257,8 +1257,9 @@ if (cmd === "deal") {
     writeHistory(histFile, h);
   }
 } else {
-  console.log(
+  (cmd ? console.error : console.log)(
     "usage: node scripts/start.mjs deal --page <kind> | css --page <kind> --palette <id> --type <id> [--radius soft] | brand --page <kind> --bg .. --ink .. --accent .. --type <id> | types --page <kind>\n  kind: "
       + PAGES.join(" | "),
   );
+  process.exitCode = cmd ? 1 : 0;
 }

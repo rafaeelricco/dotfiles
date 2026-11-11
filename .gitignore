@@ -3,3 +3,4 @@ nvim.log
 tmp/
 skill/taste/assets/icons/demo/
 skill/ui/tastes/
+node_modules/
