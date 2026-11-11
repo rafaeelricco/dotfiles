@@ -635,6 +635,7 @@ export function deal(
   seed = seed != null ? String(seed) : crypto.randomBytes(4).toString("hex");
   const rand = rng(seed);
   const notes = [];
+  if (count === 0 && !must.length) return { seed, picks: [], notes };
   // the ids in `must` (a taste's signature) are picked first, whatever the history, the fit or the seed; they raise
   // `count` when there are more of them (three at most)
   count = Math.min(3, Math.max(count, must.length));
@@ -809,7 +810,9 @@ function cmdPick(a) {
   const must = (readTaste(taste)?.signature || []).filter(s => s.startsWith("moments/")).map(s => s.slice(8));
   const page = pageArg(a, "pick");
   const tone = toneArg(a, page);
-  const count = Math.max(1, Math.min(3, +(a.count || (a.long ? 3 : 2))));
+  const count = Number(a.count ?? readTaste(taste)?.motion?.moments ?? (a.long ? 3 : 2));
+  if (!Number.isInteger(count) || count < 0 || count > 3 || count < must.length)
+    die("count must be 0..3 and include every signature moment");
   const hist = readHistory(a.history);
   // --scene deal: deal the scene first, then the moments around it
   let scene = a.scene && a.scene !== true ? String(a.scene) : null,

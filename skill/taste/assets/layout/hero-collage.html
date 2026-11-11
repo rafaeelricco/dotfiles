@@ -65,61 +65,6 @@
         mix-blend-mode: multiply;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .3 0 0 0 0 .3 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
       }
-      .hero__art > .ly-piece--note {
-        left: var(--s-6);
-        bottom: var(--s-6);
-        width: 300px;
-        z-index: 2;
-      }
-      .d-note__line {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 7px 0;
-        font-size: 13px;
-        color: #3d4247;
-        border-top: 1px solid rgb(0 0 0 / 0.06);
-      }
-      .d-note__line:first-of-type {
-        border-top: 0;
-      }
-      .d-note__line i {
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        flex: none;
-        display: grid;
-        place-items: center;
-        background: #e7f4ec;
-        color: #17673f;
-        font-style: normal;
-        font-size: 13px;
-        font-weight: 700;
-      }
-      .d-note__line i.warn {
-        background: #fdf0dc;
-        color: #8a5300;
-      }
-      .d-note__line b {
-        font-weight: 500;
-        color: #16181a;
-      }
-      .hero__proof {
-        font-size: var(--t-small);
-        color: var(--muted);
-      }
-      /* the window's rows without their time column; its content keeps --ly-cut-room clear at the right, so the frame cuts empty margin, not the chips */
-      .ly-piece--main .d-row {
-        grid-template-columns: 36px minmax(0, 1fr) 56px 96px;
-      }
-      .ly-piece--main .d-main {
-        padding-right: var(--ly-cut-room);
-      }
-      @media (max-width: 639px) {
-        .ly-piece--main .d-row {
-          grid-template-columns: 36px minmax(0, 1fr) 96px;
-        }
-      }
       /* the second section: three cards, each with an inset panel on the hero's lit sage ground */
       .open-cards .panel {
         --p-h: 248px;
@@ -164,13 +109,6 @@
       .d-receipt .ln span:last-child {
         color: #7b8086;
         text-align: right;
-      }
-      @media (max-width: 1023px) {
-        .hero__art > .ly-piece--note {
-          left: var(--s-4);
-          bottom: var(--s-4);
-          width: 270px;
-        }
       }
       /* three cards across from 1024 (their fragments are made to fit a 220px panel, so the kit's 1024-1279
    two-up rule for span-4 panels is not needed: these cards carry no span class); text beside the panel

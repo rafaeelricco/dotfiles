@@ -49,7 +49,7 @@
   color: var(--muted);
 }
 .cx-prompt__box:has(.cx-prompt__input:focus-visible) {
-  outline: 2px solid var(--action);
+  outline: 2px solid var(--focus, var(--action));
   outline-offset: calc(-1 * var(--inset) + 3px);
 }
 .cx-prompt__bar {

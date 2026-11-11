@@ -62,7 +62,8 @@ test("a link to a dotfile is not served", t => {
 
 test("a short 8.3 name for a dotfile is not served", t => {
   const p = project();
-  if (process.platform !== "win32" || !fs.existsSync(path.join(p, "ENV~1"))) return t.skip("no 8.3 names on this volume");
+  if (process.platform !== "win32" || !fs.existsSync(path.join(p, "ENV~1")))
+    return t.skip("no 8.3 names on this volume");
   assert.equal(servable(p, path.join(p, "ENV~1")), false);
   assert.equal(servable(p, path.join(p, "GIT~1/config")), false);
 });

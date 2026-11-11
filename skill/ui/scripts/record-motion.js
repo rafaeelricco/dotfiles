@@ -11,11 +11,22 @@
   //   scroll:     [{ target, section, props: { transform|opacity|clipPath|filter: [{ y, value }] }, sticky: [from, to] | null }],
   //               // the page scrolled in 24 steps; kept only where a value changed with y, or the element stays put
   //   effects:    [{ target, section, rect, canvas: "2d" | "webgl" | "unknown" | null, filter, backdropFilter, mask, blend, background }],
+  //   grounds:    [{ target, section, kind: "image" | "video", rect, cover, overlay, colors: { top, middle, bottom } | null }],
+  //               // a picture under a section; colours sampled from the image (same origin), never its address
   //   sections:   [{ top, left, width, height }],      // the page's sections, in the capture's `sections` order
   // }
   // target: a structural path (tag, nth-of-type chain from the section root, class list).
   // section: index into the capture's `sections` (the same rule as record-capture.js), or null.
-  const LIMIT = { animations: 200, keyframes: 200, cssText: 4000, sample: 400, steps: 24, scroll: 80, effects: 60 };
+  const LIMIT = {
+    animations: 200,
+    keyframes: 200,
+    cssText: 4000,
+    sample: 400,
+    steps: 24,
+    scroll: 80,
+    effects: 60,
+    grounds: 6,
+  };
   const safe = (fn, fallback) => {
     try {
       return fn();
@@ -321,5 +332,106 @@
     window.scrollTo({ top: 0, behavior: "instant" });
   }
 
-  return { animations, keyframes, scroll, effects, sections };
+  /* ---------------------------------------------------------------- picture grounds */
+  // a photograph or painting under a section: a background url()/image-set or an IMG/VIDEO layer at least 60% of the
+  // page wide, covering a fifth of the first screen or 60% of its section. Its colours are sampled in three bands
+  // from the picture itself when the page may read it (same origin); the address only loads it, it is never returned
+  const sample = async src => {
+    try {
+      let img = src;
+      if (typeof src === "string") {
+        img = new Image();
+        img.src = src;
+        await Promise.race([img.decode(), wait(3000)]);
+      }
+      const n = 24;
+      const c = document.createElement("canvas");
+      c.width = c.height = n;
+      const ctx = c.getContext("2d", { willReadFrequently: true });
+      ctx.drawImage(img, 0, 0, n, n);
+      const px = ctx.getImageData(0, 0, n, n).data; // throws on a cross-origin picture
+      const band = (y0, y1) => {
+        const s = [0, 0, 0];
+        let k = 0;
+        for (let y = y0; y < y1; y++)
+          for (let x = 0; x < n; x++) {
+            const i = (y * n + x) * 4;
+            if (px[i + 3] < 128) continue;
+            for (let j = 0; j < 3; j++) s[j] += px[i + j];
+            k++;
+          }
+        return k ?
+            "#"
+              + s
+                .map(v =>
+                  Math.round(v / k)
+                    .toString(16)
+                    .padStart(2, "0"),
+                )
+                .join("")
+          : null;
+      };
+      const out = { top: band(0, 8), middle: band(8, 16), bottom: band(16, 24) };
+      return out.top || out.middle || out.bottom ? out : null;
+    } catch {
+      return null;
+    }
+  };
+  let grounds = [];
+  try {
+    const vh = innerHeight;
+    const hits = [];
+    for (const el of all) {
+      const hit = safe(() => {
+        const cs = getComputedStyle(el);
+        if (cs.display === "none" || cs.visibility !== "visible") return null;
+        const r = el.getBoundingClientRect();
+        if (r.width < vw * 0.6) return null;
+        const image = cs.backgroundImage || "none";
+        const media = /^(IMG|VIDEO)$/.test(el.tagName);
+        const url = /url\(/i.test(image) ? (/url\(\s*["']?([^"')]+)/i.exec(image) || [])[1] : null;
+        if (!media && !url) return null;
+        const top = r.top + scrollY;
+        const first =
+          (Math.max(0, Math.min(top + r.height, vh) - Math.max(top, 0)) * Math.min(r.width, vw)) / (vw * vh);
+        const sec = sectionEls.find(s => s.contains(el));
+        const sr = sec && sec.getBoundingClientRect();
+        const share = sr ? (r.width * r.height) / (sr.width * sr.height) : 0;
+        if (first < 0.2 && share < 0.6) return null;
+        return { el, r, top, image, media, url, first, area: r.width * r.height };
+      }, null);
+      if (hit) hits.push(hit);
+    }
+    hits.sort((a, b) => b.area - a.area);
+    for (const h of hits.slice(0, LIMIT.grounds)) {
+      const live =
+        (h.el.tagName === "IMG" && h.el.complete && h.el.naturalWidth)
+        || (h.el.tagName === "VIDEO" && h.el.readyState >= 2);
+      const src =
+        h.media ?
+          live ? h.el
+          : null
+        : new URL(h.url, location.href).href;
+      grounds.push({
+        target: pathOf(h.el),
+        section: secOf(h.el),
+        kind: h.el.tagName === "VIDEO" ? "video" : "image",
+        rect: { x: round(h.r.left), y: round(h.top), w: round(h.r.width), h: round(h.r.height) },
+        cover: round(h.first, 2),
+        overlay: h.media ? "none" : clean(h.image).slice(0, 300),
+        colors: src ? await sample(src) : null,
+      });
+    }
+    // the same picture twice (a light and a dark copy, a <picture> and its fallback) is one ground: the larger cover
+    const once = new Map();
+    for (const g of grounds) {
+      const key = JSON.stringify([g.rect, g.colors]);
+      if (!once.has(key) || g.cover > once.get(key).cover) once.set(key, g);
+    }
+    grounds = [...once.values()];
+  } catch {
+    grounds = [];
+  }
+
+  return { animations, keyframes, scroll, effects, grounds, sections };
 })();

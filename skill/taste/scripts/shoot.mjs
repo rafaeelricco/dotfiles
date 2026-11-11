@@ -53,10 +53,9 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import zlib from "node:zlib";
-import { spawn, execFileSync } from "node:child_process";
-import http from "node:http";
 import { fileURLToPath } from "node:url";
 import { chromeOrExit, climbRoot, servable } from "./roots.mjs";
+import { pageEvalTimeout, startHeadlessBrowser, startPreviewServer } from "./consistency/browser.mjs";
 
 const args = process.argv.slice(2);
 const opt = (k, d) => {
@@ -175,47 +174,23 @@ if (!/^https?:\/\//i.test(url)) {
       process.exit(2);
     }
   }
-  server = http.createServer((req, res) => {
-    try {
-      let f = path.resolve(path.join(root, decodeURIComponent(new URL(req.url, "http://x").pathname)));
-      if (f !== root && !f.startsWith(root + path.sep)) {
-        res.writeHead(403);
-        return res.end();
-      }
-      if (fs.statSync(f).isDirectory()) f = path.join(f, "index.html");
-      if (!servable(root, f, path.dirname(file))) throw new Error("outside the served root");
-      res.writeHead(200, {
-        "content-type": MIME[path.extname(f).toLowerCase()] || "application/octet-stream",
-        "content-length": fs.statSync(f).size,
-        "cache-control": "no-store",
-      });
-      fs.createReadStream(f).pipe(res);
-    } catch {
-      res.writeHead(404);
-      res.end("not found");
-    }
-  });
   const from = Number(opt("port", 5300)),
     to = from >= 5300 && from <= 5399 ? 5399 : from + 9;
-  const port = await new Promise((res, rej) => {
-    let p = from;
-    const next = () => {
-      if (p > to) return rej(new Error(`no free port in ${from}-${to}`));
-      server.once("error", () => {
-        p++;
-        next();
-      });
-      server.listen(p, "127.0.0.1", () => {
-        server.removeAllListeners("error");
-        res(p);
-      });
-    };
-    next();
+  server = await startPreviewServer({
+    root,
+    home: path.dirname(file),
+    allowed: servable,
+    portStart: from,
+    portEnd: to,
+    mime: MIME,
+    outsideStatus: 403,
+    contentLength: true,
+    streamFiles: true,
   }).catch(e => {
     console.error("shoot: " + e.message);
     process.exit(1);
   });
-  url = `http://127.0.0.1:${port}/${path.relative(root, file).split(path.sep).map(encodeURIComponent).join("/")}`;
+  url = `http://127.0.0.1:${server.port}/${path.relative(root, file).split(path.sep).map(encodeURIComponent).join("/")}`;
 }
 
 /* ---------------------------------------------------------------- PNG (8-bit RGB/RGBA, no interlace) */
@@ -576,44 +551,8 @@ async function tilesOf(page, outDir, o) {
 }
 /* ---------------------------------------------------------------- Chrome */
 const profile = inProject(profileArg, "shoot");
-fs.mkdirSync(profile, { recursive: true });
-const portFile = path.join(profile, "DevToolsActivePort");
-try {
-  fs.rmSync(portFile);
-} catch {
-  /* none */
-}
-const child = spawn(
-  chromeOrExit("shoot"),
-  [
-    "--headless=new",
-    `--user-data-dir=${profile}`,
-    "--remote-debugging-port=0",
-    "--no-first-run",
-    "--no-default-browser-check",
-    "--disable-extensions",
-    "--hide-scrollbars",
-    "--mute-audio",
-    "--disable-gpu",
-    "--use-angle=swiftshader",
-    "--enable-unsafe-swiftshader",
-    `--window-size=${W},${VH}`,
-    "about:blank",
-  ],
-  { stdio: "ignore", windowsHide: true },
-);
-const kill = () => {
-  if (child.exitCode != null) return;
-  try {
-    execFileSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], { stdio: "ignore" });
-  } catch {
-    try {
-      child.kill();
-    } catch {
-      /* gone */
-    }
-  }
-};
+let browser = null;
+const kill = () => browser?.kill();
 const noTiles = !!opt("no-tiles"),
   tilesDir = opt("tiles", null);
 const guard = setTimeout(
@@ -626,59 +565,35 @@ const guard = setTimeout(
 ); // screens wait for their pictures and effects: a long page needs the time
 
 try {
-  let port = null;
-  for (let i = 0; i < 150 && !port; i++) {
-    await sleep(100);
-    try {
-      port = parseInt(fs.readFileSync(portFile, "utf8"), 10) || null;
-    } catch {
-      /* not yet */
-    }
-  }
-  if (!port) throw new Error("Chrome did not start");
-  const ver = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json();
-  const ws = new WebSocket(ver.webSocketDebuggerUrl);
-  await new Promise((r, j) => {
-    ws.addEventListener("open", r, { once: true });
-    ws.addEventListener("error", j, { once: true });
+  browser = await startHeadlessBrowser(chromeOrExit("shoot"), {
+    profile,
+    startupTimeoutMs: 15000,
+    args: [
+      "--headless=new",
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--disable-extensions",
+      "--hide-scrollbars",
+      "--mute-audio",
+      "--disable-gpu",
+      "--use-angle=swiftshader",
+      "--enable-unsafe-swiftshader",
+      `--window-size=${W},${VH}`,
+    ],
   });
-  let id = 0;
-  const pend = new Map(),
-    subs = [],
-    logs = [];
-  ws.addEventListener("message", e => {
-    const m = JSON.parse(e.data);
-    if (m.id && pend.has(m.id)) {
-      pend.get(m.id)(m);
-      pend.delete(m.id);
-    } else subs.forEach(f => f(m));
-  });
-  const send = (method, params = {}, sessionId) =>
-    new Promise(r => {
-      const i = ++id;
-      pend.set(i, r);
-      ws.send(JSON.stringify({ id: i, method, params, sessionId }));
-    });
-  const {
-    result: { targetId },
-  } = await send("Target.createTarget", { url: "about:blank" });
-  const {
-    result: { sessionId },
-  } = await send("Target.attachToTarget", { targetId, flatten: true });
-  const S = async (m, p) => {
-    const r = await send(m, p, sessionId);
-    if (r.error) throw new Error(`${m}: ${r.error.message}`);
-    return r.result;
-  };
+  const { cdp } = browser;
+  const { targetId } = await cdp.send("Target.createTarget", { url: "about:blank" });
+  const { sessionId } = await cdp.send("Target.attachToTarget", { targetId, flatten: true });
+  const S = (m, p, ms) => cdp.send(m, p, sessionId, ms);
   const ev = async x =>
-    (await S("Runtime.evaluate", { expression: x, awaitPromise: true, returnByValue: true })).result.value;
-  subs.push(m => {
-    if (m.method === "Runtime.exceptionThrown")
-      logs.push(
-        "exception: "
-          + (m.params.exceptionDetails.exception?.description || m.params.exceptionDetails.text).split("\n")[0],
-      );
-  });
+    (await S("Runtime.evaluate", { expression: x, awaitPromise: true, returnByValue: true }, pageEvalTimeout(settle)))
+      .result.value;
+  const logs = [];
+  cdp.on(sessionId, "Runtime.exceptionThrown", params =>
+    logs.push(
+      "exception: " + (params.exceptionDetails.exception?.description || params.exceptionDetails.text).split("\n")[0],
+    ),
+  );
   await S("Page.enable");
   await S("Runtime.enable");
   await S("Emulation.setDeviceMetricsOverride", { width: W, height: VH, deviceScaleFactor: 1, mobile: W < 600 });
@@ -686,11 +601,13 @@ try {
   if (opt("reduced")) media.push({ name: "prefers-reduced-motion", value: "reduce" });
   if (opt("dark")) media.push({ name: "prefers-color-scheme", value: "dark" });
   if (media.length) await S("Emulation.setEmulatedMedia", { features: media });
-  const loaded = new Promise(r =>
-    subs.push(m => {
-      if (m.method === "Page.loadEventFired") r();
-    }),
-  );
+  const loaded = new Promise(r => {
+    let off;
+    off = cdp.on(sessionId, "Page.loadEventFired", () => {
+      off();
+      r();
+    });
+  });
   await S("Page.navigate", { url });
   await Promise.race([loaded, sleep(20000)]);
   await ev(
@@ -866,7 +783,7 @@ try {
     }
   }
   try {
-    await Promise.race([send("Browser.close"), sleep(3000)]);
+    await Promise.race([cdp.send("Browser.close"), sleep(3000)]);
   } catch {
     /* closing */
   }

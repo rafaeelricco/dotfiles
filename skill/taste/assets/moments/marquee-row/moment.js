@@ -25,6 +25,9 @@ export default function (root, opts, lib) {
   clone.classList.add("mo-mq__clone");
   const rail = document.createElement("div"); // the masked part: the track and its copy
   rail.className = "mo-mq__rail";
+  // the track runs past the rail by design (the rail clips it): the layout check skips the moving rows, as the held
+  // parts of pinned-chapters and photo-chapters are skipped
+  rail.setAttribute("data-edge-free", "");
   track.replaceWith(rail);
   rail.append(track, clone);
   const pause = document.createElement("button");

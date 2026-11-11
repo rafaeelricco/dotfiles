@@ -1,6 +1,6 @@
 // consistency/cdp.mjs — our own Chrome: launch, the CDP driver and its tabs, the page init scripts (moved from consistency.mjs)
 import { spawn, spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { chromeOrExit } from "../roots.mjs";
 import { sleep } from "./cli.mjs";
@@ -11,62 +11,73 @@ export async function launch(PROFILE) {
     throw new Error("Node 22+ is required (no built-in WebSocket in " + process.version + ")");
   const exe = chromeOrExit("consistency", 2);
   const dir = join(PROFILE, `run-${process.pid}-${Date.now().toString(36)}`);
-  mkdirSync(dir, { recursive: true });
-  const proc = spawn(
-    exe,
-    [
-      "--headless=new",
-      "--remote-debugging-port=0",
-      `--user-data-dir=${dir}`,
-      "--no-first-run",
-      "--no-default-browser-check",
-      "--mute-audio",
-      "--hide-scrollbars",
-      "--disable-background-timer-throttling",
-      "--disable-renderer-backgrounding",
-      "--disable-backgrounding-occluded-windows",
-      "--disable-features=Translate,MediaRouter",
-      "--force-color-profile=srgb",
-      "--autoplay-policy=no-user-gesture-required",
-      "--disable-gpu",
-      "--use-angle=swiftshader",
-      "--enable-unsafe-swiftshader",
-      "--disk-cache-size=16777216",
-      "--window-size=1440,900",
-      "about:blank",
-    ],
-    { stdio: ["ignore", "ignore", "pipe"] },
-  );
-  const pid = proc.pid;
+  let proc = null,
+    pid = null,
+    killProcess = null,
+    cdp = null;
   let stopped = false;
+  const closeSocket = () => {
+    try {
+      cdp?.ws.close();
+    } catch {}
+  };
   const stop = () => {
     if (stopped) return;
     stopped = true;
-    if (pid && proc.exitCode === null) {
-      if (process.platform === "win32") spawnSync("taskkill", ["/pid", String(pid), "/T", "/F"], { stdio: "ignore" });
-      else {
-        try {
-          process.kill(pid, "SIGKILL");
-        } catch {}
-      }
-    }
+    closeSocket();
+    killProcess?.();
     try {
       rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
     } catch {}
   };
+  let browser;
+  try {
+    browser = await startHeadlessBrowser(exe, {
+      profile: dir,
+      startupTimeoutMs: 60000,
+      killSignal: "SIGKILL",
+      onSpawn: processRef => {
+        proc = processRef.child;
+        pid = proc.pid;
+        killProcess = processRef.kill;
+        process.once("exit", stop);
+        for (const s of ["SIGINT", "SIGTERM", "SIGHUP"])
+          process.once(s, () => {
+            stop();
+            process.exit(130);
+          });
+      },
+      args: [
+        "--headless=new",
+        "--no-first-run",
+        "--no-default-browser-check",
+        "--mute-audio",
+        "--hide-scrollbars",
+        "--disable-background-timer-throttling",
+        "--disable-renderer-backgrounding",
+        "--disable-backgrounding-occluded-windows",
+        "--disable-features=Translate,MediaRouter",
+        "--force-color-profile=srgb",
+        "--autoplay-policy=no-user-gesture-required",
+        "--disable-gpu",
+        "--use-angle=swiftshader",
+        "--enable-unsafe-swiftshader",
+        "--disk-cache-size=16777216",
+        "--window-size=1440,900",
+      ],
+    });
+    cdp = browser.cdp;
+  } catch (error) {
+    stop();
+    throw error;
+  }
   // the normal end: let Chrome exit after Browser.close (killed by its PID if it does not), then remove its profile
   // folder, trying for up to 10s while its helper processes let go of their files
   const close = async () => {
     if (stopped) return;
     if (pid && proc.exitCode === null) await Promise.race([new Promise(r => proc.once("exit", r)), sleep(5000)]);
-    if (pid && proc.exitCode === null) {
-      if (process.platform === "win32") spawnSync("taskkill", ["/pid", String(pid), "/T", "/F"], { stdio: "ignore" });
-      else {
-        try {
-          process.kill(pid, "SIGKILL");
-        } catch {}
-      }
-    }
+    closeSocket();
+    if (pid && proc.exitCode === null) killProcess?.();
     stopped = true;
     for (let i = 0; i < 40 && existsSync(dir); i++) {
       try {
@@ -75,46 +86,34 @@ export async function launch(PROFILE) {
       if (existsSync(dir)) await sleep(250);
     }
   };
-  process.once("exit", stop);
-  for (const s of ["SIGINT", "SIGTERM", "SIGHUP"])
-    process.once(s, () => {
-      stop();
-      process.exit(130);
-    });
-  const ws = await new Promise((res, rej) => {
-    let buf = "";
-    // a busy machine (several builders, WebGL on the CPU) can take long to start Chrome: wait 60s
-    const t = setTimeout(() => rej(new Error("Chrome did not start within 60s")), 60000);
-    proc.stderr.on("data", d => {
-      buf += d;
-      const m = buf.match(/DevTools listening on (ws:\/\/\S+)/);
-      if (m) {
-        clearTimeout(t);
-        res(m[1]);
-      }
-    });
-    proc.once("exit", c => {
-      clearTimeout(t);
-      rej(new Error("Chrome exited early (" + c + ")"));
-    });
-  }).catch(e => {
-    stop();
-    throw e;
-  });
-  return { ws, pid, stop, close };
+  return { ws: browser.wsUrl, cdp, pid, stop, close };
 }
 
 export class CDP {
-  static async connect(wsUrl) {
+  /** @type {WebSocket} */
+  ws;
+  /** @type {Set<Function>} */
+  anyListeners = new Set();
+  static async connect(wsUrl, timeoutMs = 30000) {
     const c = new CDP();
     c.n = 1;
     c.pending = new Map();
     c.listeners = new Map();
     c.ws = new WebSocket(wsUrl);
-    await new Promise((res, rej) => {
-      c.ws.onopen = res;
-      c.ws.onerror = () => rej(new Error("CDP socket failed"));
-    });
+    let timeout;
+    try {
+      await Promise.race([
+        new Promise((res, rej) => {
+          c.ws.onopen = res;
+          c.ws.onerror = () => rej(new Error("CDP socket failed"));
+        }),
+        new Promise((_, rej) => {
+          timeout = setTimeout(() => rej(new Error(`CDP socket did not open within ${timeoutMs}ms`)), timeoutMs);
+        }),
+      ]);
+    } finally {
+      clearTimeout(timeout);
+    }
     c.ws.onclose = () => {
       c.closed = true;
       for (const p of c.pending.values()) {
@@ -134,6 +133,7 @@ export class CDP {
       } else if (msg.method) {
         const fns = c.listeners.get((msg.sessionId || "") + "|" + msg.method);
         if (fns) for (const fn of [...fns]) fn(msg.params);
+        for (const fn of [...c.anyListeners]) fn(msg);
       }
     };
     return c;
@@ -156,7 +156,90 @@ export class CDP {
     this.listeners.get(k).add(fn);
     return () => this.listeners.get(k).delete(fn);
   }
+  onAny(fn) {
+    this.anyListeners.add(fn);
+    return () => this.anyListeners.delete(fn);
+  }
 }
+
+// Shared Chrome process startup and CDP attachment. Callers supply their own flags,
+// profile policy, timeout and cleanup behavior.
+export async function startHeadlessBrowser(
+  executable,
+  { profile, args = [], startupTimeoutMs = 15000, killSignal = "SIGTERM", onSpawn },
+) {
+  if (typeof WebSocket === "undefined") throw new Error("Node 22+ is required (no built-in WebSocket)");
+  mkdirSync(profile, { recursive: true });
+  const portFile = join(profile, "DevToolsActivePort");
+  try {
+    rmSync(portFile);
+  } catch {
+    // No stale port file to clear.
+  }
+  const child = spawn(executable, [...args, `--user-data-dir=${profile}`, "--remote-debugging-port=0", "about:blank"], {
+    stdio: "ignore",
+    windowsHide: true,
+  });
+  let spawnError = null;
+  child.once("error", error => {
+    spawnError = error;
+  });
+  const kill = () => {
+    if (child.exitCode != null) return;
+    if (process.platform === "win32") {
+      const result = spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], { stdio: "ignore" });
+      if (!result.error && result.status === 0) return;
+    }
+    try {
+      child.kill(killSignal);
+    } catch {
+      try {
+        if (child.pid && process.platform !== "win32") process.kill(child.pid, "SIGKILL");
+      } catch {
+        // Already gone.
+      }
+    }
+  };
+  onSpawn?.({ child, kill });
+  const startedAt = Date.now();
+  let port = null;
+  while (!port && Date.now() - startedAt < startupTimeoutMs) {
+    if (spawnError) {
+      kill();
+      throw new Error(`Chrome failed to launch: ${spawnError.message}`);
+    }
+    if (child.exitCode != null) {
+      kill();
+      throw new Error(`Chrome exited early (${child.exitCode})`);
+    }
+    try {
+      port = Number.parseInt(readFileSync(portFile, "utf8"), 10) || null;
+    } catch {
+      // Chrome has not published its DevTools port yet.
+    }
+    if (!port) await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  if (!port) {
+    kill();
+    throw new Error(
+      startupTimeoutMs >= 60000 ?
+        `Chrome did not start within ${Math.round(startupTimeoutMs / 1000)}s`
+      : "Chrome did not start",
+    );
+  }
+  try {
+    const remaining = () => Math.max(1, startupTimeoutMs - (Date.now() - startedAt));
+    const version = await (
+      await fetch(`http://127.0.0.1:${port}/json/version`, { signal: AbortSignal.timeout(remaining()) })
+    ).json();
+    const cdp = await CDP.connect(version.webSocketDebuggerUrl, remaining());
+    return { child, port, wsUrl: version.webSocketDebuggerUrl, cdp, kill };
+  } catch (error) {
+    kill();
+    throw error;
+  }
+}
+
 // ---------------------------------------------------------------- the WebGL guard (in every page before its scripts)
 // Counts the page's live WebGL contexts (not lost; on the page, or never put on it) and keeps them at GL_CAP: a new
 // one past the cap first frees the oldest whose canvas is far off screen (WEBGL_lose_context, as the browser's own limit

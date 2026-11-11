@@ -106,6 +106,18 @@ import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { assetRoots, inside, refOf, tastesDir } from "./roots.mjs";
 import { tasteUse } from "./taste-use.mjs";
+import { reviewEvidenceForBuild } from "./visual-review.mjs";
+import { assertSafeWritePath, writeJsonSafe } from "./build-state.mjs";
+import {
+  classifyBuildFindings,
+  definitionDigest,
+  definitionFreshnessFindings,
+  pagePlanFindings,
+  planMarkupFindings,
+  planDigest,
+  readBuildPlan,
+} from "./build-policy.mjs";
+import { loadTastePack, resolveTaste } from "./taste-definition.mjs";
 
 const SELF = fileURLToPath(import.meta.url);
 const here = path.dirname(SELF);
@@ -285,8 +297,23 @@ const readJson = (f, d) => {
   }
 };
 const writeJson = (f, v) => {
-  fs.mkdirSync(path.dirname(f), { recursive: true });
-  fs.writeFileSync(f, JSON.stringify(v, null, 1) + "\n");
+  writeJsonSafe(f, v, { spaces: 1 });
+};
+const closeMarker = (marker, done) => {
+  try {
+    assertSafeWritePath(marker);
+    assertSafeWritePath(done);
+    try {
+      fs.renameSync(marker, done);
+    } catch {
+      assertSafeWritePath(marker);
+      assertSafeWritePath(done);
+      fs.copyFileSync(marker, done);
+      fs.rmSync(marker, { force: true });
+    }
+  } catch {
+    // The state record still carries the completion status.
+  }
 };
 const slash = p => p.split(path.sep).join("/");
 
@@ -878,7 +905,10 @@ function productChecks(html, dot) {
   if (!notes) return W;
   const line = k =>
     ((notes.match(new RegExp(`^\\s*${k}\\s*:\\s*(.+)$`, "im")) || [])[1] || "").replace(/<[^>]*>/g, "").trim();
-  let phrases = line("Products").split(/,|;|\band\b/i);
+  // asides in brackets go before the split: a comma or semicolon inside one would leave a lone "(" in a noun
+  let phrases = line("Products")
+    .replace(/\([^)]*\)/g, "")
+    .split(/,|;|\band\b/i);
   if (!phrases.join("").trim())
     phrases = (
       (line("What it is").match(/\b(?:serves|sells|makes|bakes|roasts|brews|offers|rents|repairs)\s+(.+)$/i) || [])[1]
@@ -898,7 +928,9 @@ function productChecks(html, dot) {
             .replace(/\([^)]*\)|[.!?]/g, "")
             .trim()
             .split(/\s+/)
-            .pop(),
+            .pop()
+            // the noun goes into a RegExp below: letters, digits and hyphens only (an unclosed "(" crashed the gate)
+            ?.replace(/[^\p{L}\p{N}-]/gu, ""),
         )
         .filter(w => w && w.length > 2)
         .map(stem),
@@ -969,10 +1001,12 @@ const COMP_MARK = {
   ],
 };
 const reEsc = s => s.replace(/[.*+?^${}()|[\]\\-]/g, "\\$&");
-async function dealDrift(html, dot, kind, taste) {
+async function dealDrift(html, dot, kind, taste, buildPlan = null) {
   const fails = [],
     warns = [];
   if (!html) return { fails, warns };
+  // Reference markup is checked against the complete persisted plan below; do not consult shared dealer history.
+  if (buildPlan?.mode === "reference") return { fails, warns };
   const read = f => {
     try {
       return JSON.parse(fs.readFileSync(path.join(dot, f), "utf8"));
@@ -980,8 +1014,9 @@ async function dealDrift(html, dot, kind, taste) {
       return null;
     }
   };
-  const h = read("history.json") || {},
-    lh = read("layout-history.json") || {};
+  // A V2 plan is the durable deal authority. Dealer history is shared and may be updated by a later plan.
+  const h = buildPlan ? {} : read("history.json") || {},
+    lh = buildPlan ? {} : read("layout-history.json") || {};
   const plan = ((html.split(/<body\b/i)[1] || "").match(/<!--([\s\S]*?)-->/) || [])[1] || "";
   const live = html.replace(/<!--[\s\S]*?-->/g, "").replace(/<template\b[\s\S]*?<\/template>/gi, "");
   const has = (attr, id) => new RegExp(`\\b${attr}\\s*=\\s*["']?${reEsc(id)}(?![\\w-])`).test(live);
@@ -1006,10 +1041,15 @@ async function dealDrift(html, dot, kind, taste) {
   // the moments and the scene of the last deal (one pick run: one seed, one time; its scene within a few seconds of it)
   const ms = Array.isArray(h.moments) ? h.moments : [],
     last = ms[ms.length - 1];
-  let moments = last ? ms.filter(m => m.seed === last.seed && m.at === last.at).map(m => m.id) : [];
-  let scene = null,
-    from = ".taste-skill/history.json";
-  if (last) {
+  let moments =
+    buildPlan ? buildPlan.moments.map(m => m.id)
+    : last ? ms.filter(m => m.seed === last.seed && m.at === last.at).map(m => m.id)
+    : [];
+  let scene = buildPlan ? buildPlan.scene?.id || null : null,
+    from = buildPlan ? ".taste-skill/deal.json" : ".taste-skill/history.json";
+  if (buildPlan) {
+    /* persisted V2 moments and scene above are authoritative */
+  } else if (last) {
     const t = Date.parse(last.at),
       sc = (Array.isArray(h.scenes) ? h.scenes : []).filter(s => Math.abs(t - Date.parse(s.at)) < 10000).pop();
     scene = sc ? sc.id : null;
@@ -1033,59 +1073,93 @@ async function dealDrift(html, dot, kind, taste) {
       msg: `the deal (${from}) dealt the scene ${scene}; the page has no [data-big-scene="${scene}"]`,
       fix: `${mo.sceneSource(scene, undefined, taste)} (references/scenes.md)`,
     });
-  // the place hero's form
-  const heroTag = (live.match(/<(?:section|header)\b[^>]*\bclass\s*=\s*["'][^"']*\bhero--place\b[^>]*>/i) || [])[0];
-  const pf =
-    Array.isArray(lh.placeForms) && lh.placeForms.length ?
-      lh.placeForms[lh.placeForms.length - 1]
-    : (plan.match(/\bform\s*[:=]?\s*["']?(band|bleed|split|name)\b/i) || [])[1];
-  if (heroTag && pf) {
-    const built = (attrs(heroTag)["data-form"] || "band").toLowerCase();
-    if (built !== pf)
-      (built === "band" ? fails : warns).push({
-        check: "deal-drift",
-        where: `hero data-form="${built}"`,
-        msg: `the place hero was dealt the form ${pf} (layout-history.json); the page builds ${built}${built === "band" ? ", the band hero the deal moves away from" : ""}`,
-        fix: `data-form="${pf}" on <section class="hero hero--place">, built as <skill>/assets/layout/hero-place.html and layout.css 0b show it (layout-deal.mjs --type place --form ${pf} prints its markup)`,
-      });
-  }
-  // the close and the compositions: the last value dealt per part for this kind
-  const L = h.layout && typeof h.layout === "object" ? h.layout : {};
-  const prefixes = [
-    ...new Set(
-      Object.keys(L)
-        .filter(k => /:close$/.test(k))
-        .map(k => k.split(":")[0]),
-    ),
-  ];
-  const k =
-    prefixes.includes(kind) ? kind
-    : prefixes.length === 1 ? prefixes[0]
-    : null;
-  if (k) {
-    const lastOf = key => (Array.isArray(L[`${k}:${key}`]) ? L[`${k}:${key}`].slice(-1)[0] : null);
-    const close = lastOf("close");
-    if (close && !new RegExp(`\\bclose--${reEsc(close.replace(/^close-/, ""))}\\b`).test(live)) {
-      const builtClose = (live.match(/\bclose--(\w+)/) || [])[1];
-      warns.push({
-        check: "deal-drift",
-        where: `close ${builtClose ? "close-" + builtClose : "none"}`,
-        msg: `the deal dealt the close ${close}; the page builds ${builtClose ? "close-" + builtClose : "no dealt close"}${builtClose === "form" ? " (close-form only when the last section is the booking form)" : ""}`,
-        fix:
-          close === "close-type" ?
-            'the footer\'s default <div class="closing__cta close--type"> of <skill>/assets/starter.html'
-          : `the <template data-part="${close}"> of <skill>/assets/starter.html in the footer`,
-      });
+  // Reference plans enforce their own recognizable visual selections in planMarkupFindings below. Keep
+  // the historical advisory drift rules for legacy and house plans.
+  if (buildPlan?.mode !== "reference") {
+    // the place hero's form
+    const heroTag = (live.match(/<(?:section|header)\b[^>]*\bclass\s*=\s*["'][^"']*\bhero--place\b[^>]*>/i) || [])[0];
+    const pf =
+      buildPlan ? buildPlan.heroForm
+      : Array.isArray(lh.placeForms) && lh.placeForms.length ? lh.placeForms[lh.placeForms.length - 1]
+      : (plan.match(/\bform\s*[:=]?\s*["']?(band|bleed|split|name)\b/i) || [])[1];
+    if (heroTag && pf) {
+      const built = (attrs(heroTag)["data-form"] || "band").toLowerCase();
+      if (built !== pf)
+        (built === "band" ? fails : warns).push({
+          check: "deal-drift",
+          where: `hero data-form="${built}"`,
+          msg: `the place hero was dealt the form ${pf} (layout-history.json); the page builds ${built}${built === "band" ? ", the band hero the deal moves away from" : ""}`,
+          fix: `data-form="${pf}" on <section class="hero hero--place">, built as <skill>/assets/layout/hero-place.html and layout.css 0b show it (layout-deal.mjs --type place --form ${pf} prints its markup)`,
+        });
     }
-    for (const key of ["visit", "offer", "showcase", "rooms", "feature", "form", "statement"]) {
-      const c = lastOf(key);
-      if (c && COMP_MARK[c] && !COMP_MARK[c][0].test(live))
+    // the close and the compositions: the last value dealt per part for this kind
+    const L = h.layout && typeof h.layout === "object" ? h.layout : {};
+    const prefixes = [
+      ...new Set(
+        Object.keys(L)
+          .filter(k => /:close$/.test(k))
+          .map(k => k.split(":")[0]),
+      ),
+    ];
+    const k =
+      prefixes.includes(kind) ? kind
+      : prefixes.length === 1 ? prefixes[0]
+      : null;
+    if (k || buildPlan) {
+      const lastOf = key => {
+        if (buildPlan) {
+          const selected = key === "close" ? buildPlan.layout.close : buildPlan.layout.compositions?.[key];
+          return Array.isArray(selected) ? selected[selected.length - 1] : (selected ?? null);
+        }
+        return Array.isArray(L[`${k}:${key}`]) ? L[`${k}:${key}`].slice(-1)[0] : null;
+      };
+      const close = lastOf("close");
+      if (close && !new RegExp(`\\bclose--${reEsc(close.replace(/^close-/, ""))}\\b`).test(live)) {
+        const builtClose = (live.match(/\bclose--(\w+)/) || [])[1];
         warns.push({
           check: "deal-drift",
-          where: `composition ${key} ${c}`,
-          msg: `the deal dealt ${c} for ${key}; the page has none`,
-          fix: COMP_MARK[c][1],
+          where: `close ${builtClose ? "close-" + builtClose : "none"}`,
+          msg: `the deal dealt the close ${close}; the page builds ${builtClose ? "close-" + builtClose : "no dealt close"}${builtClose === "form" ? " (close-form only when the last section is the booking form)" : ""}`,
+          fix:
+            close === "close-type" ?
+              'the footer\'s default <div class="closing__cta close--type"> of <skill>/assets/starter.html'
+            : `the <template data-part="${close}"> of <skill>/assets/starter.html in the footer`,
         });
+      }
+      if (buildPlan) {
+        const comps =
+          buildPlan.layout.compositions && typeof buildPlan.layout.compositions === "object" ?
+            buildPlan.layout.compositions
+          : {};
+        for (const [key, raw] of Object.entries(comps)) {
+          const expected = Array.isArray(raw) ? raw : [raw];
+          for (const c of new Set(expected)) {
+            const mark = COMP_MARK[c];
+            if (!mark) continue;
+            const countExpected = expected.filter(x => x === c).length;
+            const re = new RegExp(mark[0].source, mark[0].flags.includes("g") ? mark[0].flags : mark[0].flags + "g");
+            const countBuilt = [...live.matchAll(re)].length;
+            if (countBuilt < countExpected)
+              warns.push({
+                check: "deal-drift",
+                where: `composition ${key} ${c}`,
+                msg: `the persisted plan sequences ${c} ${countExpected} ${countExpected === 1 ? "time" : "times"} for ${key}; the page builds it ${countBuilt} ${countBuilt === 1 ? "time" : "times"}`,
+                fix: mark[1],
+              });
+          }
+        }
+      } else {
+        for (const key of ["visit", "offer", "showcase", "rooms", "feature", "form", "statement"]) {
+          const c = lastOf(key);
+          if (c && COMP_MARK[c] && !COMP_MARK[c][0].test(live))
+            warns.push({
+              check: "deal-drift",
+              where: `composition ${key} ${c}`,
+              msg: `the deal dealt ${c} for ${key}; the page has none`,
+              fix: COMP_MARK[c][1],
+            });
+        }
+      }
     }
   }
   return { fails, warns };
@@ -1387,6 +1461,7 @@ async function browserChecks(target, proj, opts, gateDir) {
   // project (roots.mjs climbRoot), and never send a dot-named file (roots.mjs servable), so the project's .env and
   // .git are never served to the page
   const root = opts.root && !isUrl(target) ? ["--root", opts.root] : [];
+  const buildPlanArg = opts.buildPlan ? ["--build-plan", opts.buildPlan] : [];
   // consistency.mjs, with what step 6 passes it
   {
     const prof = freshProfile("consistency"),
@@ -1408,6 +1483,7 @@ async function browserChecks(target, proj, opts, gateDir) {
       prof,
       "--out",
       out,
+      ...buildPlanArg,
       ...root,
       ...(opts.kind ? ["--page", opts.kind] : []),
       ...(opts.category ? ["--category", opts.category] : []),
@@ -1437,6 +1513,7 @@ async function browserChecks(target, proj, opts, gateDir) {
           fix: f.fix || "",
           widths: [f.width].filter(Boolean),
           from: "consistency",
+          hard: f.hard === true,
         };
         (f.sev === "FAIL" || HELD.has(f.check) ? res.fails : res.warns).push(item);
       }
@@ -1450,7 +1527,7 @@ async function browserChecks(target, proj, opts, gateDir) {
       t = Date.now();
     const r = await run(
       path.join(SKILL, "scripts", "layout-check.mjs"),
-      ["--url", target, "--profile", prof, "--sizes", sizes, "--json", ...root],
+      ["--url", target, "--profile", prof, "--sizes", sizes, "--json", ...buildPlanArg, ...root],
       proj,
       300000,
       [prof],
@@ -1472,6 +1549,7 @@ async function browserChecks(target, proj, opts, gateDir) {
             fix: f.fix || LAYOUT_FIX[f.rule] || "layout-v4.md",
             widths: [Number(String(s.size).split("x")[0])],
             from: "layout",
+            hard: f.hard === true,
           });
   } else res.crashed.push("no time left for layout-check.mjs");
   return res;
@@ -1619,6 +1697,10 @@ const TASTE_CHECKS = new Set([
   "heading-align",
   "centre-axis",
   "nesting",
+  // look tests split out of SR-3 and SR-6 (consistency rhythm module) so a taste can waive them alone: hairline
+  // rules between a section's parts, and text off the left line or the one split line (centred section heads)
+  "section-rules",
+  "left-lines",
 ]);
 function tasteOverrides(file) {
   const out = { name: "", rows: [], problems: [] };
@@ -1952,16 +2034,7 @@ if (has("done") && !HOOK) {
     console.error(`gate: could not write ${stateFile}: ${e.message}`);
     process.exit(2);
   }
-  try {
-    fs.renameSync(markerFile, path.join(dot, "build.done.json"));
-  } catch {
-    try {
-      fs.copyFileSync(markerFile, path.join(dot, "build.done.json"));
-      fs.rmSync(markerFile, { force: true });
-    } catch {
-      /* gate.json's status ends it */
-    }
-  }
+  closeMarker(markerFile, path.join(dot, "build.done.json"));
   console.log(
     `gate: build closed at the user's word, after round ${state.round || 0} of ${MAX}${
       left ?
@@ -2070,9 +2143,66 @@ const root = (() => {
   return null;
 })();
 const kind = (html && kindOf(html)) || (KINDS.test(marker.kind || "") ? marker.kind : "") || "";
-// the build's taste: deal.json's, else the page's <meta name="taste">; a name that is not a taste name, or has no pack, is none
+const dealFile = path.join(dotOf(projDir), "deal.json");
+let dealRecord = null,
+  dealText = null,
+  dealReadError = null;
+try {
+  dealText = fs.readFileSync(dealFile, "utf8").replace(/^\uFEFF/, "");
+  dealRecord = JSON.parse(dealText);
+  if (!dealRecord || typeof dealRecord !== "object" || Array.isArray(dealRecord))
+    throw new Error("the JSON root must be an object");
+} catch (error) {
+  if (fs.existsSync(dealFile)) dealReadError = error.message;
+}
+// A file that declares a plan version is never allowed to fall back to page attributes if it is malformed.
+const hasPersistedPlan = !!dealReadError || !!(dealRecord && Object.hasOwn(dealRecord, "planVersion"));
+let buildPlan = null,
+  currentDefinition = null;
+const planFindings = [];
+if (dealReadError) {
+  planFindings.push({
+    check: "build-plan",
+    where: ".taste-skill/deal.json",
+    msg: `the persisted deal could not be read: ${dealReadError}`,
+    fix: "repair the deal record or rerun start.mjs plan",
+    hard: true,
+  });
+} else if (hasPersistedPlan) {
+  try {
+    buildPlan = readBuildPlan(dealFile);
+  } catch (error) {
+    planFindings.push({
+      check: "build-plan",
+      where: ".taste-skill/deal.json",
+      msg: `the persisted plan is invalid: ${error.message}`,
+      fix: "rerun start.mjs plan and rebuild from the new persisted plan",
+      hard: true,
+    });
+  }
+}
+if (buildPlan?.mode === "reference") {
+  try {
+    const pack = loadTastePack(path.join(tastesDir(), buildPlan.taste));
+    // A V2 reference plan requires the current pack to be valid for an actual build, never a legacy readTaste fallback.
+    resolveTaste(pack.definition, { purpose: "build", packDir: pack.dir });
+    currentDefinition = pack.definition;
+  } catch (error) {
+    planFindings.push({
+      check: "build-plan",
+      where: `taste ${buildPlan.taste} definition`,
+      msg: `the persisted reference taste cannot be loaded as a build definition: ${error.message}`,
+      fix: `repair taste ${buildPlan.taste} or rerun start.mjs plan --taste ${buildPlan.taste}`,
+      hard: true,
+    });
+  }
+  planFindings.push(...definitionFreshnessFindings(buildPlan, currentDefinition));
+}
+planFindings.push(...pagePlanFindings(buildPlan, html));
+// For V2 the persisted plan owns the taste identity. Legacy builds retain the old deal-or-page fallback.
 const buildTaste = (() => {
-  const n = readJson(path.join(dotOf(projDir), "deal.json"), null)?.taste || metas(html).taste;
+  if (hasPersistedPlan) return buildPlan?.mode === "reference" ? buildPlan.taste : "";
+  const n = dealRecord?.taste || metas(html).taste;
   return (
       typeof n === "string"
         && /^[a-z0-9][a-z0-9-]{0,63}$/.test(n)
@@ -2087,6 +2217,17 @@ const opts = {
   category: typeof marker.category === "string" ? marker.category : "",
   primary: typeof marker.primary === "string" ? marker.primary : "",
   taste: buildTaste,
+  mode: buildPlan?.mode || null,
+  buildPlan: buildPlan ? dealFile : null,
+  planDigest:
+    buildPlan ? planDigest(buildPlan)
+    : hasPersistedPlan ?
+      crypto
+        .createHash("sha256")
+        .update(dealText || "unreadable")
+        .digest("hex")
+    : null,
+  definitionDigest: currentDefinition ? definitionDigest(currentDefinition) : null,
 };
 const walked = P.file ? walk(P.file, root || path.dirname(P.file)) : [];
 const files = [
@@ -2099,6 +2240,18 @@ const files = [
 // the page, what it loads and what the checks are told; waivers are applied after the checks, so a new waiver needs no new run
 const fp = crypto.createHash("sha1");
 fp.update(JSON.stringify({ target, opts }));
+// Policy code, the persisted plan and its resolved definition all participate in cache freshness.
+for (const f of [
+  SELF,
+  path.join(here, "build-policy.mjs"),
+  path.join(here, "taste-use.mjs"),
+  path.join(here, "taste-definition.mjs"),
+])
+  try {
+    fp.update(f + "\0" + fs.readFileSync(f));
+  } catch {
+    /* a missing definition module becomes a hard V2 plan finding above */
+  }
 // editing the taste's pack changes what the page is held to
 if (opts.taste)
   for (const f of ["taste.json", "design-system.txt"])
@@ -2196,43 +2349,66 @@ if (state.fp === FP && state.found && Array.isArray(state.found.crashed) && !sta
     const c = copyChecks(P, kind, html, path.join(gateDir, "consistency", "rendered.html"));
     const mo = motionChecks(P, kind, html, path.join(gateDir, "consistency", "rendered.html"));
     let renderedHtml = "";
-    if (!html)
-      try {
-        renderedHtml = fs.readFileSync(path.join(gateDir, "consistency", "rendered.html"), "utf8");
-      } catch {
-        /* none */
-      }
-    const dd = await dealDrift(html || renderedHtml, dot, kind, opts.taste);
+    try {
+      renderedHtml = fs.readFileSync(path.join(gateDir, "consistency", "rendered.html"), "utf8");
+    } catch {
+      /* no capture: still validate the available source */
+    }
+    const checkedHtml = html || renderedHtml;
+    const dd = await dealDrift(checkedHtml, dot, kind, opts.taste, buildPlan);
     dd.warns.push(...productChecks(html || renderedHtml, dot));
     // the page against its taste: the deal's, else the one its own meta names (a page that carries a taste is held to it);
     // a build checked by URL is read as rendered. kit: "" says the block could not be printed, null that there is no pack to ask
-    const dealt = readJson(path.join(dotOf(projDir), "deal.json"), null);
+    const dealt = dealRecord;
     stat.push(
       ...tasteUse({
-        html: html || renderedHtml,
-        deal: { ...(dealt || {}), taste: (dealt && dealt.taste) || opts.taste || null },
+        html: checkedHtml,
+        deal: buildPlan ? buildPlan : { ...(dealt || {}), taste: (dealt && dealt.taste) || opts.taste || null },
         kit: opts.taste ? kitBlock : null,
       }),
     );
+    const allFindings = [
+      ...stat,
+      ...b.fails,
+      ...c.fails,
+      ...mo.fails,
+      ...dd.fails,
+      ...planFindings,
+      ...(!html ? pagePlanFindings(buildPlan, renderedHtml) : []),
+      ...planMarkupFindings(
+        buildPlan,
+        /<(?:section|header)\b[^>]*\bclass\s*=\s*["'][^"']*\bhero\b/i.test(html) ? html : renderedHtml || html,
+      ),
+    ];
+    const classified = classifyBuildFindings(allFindings, buildPlan?.mode);
     found = {
-      fails: mergeFamilies(merge([...stat, ...b.fails, ...c.fails, ...mo.fails, ...dd.fails])),
+      fails: mergeFamilies(merge(classified.blocked)),
+      advisories: merge(classified.advisory),
       warns: merge([...b.warns, ...c.warns, ...mo.warns, ...dd.warns]),
       crashed: [...c.crashed, ...mo.crashed, ...b.crashed],
       seconds: b.seconds,
     };
   } catch (e) {
     for (const c of children) killTree(c);
-    found = { fails: [], warns: [], crashed: ["the gate itself failed: " + e.message], seconds: {} };
+    found = { fails: [], advisories: [], warns: [], crashed: ["the gate itself failed: " + e.message], seconds: {} };
   }
 }
 clearTimeout(guard);
+found.advisories ||= [];
 
-const W = applyWaivers(found.fails, waiverFile);
+// Review freshness is re-evaluated even when browser results are cached.
+const visualFails =
+  opts.taste ? reviewEvidenceForBuild({ project: projDir, pack: path.join(tastesDir(), opts.taste) }) : [];
+const W = applyWaivers([...found.fails, ...visualFails], waiverFile);
 // a build checked by URL has no source file: read the page as rendered, as the taste-use checks do
-const TO = tasteOverrides(P.file || path.join(gateDir, "consistency", "rendered.html"));
+const TO =
+  buildPlan ?
+    { name: "", rows: [], problems: [] }
+  : tasteOverrides(P.file || path.join(gateDir, "consistency", "rendered.html"));
 if (TO.rows.length) {
   const why = new Map(TO.rows.map(r => [r.check, r.why]));
-  const by = f => (f.ids || [f.check]).find(id => why.has(id));
+  // a finding two checks share (one family) is waived only when the taste names every one of them
+  const by = f => ((f.ids || [f.check]).every(id => why.has(id)) ? f.check : undefined);
   W.waived.push(
     ...W.open.filter(f => by(f) && !f.hard).map(f => ({ ...f, reason: `taste ${TO.name}: ${why.get(by(f))}` })),
   );
@@ -2275,6 +2451,10 @@ function printAll(head) {
         .map(x => `${x.check} ${x.where.slice(0, 40)}`)
         .join("; ")}`,
     );
+  if (found.advisories.length) {
+    print(`  ${found.advisories.length} ADVISORY (reference plan house aesthetics; not blocking)`);
+    for (const f of found.advisories) print(`  ADVISORY ${f.check} ${f.where.slice(0, 80)}: ${f.msg.slice(0, 180)}`);
+  }
   if (crashed) print(`  not checked: ${found.crashed.join("; ")}`);
 }
 const record = (status, extra = {}) => {
@@ -2286,6 +2466,7 @@ const record = (status, extra = {}) => {
     open: open.map(({ hard, ...f }) => f),
     waived: W.waived,
     warnCount: found.warns.length,
+    advisoryCount: found.advisories.length,
     ...extra,
   });
   const entry = {
@@ -2315,9 +2496,10 @@ const record = (status, extra = {}) => {
 if (QUICK) {
   // a look between rounds: no round, never closes the build
   // plan is null when the last crashed result was reused and no check ran
+  const quick = /** @type {ReturnType<typeof quickPlan> | null} */ (plan);
   const look =
-    plan ?
-      ` at ${plan.widths}${plan.skip.length ? `, skipped ${plan.skip.join(" ")}` : ""}${plan.layout ? "" : ", no layout-check"}`
+    quick ?
+      ` at ${quick.widths}${quick.skip.length ? `, skipped ${quick.skip.join(" ")}` : ""}${quick.layout ? "" : ", no layout-check"}`
     : ", the last result reused";
   printAll(`gate (quick look${look}): ${n} FAIL${crashed ? ", some checks did not run" : ""}`);
   if (!HOOK) {
@@ -2346,16 +2528,7 @@ if (n === 0 && crashed) {
 
 if (n === 0) {
   record("pass");
-  try {
-    fs.renameSync(markerFile, path.join(dot, "build.done.json"));
-  } catch {
-    try {
-      fs.copyFileSync(markerFile, path.join(dot, "build.done.json"));
-      fs.rmSync(markerFile, { force: true });
-    } catch {
-      /* left armed */
-    }
-  }
+  closeMarker(markerFile, path.join(dot, "build.done.json"));
   if (HOOK) allow("GATE: PASS", true);
   printAll("gate: no open FAIL");
   console.log("GATE: PASS");
@@ -2410,16 +2583,7 @@ if (last && !idle) {
     if (HOOK) allow("could not record the round; stop allowed");
   }
   // a used-up build is closed like a passed one, so a later deal or a build one folder down is not tied to it
-  try {
-    fs.renameSync(markerFile, path.join(dot, "build.done.json"));
-  } catch {
-    try {
-      fs.copyFileSync(markerFile, path.join(dot, "build.done.json"));
-      fs.rmSync(markerFile, { force: true });
-    } catch {
-      /* gate.json's status ends it */
-    }
-  }
+  closeMarker(markerFile, path.join(dot, "build.done.json"));
   if (HOOK) {
     if (told) allow("rounds used up, told before", true);
     block(

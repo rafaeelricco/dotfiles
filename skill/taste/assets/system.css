@@ -417,8 +417,11 @@ p {
 .measure {
   max-width: 62ch;
 }
+/* the focus ring and the link hovers read the focus and link tokens (--focus, --link), unset on the kit's own pages
+   so the action colour paints them; a recorded taste whose primary is too pale for its ground sets both to each
+   ground's ink (record.mjs kit) */
 :focus-visible {
-  outline: 2px solid var(--action);
+  outline: 2px solid var(--focus, var(--action));
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -1238,11 +1241,10 @@ main > :is(.hero, .section--hero) {
   display: grid;
   gap: var(--s-4);
 }
-/* every heading starts on the left line (a centred head among left ones reads as a mistake): the
-   old centred head is left-aligned too */
+/* Keep legacy left alignment unless the recorded contract selects centered heads. */
 .section-head--center {
-  text-align: left;
-  justify-items: start;
+  text-align: var(--section-heading-align, left);
+  justify-items: var(--section-heading-justify, start);
 }
 /* a head row: the h2 (and its line) left, one link or the section's button at the right line */
 .section-head--split {
@@ -1571,9 +1573,10 @@ html[data-buttons="arrow"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--surface);
+  background: var(--panel-fill, var(--surface));
   border-radius: var(--r-lg);
-  border: 1px solid var(--line);
+  border: var(--panel-border, 1px solid var(--line));
+  box-shadow: var(--panel-shadow, none);
   padding: clamp(var(--s-4), 4vw, var(--s-7));
 }
 /* a zero-width spacer keeps --ratio (height / width) as the frame's minimum height */
@@ -2128,7 +2131,7 @@ html:not([data-tone="dark"]) :is(.frame--cta, .frame--lit, .footer--statement) {
   font-size: var(--t-small);
 }
 .menu-col a:hover {
-  color: var(--action);
+  color: var(--link, var(--action));
 }
 .menu-card {
   display: grid;
@@ -2683,7 +2686,7 @@ html:not([data-tone="dark"]) :is(.frame--cta, .frame--lit, .footer--statement) {
   font-size: var(--t-small);
 }
 .footer ul a:hover {
-  color: var(--action);
+  color: var(--link, var(--action));
 }
 .footer__legal {
   display: flex;
@@ -2798,7 +2801,7 @@ html[data-tone="dark"] .footer--dark {
   font-weight: 500;
 }
 .footer__nav a:hover {
-  color: var(--action);
+  color: var(--link, var(--action));
 }
 .footer__nav .socials {
   margin-left: auto;
@@ -3354,7 +3357,7 @@ html[data-buttons] .btn--xl::after {
   .btn--xl,
   .btn--xl.btn--wide {
     width: 100%;
-    height: 48px;
+    height: calc(var(--btn-h) + 4px);
     font: 500 18px/1 var(--font-text);
     letter-spacing: 0;
   }
@@ -4108,4 +4111,31 @@ html[data-check] [data-placeholder] {
 }
 .stack-6 > * + * {
   margin-top: var(--s-6);
+}
+
+/* Recorded flow: preserve pinned scenes/moments, let ordinary content size itself. */
+html[data-rhythm="flow"] main > :is(section, .section):not([data-big-scene], [data-moment]),
+html[data-rhythm="flow"] footer.closing {
+  height: auto;
+  min-height: 0;
+}
+html[data-rhythm="flow"] main > :is(section, .section):not([data-big-scene], [data-moment]) > :is(.wrap, .container),
+html[data-rhythm="flow"] footer.closing > .wrap {
+  height: auto;
+  min-height: 0;
+}
+html[data-rhythm="flow"] main > section:not([data-big-scene], [data-moment]) > .wrap > .fill {
+  flex: 0 1 auto;
+}
+html[data-heading-align="center"] {
+  --section-heading-align: center;
+  --section-heading-justify: center;
+}
+
+/* Recorded treatments override the generic surface only when the bridge supplied them. */
+:root h2 {
+  font-weight: var(--h2-weight, var(--display-weight));
+}
+.btn--primary {
+  background: var(--btn-fill, var(--action));
 }

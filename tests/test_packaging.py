@@ -38,9 +38,11 @@ def make_source(root: Path, *, marker: str = "one") -> Path:
         "skill/ui/SKILL.md": "# UI\n",
         "skill/ui/tests/test_ui.py": "test-only\n",
         "skill/ui/evals/cases.md": "eval-only\n",
+        "skill/taste/schemas/core.schema.json": "authoring-only schema excluded\n",
         "powershell/Microsoft.PowerShell_profile.ps1": "profile asset\n",
         "powershell/themes/theme.omp.json": "{}\n",
         "tests/test_installers.py": "repository tests excluded\n",
+        "tests/taste/schemas/core.schema.json": "test-only schema excluded\n",
         "fonts/user-font.ttf": "user file excluded\n",
         "scripts/.env": "private environment excluded\n",
         "powershell/private-token.txt": "private user file excluded\n",
@@ -94,8 +96,10 @@ class PackageReleaseTests(unittest.TestCase):
                 self.assertIn("dotfiles/RUNTIME-MANIFEST.json", names)
                 self.assertIn("dotfiles/skill/orchestrate/references/guide.md", names)
                 self.assertNotIn("dotfiles/tests/test_installers.py", names)
+                self.assertNotIn("dotfiles/tests/taste/schemas/core.schema.json", names)
                 self.assertNotIn("dotfiles/skill/ui/tests/test_ui.py", names)
                 self.assertNotIn("dotfiles/skill/ui/evals/cases.md", names)
+                self.assertNotIn("dotfiles/skill/taste/schemas/core.schema.json", names)
                 self.assertNotIn("dotfiles/scripts/package_release.py", names)
                 self.assertNotIn("dotfiles/fonts/user-font.ttf", names)
                 self.assertNotIn("dotfiles/scripts/.env", names)

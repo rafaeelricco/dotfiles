@@ -1128,6 +1128,37 @@ html:is([data-buttons="arrow"], [data-buttons="block"])
     display: none;
   }
 }
+/* the small card (.ly-piece--note, a .d-card) stands over the window's lower left, 300px wide; the
+   window's rows drop their time column and its content keeps --ly-cut-room clear at the right, so the
+   frame cuts empty margin, not the chips; the proof line under the buttons is small and muted */
+.hero__art > .ly-piece--note {
+  left: var(--s-6);
+  bottom: var(--s-6);
+  width: 300px;
+  z-index: 2;
+}
+.hero__art > .ly-piece--main .d-row {
+  grid-template-columns: 36px minmax(0, 1fr) 56px 96px;
+}
+.hero__art > .ly-piece--main .d-main {
+  padding-right: var(--ly-cut-room);
+}
+.hero--collage .hero__proof {
+  font-size: var(--t-small);
+  color: var(--muted);
+}
+@media (max-width: 1023px) {
+  .hero__art > .ly-piece--note {
+    left: var(--s-4);
+    bottom: var(--s-4);
+    width: 270px;
+  }
+}
+@media (max-width: 639px) {
+  .hero__art > .ly-piece--main .d-row {
+    grid-template-columns: 36px minmax(0, 1fr) 96px;
+  }
+}
 
 /* 6. hero--word: an oversized headline (144px) across the container with one live word last, then a
       foot row: the line and the buttons on span-6, the four facts as a column on span-5 start-8
@@ -1623,6 +1654,493 @@ h1.ly-locked {
     width: calc(100% - 2 * var(--s-4));
     left: var(--s-4);
     transform: none;
+  }
+}
+
+/* ---------------------------------------------------------------- the drawn product window and card
+   The heroes' own pieces of product UI, so a hero section copied from its demo renders whole: the window
+   (.d-win: __bar with __dots, __body with a side column and a main column) in hero--centred's
+   .hero__window and hero--collage's .hero__art, and the small card (.d-card) beside it. They take the
+   ground's tokens (--bg, --ink, --muted, --font-text, the radii), so they follow the page's palette;
+   .d-win--dark is the dark window on any page. Every colour inside reads the --d-* set below, so a page
+   restyles a window by setting those on it. A real page may paste the client's screens or a fragment
+   (assets/ui) into the same slot instead.
+     side column   .d-side (a nav list: spans with an <i> icon, .is-on, .d-side__label) or .inbox
+                   (.q a search line, .t a thread: <i> initials, <b> name, <time>, <span> preview)
+     main column   .d-main (.d-main__head with h4 and .d-btn, .d-tabs, .d-rows of .d-row with .d-chip)
+                   or .convo holding .d-chat (.d-msg--me, .d-tool, .d-msg--bot, .acts) */
+:is(.d-win, .d-card) {
+  --d-bg: var(--bg);
+  --d-ink: var(--ink);
+  --d-muted: var(--muted);
+  --d-faint: color-mix(in oklab, var(--d-muted) 80%, var(--d-bg));
+  --d-line: color-mix(in oklab, var(--d-ink) 7%, transparent);
+  --d-fill: color-mix(in oklab, var(--d-ink) 5%, transparent);
+  --d-dot: color-mix(in oklab, var(--d-ink) 14%, var(--d-bg));
+  --d-thumb: color-mix(in oklab, var(--d-ink) 6%, var(--d-bg));
+  /* the visitor's bubble is a light tint with the ink, as demo.css drew it: a page that sets only the bubble's
+     background (the pattern pages copied from the demos) keeps readable text */
+  --d-me-bg: color-mix(in oklab, var(--d-ink) 5%, var(--d-bg));
+  --d-me-ink: var(--d-ink);
+  --d-bot-bg: color-mix(in oklab, var(--d-ink) 6%, var(--d-bg));
+  --d-bot-ink: var(--d-ink);
+  --d-ring: color-mix(in oklab, var(--d-ink) 7%, transparent);
+  background: var(--d-bg);
+  color: var(--d-ink);
+  border-radius: var(--r-md);
+  font: 400 14px/1.4 var(--font-text);
+  text-align: left;
+}
+/* the small card stands raised on the hero's lit or painted ground: white with the demo's ink, as demo.css drew it */
+.d-card {
+  --d-bg: #ffffff;
+  --d-ink: #16181a;
+  --d-muted: #5d6268;
+}
+.d-win {
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px var(--d-ring),
+    0 24px 60px -28px rgb(0 0 0 / 0.45);
+}
+.d-win--dark {
+  --d-bg: #17191c;
+  --d-ink: #eceef0;
+  --d-muted: #9aa0a6;
+  --d-line: rgb(255 255 255 / 0.07);
+  --d-fill: rgb(255 255 255 / 0.07);
+  --d-dot: #3a3e43;
+  --d-me-bg: #f2f2f0;
+  --d-me-ink: #121314;
+  --d-bot-bg: #22262b;
+  --d-bot-ink: #e9ecee;
+  --d-ring: rgb(255 255 255 / 0.08);
+  box-shadow:
+    0 0 0 1px var(--d-ring),
+    0 30px 70px -30px rgb(0 0 0 / 0.8);
+}
+.d-win__bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--d-line);
+  font-size: 13px;
+  color: var(--d-muted);
+}
+.d-win__bar b {
+  color: var(--d-ink);
+  font-weight: 500;
+}
+.d-win__bar .sp {
+  flex: 1;
+}
+.d-win__dots {
+  display: flex;
+  gap: 6px;
+}
+.d-win__dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--d-dot);
+}
+/* the side column keeps its width, the main column takes the rest (and all of it when the side is hidden) */
+.d-win__body {
+  display: flex;
+  min-height: 420px;
+}
+.d-win__body > :is(.d-main, .convo) {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.d-side {
+  flex: none;
+  width: 160px;
+  padding: 14px 10px;
+  border-right: 1px solid var(--d-line);
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  font-size: 13px;
+  color: var(--d-muted);
+}
+.d-side b {
+  font-weight: 500;
+  color: var(--d-ink);
+}
+.d-side > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: var(--r-sm);
+}
+.d-side > span.is-on {
+  background: var(--d-fill);
+  color: var(--d-ink);
+  font-weight: 500;
+}
+.d-side > span i {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: currentColor;
+  opacity: 0.3;
+  flex: none;
+}
+.d-side .d-side__label {
+  font-size: 13px;
+  color: var(--d-faint);
+  height: 26px;
+  margin-top: 8px;
+}
+:where(.d-win) .inbox {
+  flex: none;
+  width: 250px;
+  border-right: 1px solid var(--d-line);
+  padding: 10px;
+  display: grid;
+  align-content: start;
+  gap: 2px;
+}
+:where(.d-win) .inbox .q {
+  height: 34px;
+  margin-bottom: 6px;
+  border-radius: var(--r-sm);
+  background: var(--d-fill);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  color: var(--d-faint);
+  font-size: 13px;
+}
+:where(.d-win) .inbox .t {
+  display: grid;
+  grid-template-columns: 30px 1fr auto;
+  gap: 1px 10px;
+  padding: 9px 8px;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+}
+:where(.d-win) .inbox .t.is-on {
+  background: var(--d-fill);
+}
+/* the initials stand on the light tint the markup gives each one, so they keep a dark ink on any window */
+:where(.d-win) .inbox .t i {
+  grid-row: 1 / span 2;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font: 600 13px/1 var(--font-text);
+  font-style: normal;
+  color: #0c0d0f;
+  background: var(--d-thumb);
+}
+:where(.d-win) .inbox .t b {
+  font-weight: 500;
+  color: var(--d-ink);
+}
+:where(.d-win) .inbox .t time {
+  color: var(--d-faint);
+  font-size: 13px;
+}
+:where(.d-win) .inbox .t span {
+  grid-column: 2 / -1;
+  color: var(--d-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.d-main,
+:where(.d-win) .convo {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+}
+.d-main {
+  padding: 16px 18px;
+  gap: 12px;
+}
+.d-main__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.d-main__head h4 {
+  font: 600 16px/1.2 var(--font-text);
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: inherit;
+}
+.d-btn {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--r-sm);
+  background: var(--d-ink);
+  color: var(--d-bg);
+  font-size: 13px;
+  font-weight: 500;
+}
+.d-btn--ghost {
+  background: var(--d-fill);
+  color: var(--d-ink);
+}
+.d-tabs {
+  display: flex;
+  gap: 4px;
+  font-size: 13px;
+}
+.d-tabs span {
+  padding: 4px 10px;
+  border-radius: 99px;
+  color: var(--d-muted);
+}
+.d-tabs span.is-on {
+  background: var(--d-fill);
+  color: var(--d-ink);
+  font-weight: 500;
+}
+.d-rows {
+  display: grid;
+  border-top: 1px solid var(--d-line);
+}
+.d-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 56px 96px 84px;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 2px;
+  border-bottom: 1px solid var(--d-line);
+  font-size: 13px;
+}
+.d-row img,
+.d-row .d-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  object-fit: cover;
+  background: var(--d-thumb);
+}
+.d-row b {
+  display: block;
+  font-weight: 500;
+  color: var(--d-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.d-row small {
+  color: var(--d-faint);
+  font-size: 13px;
+}
+.d-row .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.d-row .when {
+  color: var(--d-faint);
+  font-size: 13px;
+  text-align: right;
+  white-space: nowrap;
+}
+/* a status chip: its three colours mean in stock, low and out on any palette, so they are fixed */
+.d-chip {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 500;
+  background: #e7f4ec;
+  color: #17673f;
+  white-space: nowrap;
+}
+.d-chip::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.d-chip--low {
+  background: #fdf0dc;
+  color: #8a5300;
+}
+.d-chip--out {
+  background: #fbe6e3;
+  color: #a3271b;
+}
+/* the exchange: the visitor's question, the tool line, the answer and its actions */
+.d-chat {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 18px;
+  font-size: 14px;
+}
+.d-msg {
+  max-width: 78%;
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  background: var(--d-bot-bg);
+  color: var(--d-bot-ink);
+  line-height: 1.45;
+}
+.d-msg--me {
+  justify-self: end;
+  background: var(--d-me-bg);
+  color: var(--d-me-ink);
+  border-bottom-right-radius: 6px;
+}
+.d-msg--bot {
+  border-bottom-left-radius: 6px;
+}
+.d-msg small {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: 0.6;
+}
+.d-tool {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--d-muted);
+}
+.d-tool::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+}
+:where(.d-win) .acts {
+  display: flex;
+  gap: 8px;
+}
+:where(.d-win) .acts span {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 99px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--d-me-bg);
+  color: var(--d-me-ink);
+}
+:where(.d-win) .acts span + span {
+  background: var(--d-fill);
+  color: var(--d-bot-ink);
+}
+/* the small card: a title row with a chip, a line of text, and note lines with a status mark */
+.d-card {
+  padding: 14px 16px;
+  box-shadow:
+    0 0 0 1px var(--d-ring),
+    0 18px 44px -20px rgb(0 0 0 / 0.45);
+}
+.d-card h5 {
+  margin: 0 0 4px;
+  font: 600 14px/1.3 var(--font-text);
+  color: inherit;
+}
+.d-card p {
+  margin: 0;
+  color: var(--d-muted);
+  font-size: 13px;
+}
+.d-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.d-note__line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  font-size: 13px;
+  color: color-mix(in oklab, var(--d-ink) 85%, var(--d-bg));
+  border-top: 1px solid var(--d-line);
+}
+.d-note__line:first-of-type {
+  border-top: 0;
+}
+.d-note__line i {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex: none;
+  display: grid;
+  place-items: center;
+  background: #e7f4ec;
+  color: #17673f;
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 700;
+}
+.d-note__line i.warn {
+  background: #fdf0dc;
+  color: #8a5300;
+}
+.d-note__line b {
+  font-weight: 500;
+  color: var(--d-ink);
+}
+/* in hero--centred's frame the exchange stands in the window's top 260px: a one-line question, the tool
+   line, a two-line answer with its note on the same line, its actions */
+.hero__window .d-chat {
+  padding: 14px 18px;
+  gap: 8px;
+}
+.hero__window .d-msg--me small {
+  display: none;
+}
+.hero__window .d-msg--bot {
+  max-width: 86%;
+}
+.hero__window .d-msg--bot small {
+  display: inline;
+  margin: 0 0 0 8px;
+  white-space: nowrap;
+}
+/* a phone: the window keeps its main column (the side column and the rows' count go); in hero--centred's
+   frame the bar keeps its title, and the answer's note and the tool line go, so the whole answer ends
+   above the frame's fade */
+@media (max-width: 639px) {
+  .d-side,
+  :where(.d-win) .inbox,
+  .d-row .num {
+    display: none;
+  }
+  .d-row {
+    grid-template-columns: 36px minmax(0, 1fr) 96px 84px;
+  }
+  .hero__window .d-win__bar .sp ~ span {
+    display: none;
+  }
+  .hero__window .d-chat {
+    font-size: 13px;
+    padding: 12px 14px;
+  }
+  .hero__window .d-msg--bot small,
+  .hero__window .d-tool {
+    display: none;
   }
 }
 

@@ -7,11 +7,13 @@
     node record.mjs list                                         name, date, intro line and use_when of every taste
     node record.mjs css <name> [--out <file>]                    tokens as :root { } and .dark, [data-theme="dark"] { }
     node record.mjs kit <name>                                   the taste kit's head block (fonts, stylesheets, :root) from the taste
+    node record.mjs guide <name>                                 regenerate a v2 guide from taste.json
   A recorded URL writes <root>/<name>/: design-system.txt, shots/, capture/ (css/, <page>.html, <page>.json, frames/,
   candidates.json) and, when missing, taste.json (never overwritten, not even with --force). --from writes design-system.txt
   and taste.json only, and prints how many candidates the given captures hold.
   --root <dir> replaces <skill>/tastes. Exit 2: bad arguments, an unknown name, or a name that exists without --force.
 */
+import { correctedText } from "./record-corrections.mjs";
 import { execFileSync, spawn } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
@@ -19,6 +21,8 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromeOrExit } from "../../taste/scripts/roots.mjs";
+import { loadTastePack, resolveTaste } from "../../taste/scripts/taste-contract.mjs";
+import { renderTasteGuide, serializeTasteCss, serializeTasteKit } from "../../taste/scripts/taste-output.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const CAPTURE = fs.readFileSync(path.join(here, "record-capture.js"), "utf8");
@@ -126,6 +130,10 @@ function norm(c) {
     scheme: c.scheme === "dark" ? "dark" : "light",
     captured: typeof c.captured === "string" ? c.captured : new Date().toISOString().slice(0, 10),
     path: typeof c.path === "string" && c.path.startsWith("/") ? c.path : "/",
+    source:
+      typeof c.source === "string" ? c.source
+      : typeof c.url === "string" ? c.url
+      : null,
     viewport: [num(c.viewport?.[0], 1440), num(c.viewport?.[1], 900)],
     tokens: arr(c.tokens).filter(t => t && /^--[\w-]+$/.test(t.name) && typeof t.light === "string" && t.light),
     skipped: arr(c.skipped).filter(s => typeof s === "string"),
@@ -136,6 +144,16 @@ function norm(c) {
       muted: colour(r.muted, null),
       accent: colour(r.accent, "#000000"),
     },
+    // Retain exactly which role values were present; the v1 renderer keeps its legacy defaults above.
+    rolesObserved: {
+      bg: colour(r.bg, null),
+      surface: colour(r.surface, null),
+      ink: colour(r.ink, null),
+      muted: colour(r.muted, null),
+      accent: colour(r.accent, null),
+    },
+    fills: c.fills && typeof c.fills === "object" ? c.fills : {},
+    grounds: arr(c.grounds),
     type: arr(c.type).filter(t => t && typeof t.role === "string"),
     layout: {
       container: num(l.container, null),
@@ -318,8 +336,13 @@ function merge(captures) {
     views: [...new Set(captures.map(c => `${c.viewport[0]}x${c.viewport[1]} ${c.scheme}`))],
     paths: pages,
     tokens: [...tokens.values()].sort(byName),
+    fills: main.fills,
+    grounds: main.grounds,
+    roleCandidates: primary.map(c => ({ path: c.path, roles: c.roles })),
     roles: main.roles,
     rolesDark: dm ? dm.roles : null,
+    rolesObserved: main.rolesObserved,
+    rolesDarkObserved: dm ? dm.rolesObserved : null,
     single,
     type: [...type.values()].sort((a, b) => roleAt(a) - roleAt(b)),
     layouts,
@@ -340,6 +363,12 @@ const slot = (name, text) => `<!-- write: ${name}: ${text} -->`;
 const cell = s => String(s).replace(/\|/g, "\\|").replace(/\s+/g, " ").trim();
 const code = s => `\`${s}\``;
 const px = v => (v === null || v === undefined ? "—" : `${v}px`);
+const normalizeBorder = value => {
+  if (typeof value !== "string") return value;
+  const border = value.trim();
+  const legacy = /^(\d+(?:\.\d+)?px)\s+(#[0-9a-f]{6}(?:[0-9a-f]{2})?)$/i.exec(border);
+  return legacy ? `${legacy[1]} solid ${legacy[2]}` : border;
+};
 
 function table(head, rows) {
   return [
@@ -379,8 +408,7 @@ function render(m, name) {
       m.components.button.map(b => ({ ...b, fill: b.bg })),
       m.roles.accent,
       m.roles.bg,
-    )
-    || m.components.button[0];
+    );
   const heading = m.type.find(t => t.role === "h1") || m.type.find(t => t.role === "body");
   const R = m.roles;
 
@@ -665,6 +693,14 @@ function render(m, name) {
 
   const caveatLines = m.caveats.slice(0, 20).map(c => `- ${c}`);
   if (m.caveats.length > 20) caveatLines.push(`- ${m.caveats.length - 20} more token differences between captures.`);
+  // a measured muted grey under the 4.5:1 text needs: the table keeps it, the kit block prints it readable
+  const mutedGrounds = [R.bg, R.surface].filter(h => HEX.test(h || ""));
+  const mutedFix =
+    HEX.test(R.muted || "") && mutedGrounds.length ? readable(hex6(R.muted), mutedGrounds.map(hex6)) : null;
+  if (mutedFix)
+    caveatLines.push(
+      `- The measured **muted** ${code(R.muted)} reads ${ratioText(hex6(R.muted), hex6(R.bg))} on ${code(R.bg)}, under the 4.5:1 text needs: \`record.mjs kit\` prints it as ${code(mutedFix)}, the same hue ${luminance(mutedFix) < luminance(hex6(R.muted)) ? "darkened" : "lightened"} to 4.5:1 on the grounds, and the Colors table keeps the measured value.`,
+    );
   const provenance = [
     "## Provenance and caveats",
     [
@@ -703,6 +739,27 @@ function render(m, name) {
       stop,
       colors,
       typography,
+      [
+        "## Fills",
+        table(
+          ["Role", "Gradient"],
+          [
+            ["surface", m.fills?.surface?.css],
+            ["primary", m.fills?.primary?.css],
+            ...(m.fills?.text || []).map(t => [t.role, t.gradient?.css]),
+          ]
+            .filter(r => r[1])
+            .map(([role, css]) => [role, code(css)]),
+        ),
+      ].join("\n\n"),
+      [
+        "## Color candidates",
+        table(
+          ["Page", "Background", "Surface", "Ink", "Accent"],
+          m.roleCandidates.map(c => [c.path, c.roles.bg, c.roles.surface, c.roles.ink, c.roles.accent]),
+        ),
+      ].join("\n\n"),
+      ["## Picture grounds", ...m.grounds.map(g => JSON.stringify(g.colors || {}))].join("\n\n"),
       layout,
       elevation,
       shape,
@@ -747,7 +804,25 @@ const luminance = h =>
     .map(v => v / 255)
     .map(v => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
     .reduce((s, v, i) => s + v * [0.2126, 0.7152, 0.0722][i], 0);
-const inkOn = h => (luminance(h) > 0.4 ? "#000000" : "#ffffff");
+// black or white, whichever reads better on h (a fixed luminance cut put white on mid oranges at 3.3:1)
+const inkOn = h => (contrastOf(h, "#000000") >= contrastOf(h, "#ffffff") ? "#000000" : "#ffffff");
+const contrastOf = (a, b) => {
+  const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p);
+  return (x + 0.05) / (y + 0.05);
+};
+const ratioText = (a, b) => `${(Math.floor(contrastOf(a, b) * 100) / 100).toFixed(2)}:1`;
+// a text colour that reads under `min`:1 on a ground it sits on, stepped in its own hue toward black (toward white
+// on a dark ground) until it reads min:1 on every one of them; null when it already does
+function readable(h, grounds, min = 4.5) {
+  const worst = c => Math.min(...grounds.map(g => contrastOf(c, g)));
+  if (worst(h) >= min) return null;
+  const to = luminance(grounds[0]) > 0.18 ? "#000000" : "#ffffff";
+  for (let i = 1; i <= 100; i++) {
+    const c = mixHex(h, to, i / 100);
+    if (worst(c) >= min) return c;
+  }
+  return to;
+}
 // CSS's own family keywords and the system faces: never a Google Fonts family, never quoted ("inherited" is how the
 // pack writes a row with no family of its own)
 const GENERIC =
@@ -761,7 +836,153 @@ const quoted = f => (GENERIC.test(f) ? f : `"${f}"`);
 // hyphens, underscores (next/font names a face __Inter_aaf875)
 const SAFE_FAMILY = /^[\p{L}\p{M}\p{N}._-][\p{L}\p{M}\p{N} ._-]{0,63}$/u;
 
+// the kit's type library (taste/library/type.json): every family in it is a Google Fonts family
+let LIBRARY = null;
+const library = () => {
+  if (LIBRARY) return LIBRARY;
+  try {
+    const data = JSON.parse(fs.readFileSync(path.join(here, "..", "..", "taste", "library", "type.json"), "utf8"));
+    LIBRARY = Array.isArray(data) ? data.filter(e => e && typeof e === "object" && e.display && e.text) : [];
+  } catch {
+    LIBRARY = [];
+  }
+  return LIBRARY;
+};
+const libraryFamilies = () =>
+  new Set(library().flatMap(e => [e.display.family, e.text.family, e.mono?.family].filter(Boolean)));
+
+// serif, sans or mono: the generic family the site's own stack puts after the face (a Token reference line such as
+// --ff-heading: NaN Serf B Text,serif), else what its name says
+function kindOf(text, family) {
+  const f = family.toLowerCase();
+  if (GENERIC.test(f))
+    return (
+      /serif$/.test(f) && !/sans/.test(f) ? "serif"
+      : /mono/.test(f) ? "mono"
+      : "sans"
+    );
+  for (const m of text.matchAll(/^--[\w-]+:\s*(.+)$/gm)) {
+    const parts = m[1]
+      .split(" | ")[0]
+      .split(",")
+      .map(s =>
+        s
+          .trim()
+          .replace(/^["']|["']$/g, "")
+          .toLowerCase(),
+      );
+    const at = parts.indexOf(f);
+    if (at < 0) continue;
+    const g = parts.slice(at + 1).find(x => /^(?:ui-)?(?:serif|sans-serif|monospace)$|^system-ui$/.test(x));
+    if (g)
+      return (
+        /mono/.test(g) ? "mono"
+        : /^(?:ui-)?serif$/.test(g) ? "serif"
+        : "sans"
+      );
+  }
+  if (/mono|code/i.test(family)) return "mono";
+  if (
+    /serif|serf|garamond|times|georgia|playfair|caslon|baskerville|bodoni|fraunces|lora|merriweather|tiempos|freight|canela|domaine|lyon|publico|reckless|signifier/i.test(
+      family,
+    )
+    && !/sans/i.test(family)
+  )
+    return "serif";
+  return "sans";
+}
+
+// the nearest free face of the library for a licensed one: a serif takes the library's serifs, a sans its
+// geometric faces when the name is a geometric family's (Circular, Futura, Avenir...) else its neo-grotesks, a mono
+// the mono paired with the text face's stand-in. Among those, the one with most of the neutral moods (calm,
+// trusted, refined), then the library's own order.
+const GEOMETRIC_SANS =
+  /circular|futura|avenir|gilroy|brandon|sofia|cera|euclid|gotham|proxima|century gothic|tt commons|graphik/i;
+const NEUTRAL_MOODS = ["calm", "trusted", "refined"];
+function standInEntry(family, kind) {
+  const ranked = list =>
+    list
+      .map((e, i) => [e, (e.moods || []).filter(m => NEUTRAL_MOODS.includes(m)).length, i])
+      .sort((a, b) => b[1] - a[1] || a[2] - b[2])
+      .map(x => x[0]);
+  if (kind === "serif") return ranked(library().filter(e => e.class === "serif" && e.display.w))[0] || null;
+  const cls = GEOMETRIC_SANS.test(family) ? "geometric" : "neo-grotesk";
+  return ranked(library().filter(e => e.class === cls))[0] || null;
+}
+function standIn(family, kind, textFace, textKind) {
+  if (kind === "serif") return standInEntry(family, "serif")?.display.family ?? null;
+  if (kind === "sans") return standInEntry(family, "sans")?.text.family ?? null;
+  return standInEntry(textFace, textKind)?.mono?.family ?? (library().length ? "JetBrains Mono" : null);
+}
+
+// Which families Google Fonts serves: its css2 endpoint answers 200 for a family (and weights) it has and 400 for
+// one it has not. Each answer is kept in the pack's fonts.json, so a block prints the same every later time, offline
+// included; the record run asks first. A family never answered (offline, a timeout) counts as served when the kit's
+// type library names it, else as licensed, and is asked again next time.
+// asks: [[family, weights]] → Map family → { spec: "Family:wght@400;600" | "Family" | null, state }
+const FONT_CACHE = "fonts.json";
+const quotedList = list => list.map(f => `"${f}"`).join(", ");
+async function googleServes(dir, asks) {
+  const file = dir ? path.join(dir, FONT_CACHE) : null;
+  let cache = {};
+  try {
+    const data = JSON.parse(fs.readFileSync(file, "utf8"));
+    if (data && typeof data.served === "object" && data.served) cache = data.served;
+  } catch {
+    /* none yet */
+  }
+  let dirty = false;
+  const ask = async spec => {
+    if (typeof cache[spec] === "boolean") return cache[spec];
+    try {
+      const q = encodeURIComponent(spec)
+        .replace(/%20/g, "+")
+        .replace(/%3A/g, ":")
+        .replace(/%40/g, "@")
+        .replace(/%3B/g, ";");
+      const r = await fetch(`https://fonts.googleapis.com/css2?family=${q}`, { signal: AbortSignal.timeout(6000) });
+      if (r.status !== 200 && r.status !== 400) return null;
+      cache[spec] = r.status === 200;
+      dirty = true;
+      return cache[spec];
+    } catch {
+      return null;
+    }
+  };
+  const known = libraryFamilies();
+  const out = new Map();
+  await Promise.all(
+    asks.map(async ([family, weights]) => {
+      const full = `${family}:wght@${weights.join(";")}`;
+      const yes = await ask(full);
+      if (yes) return out.set(family, { spec: full, state: "served" });
+      // a family Google serves without one of these weights is linked at its default weight
+      const bare = yes === false ? await ask(family) : null;
+      if (bare) return out.set(family, { spec: family, state: "served" });
+      if (bare === false) return out.set(family, { spec: null, state: "licensed" });
+      return out.set(family, known.has(family) ? { spec: full, state: "served" } : { spec: null, state: "unasked" });
+    }),
+  );
+  if (dirty && file && fs.existsSync(dir))
+    try {
+      const served = Object.fromEntries(
+        Object.keys(cache)
+          .sort()
+          .map(k => [k, cache[k]]),
+      );
+      fs.writeFileSync(
+        file,
+        JSON.stringify({ source: "https://fonts.googleapis.com/css2 (200 served, 400 not)", served }, null, 1) + "\n",
+      );
+    } catch {
+      /* a read-only pack: asked again next time */
+    }
+  return out;
+}
+
 function tableRows(text, heading) {
+  text = text.replaceAll("\r\n", "\n");
+  text = text.replaceAll("\r\n", "\n");
   const at = text.indexOf(`\n${heading}\n`);
   if (at < 0) return null;
   const lines = text.slice(at + heading.length + 2).split("\n");
@@ -781,7 +1002,9 @@ function tableRows(text, heading) {
 }
 
 // manifest: the parsed taste.json or null; its variants.motion tokens (--m-*) join the printed :root block
-function kit(text, name, manifest = null) {
+// dir: the pack's folder, where fonts.json keeps what Google Fonts was asked (null: ask, keep nothing)
+async function kit(text, name, manifest = null, dir = null) {
+  if (dir) text = correctedText(text, dir);
   const hex = v => (HEX.test(v) ? hex6(v.toLowerCase()) : null);
   const colors = tableRows(text, "## Colors");
   if (!colors) fail("this file has no Colors table");
@@ -790,7 +1013,6 @@ function kit(text, name, manifest = null) {
   const bg = role("bg", 1) || "#ffffff";
   const ink = role("ink", 1) || inkOn(bg);
   const surface = role("surface", 1) || mixHex(bg, ink, 0.06);
-  const muted = role("muted", 1) || mixHex(ink, bg, 0.45);
   const accent = role("accent", 1) || ink;
 
   // the primary: the line under Shape when the taste names its fill, else picked from the Button table
@@ -813,20 +1035,32 @@ function kit(text, name, manifest = null) {
     : accent;
   // a tint can vanish into the ground (a white glass key over a photograph, read on a white page): its measured
   // text then has no contrast left on the opaque look, and the kit inks it for the ground instead
-  const contrastOf = (a, b) => {
-    const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p);
-    return (x + 0.05) / (y + 0.05);
-  };
   const measuredInk = button && hex(button.text ?? "");
-  const actionInk = measuredInk && (tint === 1 || contrastOf(action, measuredInk) >= 3) ? measuredInk : inkOn(action);
-  const accentInk = action === accent ? actionInk : inkOn(accent);
+  const firstInk = measuredInk && (tint === 1 || contrastOf(action, measuredInk) >= 3) ? measuredInk : inkOn(action);
 
   // the inverse band: the other scheme when the taste has two, else a raised step of its one scheme
   const invBg = (two && role("bg", 2)) || surface;
   const invInk = (two && role("ink", 2)) || ink;
+  // every *-ink reads 4.5:1 on its fill: the one wanted when it does, else the taste's own ink of the right side
+  // (its dark ink on a light fill, its light ink on a dark one), else black or white
+  const inkFor = (fill, want) => {
+    if (want && contrastOf(fill, want) >= 4.5) return want;
+    const own = [ink, invInk].sort((a, b) => contrastOf(fill, b) - contrastOf(fill, a))[0];
+    return contrastOf(fill, own) >= 4.5 ? own : inkOn(fill);
+  };
+  const actionInk = inkFor(action, firstInk);
+  const accentInk = inkFor(accent, action === accent ? actionInk : null);
   const fill6 = button && tint < 1 ? hex(button.fill) : null;
   const inkTint = fill6 && rgbOf(fill6).reduce((d, v, i) => d + Math.abs(v - rgbOf(ink)[i]), 0) <= 60;
   const invAction = !fill6 ? action : mixHex(invBg, inkTint ? invInk : fill6, tint);
+  const invAccent = (two && role("accent", 2)) || accent;
+  const invSurface = (two && role("surface", 2)) || mixHex(invBg, invInk, two ? 0.07 : 0.06);
+  // muted is text: a measured grey under 4.5:1 on its grounds prints in its own hue, stepped to 4.5:1 (the taste's
+  // Provenance and caveats keep the measured one)
+  const mutedRaw = role("muted", 1) || mixHex(ink, bg, 0.45);
+  const muted = readable(mutedRaw, [bg, surface]) || mutedRaw;
+  const invMutedRaw = (two && role("muted", 2)) || (two ? mixHex(invInk, invBg, 0.45) : mutedRaw);
+  const invMuted = readable(invMutedRaw, [invBg, invSurface]) || invMutedRaw;
   const p = {
     bg,
     surface,
@@ -837,16 +1071,23 @@ function kit(text, name, manifest = null) {
     action,
     "action-ink": actionInk,
     "inv-bg": invBg,
-    "inv-surface": (two && role("surface", 2)) || mixHex(invBg, invInk, two ? 0.07 : 0.06),
+    "inv-surface": invSurface,
     "inv-ink": invInk,
-    "inv-muted": (two && role("muted", 2)) || (two ? mixHex(invInk, invBg, 0.45) : muted),
-    "inv-accent": (two && role("accent", 2)) || accent,
-    "inv-accent-ink": accentInk,
+    "inv-muted": invMuted,
+    "inv-accent": invAccent,
+    "inv-accent-ink": inkFor(invAccent, accentInk),
     // a translucent key of the ink's own colour flips with the scheme (the ink tint on light, the inverse ink's
     // on the inverse band); a coloured one keeps its hue over the inverse ground
     "inv-action": invAction,
-    "inv-action-ink": tint < 1 ? inkOn(invAction) : actionInk,
+    "inv-action-ink": inkFor(invAction, tint < 1 ? null : actionInk),
   };
+  // a pale primary (a translucent grey key) under 3:1 on its ground keeps its fill, but links and the focus ring
+  // would vanish in it: they take each ground's ink through system.css's link and focus tokens
+  const faintAction = contrastOf(action, bg) < 3 || contrastOf(invAction, invBg) < 3;
+  const mutedNote =
+    muted !== mutedRaw ?
+      `the measured muted ${mutedRaw} reads ${ratioText(mutedRaw, bg)} on ${bg}: printed as ${muted}, its own hue at 4.5:1 on the grounds`
+    : "";
 
   // a pack written by hand, or before names were checked on record, still never prints an unsafe face
   const type = (tableRows(text, "## Typography")?.rows ?? []).map(r =>
@@ -861,7 +1102,18 @@ function kit(text, name, manifest = null) {
   const titleRow = ["h2", "h3"].map(k => type.find(r => r[0] === k)).find(Boolean);
   const titleFace = titleRow ? googleName(titleRow[1]) : h1Face;
   const display = titleFace;
-  const textFace = googleName(body?.[1] || display);
+  // the text face: the family that sets the most running text at reading sizes (14-20px), summed over the viewports
+  // each row was measured at (a body row counts twice); the display face keeps the headings. The page's biggest
+  // paragraph can be a large quote (a 36px serif testimonial read as body at 1440), which sets no running text.
+  const reading = new Map();
+  for (const r of type) {
+    if (!["body", "small", "nav"].includes(r[0]) || /mono/i.test(r[1]) || GENERIC.test(r[1])) continue;
+    if (!(px(r[2]) >= 14 && px(r[2]) <= 20)) continue;
+    const views = (r[5] || "").split(/,\s*/).filter(Boolean).length || 1;
+    reading.set(r[1], (reading.get(r[1]) || 0) + views * (r[0] === "body" ? 2 : 1));
+  }
+  const readingFace = [...reading].sort((a, b) => b[1] - a[1])[0]?.[0];
+  const textFace = googleName(readingFace || body?.[1] || display);
   const monoRow = type.find(r => /mono/i.test(r[1]));
   const mono = monoRow ? googleName(monoRow[1]) : "JetBrains Mono";
   const weights = new Map();
@@ -872,17 +1124,60 @@ function kit(text, name, manifest = null) {
   }
   if (!monoRow) weights.set(mono, new Set([400, 500]));
   const families = [...new Set([h1Face, display, textFace, mono])].filter(f => !GENERIC.test(f));
+  const weightsOf = f => [...(weights.get(f) || [400])].sort((a, b) => a - b);
+  // Google Fonts links only what it serves; a licensed face keeps its name in the tokens, followed in its stack by
+  // the nearest free face of the kit's type library, which is linked in its place
+  const served = await googleServes(
+    dir,
+    families.map(f => [f, weightsOf(f)]),
+  );
+  const free = new Map(); // licensed family → its free stand-in
+  for (const f of families) {
+    if (served.get(f).spec) continue;
+    const s = standIn(f, kindOf(text, f), textFace, kindOf(text, textFace));
+    if (s && !families.includes(s)) free.set(f, s);
+  }
+  const freeWeights = new Map();
+  for (const [f, s] of free) freeWeights.set(s, [...new Set([...(freeWeights.get(s) || []), ...weightsOf(f)])]);
+  const freeServed = await googleServes(
+    dir,
+    [...freeWeights].map(([s, w]) => [s, w.sort((a, b) => a - b)]),
+  );
+  for (const [f, s] of free) if (!freeServed.get(s).spec) free.delete(f);
+  const specs = [
+    ...new Set([...families.map(f => served.get(f).spec || (free.has(f) ? freeServed.get(free.get(f)).spec : null))]),
+  ].filter(Boolean);
   const link =
-    families.length ?
+    specs.length ?
       "https://fonts.googleapis.com/css2?"
-      + families
+      + specs
         .map(
-          f =>
-            `family=${encodeURIComponent(f).replace(/%20/g, "+")}:wght@${[...(weights.get(f) || [400])].sort((a, b) => a - b).join(";")}`,
+          s =>
+            `family=${encodeURIComponent(s).replace(/%20/g, "+").replace(/%3A/g, ":").replace(/%40/g, "@").replace(/%3B/g, ";")}`,
         )
         .join("&")
       + "&display=swap"
     : "";
+  const licensed = families.filter(f => !served.get(f).spec);
+  const unasked = licensed.filter(f => served.get(f).state === "unasked");
+  const fontNote =
+    licensed.length ?
+      [
+        `<!-- licensed faces: ${[
+          licensed.length > unasked.length ?
+            `Google Fonts does not serve ${quotedList(licensed.filter(f => !unasked.includes(f)))}`
+          : "",
+          unasked.length ?
+            `${quotedList(unasked)} could not be asked of Google Fonts (offline) and ${unasked.length > 1 ? "are" : "is"} not in the kit's type library, so ${unasked.length > 1 ? "they count" : "it counts"} as licensed until this block is printed online`
+          : "",
+        ]
+          .filter(Boolean)
+          .join("; ")}; nothing links ${licensed.length > 1 ? "them" : "it"}.`,
+        `     The tokens keep the taste's names; ${free.size ? `each stack carries the nearest free face of the kit's type library after it, linked here: ${[...free].map(([f, s]) => `"${f}" → ${s}`).join(", ")}` : "each stack falls back to the system face"}.`,
+        `     Holding a licence, serve the real files under the same names, one rule per face and weight:`,
+        `     @font-face { font-family: "${licensed[0]}"; src: url(fonts/${slug(licensed[0])}.woff2) format("woff2"); font-weight: ${weightsOf(licensed[0])[0]}; font-display: swap; } -->`,
+      ]
+    : [];
   const tracking = h1 && h1[4] !== "0" && /^-?\d*\.?\d+(?:em|rem|px)?$/.test(h1[4]) ? h1[4] : "0em";
 
   const primary = /Primary button: (\d+(?:\.\d+)?)px radius|Primary button: pill/.exec(text);
@@ -896,7 +1191,11 @@ function kit(text, name, manifest = null) {
   const sm = btn >= 999 ? Math.min(...shape.filter(v => v >= 4), 8) : btn;
   const above = shape.filter(v => v > sm && v <= 32).sort((a, b) => a - b);
   const md = above.length ? above[Math.floor((above.length - 1) / 2)] : sm;
-  const lg = above.length ? above[above.length - 1] : md;
+  const cardRadius = parseFloat(tableRows(text, "### Card")?.rows[0]?.[0]);
+  const lg =
+    Number.isFinite(cardRadius) ? cardRadius
+    : above.length ? above[above.length - 1]
+    : md;
 
   const stack = (f, tail) =>
     GENERIC.test(f) ?
@@ -904,24 +1203,48 @@ function kit(text, name, manifest = null) {
         tail
       : `${f}, ${tail}`
     : `"${f}", ${tail}`;
-  const fallback = f =>
-    (
-      /serif|garamond|times|georgia|playfair|caslon|baskerville|bodoni|fraunces|lora|merriweather/i.test(f)
-      && !/sans/i.test(f)
-    ) ?
-      "Georgia, serif"
-    : "system-ui, sans-serif";
+  // the generic tail follows the face's kind (the site's own stack says it, else its name), after the free stand-in
+  // of a licensed face
+  const MONO_TAIL = 'ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace';
+  const face = f => {
+    const kind = kindOf(text, f);
+    const tail =
+      kind === "serif" ? "Georgia, serif"
+      : kind === "mono" ? MONO_TAIL
+      : "system-ui, sans-serif";
+    return free.has(f) ? `"${f}", "${free.get(f)}", ${tail}` : stack(f, tail);
+  };
 
   // the taste's own sizes, a straight line from 390 to 1440 like the kit's own scale
+  // body sizes come from the text face's own rows (a large quote in the display face sets no running text)
+  const rowsAt = (role, vw) =>
+    type.filter(
+      r =>
+        r[0] === role
+        && !/mono/i.test(r[1])
+        && (role !== "body" || googleName(r[1]) === textFace)
+        && r[5].split(/,\s*/).includes(String(vw)),
+    );
   const sizeAt = (role, vw) => {
-    const rows = type.filter(r => r[0] === role && !/mono/i.test(r[1]));
-    const row = rows.find(r => r[5].split(/,\s*/).includes(String(vw)));
+    const row = rowsAt(role, vw)[0];
     return row ? px(row[2]) : 0;
+  };
+  // the phone size of the role's lead element: the largest phone size of the desktop row's family (any
+  // family when it has none), capped at the desktop size. The first row listing 390 can be a small
+  // element of that role kept at both widths (a 16px footer h2), which would set every heading of the
+  // role at that size on a phone.
+  const phoneSize = (role, big) => {
+    const desk = rowsAt(role, 1440)[0];
+    const sizes = rows => rows.map(r => px(r[2])).filter(v => v > 0);
+    const phone = rowsAt(role, 390);
+    const same = sizes(phone.filter(r => desk && r[1] === desk[1]));
+    const any = same.length ? same : sizes(phone);
+    return any.length ? Math.min(Math.max(...any), big) : 0;
   };
   const line = (role, lo, hi) => {
     const big = sizeAt(role, 1440);
     if (!(big >= lo && big <= hi)) return null;
-    const small = Math.min(sizeAt(role, 390) || big, big);
+    const small = phoneSize(role, big) || big;
     if (small === big) return `${big}px`;
     const slope = (big - small) / (1440 - 390);
     const at0 = small - slope * 390;
@@ -949,9 +1272,54 @@ function kit(text, name, manifest = null) {
   const motionTokens = Object.entries(variants && typeof variants === "object" ? variants : {})
     .filter(([k, v]) => /^--m-[a-z0-9-]+$/.test(k) && typeof v === "string" && v.trim() && !/[;{}<>]/.test(v))
     .map(([k, v]) => `  ${k}: ${v.trim()};`);
+  // Carry measured roles through the existing tables; corrections apply before this bridge.
+  const treatments = [];
+  const dimensions = tableRows(text, "## Layout");
+  const columns = dimensions?.head.slice(1).map(v => parseFloat(v)) || [];
+  const wideColumn = columns.length ? columns.indexOf(Math.max(...columns)) + 1 : 1;
+  for (const [label, token] of [
+    ["Container", "--container"],
+    ["Header", "--nav"],
+  ]) {
+    const value = parseFloat(dimensions?.rows.find(r => r[0] === label)?.[wideColumn]);
+    if (Number.isFinite(value) && value > 0) treatments.push(`  ${token}: ${value}px;`);
+  }
+  const safeCSS = value =>
+    (
+      typeof value === "string"
+      && value.length < 1000
+      && !/[;{}<>\\]/.test(value)
+      && !/url\s*\(|@|expression/i.test(value)
+      && /^[a-z0-9#().,%\s+\/-]+$/i.test(value)
+    ) ?
+      value
+    : null;
+  const card = tableRows(text, "### Card")?.rows[0];
+  for (const [index, token] of [
+    [2, "--panel-fill"],
+    [3, "--panel-border"],
+    [4, "--panel-shadow"],
+  ]) {
+    const value = safeCSS(token === "--panel-border" ? normalizeBorder(card?.[index]) : card?.[index]);
+    if (value && value !== "—") treatments.push(`  ${token}: ${value};`);
+  }
+  for (const [roleName, token] of [
+    ["surface", "--panel-fill"],
+    ["primary", "--btn-fill"],
+    ["h2", "--h2-fill"],
+  ]) {
+    const value = safeCSS(tableRows(text, "## Fills")?.rows.find(r => r[0] === roleName)?.[1]);
+    if (value && /gradient\(/.test(value)) treatments.push(`  ${token}: ${value};`);
+  }
+  const brandLight = role("brand-light", 1) || accent;
+  const uiAccent = role("ui-accent", 1) || accent;
+  treatments.push(`  --brand-light: ${brandLight};`, `  --fx-accent: ${uiAccent};`);
+  const h2Weight = Number(type.find(r => r[0] === "h2")?.[3]);
+  if (h2Weight >= 100 && h2Weight <= 1000) treatments.push(`  --h2-weight: ${h2Weight};`);
   return [
     // the gate reads the taste's Kit overrides through this name
     `<meta name="taste" content="${name}">`,
+    ...fontNote,
     ...(link ?
       [
         '<link rel="preconnect" href="https://fonts.googleapis.com">',
@@ -963,18 +1331,33 @@ function kit(text, name, manifest = null) {
     "<!-- the taste's own tokens (ui → references/record.md, Apply): in place of start.mjs css or brand; keep this <style> after the links -->",
     "<style>",
     ":root {",
+    ...(mutedNote ? [`  /* ${mutedNote} */`] : []),
     ...Object.entries(p).map(([k, v]) => `  --p-${k}: ${v};`),
-    `  --font-display: ${stack(display, fallback(display))};`,
-    `  --font-text: ${stack(textFace, "system-ui, sans-serif")};`,
-    `  --font-mono: ${quoted(mono)}, ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;`,
+    `  --font-display: ${face(display)};`,
+    `  --font-text: ${face(textFace)};`,
+    `  --font-mono: ${quoted(mono)}, ${free.has(mono) ? `"${free.get(mono)}", ` : ""}${MONO_TAIL};`,
     `  --display-weight: ${Number(h1?.[3]) || 500};`,
     `  --display-tracking: ${tracking};`,
     `  --display-tracking-xl: ${tracking};`,
     ...sizes,
     ...motionTokens,
+    ...treatments,
     "}",
+    // links and the focus ring on every ground: system.css reads these before the action colour
+    ...(faintAction ?
+      [
+        `/* the primary's fill (${action}) reads ${ratioText(action, bg)} on ${bg}: it stays on the button, and links and the focus ring take each ground's ink */`,
+        ":where(*) {",
+        "  --link: var(--ink);",
+        "  --focus: var(--ink);",
+        "}",
+      ]
+    : []),
+    ...(treatments.some(t => t.includes("--h2-fill:")) ?
+      ["h2 { background: var(--h2-fill); background-clip: text; -webkit-background-clip: text; color: transparent; }"]
+    : []),
     ...(btnShadow ? [`.btn--primary { box-shadow: ${btnShadow}; }`] : []),
-    ...(h1Face !== display ? [`:root h1 { font-family: ${stack(h1Face, fallback(h1Face))}; }`] : []),
+    ...(h1Face !== display ? [`:root h1 { font-family: ${face(h1Face)}; }`] : []),
     "html[data-radius] {",
     `  --r-sm: ${sm}px;`,
     `  --r-md: ${md}px;`,
@@ -988,7 +1371,7 @@ function kit(text, name, manifest = null) {
     `  --ground-surface: ${p["inv-surface"]} !important;`,
     `  --ground-ink: ${ink} !important;`,
     `  --ground-muted: ${muted} !important;`,
-    `  --ground-accent: ${accent} !important;`,
+    `  --ground-accent: ${brandLight} !important;`,
     "}",
     "</style>",
     "",
@@ -1544,21 +1927,209 @@ function readManifest(root, name) {
   }
 }
 
+function saveEvidence(dir, bytes) {
+  const buffer = Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes);
+  const hash = crypto.createHash("sha256").update(buffer).digest("hex").slice(0, 20);
+  const relative = `capture/evidence/${hash}.json`;
+  const absolute = path.join(dir, ...relative.split("/"));
+  fs.mkdirSync(path.dirname(absolute), { recursive: true });
+  if (!fs.existsSync(absolute)) fs.writeFileSync(absolute, buffer);
+  return relative;
+}
+
+function draftTasteFromCapture(model, name, sources, sourceUrls) {
+  const evidence = {};
+  const clean = value =>
+    typeof value === "string" && value.trim() && !/[;{}<>\r\n]/.test(value) ? value.trim() : null;
+  const addBlockEvidence = (field, reason) => {
+    if (sources.length) evidence[field] = { sources: [...new Set(sources)].sort(), reason };
+  };
+  const light = {};
+  // Raw custom properties stay in immutable evidence; only measured semantic roles enter the draft.
+  const roleNames = {
+    bg: "--p-bg",
+    surface: "--p-surface",
+    ink: "--p-ink",
+    muted: "--p-muted",
+    accent: "--p-accent",
+    accentInk: "--p-accent-ink",
+    action: "--p-action",
+    actionInk: "--p-action-ink",
+  };
+  for (const token of Object.values(roleNames)) light[token] ??= null;
+  for (const [role, token] of Object.entries(roleNames)) {
+    const value =
+      role === "accentInk" || role === "action" || role === "actionInk" ? null : model.rolesObserved?.[role];
+    if (value !== null && value !== undefined) light[token] = clean(value);
+  }
+  const primary = model.components.primary;
+  if (primary) {
+    if (typeof primary.bg === "string") light["--p-action"] = clean(primary.bg);
+    if (typeof primary.color === "string") light["--p-action-ink"] = clean(primary.color);
+  }
+  addBlockEvidence("tokens.colors.light", "Captured custom properties and painted color roles from the rendered page.");
+
+  let dark = null;
+  if (model.rolesDarkObserved || model.tokens.some(token => token.dark)) {
+    dark = {};
+    for (const token of Object.values(roleNames)) dark[token] = null;
+    for (const [role, token] of Object.entries(roleNames)) {
+      const value = model.rolesDarkObserved?.[role];
+      if (value !== null && value !== undefined) dark[token] = clean(value);
+    }
+    addBlockEvidence("tokens.colors.dark", "Captured dark-scheme custom properties and painted color roles.");
+  }
+
+  const typeRows = role =>
+    model.type
+      .filter(item => item.role === role)
+      .sort((a, b) => Math.max(...(b.at || [0])) - Math.max(...(a.at || [0])) || Number(b.size) - Number(a.size));
+  const typography = {};
+  const typeNames = {
+    h1: "--t-h1",
+    h2: "--t-h2",
+    h3: "--t-h3",
+    body: "--t-body",
+    small: "--t-small",
+    button: "--t-label",
+  };
+  for (const token of Object.values(typeNames)) typography[token] = null;
+  for (const role of ["h1", "h2", "h3", "body", "small", "button", "nav"]) {
+    const rows = typeRows(role);
+    const row = rows[0];
+    if (!row) continue;
+    let value = Number.isFinite(row.size) ? `${row.size}px` : null;
+    const wide = Math.max(...(row.at || [0]));
+    const narrow = rows
+      .filter(item => item.family === row.family && Number.isFinite(item.size))
+      .sort((a, b) => Math.min(...(a.at || [0])) - Math.min(...(b.at || [0])))[0];
+    const small = narrow && Math.min(...(narrow.at || [0]));
+    if (value && small > 0 && wide > small && narrow.size < row.size) {
+      const slope = (row.size - narrow.size) / (wide - small);
+      value = `clamp(${narrow.size}px, ${+(slope * 100).toFixed(3)}vw + ${+(narrow.size - slope * small).toFixed(2)}px, ${row.size}px)`;
+    }
+    if (typeNames[role] && value !== null) typography[typeNames[role]] = clean(value);
+    if (role === "h1") {
+      if (Number.isFinite(row.weight)) typography["--display-weight"] = String(row.weight);
+      if (clean(String(row.tracking ?? ""))) typography["--display-tracking"] = String(row.tracking);
+    }
+    if (role === "h2" && Number.isFinite(row.weight)) typography["--h2-weight"] = String(row.weight);
+  }
+  addBlockEvidence("tokens.typography", "Captured computed typography from the widest recorded viewport.");
+
+  const fontRow = role => {
+    const row = typeRows(role)[0];
+    return { family: clean(row?.family), sources: [], fallbacks: [] };
+  };
+  const fonts = { roles: { body: fontRow("body"), heading: fontRow("h2").family ? fontRow("h2") : fontRow("h1") } };
+  for (const role of ["h1", "h2", "h3"]) if (typeRows(role).length) fonts.roles[role] = fontRow(role);
+  for (const [role, face] of Object.entries(fonts.roles))
+    if (face.family) addBlockEvidence(`fonts.roles.${role}`, "Captured computed font-family from rendered text.");
+
+  const surfaces = {};
+  const page = {};
+  if (model.rolesObserved?.bg) page["background-color"] = clean(model.rolesObserved.bg);
+  if (model.rolesObserved?.ink) page.color = clean(model.rolesObserved.ink);
+  if (Object.keys(page).length) surfaces.page = page;
+  if (model.rolesObserved?.surface) surfaces.panel = { "background-color": clean(model.rolesObserved.surface) };
+  const capturedSurface = component => {
+    const result = {};
+    for (const [source, property] of [
+      ["bg", "background"],
+      ["color", "color"],
+      ["border", "border"],
+      ["shadow", "box-shadow"],
+    ]) {
+      const raw = clean(component?.[source]);
+      const value = source === "border" ? normalizeBorder(raw) : raw;
+      if (value) result[property] = value;
+    }
+    if (Number.isFinite(component?.radius)) result["border-radius"] = `${component.radius}px`;
+    return result;
+  };
+  const card = model.components.card?.[0];
+  if (card) surfaces.panel = capturedSurface(card);
+  if (primary) surfaces.primary = capturedSurface(primary);
+  for (const [role, surface] of [
+    ["surface", "panel"],
+    ["primary", "primary"],
+    ["h2", "h2"],
+  ]) {
+    const gradient =
+      role === "h2" ?
+        Array.isArray(model.fills?.text) ?
+          model.fills.text.find(entry => entry?.role === "h2")?.gradient?.css
+        : null
+      : model.fills?.[role]?.css;
+    if (clean(gradient)) {
+      surfaces[surface] ||= {};
+      surfaces[surface].background = clean(gradient);
+      if (role === "h2")
+        Object.assign(surfaces[surface], {
+          "background-clip": "text",
+          "-webkit-background-clip": "text",
+          color: "transparent",
+        });
+    }
+  }
+  addBlockEvidence("tokens.surfaces", "Captured painted surfaces, controls, gradients and shadows.");
+
+  const dimensions = {};
+  dimensions["--container"] = null;
+  dimensions["--gut"] = null;
+  dimensions["--nav"] = null;
+  const layout = [...model.layouts].sort((a, b) => Number(b.vw) - Number(a.vw))[0] || {};
+  for (const [source, token] of [
+    ["container", "--container"],
+    ["gutter", "--gut"],
+    ["header", "--nav"],
+  ])
+    if (Number.isFinite(layout[source])) dimensions[token] = `${layout[source]}px`;
+  if (Number.isFinite(primary?.h)) dimensions["--btn-h"] = `${primary.h}px`;
+  addBlockEvidence(
+    "tokens.dimensions",
+    "Captured computed layout dimensions and control height from the widest recorded viewport.",
+  );
+
+  return {
+    schemaVersion: 2,
+    name,
+    source: sourceUrls,
+    captured: model.date,
+    use_when: [],
+    fits: {},
+    variants: {},
+    signature: [],
+    settled: {},
+    tokens: { colors: { light, dark }, typography, surfaces, dimensions },
+    fonts,
+    guidance: { character: null, usage: [], composition: [], adaptations: [] },
+    evidence,
+  };
+}
+
 function list(root) {
   const rows = [];
   for (const entry of fs.existsSync(root) ? fs.readdirSync(root).sort() : []) {
     const file = path.join(root, entry, "design-system.txt");
-    if (!NAME.test(entry) || !fs.existsSync(file)) continue;
-    const text = fs.readFileSync(file, "utf8");
-    const date = /captured on (\S+)/.exec(text)?.[1] ?? "unknown";
+    if (!NAME.test(entry)) continue;
+    let text = "";
+    let definition = null;
+    try {
+      const pack = loadTastePack(path.join(root, entry));
+      if (pack.version === 2) definition = pack.definition;
+    } catch {
+      if (fs.existsSync(path.join(root, entry, "taste.json"))) continue;
+    }
+    if (!definition && !fs.existsSync(file)) continue;
+    if (!definition) text = fs.readFileSync(file, "utf8");
+    const date = definition?.captured ?? /captured on (\S+)/.exec(text)?.[1] ?? "unknown";
     const after = text.split("\n").slice(text.split("\n").findIndex(l => l.startsWith("# ")) + 1);
-    const use = readManifest(root, entry)?.use_when;
+    const use = definition?.use_when ?? readManifest(root, entry)?.use_when;
     const uses = Array.isArray(use) ? use.filter(u => typeof u === "string" && u.trim()) : [];
-    rows.push([
-      entry,
-      date,
-      (after.find(l => l.trim()) ?? "").trim() + (uses.length ? ` · use: ${uses.join(", ")}` : ""),
-    ]);
+    const intro =
+      definition ? definition.guidance?.character || "v2 taste definition" : (after.find(l => l.trim()) ?? "").trim();
+    rows.push([entry, date, intro + (uses.length ? ` · use: ${uses.join(", ")}` : "")]);
   }
   const width = Math.max(0, ...rows.map(r => r[0].length));
   for (const [n, d, intro] of rows) console.log(`${n.padEnd(width)}  ${d}  ${intro}`);
@@ -1577,22 +2148,62 @@ async function main() {
 
   if (cmd === "kit" && !o.from.length) {
     if (o._.length !== 2) fail("kit needs one taste name");
-    const file = path.join(root, checkName(o._[1]), "design-system.txt");
+    const name = checkName(o._[1]);
+    const packDir = path.join(root, name);
+    const manifest = path.join(packDir, "taste.json");
+    if (fs.existsSync(manifest)) {
+      const pack = loadTastePack(packDir);
+      if (pack.version === 2) {
+        process.stdout.write(serializeTasteKit(pack.definition, { packDir: pack.dir }));
+        return;
+      }
+    }
+    const file = path.join(packDir, "design-system.txt");
     if (!fs.existsSync(file)) fail(`unknown taste: ${o._[1]}`);
-    process.stdout.write(kit(fs.readFileSync(file, "utf8"), checkName(o._[1]), readManifest(root, o._[1])));
+    process.stdout.write(
+      await kit(fs.readFileSync(file, "utf8"), checkName(o._[1]), readManifest(root, o._[1]), path.dirname(file)),
+    );
     return;
   }
 
   if (cmd === "css" && !o.from.length) {
     if (o._.length !== 2) fail("css needs one taste name");
-    const file = path.join(root, checkName(o._[1]), "design-system.txt");
+    const name = checkName(o._[1]);
+    const packDir = path.join(root, name);
+    const manifest = path.join(packDir, "taste.json");
+    if (fs.existsSync(manifest)) {
+      const pack = loadTastePack(packDir);
+      if (pack.version === 2) {
+        const text = serializeTasteCss(pack.definition, { packDir: pack.dir });
+        if (o.out) {
+          fs.mkdirSync(path.dirname(path.resolve(o.out)), { recursive: true });
+          fs.writeFileSync(o.out, text);
+          console.log(path.resolve(o.out));
+        } else process.stdout.write(text);
+        return;
+      }
+    }
+    const file = path.join(packDir, "design-system.txt");
     if (!fs.existsSync(file)) fail(`unknown taste: ${o._[1]}`);
-    const text = css(fs.readFileSync(file, "utf8"));
+    const text = css(correctedText(fs.readFileSync(file, "utf8"), path.dirname(file)));
     if (o.out) {
       fs.mkdirSync(path.dirname(path.resolve(o.out)), { recursive: true });
       fs.writeFileSync(o.out, text);
       console.log(path.resolve(o.out));
     } else process.stdout.write(text);
+    return;
+  }
+
+  if (cmd === "guide" && !o.from.length) {
+    if (o._.length !== 2) fail("guide needs one taste name");
+    if (o.out) fail("guide does not take --out");
+    const name = checkName(o._[1]);
+    const packDir = path.join(root, name);
+    const pack = loadTastePack(packDir);
+    if (pack.version !== 2) fail(`guide requires a schemaVersion 2 taste pack: ${name}`);
+    const file = path.join(packDir, "design-system.txt");
+    fs.writeFileSync(file, renderTasteGuide(pack.definition, { packDir: pack.dir }));
+    console.log(`wrote ${file}`);
     return;
   }
 
@@ -1610,27 +2221,53 @@ async function main() {
   if (fs.existsSync(file) && !o.force && !o.keepDoc)
     fail(`${name} already exists; --keep-doc captures it again and keeps its file, --force replaces the file`);
 
+  const manifest = path.join(dir, "taste.json");
+  const existingPack = fs.existsSync(manifest) ? loadTastePack(dir) : null;
+  const createDraft = existingPack === null;
   let captures = [];
+  const evidenceSources = [];
   if (o.from.length) {
     for (const f of o.from) {
       let json = null;
+      let raw;
       try {
-        json = JSON.parse(fs.readFileSync(f, "utf8"));
+        raw = fs.readFileSync(f);
+        json = JSON.parse(raw.toString("utf8"));
       } catch (e) {
         fail(`cannot read ${f}: ${e.message}`);
       }
+      evidenceSources.push(saveEvidence(dir, raw));
       captures.push(norm(json));
     }
   } else {
     chromeOrExit("record"); // no browser: stop before the old shots and capture are removed
     fs.rmSync(path.join(dir, "shots"), { recursive: true, force: true });
-    fs.rmSync(path.join(dir, "capture"), { recursive: true, force: true });
-    for (const url of urls) captures.push(...(await captureUrl(url, dir)).map(norm));
+    const captureRoot = path.join(dir, "capture");
+    for (const entry of fs.existsSync(captureRoot) ? fs.readdirSync(captureRoot) : [])
+      if (entry !== "evidence") fs.rmSync(path.join(captureRoot, entry), { recursive: true, force: true });
+    for (const url of urls) {
+      const rawCaptures = await captureUrl(url, dir);
+      for (const raw of rawCaptures) {
+        raw.source = url;
+        const bytes = Buffer.from(JSON.stringify(raw, null, 1) + "\n");
+        evidenceSources.push(saveEvidence(dir, bytes));
+        captures.push(norm(raw));
+      }
+    }
   }
 
   fs.mkdirSync(dir, { recursive: true });
-  // --keep-doc: the capture is taken again and the taste's file, with what was written into it, stays
-  const text = o.keepDoc ? fs.readFileSync(file, "utf8") : render(merge(captures), name);
+  const model = merge(captures);
+  const sourceUrls = [...new Set([...urls, ...captures.map(c => c.source).filter(Boolean)])];
+  const draft = createDraft ? draftTasteFromCapture(model, name, evidenceSources, sourceUrls) : null;
+  // The manifest is reviewed work and stays byte-for-byte unchanged on recapture.
+  if (draft) fs.writeFileSync(manifest, JSON.stringify(draft, null, 1) + "\n");
+  // --keep-doc preserves the guide; v2 guides are regenerated only from their authoritative JSON definition.
+  const text =
+    o.keepDoc ? fs.readFileSync(file, "utf8")
+    : draft ? renderTasteGuide(draft, { packDir: dir })
+    : existingPack?.version === 2 ? renderTasteGuide(existingPack.definition, { packDir: dir })
+    : render(model, name);
   if (!o.keepDoc) fs.writeFileSync(file, text);
   console.log(`${o.keepDoc ? "kept" : "wrote"} ${file}`);
   if (!o.from.length) {
@@ -1657,26 +2294,12 @@ async function main() {
     fs.writeFileSync(path.join(dir, "capture", "candidates.json"), JSON.stringify(cands, null, 1) + "\n");
   }
   // an existing manifest is the agent's work: never overwritten, with or without --force
-  const manifest = path.join(dir, "taste.json");
-  if (!fs.existsSync(manifest))
-    fs.writeFileSync(
-      manifest,
-      JSON.stringify(
-        {
-          name,
-          source: urls,
-          captured: captures[0]?.captured,
-          use_when: [],
-          fits: {},
-          variants: {},
-          signature: [],
-          settled: {},
-        },
-        null,
-        1,
-      ) + "\n",
-    );
   console.log(`${cands.length} candidates to settle in ${manifest}`);
+  // ask Google Fonts now which of the taste's faces it serves; fonts.json keeps the answers for `kit`. Only when kit can
+  // read the file: its one fail() (no Colors table, e.g. a kept file with CRLF endings) exits the process, which would
+  // turn a finished record run into exit 2
+  if ((existingPack?.version === 1 || (draft === null && !existingPack)) && tableRows(text, "## Colors"))
+    await kit(text, name, readManifest(root, name), dir).catch(() => {});
 }
 
 try {

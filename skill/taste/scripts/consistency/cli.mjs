@@ -1,4 +1,5 @@
 // consistency/cli.mjs — the flag reader every part shares; opt/has splice a flag out of argv, so the page is argv[0] once all are read (moved from consistency.mjs)
+import { readBuildPlan } from "../build-policy.mjs";
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
 export const argv = process.argv.slice(2);
 export const opt = (n, d) => {
@@ -20,3 +21,5 @@ export const TASTE = (() => {
   const v = opt("taste", null);
   return typeof v === "string" && v && !v.startsWith("--") ? v : null;
 })();
+// Gate-supplied state, not page-controlled data attributes, selects V2 policy.
+export const BUILD_PLAN = readBuildPlan(opt("build-plan", null));

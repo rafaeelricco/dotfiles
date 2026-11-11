@@ -1,0 +1,1 @@
+Synthetic taste fixture. All design values are intentional test inputs. No screenshot capture or real-site fidelity is claimed.

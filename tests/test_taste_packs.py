@@ -31,9 +31,72 @@ def make_pack(tmp, name, **manifest):
     """<tmp>/tastes/<name>/taste.json with the given keys over the empty manifest; returns the pack folder."""
     pack = Path(tmp) / "tastes" / name
     pack.mkdir(parents=True, exist_ok=True)
-    data = {"name": name, "source": ["https://example.test/"], "use_when": [], "fits": {}, "variants": {},
-            "signature": [], "settled": {}}
+    light = {
+        "--p-bg": "#ffffff", "--p-ink": "#111111", "--p-surface": "#f4f4f4", "--p-muted": "#555555",
+        "--p-accent": "#2457c5", "--p-accent-ink": "#ffffff", "--p-action": "#2457c5", "--p-action-ink": "#ffffff",
+        "--p-inv-bg": "#111111", "--p-inv-surface": "#1d1d1d", "--p-inv-ink": "#ffffff",
+        "--p-inv-muted": "#cfcfcf", "--p-inv-accent": "#7da0ff", "--p-inv-accent-ink": "#111111",
+        "--p-inv-action": "#7da0ff", "--p-inv-action-ink": "#111111",
+    }
+    typography = {"--t-h1": "48px", "--t-h2": "32px", "--t-body": "16px"}
+    dimensions = {"--container": "1200px", "--nav": "72px"}
+    data = {
+        "schemaVersion": 2,
+        "name": name,
+        "source": ["https://example.test/"],
+        "use_when": [],
+        "fits": {},
+        "variants": {},
+        "signature": [],
+        "settled": {},
+        "tokens": {"colors": {"light": light, "dark": None}, "typography": typography,
+                   "surfaces": {}, "dimensions": dimensions},
+        "fonts": {"roles": {role: {"family": "system-ui", "sources": [], "fallbacks": ["sans-serif"]}
+                             for role in ("body", "heading")}},
+        "guidance": {"character": "Clear and measured.", "usage": ["Use direct language."],
+                     "composition": ["Keep the hierarchy compact."], "adaptations": ["Use accessible contrast."]},
+        "evidence": {},
+        "heroes": ["centred"],
+        "layout": {"nav": ["nav-mega"], "footer": ["footer-columns"], "close": ["close-type"],
+                   "buttons": ["solid"], "mark": ["wordmark"], "bands": [], "rhythm": "screens",
+                   "headingAlign": "left"},
+        "motion": {"moments": 0, "entrance": "still", "scene": "none", "effect": "none",
+                   "reveal": "none", "fragmentPlayback": "static"},
+    }
     data.update(manifest)
+    data["layout"] = {**data["layout"], **manifest.get("layout", {})}
+    signature = data.get("signature", [])
+    motion = {**data["motion"], **manifest.get("motion", {})}
+    if "motion" not in manifest:
+        motion["moments"] = sum(item.startswith("moments/") for item in signature)
+        if any(item.startswith("scenes/") for item in signature):
+            motion["scene"] = "auto"
+        if any(item.startswith("effects/") for item in signature):
+            motion["effect"] = "auto"
+    data["motion"] = motion
+    data["contractEvidence"] = {
+        f"{family}.{field}": {"sources": ["shots/ref.png"], "reason": "recorded in the reference capture"}
+        for family in ("layout", "motion")
+        for field in data.get(family, {})
+    }
+    evidence = {"sources": ["https://example.test/reference.png"], "reason": "recorded in the reference capture"}
+    data["evidence"]["layout"] = evidence
+    data["evidence"]["motion"] = evidence
+    for key, value in light.items():
+        data["evidence"][f"tokens.colors.light.{key}"] = evidence
+    for key, value in typography.items():
+        data["evidence"][f"tokens.typography.{key}"] = evidence
+    for key, value in dimensions.items():
+        data["evidence"][f"tokens.dimensions.{key}"] = evidence
+    for family in ("layout", "motion"):
+        for field in data.get(family, {}):
+            data["evidence"][f"{family}.{field}"] = evidence
+    data["evidence"]["fonts.roles.body"] = evidence
+    data["evidence"]["fonts.roles.heading"] = evidence
+    data["evidence"]["guidance.character"] = evidence
+    data["evidence"]["guidance.usage"] = evidence
+    data["evidence"]["guidance.composition"] = evidence
+    data["evidence"]["guidance.adaptations"] = evidence
     (pack / "taste.json").write_text(json.dumps(data), encoding="utf-8")
     return pack
 
@@ -70,6 +133,14 @@ def add_effect(pack, eid="pack-fx"):
     """A valid pack effect: grain-gradient copied under a new id (meta.json and effect.js declare it)."""
     return clone_item(TASTE / "assets/effects/grain-gradient", pack / "assets/effects" / eid, "grain-gradient", eid,
                       ["meta.json", "effect.js"])
+
+
+def add_ui(pack, uid="chat"):
+    item = pack / "assets/ui" / uid
+    item.mkdir(parents=True, exist_ok=True)
+    (item / "meta.json").write_text(json.dumps({"id": uid}), encoding="utf-8")
+    (item / "fragment.html").write_text('<div class="chat-fragment">Chat</div>\n', encoding="utf-8")
+    return item
 
 
 class Sandbox(unittest.TestCase):
@@ -137,16 +208,74 @@ class Packs(Sandbox):
         pack = make_pack(self.tmp, "sample", signature=["moments/pack-moment"])
         add_moment(pack)
         site, stdout, deal = self.plan("sample")
+        self.assertEqual(deal["planVersion"], 2)
+        self.assertEqual(deal["mode"], "reference")
         self.assertEqual(deal["taste"], "sample")
         mine = [m for m in deal["moments"] if m["id"] == "pack-moment"]
         self.assertEqual(len(mine), 1)
         self.assertEqual(Path(mine[0]["dir"]).resolve(), (pack / "assets/moments/pack-moment").resolve())
-        self.assertTrue(mine[0]["dir"].endswith("assets/moments/pack-moment"))
+        self.assertTrue(mine[0]["dir"].replace("\\", "/").endswith("assets/moments/pack-moment"))
         self.assertIn("tastes/sample/assets/moments/pack-moment/demo.html", stdout)
         lines = [line.strip() for line in stdout.splitlines()]
         taste_lines = [line for line in lines if line.startswith("taste ")]
         self.assertTrue(any("sample" in line and "record.mjs kit sample" in line for line in taste_lines), stdout)
         self.assertFalse([line for line in lines if line.startswith("palette ")])
+        self.assertFalse((site / ".taste-skill/history.json").exists())
+        self.assertFalse((site / ".taste-skill/layout-history.json").exists())
+
+    @needs_node
+    def test_reference_plan_is_independent_of_existing_histories(self):
+        pack = make_pack(self.tmp, "sample")
+        site = self.tmp / "site"
+        site.mkdir()
+        history = site / ".taste-skill/history.json"
+        history.parent.mkdir(parents=True)
+        original = {"palettes": ["old"], "types": ["old"], "entrances": ["old"], "heroes": ["old"]}
+        history.write_text(json.dumps(original), encoding="utf-8")
+        out = self.run_node("start.mjs", "plan", "--page", "software", "--taste", "sample", "--history", str(history), cwd=site)
+        self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
+        deal = json.loads((site / ".taste-skill/deal.json").read_text(encoding="utf-8"))
+        self.assertEqual(history.read_text(encoding="utf-8"), json.dumps(original))
+        self.assertEqual(deal["hero"], "centred")
+        self.assertEqual(deal["layout"]["nav"], "nav-mega")
+
+    @needs_node
+    def test_legacy_reference_plan_preserves_pack_and_legacy_deal(self):
+        pack = make_pack(self.tmp, "sample")
+        definition_file = pack / "taste.json"
+        definition = json.loads(definition_file.read_text(encoding="utf-8"))
+        del definition["schemaVersion"]
+        original = json.dumps(definition)
+        definition_file.write_text(original, encoding="utf-8")
+        site = self.tmp / "legacy-site"
+        site.mkdir()
+        out = self.run_node("start.mjs", "plan", "--page", "software", "--taste", "sample", cwd=site)
+        self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
+        self.assertEqual(definition_file.read_text(encoding="utf-8"), original)
+        deal = json.loads((site / ".taste-skill/deal.json").read_text(encoding="utf-8"))
+        self.assertNotIn("planVersion", deal)
+        self.assertEqual(deal["taste"], "sample")
+
+    @needs_node
+    def test_reference_plan_refuses_symlinked_deal_without_overwriting_target(self):
+        make_pack(self.tmp, "sample")
+        outside = self.tmp / "outside"
+        outside.mkdir()
+        canary = outside / "canary.json"
+        canary.write_text("CANARY", encoding="utf-8")
+        site = self.tmp / "symlink-site"
+        state = site / ".taste-skill"
+        state.mkdir(parents=True)
+        try:
+            os.symlink(canary, state / "deal.json")
+        except (OSError, NotImplementedError) as error:
+            self.skipTest(f"symlinks unavailable: {error}")
+        out = self.run_node("start.mjs", "plan", "--page", "software", "--taste", "sample", cwd=site)
+        self.assertNotEqual(out.returncode, 0, out.stdout)
+        self.assertIn("symlink or junction", out.stderr)
+        self.assertEqual(canary.read_text(encoding="utf-8"), "CANARY")
+        self.assertFalse((state / "build.json").exists())
+        self.assertFalse((state / "history.json").exists())
 
     @needs_node
     def test_kit_copy_copies_core_and_dealt_only(self):
@@ -156,6 +285,13 @@ class Packs(Sandbox):
         self.assertEqual(out.returncode, 0, out.stderr)
         assets = site / "assets"
         self.assertTrue((assets / "system.css").is_file())
+        # layout.js always imports ui.js; closeImports keeps the runtime dependency even though core.json does not
+        # copy it redundantly as an always-file.
+        self.assertTrue((assets / "ui/ui.js").is_file())
+        # The starter and start.mjs output name these paths directly, so their runtime files stay in the core.
+        self.assertTrue((assets / "ui/cards.css").is_file())
+        self.assertTrue((assets / "backgrounds/backgrounds.css").is_file())
+        self.assertTrue((assets / "backgrounds/backgrounds.js").is_file())
         self.assertTrue((assets / "moments/pack-moment/moment.js").is_file())
         dealt = {m["id"] for m in deal["moments"]}
         built_in = sorted(d.name for d in MOMENTS.iterdir() if d.is_dir() and (d / "meta.json").is_file())
@@ -228,6 +364,41 @@ class Packs(Sandbox):
                 self.assertEqual(sorted(p.name for p in outside.iterdir()), ["canary.txt"])
 
     @needs_node
+    def test_kit_copy_refuses_a_symlinked_ancestor_of_external_destination(self):
+        outside = self.tmp / "outside"
+        target = outside / "assets"
+        target.mkdir(parents=True)
+        canary = target / "system.css"
+        canary.write_text("CANARY", encoding="utf-8")
+        redirect = self.tmp / "redirect"
+        try:
+            os.symlink(outside, redirect, target_is_directory=True)
+        except (OSError, NotImplementedError) as error:
+            self.skipTest(f"symlinks unavailable: {error}")
+
+        site = self.tmp / "site"
+        (site / ".taste-skill").mkdir(parents=True)
+        (site / ".taste-skill/deal.json").write_text(
+            json.dumps({"taste": None, "moments": [], "scene": None, "effect": None}), encoding="utf-8"
+        )
+        out = self.run_node("kit-copy.mjs", "--to", str(redirect / "assets"), cwd=site)
+        self.assertEqual(out.returncode, 2, out.stdout + out.stderr)
+        self.assertIn("is a symlink", out.stderr)
+        self.assertEqual(canary.read_text(encoding="utf-8"), "CANARY")
+
+    @needs_node
+    def test_kit_copy_allows_a_legitimate_external_destination(self):
+        destination = self.tmp / "external-assets"
+        site = self.tmp / "site"
+        (site / ".taste-skill").mkdir(parents=True)
+        (site / ".taste-skill/deal.json").write_text(
+            json.dumps({"taste": None, "moments": [], "scene": None, "effect": None}), encoding="utf-8"
+        )
+        out = self.run_node("kit-copy.mjs", "--to", str(destination), cwd=site)
+        self.assertEqual(out.returncode, 0, out.stderr)
+        self.assertTrue((destination / "system.css").is_file())
+
+    @needs_node
     def test_kit_copy_refuses_a_part_outside_the_kit(self):
         bad = [({"moments": [{"id": "../../.."}]}, []), ({"signature": [{"family": "..", "id": ".."}]}, []),
                ({"signature": [{"family": "ui", "id": "C:/x"}]}, []), ({}, ["--add", "ui/..\\..\\.."])]
@@ -245,21 +416,53 @@ class Packs(Sandbox):
 
     @needs_node
     def test_signature_spans_the_families(self):
-        signature = ["moments/pack-moment", "scenes/pack-scene", "effects/pack-fx", "ui/chat"]
+        signature = ["moments/pack-moment", "effects/pack-fx", "ui/chat"]
         pack = make_pack(self.tmp, "sample", signature=signature)
         add_moment(pack)
-        add_scene(pack)
         add_effect(pack)
-        site, _, deal = self.plan("sample")
-        self.assertEqual(deal["scene"]["id"], "pack-scene")
+        add_ui(pack)
+        site, stdout, deal = self.plan("sample")
+        # a signature effect is the page's one effect: no big scene is dealt beside it (MO-16, MO-23)
+        self.assertIsNone(deal["scene"])
+        self.assertIn("effect       pack-fx", stdout)
         self.assertEqual(deal["effect"]["id"], "pack-fx")
         self.assertIn("pack-moment", [m["id"] for m in deal["moments"]])
         self.assertEqual({(s["family"], s["id"]) for s in deal["signature"]}, {tuple(s.split("/")) for s in signature})
         out = self.run_node("kit-copy.mjs", "--to", "assets", cwd=site)
         self.assertEqual(out.returncode, 0, out.stderr)
         self.assertTrue((site / "assets/ui/chat/fragment.html").is_file())
-        self.assertTrue((site / "assets/scenes/pack-scene/scene.js").is_file())
         self.assertTrue((site / "assets/effects/pack-fx/effect.js").is_file())
+
+    @needs_node
+    def test_signature_scene_is_the_scene(self):
+        pack = make_pack(self.tmp, "sample", signature=["scenes/pack-scene"])
+        add_scene(pack)
+        site, _, deal = self.plan("sample")
+        self.assertEqual(deal["scene"]["id"], "pack-scene")
+        out = self.run_node("kit-copy.mjs", "--to", "assets", cwd=site)
+        self.assertEqual(out.returncode, 0, out.stderr)
+        self.assertTrue((site / "assets/scenes/pack-scene/scene.js").is_file())
+
+    @needs_node
+    def test_heroes_narrow_the_hero_deal(self):
+        make_pack(self.tmp, "sample", heroes=["centred"])
+        for _ in range(3):
+            _, stdout, deal = self.plan("sample")
+            self.assertEqual(deal["hero"], "centred", stdout)
+
+    @needs_node
+    def test_heroes_with_no_compatible_choice_fail_before_writing(self):
+        make_pack(self.tmp, "sample", heroes=["place"])
+        site = self.tmp / "site"
+        site.mkdir()
+        history = site / ".taste-skill/history.json"
+        out = self.run_node("start.mjs", "plan", "--page", "software", "--taste", "sample",
+                            "--history", str(history), cwd=site)
+        self.assertNotEqual(out.returncode, 0, out.stdout)
+        self.assertIn("no compatible hero", out.stderr)
+        self.assertFalse(history.exists())
+        self.assertFalse((site / ".taste-skill/deal.json").exists())
+        self.assertFalse((site / ".taste-skill/build.json").exists())
 
     @needs_node
     def test_house_is_not_a_taste(self):
@@ -303,7 +506,9 @@ HEAD = '<meta name="taste" content="x">\n<style>:root{--p-action: #3c83f6;}</sty
 @needs_node
 class TasteUse(Sandbox):
     def use(self, html, kit=HEAD, signature=("moments/pack-moment",)):
-        make_pack(self.tmp, "x", signature=list(signature))
+        pack = make_pack(self.tmp, "x", signature=list(signature))
+        # This class exercises existing versionless build compatibility.
+        (pack / "taste.json").write_text(json.dumps({"name": "x", "signature": list(signature)}), encoding="utf-8")
         script = (
             'const { tasteUse } = await import(process.env.USE_MJS);'
             "console.log(JSON.stringify(tasteUse(JSON.parse(process.env.USE_INPUT))));"
@@ -319,7 +524,11 @@ class TasteUse(Sandbox):
 
     @staticmethod
     def page(head=HEAD, body='<section data-moment="pack-moment"></section>'):
-        return f"<!doctype html><html><head>{head}</head><body>{body}</body></html>"
+        attrs = (
+            'data-rhythm="screens" data-heading-align="left" data-reveal="none" '
+            'data-fragment-playback="static" data-moment-count="1"'
+        )
+        return f"<!doctype html><html {attrs}><head>{head}</head><body>{body}</body></html>"
 
     def test_page_without_the_meta_fails(self):
         found = self.use(self.page(head='<style>:root{--p-action: #3c83f6;}</style>'))
@@ -405,6 +614,32 @@ class PackCheck(Sandbox):
         out, last = self.check()
         self.assertEqual(out.returncode, 1, out.stdout + out.stderr)
         lines = [line for line in out.stdout.splitlines() if "pack-manifest" in line and "signature" in line]
+        self.assertTrue(lines, out.stdout)
+        self.assertRegex(last, r"^PACK: FAIL \d+$")
+
+    def test_signature_with_a_scene_and_an_effect_fails(self):
+        pack = make_pack(self.tmp, "sample", signature=["scenes/pack-scene", "effects/pack-fx"])
+        add_scene(pack)
+        add_effect(pack)
+        out, last = self.check()
+        self.assertEqual(out.returncode, 1, out.stdout + out.stderr)
+        lines = [line for line in out.stdout.splitlines() if "pack-manifest" in line and "a scene and an effect" in line]
+        self.assertTrue(lines, out.stdout)
+        self.assertRegex(last, r"^PACK: FAIL \d+$")
+
+    def test_heroes_naming_a_kit_hero_pass(self):
+        pack = make_pack(self.tmp, "sample", heroes=["centred"], settled={"c1": "skip: cookie banner"})
+        self.candidates(pack)
+        out, last = self.check()
+        self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
+        self.assertEqual(last, "PACK: PASS")
+
+    def test_unknown_hero_fails(self):
+        pack = make_pack(self.tmp, "sample", heroes=["nope"], settled={"c1": "skip: cookie banner"})
+        self.candidates(pack)
+        out, last = self.check()
+        self.assertEqual(out.returncode, 1, out.stdout + out.stderr)
+        lines = [line for line in out.stdout.splitlines() if "pack-manifest" in line and "heroes" in line]
         self.assertTrue(lines, out.stdout)
         self.assertRegex(last, r"^PACK: FAIL \d+$")
 

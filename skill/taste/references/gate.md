@@ -119,11 +119,21 @@ node <skill>/scripts/gate.mjs --start index.html --kind <kind> --category "<what
   FAIL is printed as WAIVED: it goes in the report. kit-edited and checker-gaming cannot be waived. More
   than 5 waivers is itself a FAIL: "too many waivers: fix instead".
 
-- **Taste overrides.** A page built from a recorded taste carries `<meta name="taste" content="<name>">`
+- **Version 2 build policy.** The persisted plan supplies the mode and resolved design.
+  Reference builds receive house-style advice separately from failures; technical,
+  unknown and contract failures still block. The classification lives in
+  `scripts/build-policy.mjs`, before findings are grouped. See `taste-contract.md`
+  for precedence and compatibility. Version 2 does not read the Markdown override table.
+
+- **Legacy taste overrides.** A page built from a recorded taste carries `<meta name="taste" content="<name>">`
   (printed by the `ui` skill's `record.mjs kit`). The gate reads that taste's `### Kit overrides` table
   (`| Check | Why |`) and waives every finding of each check it names, printed as WAIVED with
   `taste <name>:` and its reason; these never count toward the 5 waivers. Only these look checks can be
-  named: `action-count`, `button-styles`, `same-action`, `heading-align`, `centre-axis`, `nesting`. Any
+  named: `action-count`, `button-styles`, `same-action`, `heading-align`, `centre-axis`, `nesting`,
+  `section-rules` (hairline rules between a section's parts, SR-3) and `left-lines` (text off the
+  container's left line or the one split line, centred section heads, and the hero box's lines, SR-6).
+  A finding two checks share is waived only when the taste names both. A taste rule no check reads needs
+  no row: an accent phrase in each headline, one-colour customer logos (`icons.mjs --mono`). Any
   other id, a reason under 12 characters, or a taste meta with no recorded taste is a FAIL
   (`taste-overrides`). `text-contrast` on a colour pair the taste itself declares (its `--p-*-ink` on `--p-*`) reads WARN
   from 3:1 and FAILs under 3:1: `consistency.mjs` does that, it is not a taste override.

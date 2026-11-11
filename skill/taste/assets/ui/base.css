@@ -47,10 +47,14 @@
   --u-sh: oklch(from var(--u-bg) 0 0 0 / calc(0.5 - l * 0.38));
   --u-hi: transparent;
   --u-hi: oklch(from var(--u-bg) 1 0 0 / clamp(0, calc(0.11 - l * 0.11), 0.09));
-  --u-shadow:
-    inset 0 1px 0 var(--u-hi), 0 1px 1px color-mix(in oklab, var(--u-sh) 40%, transparent),
+  --u-shadow: var(
+    --panel-shadow,
+    inset 0 1px 0 var(--u-hi),
+    0 1px 1px color-mix(in oklab, var(--u-sh) 40%, transparent),
     0 2px 4px -1px color-mix(in oklab, var(--u-sh) 45%, transparent),
-    0 12px 24px -8px color-mix(in oklab, var(--u-sh) 80%, transparent), 0 32px 64px -24px var(--u-sh);
+    0 12px 24px -8px color-mix(in oklab, var(--u-sh) 80%, transparent),
+    0 32px 64px -24px var(--u-sh)
+  );
   --u-shadow-sm:
     inset 0 1px 0 var(--u-hi), 0 1px 2px color-mix(in oklab, var(--u-sh) 55%, transparent),
     0 6px 16px -6px color-mix(in oklab, var(--u-sh) 80%, transparent);

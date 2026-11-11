@@ -609,26 +609,10 @@ function compile(gl, type, src, label) {
   return sh;
 }
 
-// true when this browser can make a WebGL context at all (checked once, the probe context is freed)
-let webglProbe = null;
-function HAS_WEBGL() {
-  if (webglProbe == null) {
-    webglProbe = false;
-    try {
-      const g =
-        window.WebGLRenderingContext
-        && (document.createElement("canvas").getContext("webgl2")
-          || document.createElement("canvas").getContext("webgl"));
-      if (g) {
-        webglProbe = true;
-        g.getExtension("WEBGL_lose_context")?.loseContext();
-      }
-    } catch (_) {
-      /* no WebGL */
-    }
-  }
-  return webglProbe;
-}
+// true when this browser has the WebGL API at all (no API: the CSS fallback at once). No context is made to find out:
+// a probe context counted as one of the page's contexts and could evict a live one. A browser that has the API but
+// refuses a context falls back in init() when the effect is first seen
+const HAS_WEBGL = () => !!(window.WebGL2RenderingContext || window.WebGLRenderingContext);
 
 // The page's one count of live WebGL contexts, window.__tpGl, at most window.__tpGlMax (default 4: the house rule, a laptop's
 // integrated GPU). scenes/lib.js glBudget, fx.js (every effect, and fx.glBudget for the ones that make their own),

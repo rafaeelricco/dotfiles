@@ -1,9 +1,19 @@
 // taste-use.mjs - a page dealt with a saved taste must carry it. Every finding is hard: no waiver, no taste override.
-import { readTaste } from "./roots.mjs";
+import path from "node:path";
+import { isDeepStrictEqual } from "node:util";
+import { resolveReferenceContract, validateContract } from "./taste-contract.mjs";
+import { loadTastePack, resolveTaste } from "./taste-definition.mjs";
+import { readTaste, tastesDir } from "./roots.mjs";
 
 const NAME = /^[a-z0-9][a-z0-9-]{0,63}$/;
 // the attribute that mounts each family's item on a page
-const MOUNT = { moments: "data-moment", scenes: "data-big-scene", effects: "data-fx", ui: "data-ui" };
+const MOUNT = {
+  moments: "data-moment",
+  scenes: "data-big-scene",
+  effects: "data-fx",
+  ui: "data-ui",
+  components: "data-component",
+};
 const reEsc = s => s.replace(/[.*+?^${}()|[\]\\-]/g, "\\$&");
 const noComments = t => t.replace(/<!--[\s\S]*?-->/g, "");
 // the source without <template>…</template> (nested ones too): nothing in it is on the page
@@ -42,6 +52,7 @@ function decls(css) {
 // kit: what `record.mjs kit <name>` prints; null or undefined when it was not asked for (taste-head is not checked),
 // "" when printing it failed
 export function tasteUse({ html, deal, kit }) {
+  const v2 = deal?.planVersion === 2;
   const name = typeof deal?.taste === "string" ? deal.taste.trim() : "";
   if (!name) return [];
   if (!String(html ?? "").trim()) return [];
@@ -49,6 +60,46 @@ export function tasteUse({ html, deal, kit }) {
   const F = [];
   const hard = (check, where, msg, fix) => F.push({ check, where, msg, fix, hard: true });
   const where = `taste ${name}`;
+  let manifest;
+  if (v2) {
+    try {
+      const pack = loadTastePack(path.join(tastesDir(), name));
+      manifest = resolveTaste(pack.definition, { purpose: "build", packDir: pack.dir });
+    } catch (error) {
+      hard(
+        "taste-contract",
+        where,
+        `the current taste pack could not be loaded or resolved: ${error.message}`,
+        `repair the taste pack or rerun start.mjs plan --taste ${name}`,
+      );
+      return F;
+    }
+  } else {
+    manifest = readTaste(name);
+    for (const e of validateContract(manifest))
+      hard("taste-contract", where, `${e.path}: ${e.message}`, "correct the pack from reference evidence");
+  }
+  // V2 contract attributes come from the immutable plan. The current pack is loaded above for strict shape and
+  // signature checks, but cannot silently change the contract of an already-started build.
+  const contract = v2 ? deal.contract : manifest;
+  if (v2 && !isDeepStrictEqual(contract, resolveReferenceContract(manifest)))
+    hard(
+      "taste-contract",
+      where,
+      "the persisted contract differs from the current resolved reference definition",
+      `rerun start.mjs plan --taste ${name} and rebuild from the refreshed persisted contract`,
+    );
+  const attributes = {
+    "data-rhythm": contract?.layout?.rhythm,
+    "data-heading-align": contract?.layout?.headingAlign,
+    "data-reveal": contract?.motion?.reveal,
+    "data-fragment-playback": contract?.motion?.fragmentPlayback,
+    "data-moment-count": contract?.motion?.moments !== undefined ? String(contract.motion.moments) : undefined,
+  };
+  const htmlTag = page.match(/<html\b[^>]*>/i)?.[0] || "";
+  for (const [key, value] of Object.entries(attributes))
+    if (value && !new RegExp(`${key}\\s*=\\s*["']${reEsc(value)}["']`).test(htmlTag))
+      hard("taste-contract", where, `missing ${key}="${value}"`, "apply the resolved contract attributes to html");
   const live = noTemplates(page); // what the browser renders: no comments, no <template> contents
 
   // taste-missing: the page's <meta name="taste"> is absent or names another taste
@@ -110,7 +161,7 @@ export function tasteUse({ html, deal, kit }) {
   }
 
   // taste-signature: an item of taste.json "signature" has no mount on the page
-  const sig = NAME.test(name) ? readTaste(name)?.signature : null;
+  const sig = NAME.test(name) ? manifest?.signature : null;
   for (const item of Array.isArray(sig) ? sig : []) {
     if (typeof item !== "string") continue;
     const at = item.indexOf("/"),

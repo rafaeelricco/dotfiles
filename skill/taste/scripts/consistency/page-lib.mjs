@@ -2890,6 +2890,10 @@ export function lib() {
       const kids = [];
       for (const k of p.children) {
         if (SKIP.has(k.tagName)) continue;
+        // the kit's offset pair (assets/system.css, .comp-offset: "two photographs, the second smaller and lower")
+        // starts its second figure 22% lower on purpose from 1024px; that drop is the composition, not a stagger.
+        // Only that figure is left out, so any other box in the grid, and every other grid, is still measured
+        if (k.matches(".comp-offset > figure + figure")) continue;
         const q = k.getBoundingClientRect(),
           c = CS(k);
         if (
@@ -3004,7 +3008,8 @@ export function lib() {
         named = /marquee|ticker|running-?line/i.test(typeof a.className === "string" ? a.className : "");
       if (!(endless(el) || loopers.has(idOf(el)) || named)) continue;
       const vis = clipRect(el, r);
-      if (vis.left > 2 || vis.right < vw - 2) continue;
+      // a running line is clipped at the viewport's edges, or at the container's when a dealt moment runs it
+      if ((vis.left > 2 || vis.right < vw - 2) && !el.closest("[data-moment][data-moment-mounted]")) continue;
       const ls = deepLines(el).filter(l => l.bottom > 0 && l.top < vh);
       const cutL = ls.some(l => l.left < vis.left - 1 && l.right > vis.left + 1),
         cutR = ls.some(l => l.left < vis.right - 1 && l.right > vis.right + 1);

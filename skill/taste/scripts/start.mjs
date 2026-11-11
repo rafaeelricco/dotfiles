@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { LISTS, COMPS, KIND_COMPS } from "./layout-options.mjs";
+import { resolveContract, validateContract, contractRegistry } from "./taste-contract.mjs";
 /*
   taste-skill start.mjs - deals colours and type, then prints the Google Fonts link, the six stylesheet links
   and the :root block. library/type.json is the one source of every face, weight, tracking and size.
@@ -31,7 +33,7 @@
   node scripts/start.mjs types --page <kind>
       every pairing the kind can be dealt, with its exact Google Fonts link
   node scripts/start.mjs plan --page <kind> --trade <trade> [--type <page type>] [--has photo,ui,film,object,setting]
-                              [--long] [--tone warm|editorial|product|tech|playful] [--axis] [--taste <name>]
+                              [--long] [--tone warm|editorial|product|tech|playful] [--axis] [--taste <name>] [--mode house|reference]
                               --history .taste-skill/history.json
       --has names what the brief can fill (default: software ui,figures; tech photo,product,figures; product
       photo,product; place and service photo; gaming setting): add figures when the fact sheet holds two proof
@@ -42,8 +44,11 @@
       moments and 0-1 scene; effects.mjs pick for 0-1 effect) and deals the hero's entrance from
       assets/motion/meta.json by fit. It ends with PLAN: one line per part, each naming the file or recipe to copy.
       The hero's history goes to layout-history.json beside the --history file.
-      --taste <name> deals with a saved taste's pack (<ui skill>/tastes/<name>): its own parts and the kit parts
-      its fits list names, its signature items always (moments, scene, effect, and ui fragments the PLAN names).
+      --taste <name> with a schemaVersion: 2 definition selects reference mode. It compiles only that definition's
+      ordered compatible layout choices and fits/signature lists; it never uses build history, random selection
+      or a substitute hero. Legacy v1 tastes keep the prior planner and gate behavior without pack migration.
+      Explicit --mode reference requires schemaVersion: 2; otherwise the mode is inferred from the taste.
+      --type is a house-only option; reference compatibility follows --page and --has.
       Without it, saved tastes are listed in a note before the PLAN so a brief that fits one can use it.
 
   --page, the SKILL.md kinds as start.mjs names them:
@@ -68,6 +73,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { color } from "../assets/effects/fx.js";
 import { HOUSE, SKILL, itemDir, readTaste, refOf, tasteName, tastesDir } from "./roots.mjs";
+import { resolveMode } from "./build-mode.mjs";
+import { armBuild, assertSafeWritePath, writeJsonSafe } from "./build-state.mjs";
+import { compileReferencePlan } from "./reference-plan.mjs";
+import { loadTastePack } from "./taste-definition.mjs";
+import { validateBuildPlan } from "./build-policy.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const lib = f => JSON.parse(fs.readFileSync(path.join(here, "..", "library", f), "utf8"));
@@ -81,6 +91,25 @@ const opt = (k, d) => {
     : true
   );
 };
+const isObject = value => value !== null && typeof value === "object" && !Array.isArray(value);
+const histFile = opt("history", ".taste-skill/history.json");
+let buildMode = "house";
+if (cmd === "plan") {
+  try {
+    let tasteVersion;
+    if (opt("taste")) {
+      try {
+        tasteVersion = loadTastePack(path.join(tastesDir(), tasteName(opt("taste")))).version;
+      } catch {
+        // Let the selected planning branch report its pack/name error in its normal context.
+      }
+    }
+    buildMode = resolveMode({ mode: opt("mode"), taste: opt("taste"), tasteVersion });
+  } catch (error) {
+    console.error("start: " + error.message);
+    process.exit(2);
+  }
+}
 
 // company-site palettes: quiet grounds
 const isViolet = c => {
@@ -104,8 +133,7 @@ function readHistory(file) {
   return h;
 }
 function writeHistory(file, h) {
-  fs.mkdirSync(path.dirname(path.resolve(file)), { recursive: true });
-  fs.writeFileSync(file, JSON.stringify(h, null, 2));
+  writeJsonSafe(file, h, { spaces: 2, newline: false });
 }
 // fresh ones first in a random order, then the recent ones, the oldest first: n of them
 function drawFresh(list, n, recent) {
@@ -139,8 +167,7 @@ function readRecent() {
 function writeRecent(r) {
   if (!r) return;
   try {
-    fs.mkdirSync(path.dirname(RECENT_FILE), { recursive: true });
-    fs.writeFileSync(RECENT_FILE, JSON.stringify(r, null, 1) + "\n");
+    writeJsonSafe(RECENT_FILE, r, { spaces: 1 });
   } catch {
     /* optional: never stop a deal over it */
   }
@@ -422,76 +449,15 @@ const setPage = p => {
   techPage = TECH.has(p);
 };
 
-// the finish gate (scripts/gate.mjs) holds a build open from a deal until its checks pass. Only a deal arms it (a
-// css or brand run restyles a page that may be finished): a folder with an open build keeps it, a folder one or two below
-// an open build joins that one, any other gets a new one. The page is left to gate.mjs to find in this folder (or one
-// below); gate.mjs --start names it.
-if (cmd === "deal") {
+// start.mjs deal and plan share the build marker logic so nested plan runs join the nearest open build.
+if (cmd === "deal" && !opt("no-arm")) {
   try {
-    const read = f => {
-      try {
-        return JSON.parse(fs.readFileSync(f, "utf8").replace(/^﻿/, ""));
-      } catch {
-        return null;
-      }
-    };
-    // an open build here, or one or two folders up (gate.mjs --start run in the session's folder, the site in site/ or
-    // site/web/ of it): the nearest one is kept, so the folder never holds a second build that its PASS would not close
-    const open = d => {
-      const b = read(path.join(d, ".taste-skill", "build.json")),
-        g = read(path.join(d, ".taste-skill", "gate.json"));
-      return (
-        (b && typeof b === "object" && typeof b.start === "string")
-        || (g && typeof g.start === "string" && /^(active|fail|error)$/.test(g.status || ""))
-      );
-    };
-    const here = path.resolve("."),
-      up = [here, path.dirname(here), path.dirname(path.dirname(here))].filter((d, i, a) => a.indexOf(d) === i);
-    const home = up.find(open) || here;
-    const dot = path.join(home, ".taste-skill"),
-      marker = path.join(dot, "build.json");
-    const m = read(marker);
-    if (home !== here) console.error(`start: the finish gate is already armed in ${home}; this deal joins that build`);
-    if (m && typeof m === "object" && typeof m.start === "string") {
-      let changed = false;
-      if (!m.kind && page) {
-        m.kind = page;
-        changed = true;
-      }
-      // a build joined from below whose page is not there yet names this folder as its page (gate.mjs reads a folder as
-      // its index.html), so the gate finds a page two folders down too
-      if (
-        home !== here
-        && !m.url
-        && !(typeof m.page === "string" && m.page && fs.existsSync(path.resolve(home, m.page)))
-      ) {
-        m.page = path.relative(home, here).split(path.sep).join("/");
-        changed = true;
-      }
-      if (changed) fs.writeFileSync(marker, JSON.stringify(m, null, 1) + "\n");
-    } else if (home === here) {
-      fs.mkdirSync(dot, { recursive: true });
-      fs.writeFileSync(
-        marker,
-        JSON.stringify(
-          {
-            page: null,
-            dir: process.cwd(),
-            kind: page || null,
-            start: new Date().toISOString(),
-            by: "start.mjs",
-            gate: path.join(path.dirname(fileURLToPath(import.meta.url)), "gate.mjs"),
-          },
-          null,
-          1,
-        ) + "\n",
-      ); // the gate that judges this build
-      console.error(
-        `start: the finish gate is armed in ${process.cwd()}; run start.mjs from the project folder (the one that holds the page)`,
-      );
-    }
-  } catch {
-    /* the gate is optional: never stop a deal over it */
+    assertSafeWritePath(histFile);
+    if (RECENT_FILE && !opt("no-recent")) assertSafeWritePath(RECENT_FILE);
+    armBuild(page);
+  } catch (error) {
+    console.error("start: " + error.message);
+    process.exit(2);
   }
 }
 const GROUPS = { serif: "a serif", plain: "a plain sans", soft: "a soft sans" };
@@ -687,68 +653,6 @@ function describe(t, withLink) {
 // In testing every page of one kind had the same parts in the same order: one place hero, one close (a big
 // button across the .wrap), the same visit split. So the parts a template fixes are dealt here with the
 // palette and the pairing, each away from the last pages' (h.layout keeps the last ids per part).
-const LISTS = {
-  nav: {
-    software: "nav-mega|nav-cards|nav-centre",
-    gaming: "nav-mega|nav-centre|nav-cards",
-    tech: "nav-cards|nav-split|nav-mega",
-    product: "nav-cards|nav-split|nav-mega",
-    service: "nav-mega|nav-split|nav-centre",
-    place: "nav-split|nav-cards|nav-centre",
-  },
-  footer: {
-    software: "footer-dark|footer-statement|footer-columns",
-    gaming: "footer-dark|footer-statement",
-    tech: "footer-columns|footer-dark",
-    product: "footer-columns|footer-dark",
-    service: "footer-visit|footer-dark|footer-columns",
-    place: "footer-visit|footer-columns",
-  },
-  close: {
-    software: "close-type|close-word|close-split",
-    gaming: "close-word|close-type|close-split",
-    tech: "close-photo|close-type|close-word|close-split",
-    product: "close-photo|close-type|close-word|close-split",
-    service: "close-type|close-photo|close-split|close-word",
-    place: "close-photo|close-split|close-word|close-type",
-  },
-  buttons: {
-    software: "solid|pill|tonal|arrow",
-    gaming: "solid|pill|block",
-    tech: "arrow|solid|block|pill",
-    product: "arrow|solid|block|pill",
-    service: "solid|tonal|block|arrow",
-    place: "block|solid|arrow",
-  },
-  mark: { place: "dots|arc|ring|petal|leaf|stack", "*": "wordmark|initial|arc|ring|stack|dots" },
-  // grounds: one or two bands from the palette on every page (tint: .ground-surface; dark: .ground-inverse; brand: .ground-brand)
-  bands: {
-    software: "dark|tint|dark+tint",
-    gaming: "dark|dark+brand",
-    tech: "dark|brand|tint+dark",
-    product: "brand|dark|tint+brand|tint+dark",
-    service: "tint|dark|tint+dark|brand",
-    place: "tint|brand|tint+brand|tint+dark",
-  },
-};
-// section compositions (system.css, compositions; sections-library.md, Compositions), a pool per section type
-const COMPS = {
-  offer: "list-tall|split-7-5|split-5-7|strip|offset-pair", // a menu, prices, services, repairs
-  showcase: "bleed-panel|offset-pair|three-up|mirrored|wall|story", // the place, the work, the house, the product in use
-  rooms: "row|side|list-tall", // rooms, goods, bouquets, models
-  feature: "split-7-5|split-5-7|mirrored|bleed-panel|offset-pair|three-up", // a product's or a service's point
-  visit: "split-6-6|mirrored|street-large|bleed-panel",
-  form: "form-photo|form-band|close-form",
-  statement: "statement-type|statement-short",
-};
-const KIND_COMPS = {
-  software: ["feature", "statement", "form"],
-  gaming: ["showcase", "statement", "form"],
-  tech: ["feature", "showcase", "statement"],
-  product: ["feature", "showcase", "rooms", "statement"],
-  service: ["offer", "showcase", "feature", "visit", "form"],
-  place: ["visit", "offer", "showcase", "rooms", "form"],
-};
 const COMP_WHAT = {
   offer: "the offer (menu, prices, services)",
   showcase: "the showcase (the place, the work, the house, in use)",
@@ -758,7 +662,7 @@ const COMP_WHAT = {
   form: "the booking or order form",
   statement: "a statement section",
 };
-function dealLayout(h) {
+function dealLayout(h, contract) {
   const L = h.layout && typeof h.layout === "object" && !Array.isArray(h.layout) ? h.layout : (h.layout = {});
   const pick = (key, line, avoidLast = 1) => {
     const opts = line.split("|"),
@@ -770,11 +674,11 @@ function dealLayout(h) {
     return v;
   };
   const k = page;
-  const get = key => LISTS[key][k] || LISTS[key]["*"];
+  const get = key => (contract.layout[key] || (LISTS[key][k] || LISTS[key]["*"]).split("|")).join("|");
   const out = {};
   for (const key of ["nav", "footer", "close", "buttons", "mark"])
     out[key] = pick(`${k}:${key}`, get(key), key === "close" ? 2 : 1);
-  out.bands = pick(`${k}:bands`, get("bands"));
+  out.bands = contract.layout.bands ? contract.layout.bands.join("+") || "none" : pick(`${k}:bands`, get("bands"));
   console.log(`\nLAYOUT for ${k} (dealt away from the last pages; build exactly these, write them on plan line 2):`);
   console.log(
     `  nav ${out.nav} · footer ${out.footer} · close ${out.close} · buttons ${out.buttons} · mark ${out.mark}`,
@@ -785,6 +689,7 @@ function dealLayout(h) {
       .map(
         b =>
           ({
+            none: "no bands",
             tint: "one tinted band (.ground-surface)",
             dark: "one dark band (.ground-inverse, the palette's dark)",
             brand: "one band in the accent (.ground-brand)",
@@ -794,7 +699,9 @@ function dealLayout(h) {
   );
   const lines = [];
   for (const sec of KIND_COMPS[k] || []) {
-    if (sec === "feature") {
+    if (contract.layout.compositions?.[sec]) {
+      lines.push(`${COMP_WHAT[sec]}: ${contract.layout.compositions[sec].join(", then ")} (recorded sequence)`);
+    } else if (sec === "feature") {
       const a = pick(`${k}:feature`, COMPS.feature, 2);
       let b = pick(`${k}:feature`, COMPS.feature, 2);
       for (let i = 0; b === a && i < 6; i++) b = pick(`${k}:feature`, COMPS.feature, 1);
@@ -809,8 +716,6 @@ function dealLayout(h) {
     `  ${out.close === "close-type" ? "close-type: the h2 large, the button at its own width (never across the .wrap)" : out.close}; a page whose last section is a form ends on close-form instead; the footer never repeats hours or a form printed above`,
   );
 }
-
-const histFile = opt("history", ".taste-skill/history.json");
 
 if (cmd === "deal") {
   const h = readHistory(histFile);
@@ -874,7 +779,10 @@ if (cmd === "deal") {
   );
   for (const t of tys) console.log(describe(t, false));
   if (!tys.length) console.log("  (no pairing matches; drop --axis)");
-  dealLayout(h);
+  const manifest = readTaste(tasteName(opt("taste")));
+  const errors = validateContract(manifest);
+  if (errors.length) throw new Error(errors.map(e => `${e.path}: ${e.message}`).join("; "));
+  dealLayout(h, resolveContract(manifest));
   h.dealt = [...(h.dealt || []), ...tys.map(t => t.id)].slice(-30);
   if (!opt("no-record")) writeHistory(histFile, h);
   if (!opt("axis") && !placePage)
@@ -885,6 +793,97 @@ if (cmd === "deal") {
   console.log(
     `\nthen: node ${/\s/.test(self) ? `"${self}"` : self} css --page ${page} --palette <id> --type <id> --radius soft --history ${histFile}${placePage ? "\n  (the client's own colours, a painted shopfront or a logo the brief gives, in place of the palette: start.mjs brand)" : ""}`,
   );
+} else if (cmd === "plan" && buildMode === "reference") {
+  if (typeof opt("type") === "string") {
+    console.error(
+      "start: --type is a house-dealer option; reference hero compatibility follows --page and --has, so omit --type",
+    );
+    process.exit(2);
+  }
+  let taste;
+  try {
+    taste = tasteName(opt("taste"));
+  } catch (error) {
+    console.error("start: " + error.message);
+    process.exit(2);
+  }
+  let loaded;
+  try {
+    loaded = loadTastePack(path.join(tastesDir(), taste));
+    if (loaded.version !== 2)
+      throw new Error(
+        `taste "${taste}" uses the legacy v1 manifest; export and gating still accept it, but new reference plans require schemaVersion: 2. Create a reviewed schemaVersion: 2 definition before planning; the existing pack is unchanged.`,
+      );
+  } catch (error) {
+    console.error("start: " + error.message);
+    process.exit(2);
+  }
+  const defaultHas = {
+    software: "ui,figures",
+    gaming: "setting",
+    tech: "photo,product,figures",
+    product: "photo,product",
+    service: "photo",
+    place: "photo",
+  }[page];
+  const has = typeof opt("has") === "string" ? opt("has") : defaultHas;
+  const reference = compileReferencePlan(loaded.definition, {
+    page,
+    has,
+    tone: typeof opt("tone") === "string" ? opt("tone") : undefined,
+    packDir: loaded.dir,
+  });
+  const planErrors = validateBuildPlan(reference);
+  if (planErrors.length) throw new Error(planErrors.map(item => `${item.field}: ${item.message}`).join("; "));
+  const histDir = path.dirname(path.resolve(histFile));
+  const dealFile = path.join(histDir, "deal.json");
+  if (!opt("no-record")) {
+    assertSafeWritePath(dealFile);
+    // All plan validation and all destination checks complete before the shared build marker is armed.
+    armBuild(page);
+    writeJsonSafe(dealFile, reference, { spaces: 1 });
+  }
+  console.log(
+    `REFERENCE PLAN  v${reference.planVersion}  mode ${reference.mode}  taste ${reference.taste}  page ${reference.page}`,
+  );
+  console.log(`  hero         ${reference.hero}${reference.heroForm ? ` data-form="${reference.heroForm}"` : ""}`);
+  console.log(`  entrance     data-enter="${reference.entrance}"`);
+  for (const key of ["nav", "footer", "close", "buttons", "mark"])
+    console.log(`  ${key.padEnd(12)} ${reference.layout[key]}`);
+  if (Object.hasOwn(reference.layout, "bands"))
+    console.log(`  bands        ${reference.layout.bands.length ? reference.layout.bands.join(" + ") : "none"}`);
+  for (const [section, choices] of Object.entries(reference.layout.compositions || {}))
+    console.log(`  composition  ${section}: ${choices.join(", then ")}`);
+  if (reference.moments.length)
+    reference.moments.forEach((item, index) =>
+      console.log(`  moment ${index + 1}     ${item.id}: ${refOf(path.join(item.dir, "demo.html"))}`),
+    );
+  else console.log(`  moments      none${reference.contract.motion.moments === 0 ? " (recorded)" : ""}`);
+  console.log(
+    `  scene        ${reference.scene ? `${reference.scene.id}: ${refOf(path.join(reference.scene.dir, "demo.html"))}` : "none"}`,
+  );
+  console.log(
+    `  effect       ${reference.effect ? `${reference.effect.id} (${reference.effect.slot}): ${refOf(path.join(reference.effect.dir, "meta.json"))}` : "none"}`,
+  );
+  console.log(
+    `  signature    ${reference.signature.length ? reference.signature.map(item => `${item.family}/${item.id}`).join(", ") : "none"}`,
+  );
+  console.log(
+    `  taste        ${reference.taste}: node <ui skill>/scripts/record.mjs kit ${reference.taste}; add <meta name="taste" content="${reference.taste}">`,
+  );
+  const attrs = [
+    `data-build-mode="reference"`,
+    `data-rhythm="${reference.contract.layout.rhythm}"`,
+    `data-heading-align="${reference.contract.layout.headingAlign}"`,
+    `data-reveal="${reference.contract.motion.reveal}"`,
+    `data-fragment-playback="${reference.contract.motion.fragmentPlayback}"`,
+    `data-moment-count="${reference.contract.motion.moments}"`,
+    `data-buttons="${reference.layout.buttons}"`,
+    `data-mark="${reference.layout.mark}"`,
+  ];
+  console.log(`  html         <html ${attrs.join(" ")}>`);
+  console.log(`  contract     ${JSON.stringify(reference.contract)}`);
+  console.log(`  then         build in a copy of starter.html, then: node <skill>/scripts/gate.mjs index.html`);
 } else if (cmd === "plan") {
   // one command for the whole deal: the dealers run as they are (never copied here), their output kept in full under
   // each heading, then PLAN sums it up one line a part with the file to copy from
@@ -898,21 +897,40 @@ if (cmd === "deal") {
     console.error("start: " + e.message);
     process.exit(1);
   }
+  const manifest = readTaste(taste);
+  const errors = validateContract(manifest);
+  if (errors.length) throw new Error(errors.map(e => `${e.path}: ${e.message}`).join("; "));
+  const contract = resolveContract(manifest);
   // the taste's signature items, as [family, id]: dealt whatever the history or the fit, named in the PLAN, recorded in deal.json
   const signature = (readTaste(taste)?.signature || [])
     .filter(s => typeof s === "string" && s.includes("/"))
     .map(s => [s.slice(0, s.indexOf("/")), s.slice(s.indexOf("/") + 1)]);
+  // a signature effect is the page's one effect: a big scene beside it FAILs effect-kind (MO-16, MO-23), so the
+  // moments are dealt with no scene and with that effect counted in their WebGL budget
+  const sigFx = (signature.find(([family]) => family === "effects") || [])[1] || "";
+  // the taste's heroes (taste.json "heroes": ids of assets/layout/heroes.json, its Composition's hero): the hero
+  // deal keeps to them when one fits the page
+  const tasteHeroes = (readTaste(taste)?.heroes || []).filter(s => typeof s === "string" && /^[a-z0-9-]+$/.test(s));
   const skill = path.join(here, "..");
   const rel = p => p.split(path.sep).join("/");
   const run = (file, list) => {
     const r = spawnSync(process.execPath, [file, ...list], { encoding: "utf8", cwd: process.cwd() });
     if (r.stderr && r.stderr.trim()) process.stderr.write(r.stderr);
+    if (r.error || r.status !== 0)
+      throw new Error(`dealer failed: ${path.basename(file)} (${r.status ?? r.error?.message})`);
     return (r.stdout || "").replace(/\s+$/, "");
   };
   const flag = k => (opt(k) === true ? ["--" + k] : []);
   const val = k => (typeof opt(k) === "string" ? ["--" + k, opt(k)] : []);
-  const histDir = path.dirname(histFile);
+  const histDir = path.dirname(path.resolve(histFile));
   const layoutHist = path.join(histDir, "layout-history.json");
+  const dealFile = path.join(histDir, "deal.json");
+  for (const file of [histFile, layoutHist, dealFile]) assertSafeWritePath(file);
+  if (RECENT_FILE && !opt("no-recent")) assertSafeWritePath(RECENT_FILE);
+  for (const dir of [process.cwd(), path.dirname(process.cwd()), path.dirname(path.dirname(process.cwd()))]) {
+    assertSafeWritePath(path.join(dir, ".taste-skill", "build.json"));
+    assertSafeWritePath(path.join(dir, ".taste-skill", "gate.json"));
+  }
   const pageType =
     typeof opt("type") === "string" ?
       opt("type")
@@ -946,10 +964,13 @@ if (cmd === "deal") {
     ...val("trade"),
     "--history",
     histFile,
+    "--no-arm",
     ...flag("axis"),
+    ...val("taste"),
     ...flag("dark"),
     ...flag("light"),
     ...flag("no-recent"),
+    ...flag("no-record"),
   ]);
   // 2. the hero
   const heroOut = run(path.join(skill, "scripts", "layout-deal.mjs"), [
@@ -959,17 +980,20 @@ if (cmd === "deal") {
     has,
     "--history",
     layoutHist,
+    ...(tasteHeroes.length ? ["--heroes", tasteHeroes.join(",")] : []),
     ...(page === "gaming" ? ["--kind", "gaming"]
     : page === "tech" ? ["--kind", "tech"]
     : []),
   ]);
-  // 3. moments and the scene, by fit
+  // 3. moments and the scene, by fit (no scene when the taste's signature holds an effect)
   const momOut = run(path.join(here, "moments.mjs"), [
     "pick",
     "--page",
     page,
-    "--scene",
-    "deal",
+    ...(sigFx ? ["--effects", sigFx]
+    : contract.motion.scene === "none" ? []
+    : ["--scene", "deal"]),
+    ...(contract.motion.moments !== undefined ? ["--count", String(contract.motion.moments)] : []),
     "--has",
     has,
     "--history",
@@ -983,8 +1007,14 @@ if (cmd === "deal") {
   const bg = (dealOut.match(/\bbg (#[0-9a-f]{6})/i) || [])[1];
   const ground = bg && color.isDark(bg) ? "dark" : "light";
   const fxRoll = techPage || Math.random() < 1 / 3;
+  // a dealt big scene is the page's one effect: the checker FAILs a data-fx ground beside it (effect-kind, MO-16,
+  // MO-23), so no effect is dealt with one, unless the taste names an effect as a signature item
+  const sceneDealt = /^scene \S+ · /m.test(momOut);
+  const sigEffect = signature.some(([family]) => family === "effects");
+  const fxSkip = contract.motion.effect === "none" || (sceneDealt && !sigEffect);
   const fxOut =
-    fxRoll || signature.some(([family]) => family === "effects") ?
+    fxSkip ? ""
+    : fxRoll || sigEffect ?
       run(path.join(here, "effects.mjs"), [
         "pick",
         "--page",
@@ -1005,12 +1035,18 @@ if (cmd === "deal") {
   const heroId = (heroOut.match(/^hero: (\S+)/m) || [])[1] || "";
   const heroForm = (heroOut.match(/^\s*form: (\w+)/m) || [])[1] || "";
   const hasSet = new Set(has.split(","));
+  // a picture the dealt hero itself shows: the window heroes (and a software split, which holds a window) show none,
+  // whatever photographs the rest of the page has, so an entrance that needs a photograph (exposure, set-type) is not
+  // dealt to them
+  const windowHero =
+    /^(centred|collage|word|statement|triptych)$/.test(heroId) || (heroId === "split" && pageType === "software");
   const picture =
-    hasSet.has("photo")
-    || hasSet.has("film")
-    || hasSet.has("object")
-    || hasSet.has("setting")
-    || /place|photo|film|product|editorial/.test(heroId);
+    !windowHero
+    && (hasSet.has("photo")
+      || hasSet.has("film")
+      || hasSet.has("object")
+      || hasSet.has("setting")
+      || /place|photo|film|product|editorial/.test(heroId));
   const meets = need =>
     /window|ui/i.test(need) ? hasSet.has("ui") || heroId === "ui"
     : /moving|scene/i.test(need) ? hasSet.has("film") || heroId === "film"
@@ -1030,7 +1066,12 @@ if (cmd === "deal") {
     freshE.length ? freshE
     : fitE.length ? fitE
     : deck.filter(e => e.default);
-  const enter = poolE[Math.floor(Math.random() * poolE.length)] || {
+  const requestedEnter = contract.motion.entrance;
+  if (requestedEnter && requestedEnter !== "still" && !fitE.some(e => e.id === requestedEnter))
+    throw new Error(`taste entrance ${requestedEnter} cannot fit the selected hero and content`);
+  const enter = (requestedEnter ?
+    deck.find(e => e.id === requestedEnter) || { id: "still", sees: "static hero", markup: 'data-enter="still"' }
+  : poolE[Math.floor(Math.random() * poolE.length)]) || {
     id: "rise",
     sees: "the h1 rises line by line",
     markup: "data-enter",
@@ -1045,11 +1086,16 @@ if (cmd === "deal") {
   console.log(dealOut);
   head("HERO (scripts/layout-deal.mjs)");
   console.log(heroOut);
-  head("MOMENTS AND SCENE (moments.mjs pick --scene deal)");
+  head(`MOMENTS AND SCENE (moments.mjs pick${sigFx ? ` --effects ${sigFx}` : " --scene deal"})`);
   console.log(momOut);
+  if (sigFx)
+    console.log(`scene: none dealt: the taste's signature effect ${sigFx} is the page's one effect (MO-16, MO-23)`);
   head("EFFECT (effects.mjs pick)");
   console.log(
-    fxOut || "  none this page (a place, service or product page takes a quiet treatment about one page in three)",
+    fxOut
+      || (fxSkip ?
+        "  none this page: the dealt big scene is the page's one effect (a data-fx ground beside it FAILs effect-kind)"
+      : "  none this page (a place, service or product page takes a quiet treatment about one page in three)"),
   );
 
   // the summary, read from the dealers' own lines
@@ -1072,6 +1118,48 @@ if (cmd === "deal") {
     intensity: m[3],
   }));
   const fx = fxOut.match(/^\s*\d+\. (\w+)\s+(\S+)/m) || [];
+  const compositionLabels = {
+    offer: "the offer (menu, prices, services)",
+    showcase: "the showcase (the place, the work, the house, in use)",
+    rooms: "rooms or goods",
+    feature: "each feature section",
+    visit: "the visit",
+    form: "the booking or order form",
+    statement: "a statement section",
+  };
+  const selectedCompositions = {};
+  for (const [section, label] of Object.entries(compositionLabels)) {
+    const line = compBlock.split("\n").find(value => value.startsWith(`    ${label}: `));
+    if (!line) continue;
+    selectedCompositions[section] = line
+      .slice(`    ${label}: `.length)
+      .replace(/\s+\([^)]*\)$/, "")
+      .split(/, then /);
+  }
+  const selectedBands =
+    /no bands/.test(dealOut) ?
+      []
+    : [
+        ...(bands.includes("tinted band") ? ["tint"] : []),
+        ...(bands.includes("dark band") ? ["dark"] : []),
+        ...(bands.includes("band in the accent") ? ["brand"] : []),
+      ];
+  const selectedLayout = {
+    ...(lay[1] ? { nav: lay[1], footer: lay[2], close: lay[3], buttons: lay[4], mark: lay[5] } : {}),
+    bands: selectedBands,
+    ...(Object.keys(selectedCompositions).length ? { compositions: selectedCompositions } : {}),
+  };
+  const actualContract = resolveContract(null, {
+    layout: { rhythm: "screens", headingAlign: "left" },
+    motion: {
+      entrance: enter.id,
+      moments: moments.length,
+      scene: scene ? "auto" : "none",
+      effect: fx[2] ? "auto" : "none",
+      reveal: "default",
+      fragmentPlayback: "loop",
+    },
+  });
   const skillRef = "<skill>";
   const src = (family, id) => refOf(itemDir(family, id, taste) || path.join(SKILL, "assets", family, id));
   const fxParams = fx[2] && readTaste(taste)?.variants?.effects?.[fx[2]];
@@ -1098,6 +1186,7 @@ if (cmd === "deal") {
   }
   head("PLAN (write it on plan line 2 and in the comment at the top of <body>; build exactly this)");
   const L = [];
+  if (buildMode !== "legacy") L.push(`mode         house: add data-build-mode="house" to <html>`);
   L.push(
     `kind ${page} · page type ${pageType}${trade ? ` · trade ${trade}` : ""} · ${FIT[page] ? `fits tones ${FIT[page].tones.join("/")}, ${FIT[page].intensity.join("/")}${FIT[page].webgl ? ", WebGL" : ", no WebGL"}` : ""}`,
   );
@@ -1110,7 +1199,7 @@ if (cmd === "deal") {
     : `palette      ${pal}, type ${typ}: node ${skillRef}/scripts/start.mjs css --page ${page} --palette ${pal} --type ${typ} --radius ${page === "place" ? "sharp" : "soft"} --history ${rel(histFile)}  (paste its block into the starter's head)`,
   );
   L.push(
-    `hero         ${heroId || "?"}${heroForm ? ` data-form="${heroForm}"` : ""}: copy only the <section class="hero ..."> of ${skillRef}/assets/layout/hero-${heroId || "<id>"}.html`,
+    `hero         ${heroId || "?"}${heroForm ? ` data-form="${heroForm}"` : ""}: copy only the <section class="hero ..."> of ${skillRef}/assets/layout/hero-${heroId || "<id>"}.html${tasteHeroes.length ? `  (taste ${taste} heroes: ${tasteHeroes.join(", ")}${tasteHeroes.includes(heroId) ? "" : "; none fits this page, dealt as usual"})` : ""}`,
   );
   const enterMore = String(enter.markup || "")
     .replace(/^data-enter(?:="[\w-]+")?\s*/, "")
@@ -1139,6 +1228,10 @@ if (cmd === "deal") {
   L.push(
     `reveals      automatic: each section's h2 and lead photograph rise once (motion.js); nothing to add, data-still on a section to keep it still`,
   );
+  if (buildMode !== "legacy")
+    L.push(
+      `contract attrs  data-rhythm="screens" data-heading-align="left" data-reveal="default" data-fragment-playback="loop" data-moment-count="${moments.length}"`,
+    );
   const SLOT = {
     section: "a content section",
     statement: "a statement section",
@@ -1157,12 +1250,27 @@ if (cmd === "deal") {
       `moment ${i + 1}     ${m.id} in ${slotOf(m.fits)} of its own (${m.intensity})${i === 0 ? ", within the first three screens" : ""}: ${momentSource(m.id, skillRef, taste)}, link ${m.id}/moment.css; references/moments.md`,
     ),
   );
-  if (!moments.length) L.push("moments      none dealt: run moments.mjs pick again (every page takes two)");
+  if (!moments.length)
+    L.push(
+      contract.motion.moments === 0 ?
+        "moments      none (recorded taste)"
+      : "moments      none dealt: run moments.mjs pick again",
+    );
   L.push(
-    `scene        ${scene ? `${scene} ${SCENE_AT[sceneAt.trim().split("/")[0]] || "in a section of its own"}: copy the whole <section data-big-scene="${scene}"> of ${src("scenes", scene)}/demo.html (the gate's deal-drift check FAILs a page without it), link scenes.css and ${scene}/scene.css, load assets/scenes/scenes.js; references/scenes.md` : "none this page"}`,
+    `scene        ${
+      scene ?
+        `${scene} ${SCENE_AT[sceneAt.trim().split("/")[0]] || "in a section of its own"}: copy the whole <section data-big-scene="${scene}"> of ${src("scenes", scene)}/demo.html (the gate's deal-drift check FAILs a page without it), link scenes.css and ${scene}/scene.css, load assets/scenes/scenes.js; references/scenes.md`
+      : sigFx ?
+        `none: the taste's signature effect ${sigFx} is the page's one effect (a big scene beside it FAILs effect-kind, MO-16, MO-23)`
+      : "none this page"
+    }`,
   );
+  const fxDir = fx[2] && (itemDir("effects", fx[2], taste) || path.join(SKILL, "assets", "effects", fx[2]));
+  const fxRef =
+    fx[2] && `${src("effects", fx[2])}/${fs.existsSync(path.join(fxDir, "demo.html")) ? "demo.html" : "meta.json"}`;
+  const fxBand = `<div class="frame" data-visual><div class="frame__fx" data-fx="${fx[2]}" aria-hidden="true"></div> the band's picture </div> in one dealt band, or the close's .frame--cta; never data-fx on the section`;
   L.push(
-    `effect       ${fx[2] ? `${fx[2]} on the ${fx[1] === "hero" ? "hero (or its one [data-visual] frame when a photograph fills the hero)" : `${fx[1]}: one of the dealt bands`} (${src("effects", fx[2])}/demo.html${fxParams ? `; data-fx-params='${JSON.stringify(fxParams)}'` : ""}; references/effects-usage.md)` : "none"}`,
+    `effect       ${fx[2] ? `${fx[2]} on the ${fx[1] === "hero" ? "hero (or its one [data-visual] frame when a photograph fills the hero)" : `${fx[1]}: ${fxBand}`} (${fxRef}${fxParams ? `; data-fx-params='${JSON.stringify(fxParams)}'` : ""}; references/effects-usage.md)` : "none"}`,
   );
   L.push(
     `hover layer  automatic (motion.js): buttons, links, linked cards and photos; loops inside every card visual (references/motion.md)`,
@@ -1170,34 +1278,61 @@ if (cmd === "deal") {
   L.push(
     `kit          node ${skillRef}/scripts/kit-copy.mjs --to assets  (the core and the dealt parts only; a part you add by hand: --add ui/<name>)`,
   );
+  if (taste && buildMode !== "legacy") {
+    L.push(
+      `contract     ${JSON.stringify(contract)}; apply layout rhythm/headingAlign as data-rhythm/data-heading-align on html; motion reveal/fragmentPlayback/moments as data-reveal/data-fragment-playback/data-moment-count`,
+    );
+    L.push(
+      "review       compare reference crops; create .taste-skill/visual-review.json before finishing (references/taste-contract.md)",
+    );
+  }
   for (const [family, id] of signature)
-    if (family === "ui")
+    if (family === "components")
+      L.push(`signature    components/${id}: ${src("components", id)}/demo.html; mount data-component="${id}"`);
+    else if (family === "ui")
       L.push(
         `signature    ui/${id}: paste its fragment (${src("ui", id)}/fragment.html) into a card visual; references/cards.md`,
       );
   L.push(`then         build in a copy of starter.html, then: node ${skillRef}/scripts/gate.mjs index.html`);
   for (const l of L) console.log("  " + l);
-  // the deal as data: kit-copy.mjs copies from it, the gate checks the page against it
+  // V2 house plans are authoritative to the gate and kit-copy, including selected layout and resolved attributes.
   if (!opt("no-record")) {
-    const at = (family, id) => itemDir(family, id, taste);
-    fs.mkdirSync(histDir, { recursive: true });
-    fs.writeFileSync(
-      path.join(histDir, "deal.json"),
-      JSON.stringify(
-        {
-          taste,
-          page,
-          hero: heroId || null,
-          entrance: enter.id,
-          moments: moments.map(m => ({ id: m.id, dir: at("moments", m.id) })),
-          scene: scene ? { id: scene, dir: at("scenes", scene) } : null,
-          effect: fx[2] ? { id: fx[2], slot: fx[1], dir: at("effects", fx[2]) } : null,
-          signature: signature.map(([family, id]) => ({ family, id, dir: at(family, id) })),
-        },
-        null,
-        1,
-      ) + "\n",
-    );
+    const at = (family, id) => itemDir(family, id, taste)?.replaceAll("\\", "/") || null;
+    if (buildMode === "legacy") {
+      const legacyDeal = {
+        taste,
+        page,
+        hero: heroId || null,
+        entrance: enter.id,
+        moments: moments.map(m => ({ id: m.id, dir: at("moments", m.id) })),
+        scene: scene ? { id: scene, dir: at("scenes", scene) } : null,
+        effect: fx[2] ? { id: fx[2], slot: fx[1], dir: at("effects", fx[2]) } : null,
+        signature: signature.map(([family, id]) => ({ family, id, dir: at(family, id) })),
+      };
+      armBuild(page);
+      writeJsonSafe(dealFile, legacyDeal, { spaces: 1 });
+    } else {
+      const housePlan = {
+        planVersion: 2,
+        mode: "house",
+        taste: null,
+        page,
+        definitionHash: null,
+        layout: selectedLayout,
+        hero: heroId || null,
+        heroForm: heroForm || null,
+        entrance: enter.id,
+        contract: actualContract,
+        moments: moments.map(m => ({ id: m.id, dir: at("moments", m.id) })),
+        scene: scene ? { id: scene, dir: at("scenes", scene) } : null,
+        effect: fx[2] ? { id: fx[2], slot: fx[1], dir: at("effects", fx[2]) } : null,
+        signature: signature.map(([family, id]) => ({ family, id, dir: at(family, id) })),
+      };
+      const planErrors = validateBuildPlan(housePlan);
+      if (planErrors.length) throw new Error(planErrors.map(item => `${item.field}: ${item.message}`).join("; "));
+      armBuild(page);
+      writeJsonSafe(dealFile, housePlan, { spaces: 1 });
+    }
   }
 } else if (cmd === "types") {
   for (const t of allTypes.filter(t => suits(t, page))) console.log(describe(t, true));

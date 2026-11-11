@@ -1,7 +1,7 @@
 # Sections
 
 A page is built from its kind's plan; a deal changes the parts a template would fix. Every id has a
-recipe in `sections-library.md`. The kind and what it may carry: `flow-taste.md` sections 1 to 3 and
+recipe in `sections-library.md`. The kind and what it may carry: `flow-taste.md` section 1 and `page-planning.md` sections 2 and 3 and
 `effects-usage.md`. Heights and edges: `layout-v4.md`.
 
 ## 1. Plan in screens

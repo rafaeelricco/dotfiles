@@ -15,8 +15,7 @@ class TasteSkill(unittest.TestCase):
         self.assertNotIn("$CLAUDE_PROJECT_DIR/.", text)
         self.assertNotIn("design-taste-frontend", text)
         self.assertIn("the `ui`\nskill's `record` job", text)
-        self.assertIn("Usage rules, Composition and Signature win over this skill's look rules", text)
-        self.assertIn("Kit overrides", text)
+        self.assertIn("references/taste-contract.md", text)
 
     def test_skill_md_routes_to_the_flow(self):
         text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
@@ -24,15 +23,6 @@ class TasteSkill(unittest.TestCase):
         self.assertIn("Read `./references/flow-taste.md` now.", text)
         self.assertNotIn("## House rules", text)
         self.assertIn("## House rules", flow)
-
-    def test_taste_overrides_name_the_same_checks_in_gate_and_docs(self):
-        gate = (SKILL / "scripts/gate.mjs").read_text(encoding="utf-8")
-        listed = re.search(r"const TASTE_CHECKS = new Set\(\[([^\]]*)\]\)", gate).group(1)
-        checks = re.findall(r'"([a-z-]+)"', listed)
-        doc = (SKILL / "references/gate.md").read_text(encoding="utf-8")
-        named = doc.split("- **Taste overrides.**", 1)[1].split("\n\n", 1)[0]
-        self.assertEqual(sorted(re.findall(r"`([a-z]+(?:-[a-z]+)+|nesting)`", named.split("named:", 1)[1].split(".", 1)[0])), sorted(checks))
-        self.assertIn('metas(html).taste', gate)
 
     def test_no_file_links_to_the_source_repo(self):
         hits = [

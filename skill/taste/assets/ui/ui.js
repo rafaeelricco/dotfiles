@@ -42,10 +42,11 @@
   the page needs one or two contexts. See grounds() below.
 */
 const BASE = new URL("./", import.meta.url);
+const staticRoots = new WeakSet();
 const reducedQuery = typeof matchMedia === "function" ? matchMedia("(prefers-reduced-motion: reduce)") : null;
 export const reduced = () => !!(reducedQuery && reducedQuery.matches);
 /** true when el sits under data-ui-still: it shows its finished picture and never cycles */
-export const isStill = el => !!(el && el.closest && el.closest("[data-ui-still]"));
+export const isStill = el => !!(el && (staticRoots.has(el) || (el.closest && el.closest("[data-ui-still]"))));
 
 const css = new Map();
 function link(href) {
@@ -142,6 +143,8 @@ export async function start(root, opts) {
   await Promise.all([link(new URL("base.css", BASE).href), link(new URL(`${name}/fragment.css`, BASE).href)]);
   const init = await script(name).catch(() => null);
   if (!init) return null;
+  if (opts.playback === "static" || document.documentElement.dataset.fragmentPlayback === "static")
+    staticRoots.add(root);
   root.__ui = init(root, opts) || { destroy() {} };
   seat(root);
   return root.__ui;
@@ -446,7 +449,7 @@ export function loop(root, cycle, { still, rest = 600, rootMargin = "0px", cycle
     tidy(root);
   };
   const setHeld = on => root.classList.toggle("is-ui-held", on);
-  if (reduced()) {
+  if (reduced() || staticRoots.has(root)) {
     setHeld(true);
     show();
     const none = () => {};

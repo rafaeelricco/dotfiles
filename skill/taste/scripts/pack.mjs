@@ -11,8 +11,8 @@
   PASS or FAIL or the exit code. --json prints {name, findings, warnings, status} and nothing else.
   Own items are written as if they sat in the kit, so each is staged (roots.mjs stageItem) to be loaded or shot.
   --render shoots every own item's demo.html with shoot.mjs (the picture lands in <pack>/shots/items/).
-  Checks: pack-manifest, pack-unsettled, pack-ref, pack-variant, pack-item, pack-spec, pack-collide, pack-hotlink,
-  pack-size, pack-lint, pack-render. The house pack is checked like any other, without pack-spec, pack-size and
+  Checks: pack-manifest, pack-unsettled, pack-settled, pack-ref, pack-variant, pack-item, pack-spec, pack-collide,
+  pack-hotlink, pack-size, pack-lint, pack-render. The house pack is checked like any other, without pack-spec, pack-size and
   pack-collide (its items are the kit's own, moved).
   Exit 0 whole, 1 a finding, 2 usage or an unknown pack.
 */
@@ -23,13 +23,16 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { HOUSE, SKILL, itemDir, stageItem, tasteName, tastesDir } from "./roots.mjs";
 
+import { screenshotHash } from "./visual-review.mjs";
+import { validateContract, validateTaste } from "./taste-contract.mjs";
+
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const KIT = path.join(SKILL, "assets");
 const FAMILIES = ["moments", "scenes", "effects", "ui", "components"];
 const BUDGET = { moments: 60e3, effects: 60e3, ui: 60e3, components: 80e3, scenes: 160e3 }; // bytes of code per item
 const NAME = /^[a-z0-9][a-z0-9-]{0,63}$/;
 // the families a signature may name, and how many items of each
-const SIGNATURE = { moments: 3, scenes: 1, effects: 1, ui: Infinity };
+const SIGNATURE = { moments: 3, scenes: 1, effects: 1, ui: Infinity, components: Infinity };
 const REF = /^([a-z]+)\/([a-z0-9][a-z0-9-]*)$/;
 const SETTLED = /^(fits|variant|own):([a-z]+)\/([a-z0-9][a-z0-9-]*)$/;
 const RENDER_LIMIT = 120e3; // ms for one shoot.mjs run
@@ -147,6 +150,8 @@ function readManifest(pack, name) {
   }
   if (!isObj(t)) return { taste: null, findings: [F("must be a JSON object")] };
   const f = [];
+  if (t.schemaVersion !== undefined && t.schemaVersion !== 2)
+    f.push(F(`unsupported schemaVersion ${JSON.stringify(t.schemaVersion)}`));
   const need = (k, ok, shape) => {
     if (!(k in t)) f.push(F(`"${k}" is missing (${shape})`));
     else if (!ok) f.push(F(`"${k}" must be ${shape}`));
@@ -178,8 +183,48 @@ function readManifest(pack, name) {
     }
     for (const [family, most] of Object.entries(SIGNATURE))
       if (count[family] > most) f.push(F(`"signature" lists ${count[family]} ${family}: at most ${most}`));
+    // the big scene is the page's one effect (MO-16, MO-23): start.mjs plan deals no scene beside a signature effect
+    if (count.scenes && count.effects)
+      f.push(
+        F('"signature" names a scene and an effect: the big scene is the page\'s one effect (MO-16, MO-23), keep one'),
+      );
+  }
+  // heroes (optional): ids of the kit's assets/layout/heroes.json the taste's pages open with; start.mjs plan deals among them
+  if ("heroes" in t) {
+    let known = [];
+    try {
+      known = readJson(path.join(KIT, "layout", "heroes.json")).heroes.map(h => h.id);
+    } catch {
+      /* no heroes.json: every id is reported */
+    }
+    if (!allStr(t.heroes)) f.push(F('"heroes" must be an array of hero ids (assets/layout/heroes.json)'));
+    else
+      for (const id of t.heroes)
+        if (!known.includes(id))
+          f.push(F(`"heroes" entry "${id}" is not a hero of assets/layout/heroes.json (${known.join(", ")})`));
   }
   need("settled", isObj(t.settled) && allStr(Object.values(t.settled)), "an object of strings");
+  if (t.schemaVersion === 2)
+    f.push(...validateTaste(t, { purpose: "pack", packDir: pack }).map(x => F(`${x.path}: ${x.message}`)));
+  else f.push(...validateContract(t).map(x => F(`${x.path}: ${x.message}`)));
+  if (t.reviewVersion !== undefined && t.reviewVersion !== 1) f.push(F("unsupported reviewVersion"));
+  if (t.reviewVersion === 1) {
+    for (const [id, resolution] of Object.entries(obj(t.settled))) {
+      if (/^skip:/.test(String(resolution))) continue;
+      const evidence = t.matchEvidence?.[id];
+      if (!evidence || typeof evidence.notes !== "string" || !evidence.notes.trim()) {
+        f.push(F(`matchEvidence.${id}: notes required`));
+        continue;
+      }
+      for (const key of ["reference", "actual"]) {
+        try {
+          screenshotHash(pack, evidence[key]);
+        } catch (e) {
+          f.push(F(`matchEvidence.${id}.${key}: ${e.message}`));
+        }
+      }
+    }
+  }
   return { taste: t, findings: f };
 }
 
@@ -207,20 +252,50 @@ function unsettled(t, ids) {
     .map(id => ({ check: "pack-unsettled", where: id, msg: 'no entry in taste.json "settled"' }));
 }
 
+// a kit item kept for reference but never dealt: a meta.json "retired" reason (moments), or its family index's
+// top-level "retired" list (scenes); null when it is live
+function retiredOf(family, id, name) {
+  const dir = itemDir(family, id, name);
+  if (!dir) return null;
+  try {
+    const why = readJson(path.join(dir, "meta.json")).retired;
+    if (typeof why === "string" && why.trim()) return why.trim();
+  } catch {
+    /* no meta: not retired by it */
+  }
+  try {
+    const list = readJson(path.join(path.dirname(dir), "index.json")).retired;
+    if (Array.isArray(list) && list.includes(id)) return "its family index lists it as retired";
+  } catch {
+    /* no index */
+  }
+  return null;
+}
+
 // fits, variants, signature and the settled entries of candidate ids
 function refs(t, ids, name, pack) {
   const out = [];
   const miss = (where, family, id) =>
     out.push({ check: "pack-ref", where, msg: `no ${family}/${id} in this pack, the house pack or the kit` });
+  const retired = (where, family, id, why) =>
+    out.push({ check: "pack-ref", where, msg: `${family}/${id} is retired, so no dealer deals it (${why})` });
+  const settledAs = (cid, msg) => out.push({ check: "pack-settled", where: `settled.${cid}`, msg });
   const ownIn = (family, id) => isFile(path.join(pack, "assets", family, id, "meta.json"));
   for (const [family, list] of Object.entries(obj(t.fits)))
     if (FAMILIES.includes(family))
-      for (const id of strs(list)) if (!itemDir(family, id, name)) miss(`fits.${family}`, family, id);
+      for (const id of strs(list)) {
+        const why = itemDir(family, id, name) ? retiredOf(family, id, name) : null;
+        if (!itemDir(family, id, name)) miss(`fits.${family}`, family, id);
+        else if (why) retired(`fits.${family}`, family, id, why);
+      }
   for (const id of Object.keys(obj(obj(t.variants).effects)))
     if (!itemDir("effects", id, name)) miss("variants.effects", "effects", id);
   for (const s of strs(t.signature)) {
     const [family, id] = s.split("/");
-    if (REF.test(s) && FAMILIES.includes(family) && !itemDir(family, id, name)) miss("signature", family, id);
+    if (!REF.test(s) || !FAMILIES.includes(family)) continue;
+    const why = itemDir(family, id, name) ? retiredOf(family, id, name) : null;
+    if (!itemDir(family, id, name)) miss("signature", family, id);
+    else if (why) retired("signature", family, id, why);
   }
   const settled = obj(t.settled);
   for (const cid of ids) {
@@ -237,6 +312,19 @@ function refs(t, ids, name, pack) {
           where: `settled.${cid}`,
           msg: `"${v}": no ${family}/${id} ${how === "own" ? "in this pack's assets" : "to point at"}`,
         });
+      else if (how !== "own" && retiredOf(family, id, name))
+        retired(`settled.${cid}`, family, id, retiredOf(family, id, name));
+      else if (
+        how === "fits"
+        && !strs(obj(t.fits)[family]).includes(id)
+        && !strs(t.signature).includes(`${family}/${id}`)
+      )
+        settledAs(cid, `"${v}": ${family}/${id} is not under fits.${family} or signature, so no dealer deals it`);
+      else if (how === "variant" && !(family === "effects" && isObj(obj(obj(t.variants).effects)[id])))
+        settledAs(
+          cid,
+          `"${v}": a variant needs its numbers under variants.effects.${id}${family === "effects" ? "" : " (only effects carry variants)"}`,
+        );
     } else if (!(v.startsWith("skip:") && v.slice(5).trim().length >= 3))
       out.push({
         check: "pack-manifest",
@@ -273,6 +361,8 @@ async function paramsOf(id, dir) {
   const s = await scanItem(dir);
   return s.effects?.find(e => e.id === id)?.params || null;
 }
+const PALETTE = ["bg", "surface", "ink", "muted", "accent", "accentInk"]; // the keys fx.js mountAll merges from data-fx-palette
+const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 async function variants(t, name) {
   const out = [];
   const F = (where, msg) => out.push({ check: "pack-variant", where, msg });
@@ -281,6 +371,16 @@ async function variants(t, name) {
     const declared = dir ? await paramsOf(id, dir) : null;
     if (!declared || !isObj(set)) continue; // an unknown effect is pack-ref; an invalid one is pack-item
     for (const [k, v] of Object.entries(set)) {
+      if (k === "palette") {
+        if (!isObj(v)) F(`variants.effects.${id}`, `"palette" must be an object of colours (${PALETTE.join(", ")})`);
+        else
+          for (const [pk, pv] of Object.entries(v))
+            if (!PALETTE.includes(pk))
+              F(`variants.effects.${id}`, `"palette.${pk}" is not a palette key (${PALETTE.join(", ")})`);
+            else if (typeof pv !== "string" || !HEX.test(pv))
+              F(`variants.effects.${id}`, `"palette.${pk}" must be a hex colour`);
+        continue;
+      }
       const p = declared[k];
       if (!isObj(p))
         F(`variants.effects.${id}`, `"${k}" is not a param of ${id} (${Object.keys(declared).join(", ")})`);

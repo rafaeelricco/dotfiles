@@ -2451,6 +2451,8 @@ export const rhythmMod = (() => {
             }),
           );
         } else if (/hidden|clip/.test(s.overflowX) && s.display !== "inline") {
+          // a dealt moment's running line (marquee-row's rail, data-edge-free) clips its track by design: never a carousel
+          if (el.matches("[data-edge-free]")) continue;
           let items = inFlowKids(el);
           if (items.length === 1) items = inFlowKids(items[0]);
           if (items.length < 2) continue;
@@ -2585,8 +2587,15 @@ export const rhythmMod = (() => {
         const kHit = ks.find(k => Math.abs(rr.l - k.x) <= 2);
         const gr = rectOf(sp.G.el),
           cols = [box(lr), box(rr)];
+        // the kit's offset pair (assets/system.css, .comp-offset: <figure class="media span-7"> then <figure class="media
+        // span-4 start-9">, the second 22% lower from 1024px; sections-library.md, Compositions: "two photographs of one
+        // subject, the second smaller and lower") is two pictures, not words beside a visual: its drop, its picture on the
+        // left and its start-9 line are the composition, so T-mode, T-orientation and T-pair leave it out (and it sets no
+        // pair line for the page's real splits). It stays a split for everything else, T-edges included. Only that exact
+        // shape: a .comp-offset grid whose two columns are figures
+        const offsetPair = sp.G.el.matches(".comp-offset") && TU(L) === "FIGURE" && TU(Rt) === "FIGURE";
         // T-mode: the tops of the two columns' first boxes agree within 8px (merged CK-33: a centred split FAILs)
-        if (!(mode === "top" || mode === "both"))
+        if (!offsetPair && !(mode === "top" || mode === "both"))
           mOff.push(
             off(
               sp.G.el,
@@ -2596,7 +2605,7 @@ export const rhythmMod = (() => {
             ),
           );
         // T-orientation: text left on every split
-        if (orient !== "text-left")
+        if (!offsetPair && orient !== "text-left")
           oOff.push(
             off(
               sp.G.el,
@@ -2608,19 +2617,22 @@ export const rhythmMod = (() => {
         // T-pair: one pair: the right column's x the same on every split (2px), on wrap.left + k*(w+24)/12 (k 5, 6 or 7;
         // a place page 6), the left column ending at x - 24
         const probs = [];
-        if (pairX == null) pairX = rr.l;
-        else if (Math.abs(rr.l - pairX) > 2)
-          probs.push(`its right column starts at x ${px(rr.l - SX)}, the first split's at ${px(pairX - SX)}`);
-        if (!kHit)
-          probs.push(
-            `its right column starts at x ${px(rr.l - SX)}, on none of the split lines ${ks.map(k => `${px(k.x - SX)} (k=${k.k})`).join(", ")}`,
-          );
-        // the left column ends 24px before the right one, or one column earlier on that column's end: the kit's splits set
-        // their words on span-5 beside a visual on span-6 start-7 (heroes.json split and collage, the layout demos' sections)
-        else if (Math.abs(lr.r - (kHit.x - 24)) > 2 && Math.abs(lr.r - (kHit.x - 24 - (cw + 24) / 12)) > 2)
-          probs.push(
-            `its left column ends at ${px(lr.r - SX)}px, not 24px before the right one (${px(kHit.x - 24 - SX)}px) or a column before it (${px(kHit.x - 24 - (cw + 24) / 12 - SX)}px)`,
-          );
+        if (!offsetPair) {
+          if (pairX == null) pairX = rr.l;
+          else if (Math.abs(rr.l - pairX) > 2)
+            probs.push(`its right column starts at x ${px(rr.l - SX)}, the first split's at ${px(pairX - SX)}`);
+          if (!kHit)
+            probs.push(
+              `its right column starts at x ${px(rr.l - SX)}, on none of the split lines ${ks.map(k => `${px(k.x - SX)} (k=${k.k})`).join(", ")}`,
+            );
+          // the left column ends 24px before the right one, or one column earlier on that column's end: the kit's splits
+          // set their words on span-5 beside a visual on span-6 start-7 (heroes.json split and collage, the layout demos'
+          // sections)
+          else if (Math.abs(lr.r - (kHit.x - 24)) > 2 && Math.abs(lr.r - (kHit.x - 24 - (cw + 24) / 12)) > 2)
+            probs.push(
+              `its left column ends at ${px(lr.r - SX)}px, not 24px before the right one (${px(kHit.x - 24 - SX)}px) or a column before it (${px(kHit.x - 24 - (cw + 24) / 12 - SX)}px)`,
+            );
+        }
         if (probs.length)
           pOff.push(
             off(sp.G.el, gr, `the split's columns are off the page's one pair of lines: ${probs.join("; ")}`, {
@@ -2652,7 +2664,31 @@ export const rhythmMod = (() => {
     harness.rows = rows.length;
     harness.splits = splits.length;
     harness.headings = heads.length;
-    return { harness, tests, status };
+    // Only screen-grid aesthetics change under flow. Fit, overflow, collisions and
+    // expanded-content containment remain measured and reported.
+    const layout =
+      opt.contract !== undefined ?
+        opt.contract.layout || {}
+      : {
+          rhythm: document.documentElement.dataset.rhythm,
+          headingAlign: document.documentElement.dataset.headingAlign,
+        };
+    const flow = layout.rhythm === "flow";
+    const centered = layout.headingAlign === "center";
+    const omitted = new Set(
+      flow ?
+        ["SR-1 T1", "SR-1 T2", "SR-2 T-height", "SR-2 T-grid", "SR-2 T-total", "SR-2 T-grid-expanded", "SR-5 T2"]
+      : [],
+    );
+    if (centered) {
+      omitted.add("SR-6 T3-left-lines");
+      omitted.add("SR-6 T4-alignment");
+    }
+    return {
+      harness,
+      tests: tests.filter(t => !(flow && t.rule === "SR-4") && !omitted.has(`${t.rule} ${t.id}`)),
+      status,
+    };
   }
 
   // ---------------------------------------------------------------- the expansion pass, in the page (serialised)
@@ -3115,7 +3151,7 @@ export const rhythmMod = (() => {
   }
 
   const readExpr = (ctx, desktop, only) =>
-    `(${measure.toString()})(${JSON.stringify({ width: ctx.width, height: ctx.height, desktop, only })})`;
+    `(${measure.toString()})(${JSON.stringify({ width: ctx.width, height: ctx.height, desktop, only, contract: ctx.buildPlan?.contract })})`;
 
   // the expansion pass on the same tab, after the first read was cropped: SR-2 read again at the top as the baseline (so
   // a height the crops' scrolling changed, a reveal, a counter or a lazy block, is not taken for one a click changed),

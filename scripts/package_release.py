@@ -59,6 +59,9 @@ def _is_runtime_path(relative: str) -> bool:
         return False
     if "tests" in parts or "evals" in parts:
         return False
+    # The Taste JSON schemas validate authoring/test data only; dealers consume the validated JSON assets directly.
+    if parts[:3] == ("skill", "taste", "schemas") and path.name.endswith(".schema.json"):
+        return False
     if relative in ROOT_FILES or relative == "skill/dependencies.txt":
         return True
     if parts[0] == "skill" and len(parts) >= 3:

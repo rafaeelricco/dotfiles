@@ -6,7 +6,9 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 const taste = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../skill/taste");
+const schemas = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../taste/schemas");
 const read = f => JSON.parse(fs.readFileSync(path.join(taste, f), "utf8"));
+const readSchema = f => JSON.parse(fs.readFileSync(path.join(schemas, f), "utf8"));
 const typeOf = v =>
   Array.isArray(v) ? "array"
   : v === null ? "null"
@@ -27,7 +29,7 @@ function check(s, v, at, errs) {
 }
 const valid = (schema, file) => {
   const errs = [];
-  check(read(`schemas/${schema}.schema.json`), read(file), file, errs);
+  check(readSchema(`${schema}.schema.json`), read(file), file, errs);
   assert.deepEqual(errs, []);
 };
 

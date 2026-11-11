@@ -54,12 +54,18 @@
     heading-repeat   (WARN) two headings with the same words, or one holding the whole of the other.
 */
 window.lyCheck = function lyCheck(opts = {}) {
+  // A supplied build contract is authoritative; page attributes remain the legacy path.
+  const rhythm = opts.contract !== undefined ? opts.contract.layout?.rhythm : document.documentElement.dataset.rhythm;
   const tol = opts.tol ?? 1.5;
   const vw = document.documentElement.clientWidth,
     vh = innerHeight,
     sy = scrollY;
   const out = [],
-    add = (rule, where, detail) => out.push({ rule, where, detail });
+    add = (rule, where, detail) => {
+      if (rhythm === "flow" && ["screen-short", "screen-height", "neighbour", "neighbour-ground"].includes(rule))
+        return;
+      out.push({ rule, where, detail });
+    };
   const R1 = n => Math.round(n * 10) / 10;
   const name = el => {
     if (!el) return "?";
@@ -181,7 +187,11 @@ window.lyCheck = function lyCheck(opts = {}) {
       continue;
     }
     if (cen && !(Math.abs(r.left - L) <= tol)) continue; // centred on the axis: fine both sides
-    if (!onStart(r.left))
+    // the kit's offset pair under 1024px (assets/system.css, .comp-offset > figure + figure: width 72%, margin-left
+    // auto) sets its second, smaller figure against the right line on purpose; it is held to that line (edge-right
+    // below), and only its left edge is let off the column starts
+    const offsetPair = el.matches(".comp-offset > figure + figure") && Math.abs(r.right - R) <= tol;
+    if (!onStart(r.left) && !offsetPair)
       add("edge-left", name(el), `starts at x ${R1(r.left)}; the lines are ${R1(L)} and the column starts`);
     if (!text && !onEnd(r.right)) add("edge-right", name(el), `ends at x ${R1(r.right)}; the right line is ${R1(R)}`);
   }
@@ -381,7 +391,7 @@ window.lyCheck = function lyCheck(opts = {}) {
       }
     }
   });
-  if (info.length) {
+  if (info.length && rhythm !== "flow") {
     const hero = info[0];
     if (hero.r.top > navH + tol + (navPos === "static" && navEl ? navEl.getBoundingClientRect().height : 0))
       add("hero-fold", name(hero.el), `starts at y ${Math.round(hero.r.top)}, not under the nav`);
@@ -476,12 +486,21 @@ window.lyCheck = function lyCheck(opts = {}) {
 };
 
 window.lyFinish = async function lyFinish(opts = {}) {
+  const motion =
+    opts.contract !== undefined ?
+      opts.contract.motion || {}
+    : {
+        moments: document.documentElement.dataset.momentCount === "0" ? 0 : undefined,
+        reveal: document.documentElement.dataset.reveal,
+      };
   const vw = document.documentElement.clientWidth,
     vh = innerHeight,
     sy0 = scrollY;
   const out = [],
     add = (rule, where, detail, fix, sev) =>
-      out.push(sev ? { rule, where, detail, fix, sev } : { rule, where, detail, fix });
+      rule === "motion-visible" && motion.moments === 0 ?
+        undefined
+      : out.push(sev ? { rule, where, detail, fix, sev } : { rule, where, detail, fix });
   const wait = ms => new Promise(r => setTimeout(r, ms));
   const go = async (y, ms) => {
     scrollTo(0, Math.max(0, y));
@@ -866,7 +885,7 @@ window.lyFinish = async function lyFinish(opts = {}) {
         "move the first dealt moment (start.mjs plan names it) into the second or third section, on the element its demo.html names",
       );
   }
-  if (opts.reveal && secs.length > 2) {
+  if (opts.reveal && motion.reveal !== "none" && secs.length > 2) {
     const R = "[data-reveal], [data-revealed], [data-m-reveal], .m-reveal, .is-revealed";
     if (!document.querySelector(R) && !secs.every(s => s.matches("[data-still]")))
       add(

@@ -27,6 +27,8 @@
                                                setting, photos.mjs search) always prints photo: the game's name
                                                set large on the photograph's calm side
          [--hero <id>]                         print that one instead of dealing it
+         [--heroes a,b]                        deal only among these ids (a saved taste's heroes, start.mjs plan --taste);
+                                               none of them fits the --type and --has: the usual deal
          [--history .taste-skill/layout-history.json] [--json] [--stats 1000]
 
   Prints the hero: its demo page, its numbers, and the moment, ground and effect ids that fit the type
@@ -86,6 +88,14 @@ const has = new Set(
 if (gaming) has.delete("ui"); // never a UI hero on a game
 if (!gaming && has.delete("setting")) has.add("photo"); // only a game has a setting: on any other page it is a photograph
 const weightKey = gaming ? "gaming" : type; // the types weights to read
+// --heroes a,b: a saved taste's heroes list (start.mjs plan --taste); the deal keeps to those ids when one fits
+const only =
+  opt("heroes") && opt("heroes") !== true ?
+    String(opt("heroes"))
+      .split(",")
+      .map(s => s.trim())
+      .filter(Boolean)
+  : [];
 const histFile = opt("history");
 let hist = { heroes: [] };
 if (histFile)
@@ -141,7 +151,9 @@ function dealOnce(recentHeroes) {
       console.error(`deal: no hero for ${gaming ? "a game" : type} with ${[...has].join(", ")}`);
       process.exit(1);
     }
-    hero = draw(ok, h => h.types[weightKey], recentHeroes);
+    // a taste's heroes first, away from the recent ones among themselves; none of them fits: the usual deal
+    const kept = ok.filter(h => only.includes(h.id));
+    hero = draw(kept.length ? kept : ok, h => h.types[weightKey], recentHeroes);
   }
   return hero;
 }
@@ -168,6 +180,10 @@ if (!hero) {
   console.error("deal: unknown --hero id");
   process.exit(2);
 }
+if (only.length && !opt("hero") && !only.includes(hero.id))
+  console.error(
+    `deal: none of the taste's heroes (${only.join(", ")}) fits ${gaming ? "a game" : type} with ${[...has].join(", ")}; dealt as usual`,
+  );
 
 // a place's hero has four forms (layout.css 0b), dealt away from the last two: two cafes in a row never share one.
 // A place with no photograph keeps the statement hero (sections.md section 2), so no form is dealt.

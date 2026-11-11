@@ -45,7 +45,16 @@ import { spawn, execFileSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { pick as dealEffects, filterEffects, SLOTS, KINDS } from "../assets/effects/pick.js";
 import { pageKind, fitsKind, FIT, TONES, INTENSITIES } from "./moments.mjs";
-import { assetRoots, chromeOrExit, readTaste, servable, stageItem, tasteName, tastesDir, updateDeal } from "./roots.mjs";
+import {
+  assetRoots,
+  chromeOrExit,
+  readTaste,
+  servable,
+  stageItem,
+  tasteName,
+  tastesDir,
+  updateDeal,
+} from "./roots.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const FX = path.join(ROOT, "assets", "effects");

@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "kaplo-page",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "5731",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        "C:/Users/Administrator/AppData/Local/Temp/claude/3fe97e899aef7239/585a61e7-701f-4d5b-bb3c-4331339c4635/scratchpad/launcher"
+      ],
+      "port": 5731
+    }
+  ]
+}

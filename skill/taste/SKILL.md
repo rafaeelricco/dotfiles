@@ -25,19 +25,13 @@ and `CHROME_PATH` names any other (ffmpeg optional).
 
 **A brief that points at a site to follow** ("like this site", "replicate its taste") is first the `ui`
 skill's `record` job: invoke `ui` with it, then build here only if a page with this kit is what is asked.
-A page given a recorded taste is dealt with `--taste <name>`: the pack's own parts and signature items
-are dealt, and the taste's head block (`ui` → `record.md`, Apply) replaces the dealt palette, pairing
-and radius. Turning what a site does into kit parts is `references/extract.md`; nothing captured is
-written inside this skill. That block carries the taste's faces (a face kept for the h1 alone
-stays on the h1), type sizes, button height and button shadow; never set them back to the kit's. The
-taste's Usage rules, Composition and Signature win over this skill's look rules: the font list
-(`layout-v4.md` §5), the accent as the only filled button and flat buttons (`system.md`), the fixed
-type scale, tracked capitals, light or dark bands, centred blocks and a nav button. A kit check that a
-taste breaks on purpose is listed in the taste's Kit overrides (`references/gate.md`, Taste overrides),
-never waived page by page. Everything else here holds: one section per screen, equal edges, contrast,
-the copy rules and the gate.
+A page given a recorded taste uses `taste.mjs plan --taste <name>` in reference mode.
+Follow `references/taste-contract.md` for its structured definition, precedence,
+legacy compatibility and completion checks. Turning observed behavior into own kit
+parts is `references/extract.md`; captured material stays in the pack. Technical PASS
+alone does not establish visual quality.
 
 Skill-local files: `./references/*`, `./scripts/*`, `./assets/*` and `./library/*` only.
-Read `./references/flow-taste.md` now. A section, step or house-rule number cited as `SKILL.md`'s,
-in a reference or in a script's output, is in that file.
+Read `./references/flow-taste.md` now. References to its page-planning sections 2 and 3 are in
+`./references/page-planning.md`; other flow section, step and house-rule numbers are in the flow.
 Load each additional reference only when that flow names it.

@@ -158,6 +158,10 @@ height) says; no page CSS; the scene's section stays one or two screens like eve
   390), or the scene's own section. One `[data-visual]` a page. A hero with an effect in a frame is
   a 5/7 or 6/6 split with the visual right, or moves the effect to its own section; an effect as the
   hero's layer (a game's world, a focal ground) keeps the words on its calm part at 4.5:1.
+- **A band's effect** (a place, service or product page's one quiet treatment, `--slots band`): a layer of its own in
+  the band's one `[data-visual]` frame, `<div class="frame" data-visual><div class="frame__fx" data-fx="<id>"
+aria-hidden="true"></div>…</div>`, or in the close's `.frame--cta`. Never `data-fx` on the `<section>`: its canvas
+  sits beside the `.wrap` at z-index -1, which the rhythm check (SR-6) refuses as a layer.
 - **Split frame:** `.frame.frame--split` holding a `.stage`; a window `.at-corner.to-edge` at 56/56,
   cut by the right and bottom; a second piece (`cursor`, `notify`) only over a window's lower-right
   edge (`.at-over`), hidden from 1024 to 1279 and on a phone. Text and UI never share a half.

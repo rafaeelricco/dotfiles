@@ -27,10 +27,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import http from "node:http";
-import { spawn, execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { chromeOrExit, climbRoot, servable } from "./roots.mjs";
+import { readBuildPlan } from "./build-policy.mjs";
+import { startHeadlessBrowser, startPreviewServer } from "./consistency/browser.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const LAYOUT = path.join(here, "..", "assets", "layout");
@@ -44,6 +44,8 @@ const opt = (k, d) => {
   );
 };
 // default Chrome profile folder: --profile, else $TASTE_SKILL_TMP/chrome/<tool>-<pid>, else a fresh folder under the system temp dir
+const buildPlan = readBuildPlan(opt("build-plan", null));
+const checkOptions = buildPlan ? { contract: buildPlan.contract, mode: buildPlan.mode } : {};
 const defaultProfile = () =>
   process.env.TASTE_SKILL_TMP ?
     path.join(process.env.TASTE_SKILL_TMP, "chrome", "layout-check-" + process.pid)
@@ -129,37 +131,20 @@ if (!/^https?:\/\//i.test(target)) {
     ".txt": "text/plain",
     ".ico": "image/x-icon",
   };
-  server = http.createServer((req, res) => {
-    try {
-      let p = decodeURIComponent(new URL(req.url, "http://x").pathname);
-      if (p.endsWith("/")) p += "index.html";
-      const f = path.join(root, p);
-      if (!servable(root, f, path.dirname(file)) || fs.statSync(f).isDirectory()) {
-        res.writeHead(404);
-        res.end("not found");
-        return;
-      }
-      res.writeHead(200, {
-        "Content-Type": MIME[path.extname(f).toLowerCase()] || "application/octet-stream",
-        "Cache-Control": "no-store",
-      });
-      res.end(fs.readFileSync(f));
-    } catch {
-      res.writeHead(404);
-      res.end("not found");
-    }
-  });
-  let port = 0;
-  for (let p = 5770; p <= 5779 && !port; p++)
-    port = await new Promise(r => {
-      server.once("error", () => r(0));
-      server.listen(p, "127.0.0.1", () => r(p));
-    });
-  if (!port) {
+  server = await startPreviewServer({
+    root,
+    home: path.dirname(file),
+    allowed: servable,
+    portStart: 5770,
+    portEnd: 5779,
+    mime: MIME,
+    indexForBareDirectory: false,
+  }).catch(() => null);
+  if (!server) {
     console.error("check: no free port in 5770-5779");
     process.exit(2);
   }
-  url = `http://127.0.0.1:${port}/${path.relative(root, file).split(path.sep).map(encodeURIComponent).join("/")}`;
+  url = `http://127.0.0.1:${server.port}/${path.relative(root, file).split(path.sep).map(encodeURIComponent).join("/")}`;
 }
 const { heroes } = JSON.parse(fs.readFileSync(path.join(LAYOUT, "heroes.json"), "utf8"));
 // the stress: the page's own h1 markup (from its source, before layout.js split it) with words from the
@@ -189,45 +174,9 @@ const STRESS = String.raw`(async (maxChars) => {
 })`;
 
 const profile = inProject(profileArg, "layout-check");
-fs.mkdirSync(profile, { recursive: true });
-const portFile = path.join(profile, "DevToolsActivePort");
-try {
-  fs.rmSync(portFile);
-} catch {
-  /* none */
-}
 const [w0, h0] = sizes[0];
-const child = spawn(
-  chrome,
-  [
-    "--headless=new",
-    `--user-data-dir=${profile}`,
-    "--remote-debugging-port=0",
-    "--no-first-run",
-    "--no-default-browser-check",
-    "--disable-extensions",
-    "--hide-scrollbars",
-    "--mute-audio",
-    "--disable-gpu",
-    "--use-angle=swiftshader",
-    "--enable-unsafe-swiftshader",
-    `--window-size=${w0},${h0}`,
-    "about:blank",
-  ],
-  { stdio: "ignore", windowsHide: true },
-);
-const kill = () => {
-  if (child.exitCode != null) return;
-  try {
-    execFileSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], { stdio: "ignore" });
-  } catch {
-    try {
-      child.kill();
-    } catch {
-      /* gone */
-    }
-  }
-};
+let browser = null;
+const kill = () => browser?.kill();
 const guard = setTimeout(() => {
   console.error("check: timed out");
   kill();
@@ -237,49 +186,29 @@ const guard = setTimeout(() => {
 let failed = false;
 const report = [];
 try {
-  let port = null;
-  for (let i = 0; i < 150 && !port; i++) {
-    await sleep(100);
-    try {
-      port = parseInt(fs.readFileSync(portFile, "utf8"), 10) || null;
-    } catch {
-      /* not yet */
-    }
-  }
-  if (!port) throw new Error("Chrome did not start");
-  const ver = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json();
-  const ws = new WebSocket(ver.webSocketDebuggerUrl);
-  await new Promise((r, j) => {
-    ws.addEventListener("open", r, { once: true });
-    ws.addEventListener("error", j, { once: true });
+  browser = await startHeadlessBrowser(chrome, {
+    profile,
+    startupTimeoutMs: 15000,
+    args: [
+      "--headless=new",
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--disable-extensions",
+      "--hide-scrollbars",
+      "--mute-audio",
+      "--disable-gpu",
+      "--use-angle=swiftshader",
+      "--enable-unsafe-swiftshader",
+      `--window-size=${w0},${h0}`,
+    ],
   });
-  let id = 0;
-  const pend = new Map(),
-    subs = [];
-  ws.addEventListener("message", e => {
-    const m = JSON.parse(e.data);
-    if (m.id && pend.has(m.id)) {
-      pend.get(m.id)(m);
-      pend.delete(m.id);
-    } else subs.forEach(f => f(m));
-  });
-  const send = (method, params = {}, sessionId) =>
-    new Promise(r => {
-      const i = ++id;
-      pend.set(i, r);
-      ws.send(JSON.stringify({ id: i, method, params, sessionId }));
-    });
-  const {
-    result: { targetId },
-  } = await send("Target.createTarget", { url: "about:blank" });
-  const {
-    result: { sessionId },
-  } = await send("Target.attachToTarget", { targetId, flatten: true });
-  const S = async (m, p) => {
-    const r = await send(m, p, sessionId);
-    if (r.error) throw new Error(`${m}: ${r.error.message}`);
-    return r.result;
-  };
+  const { cdp } = browser;
+  const send = (method, params = {}, sessionId) => cdp.send(method, params, sessionId);
+  const { targetId } = await send("Target.createTarget", { url: "about:blank" });
+  const { sessionId } = await send("Target.attachToTarget", { targetId, flatten: true });
+  const S = (m, p) => send(m, p, sessionId);
+  const subs = [];
+  cdp.onAny(m => subs.forEach(f => f(m)));
   const ev = async x => {
     const r = await S("Runtime.evaluate", { expression: x, awaitPromise: true, returnByValue: true });
     if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description || r.exceptionDetails.text);
@@ -338,7 +267,7 @@ try {
     );
     await ev("document.fonts ? document.fonts.ready.then(() => 1) : 1");
     await sleep(900);
-    const res = await ev(src + "\n;window.lyCheck()");
+    const res = await ev(src + `\n;window.lyCheck(${JSON.stringify(checkOptions)})`);
     res.size = `${W}x${H}`;
     res.overflowX = await ev("document.documentElement.scrollWidth > document.documentElement.clientWidth");
     if (res.overflowX) res.findings.push({ rule: "overflow-x", where: "page", detail: "the page scrolls sideways" });
@@ -348,7 +277,7 @@ try {
         `new Promise(r => { const t = performance.now(); (function w() { if (document.documentElement.dataset.momentsReady || !document.querySelector('[data-moment]') || performance.now() - t > 4000) r(); else setTimeout(w, 50); })(); })`,
       );
       try {
-        res.findings.push(...(await ev(`window.lyFinish(${JSON.stringify({ reveal })})`)));
+        res.findings.push(...(await ev(`window.lyFinish(${JSON.stringify({ reveal, ...checkOptions })})`)));
       } catch (e) {
         res.findings.push({
           rule: "finish-check",
@@ -388,15 +317,28 @@ try {
         `(document.querySelector('main > section')?.className.match(/hero--([a-z]+)/) || [])[1] || ''`,
       );
       const h = heroes.find(x => x.id === id);
-      if (h) {
+      const taste =
+        h && (buildPlan ? buildPlan.mode === "reference" : await ev(`!!document.querySelector('meta[name="taste"]')`));
+      const allowedAt = h =>
+        W >= 1400 ? h.h1.lines[0]
+        : W <= 420 ? h.h1.lines[1]
+        : null;
+      if (taste) {
+        // a taste pins the h1's face and size: maxChars (set for the kit's pairings) does not apply, its own h1 does
+        const lines = res.hero?.h1?.lines ?? 0,
+          allowed = allowedAt(h);
+        if (allowed && lines > allowed)
+          res.findings.push({
+            rule: "hero-lines",
+            where: "section.hero h1",
+            detail: `the page's own h1 (its taste pins the face) takes ${lines} lines at ${W}, ${allowed} at most`,
+          });
+      } else if (h) {
         const st = await ev(`${STRESS}(${h.h1.maxChars})`);
         if (st) {
-          const again = await ev(src + "\n;window.lyCheck()");
+          const again = await ev(src + `\n;window.lyCheck(${JSON.stringify(checkOptions)})`);
           const lines = again.hero?.h1?.lines ?? 0,
-            allowed =
-              W >= 1400 ? h.h1.lines[0]
-              : W <= 420 ? h.h1.lines[1]
-              : null;
+            allowed = allowedAt(h);
           res.stress = { hero: id, maxChars: h.h1.maxChars, chars: st.chars, lines, height: again.hero?.height };
           for (const f of again.findings.filter(f => f.rule === "hero-fold"))
             res.findings.push({
@@ -424,7 +366,7 @@ try {
       errors.length = 0;
     }
   }
-  ws.close();
+  cdp.ws.close();
 } catch (e) {
   console.error("check:", e.message);
   failed = true;

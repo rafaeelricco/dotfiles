@@ -641,6 +641,7 @@ function enter() {
 const RV_SKIP = ".hero, [data-still], [data-moment], [data-big-scene], [data-scene], [data-enter]";
 const RV_NOT = ".card, .tile, li, table, .panel, [data-ui], [data-m-loop], [data-peek] .rows, a.card, [hidden]";
 function reveals() {
+  if (document.documentElement.dataset.reveal === "none") return;
   if (reduced() || shot() || !("IntersectionObserver" in window)) return;
   const main = document.querySelector("main") || document.body;
   const secs = [...main.querySelectorAll("section")].filter(

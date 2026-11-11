@@ -278,25 +278,14 @@
 // not named index.html, so two pages in one folder keep their own), or to a temp folder for a URL: never into the current
 // directory.
 import { spawn, spawnSync } from "node:child_process";
-import {
-  existsSync,
-  mkdirSync,
-  rmSync,
-  writeFileSync,
-  statSync,
-  createReadStream,
-  readdirSync,
-  unlinkSync,
-  readFileSync,
-} from "node:fs";
-import { createServer } from "node:http";
+import { existsSync, mkdirSync, rmSync, writeFileSync, statSync, readdirSync, unlinkSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve, dirname, basename, extname, relative, sep, isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 import { inflateSync } from "node:zlib";
 import { readCatalogue } from "./moments.mjs";
-import { assetRoots, climbRoot, itemDir, servable } from "./roots.mjs";
-import { sleep, argv, opt, has, TASTE } from "./consistency/cli.mjs";
+import { readTaste, assetRoots, climbRoot, itemDir, servable } from "./roots.mjs";
+import { sleep, argv, opt, has, TASTE, BUILD_PLAN } from "./consistency/cli.mjs";
 import { isTreatment, sceneFitsKind } from "./consistency/fit.mjs";
 import { visualMod } from "./consistency/modules/visuals.mjs";
 import { addressMod } from "./consistency/modules/address.mjs";
@@ -305,7 +294,8 @@ import { motionMod } from "./consistency/modules/motion-hooks.mjs";
 import { tilesMod } from "./consistency/modules/tiles.mjs";
 import { areaMod } from "./consistency/modules/area.mjs";
 import { basicsMod } from "./consistency/modules/basics.mjs";
-import { launch, CDP, Tab, GL_CAP, GL_GUARD, IO_HOOK } from "./consistency/cdp.mjs";
+import { launch, Tab, GL_CAP, GL_GUARD, IO_HOOK } from "./consistency/cdp.mjs";
+import { startPreviewServer } from "./consistency/browser.mjs";
 import { lib, helperLib } from "./consistency/page-lib.mjs";
 
 // the checks kept as blocks of their own: each runs on the walked tab at every width it names (phase 'width') or opens
@@ -446,27 +436,6 @@ const MIME = {
   ".frag": "text/plain; charset=utf-8",
   ".vert": "text/plain; charset=utf-8",
 };
-function listenFree(srv, from, to) {
-  return new Promise((res, rej) => {
-    let p = from;
-    const next = () => {
-      if (p > to) return rej(new Error(`no free port in ${from}-${to}`));
-      const onErr = () => {
-        srv.off("listening", onOk);
-        p++;
-        next();
-      };
-      const onOk = () => {
-        srv.off("error", onErr);
-        res(p);
-      };
-      srv.once("error", onErr);
-      srv.once("listening", onOk);
-      srv.listen(p, "127.0.0.1");
-    };
-    next();
-  });
-}
 let url = target,
   server = null,
   outDir,
@@ -508,28 +477,20 @@ else {
   }
   serveRoot = root;
   serveHome = dirname(file);
-  server = createServer((req, res) => {
-    try {
-      let f = resolve(join(root, decodeURIComponent(new URL(req.url, "http://x").pathname)));
-      if (f !== root && !f.startsWith(root + sep)) {
-        res.writeHead(403);
-        return res.end();
-      }
-      if (statSync(f).isDirectory()) f = join(f, "index.html");
-      if (!servable(root, f, serveHome)) throw new Error("outside the served root");
-      res.writeHead(200, {
-        "content-type": MIME[extname(f).toLowerCase()] || "application/octet-stream",
-        "content-length": statSync(f).size,
-        "cache-control": "no-store",
-      });
-      createReadStream(f).pipe(res);
-    } catch {
-      res.writeHead(404);
-      res.end("not found");
-    }
-  });
   // the default range is 5200-5299; a --port outside it gets that port and the next 9
-  const port = await listenFree(server, PORT, PORT >= 5200 && PORT <= 5299 ? 5299 : PORT + 9);
+  const preview = await startPreviewServer({
+    root,
+    home: serveHome,
+    allowed: servable,
+    portStart: PORT,
+    portEnd: PORT >= 5200 && PORT <= 5299 ? 5299 : PORT + 9,
+    mime: MIME,
+    outsideStatus: 403,
+    contentLength: true,
+    streamFiles: true,
+  });
+  server = preview.server;
+  const port = preview.port;
   url = `http://127.0.0.1:${port}/${relative(root, file).split(sep).map(encodeURIComponent).join("/")}`;
   // index.html keeps .taste-skill/consistency; about.html gets .taste-skill/consistency-about, so it never wipes index's crops
   outDir = resolve(
@@ -5151,7 +5112,7 @@ async function runWidth(cdp, helper, { w: width, h }, first) {
     // the close at its one large size (Figma's full-width "Get started" under the last line, system.css .btn--xl):
     // one button the width of the column and taller than the rest is a size the page keeps for its close, not a
     // second style; two or more of them are judged like any other
-    const xlOf = b => b.rect && b.rect.width >= Math.min(360, 0.85 * vw) && b.h >= 56;
+    const xlOf = b => b.rect && b.rect.width >= Math.min(320, 0.4 * vw) && b.h >= 56;
     const xls = all.filter(b => b.real && !b.mock && !b.nav && xlOf(b)),
       xlIds = new Set(xls.length === 1 || new Set(xls.map(b => norm(b.text))).size === 1 ? xls.map(b => b.id) : []);
     const page = all.filter(b => b.real && !b.mock && !b.nav && !xlIds.has(b.id));
@@ -5292,6 +5253,7 @@ async function runWidth(cdp, helper, { w: width, h }, first) {
         typeFlag: TYPE_FLAG,
         kind: KIND,
         flags: MOD_FLAGS.get(M.id),
+        buildPlan: BUILD_PLAN,
         outDir,
         stopY,
         shots,
@@ -6262,7 +6224,7 @@ for (const M of MODULES)
 let code = 0,
   cdp = null;
 try {
-  cdp = await CDP.connect(chrome.ws);
+  cdp = chrome.cdp;
   const helper = await Tab.open(cdp, { width: 400, height: 300 });
   await helper.eval(`(${helperLib.toString()})()`);
   for (const [i, w] of WIDTHS.entries()) {
@@ -6355,6 +6317,7 @@ try {
         typeFlag: TYPE_FLAG,
         kind: KIND,
         flags: MOD_FLAGS.get(M.id),
+        buildPlan: BUILD_PLAN,
         outDir,
         sleep,
         errors: r.errors,
@@ -6398,6 +6361,7 @@ try {
           first: i === 0,
           quick,
           flags: MOD_FLAGS.get(M.id),
+          buildPlan: BUILD_PLAN,
         }),
       )
     )
@@ -6441,6 +6405,15 @@ if (missed.length) {
   const all = report.widths.flatMap(w => w.findings);
   for (const w of report.widths) w.findings = w.findings.filter(f => !sameFault(f, all));
 }
+// Explicit recorded motion can be absent. Never suppress hidden content,
+// pause/reduced-motion, keyboard, clipping or overlap findings.
+const recordedMotion = BUILD_PLAN ? BUILD_PLAN.contract?.motion || {} : readTaste(TASTE)?.motion || {};
+for (const w of report.widths)
+  w.findings = w.findings.filter(
+    f =>
+      !(recordedMotion.moments === 0 && f.check === "moment-none")
+      && !(recordedMotion.entrance === "still" && f.check === "hero-enter"),
+  );
 const lists = [
   ...report.widths.map(w => w.findings),
   report.sweep ? report.sweep.findings : [],

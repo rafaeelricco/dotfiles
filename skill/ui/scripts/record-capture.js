@@ -85,6 +85,17 @@
     const flat = paint(cs.backgroundColor);
     return flat && flat[3] >= 0.5 ? flat : gradientFill(cs) || flat;
   };
+  // the gradient itself, for `fills` below (gradientFill averages it into one colour for the roles)
+  const gradientOf = cs => {
+    const img = cs && cs.backgroundImage;
+    if (!img || !/gradient\(/i.test(img) || /url\(/i.test(img)) return null;
+    const stops = (img.match(/rgba?\([^)]*\)|#[0-9a-f]{3,8}\b/gi) || [])
+      .map(v => safe(() => hex(parse(v)), null))
+      .filter(Boolean);
+    if (!stops.length) return null;
+    const kind = /^\s*(?:repeating-)?(linear|radial|conic)-gradient/i.exec(img)?.[1].toLowerCase() || "linear";
+    return { kind, css: img.slice(0, 600), stops };
+  };
   // decoration, not paint: a blurred glow or a layer seen through low opacity
   const opacityMemo = new Map();
   const opacityOf = el => {
@@ -211,7 +222,7 @@
   const borderOf = cs => {
     const w = parseFloat(cs.borderTopWidth) || 0;
     const c = paint(cs.borderTopColor);
-    return w > 0 && cs.borderTopStyle !== "none" && c ? `${round(w, 1)}px ${hex(c)}` : "none";
+    return w > 0 && cs.borderTopStyle !== "none" && c ? `${round(w, 1)}px ${cs.borderTopStyle} ${hex(c)}` : "none";
   };
   const shadowOf = cs => {
     const s = cs.boxShadow;
@@ -269,7 +280,7 @@
             const up = p && painted.get(p);
             if (up) up.a = Math.max(0, up.a - area);
           }
-          if (interactive && chroma(rec.c) >= 0.2) bump(accents, rec.c, area + 4000);
+          if (interactive && chroma(rec.c) >= 0.2) bump(accents, rec.c, Math.min(area, 10000) + 4000);
         }
         const ta = textArea(el);
         // text painted by a clipped gradient reads transparent: its colour is the gradient's
@@ -283,7 +294,8 @@
         const ink = ta > 0 ? paint(cs.color) || clipFill() : null;
         if (ink && !decor) {
           const h = hex6(ink[3] < 1 ? over(ink, page) : ink);
-          texts.push({ h, ta, el });
+          // heading text (h1-h3, a span inside one included) is counted apart: it can carry the ink (below)
+          texts.push({ h, ta, el, head: !!el.closest("h1, h2, h3") });
           if (el.matches("a") && chroma(h) >= 0.2) bump(accents, h, ta + 4000);
         }
       }
@@ -305,16 +317,24 @@
       // ink and muted are text read on the page ground: white type over a photograph or inside a dark
       // mock-up does not count, however much of it there is
       const inks = new Map();
+      const heads = new Map();
       const all = new Map();
       for (const t of texts) {
         bump(all, t.h, t.ta);
-        if (contrast(t.h, bg) >= 3) bump(inks, t.h, t.ta);
+        if (contrast(t.h, bg) < 3) continue;
+        bump(inks, t.h, t.ta);
+        if (t.head) bump(heads, t.h, t.ta);
       }
       const inkOrder = inks.size ? rank(inks) : rank(all);
-      const ink =
+      const text =
         inkOrder.find(h => contrast(h, bg) >= 4.5)
         || inkOrder[0]
         || (dist(bg, "#000000") > 380 ? "#000000" : "#ffffff");
+      // running text in a mid grey under darker headings (firecrawl: #727272 text, #262626 h1-h3) is the muted:
+      // the headings' neutral colour is the ink, since the kit sets body text in the ink at 7:1
+      const ink =
+        (contrast(text, bg) < 7 && rank(heads).find(h => chroma(h) < 0.2 && contrast(h, bg) > contrast(text, bg)))
+        || text;
       const between = h => (lum(h) - lum(ink)) * (lum(h) - lum(bg)) < 0;
       const muted = inkOrder.find(h => chroma(h) < 0.2 && dist(h, ink) > 30 && dist(h, bg) > 60 && between(h)) || null;
       const accent =
@@ -344,31 +364,28 @@
       tracking: em ? `${em}em` : "0",
     };
   };
-  const biggestText = selector => {
-    let best = null;
-    let n = 0;
-    for (const el of document.querySelectorAll(selector)) {
-      if (++n > 80) break;
+  const representative = (selector, bodyRole = false) => {
+    const groups = new Map();
+    for (const el of [...document.querySelectorAll(selector)].slice(0, 200)) {
+      if (el.closest("footer, nav, blockquote, [role=dialog]") || consentOf(el)) continue;
       const v = safe(() => view(el), null);
-      const a = v ? textArea(el) : 0;
-      if (a > 0 && (!best || a > best.a)) best = { v, a };
+      if (!v || !el.textContent.trim()) continue;
+      const size = parseFloat(v.cs.fontSize);
+      if (bodyRole && (size < 12 || size > 24)) continue;
+      const key = [family(v.cs.fontFamily), Math.round(size), v.cs.fontWeight].join("|");
+      const g = groups.get(key) || { count: 0, v };
+      g.count++;
+      groups.set(key, g);
     }
-    return best && best.v;
+    return [...groups.values()].sort((a, b) => b.count - a.count)[0]?.v || null;
   };
-  const largest = selector => {
-    let best = null;
-    let n = 0;
-    for (const el of document.querySelectorAll(selector)) {
-      if (++n > 80) break;
-      const v = safe(() => view(el), null);
-      if (
-        v
-        && textArea(el) + el.textContent.length > 0
-        && (!best || parseFloat(v.cs.fontSize) > parseFloat(best.cs.fontSize))
-      )
-        best = v;
-    }
-    return best;
+  // A consent banner's keys never count (the button table, the type row and the primary pick below)
+  const CONSENT = /\b(?:cookie|consent|gdpr|onetrust|didomi|truste|trustarc|usercentrics)/i;
+  const consentOf = el => {
+    for (let p = el; p && p !== body; p = p.parentElement)
+      if (CONSENT.test(`${p.id || ""} ${p.getAttribute("class") || ""} ${p.getAttribute("aria-label") || ""}`))
+        return true;
+    return false;
   };
   const BUTTONS =
     'button,[role="button"], input[type="button"], input[type="submit"], a[class*="btn" i], a[class*="button" i]';
@@ -377,7 +394,7 @@
     for (const el of document.querySelectorAll(BUTTONS)) {
       if (out.length >= 80) break;
       const v = safe(() => view(el), null);
-      if (v && v.r.height >= 20 && v.r.width >= 28) out.push(v);
+      if (v && v.r.height >= 20 && v.r.width >= 28 && !consentOf(el)) out.push(v);
     }
     return out;
   }, []);
@@ -385,10 +402,10 @@
     const rows = [];
     const pick = [
       ["h1", find("h1")],
-      // the section title is the largest h2, not the first (a hero lead or a small label can be an h2)
-      ["h2", largest("h2")],
-      ["h3", largest("h3")],
-      ["body", biggestText("p") || biggestText("li") || (entries.length ? view(body) : null)],
+      // Repeated content roles outrank exceptional closing headlines and testimonials.
+      ["h2", representative("h2")],
+      ["h3", representative("h3")],
+      ["body", representative("p", true) || representative("li", true)],
       ["small", find("small, figcaption, footer a, footer p, label")],
       ["button", buttons[0] || null],
       ["nav", find("nav a, header a")],
@@ -612,13 +629,6 @@
   //   3. the rest: a footer's keys and a form submit below the first screen (a lone newsletter button).
   // A consent banner's keys never count. Within a tier, a saturated fill first, then the style the page
   // repeats most, a key in the first screen counting double
-  const CONSENT = /\b(?:cookie|consent|gdpr|onetrust|didomi|truste|trustarc|usercentrics)/i;
-  const consentOf = el => {
-    for (let p = el; p && p !== body; p = p.parentElement)
-      if (CONSENT.test(`${p.id || ""} ${p.getAttribute("class") || ""} ${p.getAttribute("aria-label") || ""}`))
-        return true;
-    return false;
-  };
   // the site footer, not a card's or a modal's footer row
   const FOOTER_CLASS = /^(?:site-|page-|main-|global-)?footer(?:$|[_-])/i;
   const footerOf = el => {
@@ -631,6 +641,7 @@
     const b = cs.backdropFilter || cs.webkitBackdropFilter || "none";
     return /blur\(/.test(b) ? b : "none";
   };
+  let primaryView = null; // the chosen key's element, for fills.primary
   const primary = safe(() => {
     const cands = [];
     for (const v of buttons) {
@@ -676,10 +687,83 @@
         || b.v.r.width * b.v.r.height - a.v.r.width * a.v.r.height,
     );
     const x = pool[0];
+    primaryView = x ? x.v : null;
     return x ? { ...frame(x.v), shadow: shadowOf(x.v.cs), ...(x.blur !== "none" ? { blur: x.blur } : {}) } : null;
   }, null);
   if (primary && chroma(hex6(paint(primary.bg) || [0, 0, 0, 1])) >= 0.2) roles.accent = hex6(paint(primary.bg));
   components.primary = primary;
+
+  /* ---------------------------------------------------------------- fills: the gradients behind the flat roles */
+  // { bg, surface, primary: Grad | null, panels: [{ radius, w, h, gradient }], text: [{ role, gradient }] }
+  // Grad = { kind, css, stops }: the computed background-image (never url()) and its colour stops in order
+  const fills = safe(() => {
+    const big = r => r.width >= 160 && r.height >= 80;
+    const flatOver = cs => (paint(cs.backgroundColor) || [0, 0, 0, 0])[3] >= 0.5;
+    const clipped = s => /text/.test(s.backgroundClip || s.webkitBackgroundClip || "");
+    // the largest big element whose averaged gradient is the role's colour: the gradient that made the role
+    const ofRole = c => {
+      let best = null;
+      for (const { cs, r } of entries) {
+        if (!c || !big(r) || flatOver(cs)) continue;
+        const f = gradientFill(cs);
+        if (!f || hex6(f) !== c) continue;
+        const a = r.width * r.height;
+        if (!best || a > best.a) best = { a, g: gradientOf(cs) };
+      }
+      return best ? best.g : null;
+    };
+    // the key's own gradient, else one on a descendant covering 80% of it (paintOf's rule)
+    const under = v => {
+      if (!v) return null;
+      const own = gradientOf(v.cs);
+      if (own) return own;
+      for (const d of [...v.el.querySelectorAll("*")].slice(0, 40)) {
+        const dr = d.getBoundingClientRect();
+        if (dr.width * dr.height < v.r.width * v.r.height * 0.8) continue;
+        const g = gradientOf(getComputedStyle(d));
+        if (g) return g;
+      }
+      return null;
+    };
+    const panels = new Map(); // by css: the largest of each
+    for (const { cs, r } of entries) {
+      if (!big(r) || r.width >= vw - 2 || flatOver(cs)) continue;
+      const radius = radiusOf(cs, r);
+      const g = radius >= 8 ? gradientOf(cs) : null;
+      if (!g) continue;
+      const a = r.width * r.height;
+      if (!panels.has(g.css) || a > panels.get(g.css).a)
+        panels.set(g.css, { a, radius, w: round(r.width), h: round(r.height), gradient: g });
+    }
+    const text = new Map(); // by role: the largest h1, h2, h3 painted by a clipped gradient
+    for (const el of document.querySelectorAll("h1, h2, h3")) {
+      const r = el.getBoundingClientRect();
+      if (r.width < 1 || r.height < 1) continue;
+      let g = null;
+      for (let p = el, i = 0; p && i < 4 && !g; p = p.parentElement, i++) {
+        const s = getComputedStyle(p);
+        if (clipped(s)) g = gradientOf(s);
+      }
+      for (const d of g ? [] : [...el.querySelectorAll("*")].slice(0, 20)) {
+        const s = getComputedStyle(d);
+        if (clipped(s) && (g = gradientOf(s))) break;
+      }
+      if (!g) continue;
+      const role = el.tagName.toLowerCase();
+      const a = r.width * r.height;
+      if (!text.has(role) || a > text.get(role).a) text.set(role, { a, role, gradient: g });
+    }
+    return {
+      bg: ofRole(roles.bg),
+      surface: ofRole(roles.surface),
+      primary: under(primaryView),
+      panels: [...panels.values()]
+        .sort((x, y) => y.a - x.a)
+        .slice(0, 4)
+        .map(({ a, ...p }) => p),
+      text: [...text.values()].map(({ a, ...t }) => t),
+    };
+  }, null);
 
   return {
     v: 1,
@@ -696,5 +780,6 @@
     shadows,
     motion,
     components,
+    fills,
   };
 })();

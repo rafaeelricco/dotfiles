@@ -43,7 +43,8 @@ const ID = /^[a-z0-9_][a-z0-9_.-]*(\/[a-z0-9_][a-z0-9_.-]*)*$/;
 function checkPart(family, id, from) {
   if (typeof family !== "string" || !FAMILIES.has(family))
     die(`${from} names family ${JSON.stringify(family)}; families: ${[...FAMILIES].sort().join(", ")}`);
-  if (typeof id !== "string" || !ID.test(id)) die(`${from} names ${family}/${JSON.stringify(id)}, which is not a part id`);
+  if (typeof id !== "string" || !ID.test(id))
+    die(`${from} names ${family}/${JSON.stringify(id)}, which is not a part id`);
 }
 // p lies strictly inside base: below it, never base itself or a path that climbs out of it
 const below = (base, p) => {
@@ -51,12 +52,11 @@ const below = (base, p) => {
   return !!r && r.split(path.sep)[0] !== ".." && !path.isAbsolute(r);
 };
 
-// Never write through a link: a symlink or junction committed in the project at the --to folder, a folder under it or
-// the file itself would send the kit's bytes to wherever it points and overwrite what is there. Every part from the
-// working folder (or from --to's parent, when --to lies outside it) down to p is checked.
-const linkBase = (r => (r && !r.startsWith("..") && !path.isAbsolute(r) ? process.cwd() : path.dirname(to)))(
-  path.relative(process.cwd(), to)
-);
+// Never write through a link: a symlink or junction at --to, below it, or on an external path's ancestors could redirect
+// the kit's bytes. Project destinations are checked from cwd; external destinations are checked from their volume root.
+const relativeToCwd = path.relative(process.cwd(), to);
+const insideCwd = !relativeToCwd || (relativeToCwd.split(path.sep)[0] !== ".." && !path.isAbsolute(relativeToCwd));
+const linkBase = insideCwd ? process.cwd() : path.parse(to).root;
 function refuseLinks(p) {
   let at = linkBase;
   for (const part of path.relative(linkBase, p).split(path.sep).filter(Boolean)) {
@@ -69,7 +69,9 @@ function refuseLinks(p) {
       throw e;
     }
     if (st.isSymbolicLink())
-      die(`${path.relative(process.cwd(), at) || at} is a symlink; kit-copy will not write through it. Remove it and run again.`);
+      die(
+        `${path.relative(process.cwd(), at) || at} is a symlink; kit-copy will not write through it. Remove it and run again.`,
+      );
   }
 }
 
@@ -296,7 +298,8 @@ for (const [family, id] of items) {
   scan.push(...g.js);
   // appended parts are copied by this same loop
   for (const e of effectsOf(family, id))
-    if (!items.some(p => p[0] === "effects" && p[1] === e) && ID.test(e) && itemDir("effects", e, taste)) items.push(["effects", e]);
+    if (!items.some(p => p[0] === "effects" && p[1] === e) && ID.test(e) && itemDir("effects", e, taste))
+      items.push(["effects", e]);
 }
 
 report("imports", closeImports(to, taste, scan));

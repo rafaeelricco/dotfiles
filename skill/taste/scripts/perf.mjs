@@ -28,11 +28,9 @@
 */
 import fs from "node:fs";
 import path from "node:path";
-import http from "node:http";
-import zlib from "node:zlib";
 import os from "node:os";
-import { spawn, execFileSync } from "node:child_process";
 import { chromeOrExit, servable } from "./roots.mjs";
+import { startHeadlessBrowser, startPreviewServer } from "./consistency/browser.mjs";
 
 const args = process.argv.slice(2);
 const pos = [],
@@ -161,35 +159,17 @@ const MIME = {
 const GZ = new Set([".html", ".js", ".mjs", ".css", ".json", ".svg", ".txt"]);
 
 async function serve(root) {
-  const cache = new Map();
-  const srv = http.createServer((req, res) => {
-    let p = decodeURIComponent(req.url.split("?")[0]);
-    if (p.endsWith("/")) p += "index.html";
-    const file = path.join(root, p);
-    if (!servable(root, file) || fs.statSync(file).isDirectory()) {
-      res.writeHead(404);
-      res.end("not found");
-      return;
-    }
-    const ext = path.extname(file).toLowerCase();
-    const h = { "Content-Type": MIME[ext] || "application/octet-stream", "Cache-Control": "no-store" };
-    let body = fs.readFileSync(file);
-    if (GZ.has(ext) && /gzip/.test(req.headers["accept-encoding"] || "")) {
-      if (!cache.has(file)) cache.set(file, zlib.gzipSync(body, { level: 6 }));
-      body = cache.get(file);
-      h["Content-Encoding"] = "gzip";
-    }
-    res.writeHead(200, h);
-    res.end(body);
+  const preview = await startPreviewServer({
+    root,
+    allowed: (servedRoot, file) => servable(servedRoot, file),
+    portStart: PORT0,
+    portEnd: PORT0 + 9,
+    mime: MIME,
+    indexForBareDirectory: false,
+    gzipExtensions: [...GZ],
+    gzipLevel: 6,
   });
-  for (let port = PORT0; port <= PORT0 + 9; port++) {
-    const ok = await new Promise(r => {
-      srv.once("error", () => r(false));
-      srv.listen(port, "127.0.0.1", () => r(true));
-    });
-    if (ok) return { srv, port };
-  }
-  throw new Error(`no free port in ${PORT0}-${PORT0 + 9}`);
+  return { srv: preview.server, port: preview.port };
 }
 
 /* ---------------------------------------------------------------- in-page probes (run before any page script) */
@@ -277,18 +257,14 @@ const AUDIT = `(async () => {
 
 /* ---------------------------------------------------------------- one measurement */
 async function measure(chrome, url, W, H, nogl = false) {
-  const { send, S, ev, on } = chrome;
-  const {
-    result: { targetId },
-  } = await send("Target.createTarget", { url: "about:blank" });
-  const {
-    result: { sessionId },
-  } = await send("Target.attachToTarget", { targetId, flatten: true });
-  const Sx = (m, p) => S(sessionId, m, p),
-    E = x => ev(sessionId, x);
+  const { targetId } = await chrome.send("Target.createTarget", { url: "about:blank" });
+  const { sessionId } = await chrome.send("Target.attachToTarget", { targetId, flatten: true });
+  const Sx = (m, p) => chrome.send(m, p, sessionId),
+    E = async x =>
+      (await Sx("Runtime.evaluate", { expression: x, awaitPromise: true, returnByValue: true })).result.value;
   const reqs = new Map(),
     errors = [];
-  const off = on(m => {
+  const off = chrome.onAny(m => {
     if (m.sessionId !== sessionId) return;
     const p = m.params;
     if (m.method === "Network.requestWillBeSent")
@@ -315,7 +291,7 @@ async function measure(chrome, url, W, H, nogl = false) {
   await Sx("Emulation.setDeviceMetricsOverride", { width: W, height: H, deviceScaleFactor: 1, mobile: W < 600 });
   await Sx("Page.addScriptToEvaluateOnNewDocument", { source: (nogl ? "window.__NOGL = 1;" : "") + PROBE });
   const loaded = new Promise(r => {
-    const o = on(m => {
+    const o = chrome.onAny(m => {
       if (m.sessionId === sessionId && m.method === "Page.loadEventFired") {
         o();
         r();
@@ -342,7 +318,7 @@ async function measure(chrome, url, W, H, nogl = false) {
   const atEnd = await E(SNAP);
   const audit = await E(AUDIT);
   off();
-  await send("Target.closeTarget", { targetId }).catch(() => {});
+  await chrome.send("Target.closeTarget", { targetId }).catch(() => {});
   return { reqs: [...reqs.values()], atLoad, atEnd, audit, loadReqs, errors, docH: audit.docH, stuck, waiting0 };
 }
 
@@ -685,46 +661,12 @@ for (const d of fs.readdirSync(profileBase)) {
 }
 const profile = path.join(profileBase, "run-" + process.pid);
 fs.mkdirSync(profile, { recursive: true });
-const portFile = path.join(profile, "DevToolsActivePort");
-// if the sweep could not remove run-<own pid> (a file still locked), its old port file must not be read as this Chrome's
-try {
-  fs.rmSync(portFile);
-} catch {
-  /* none */
-}
 const loadBefore = await hostLoad();
-const child = spawn(
-  chromeOrExit("perf"),
-  [
-    "--headless=new",
-    `--user-data-dir=${profile}`,
-    "--remote-debugging-port=0",
-    "--no-first-run",
-    "--no-default-browser-check",
-    "--disable-extensions",
-    "--hide-scrollbars",
-    "--mute-audio",
-    "--disable-gpu",
-    "--use-angle=swiftshader",
-    "--enable-unsafe-swiftshader",
-    "--window-size=1440,900",
-    "about:blank",
-  ],
-  { stdio: "ignore", windowsHide: true },
-);
-const exited = new Promise(r => child.once("exit", r));
-const kill = () => {
-  if (child.exitCode != null) return;
-  try {
-    execFileSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], { stdio: "ignore" });
-  } catch {
-    try {
-      child.kill();
-    } catch {
-      /* gone */
-    }
-  }
-};
+let browser = null,
+  child = null,
+  cdp = null,
+  exited = Promise.resolve();
+const kill = () => browser?.kill();
 // the guard scales with the work; on a timeout the results so far are printed, not lost
 const guard = setTimeout(
   () => {
@@ -737,50 +679,29 @@ const guard = setTimeout(
 );
 let loadAfter = loadBefore;
 try {
-  let port = null;
-  for (let i = 0; i < 150 && !port; i++) {
-    await sleep(100);
-    try {
-      port = parseInt(fs.readFileSync(portFile, "utf8"), 10) || null;
-    } catch {
-      /* not yet */
-    }
-  }
-  if (!port) throw new Error("Chrome did not start");
-  const ver = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json();
-  const ws = new WebSocket(ver.webSocketDebuggerUrl);
-  await new Promise((r, j) => {
-    ws.addEventListener("open", r, { once: true });
-    ws.addEventListener("error", j, { once: true });
+  browser = await startHeadlessBrowser(chromeOrExit("perf"), {
+    profile,
+    startupTimeoutMs: 15000,
+    args: [
+      "--headless=new",
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--disable-extensions",
+      "--hide-scrollbars",
+      "--mute-audio",
+      "--disable-gpu",
+      "--use-angle=swiftshader",
+      "--enable-unsafe-swiftshader",
+      "--window-size=1440,900",
+    ],
   });
-  let id = 0;
-  const pend = new Map(),
-    subs = new Set();
-  ws.addEventListener("message", e => {
-    const m = JSON.parse(e.data);
-    if (m.id && pend.has(m.id)) {
-      pend.get(m.id)(m);
-      pend.delete(m.id);
-    } else subs.forEach(f => f(m));
-  });
-  const send = (method, params = {}, sessionId) =>
-    new Promise(r => {
-      const i = ++id;
-      pend.set(i, r);
-      ws.send(JSON.stringify({ id: i, method, params, sessionId }));
-    });
-  const S = async (sid, m, p) => {
-    const r = await send(m, p, sid);
-    if (r.error) throw new Error(`${m}: ${r.error.message}`);
-    return r.result;
+  child = browser.child;
+  cdp = browser.cdp;
+  exited = new Promise(r => child.once("exit", r));
+  const chrome = {
+    send: (method, params = {}, sessionId) => cdp.send(method, params, sessionId),
+    onAny: fn => cdp.onAny(fn),
   };
-  const ev = async (sid, x) =>
-    (await S(sid, "Runtime.evaluate", { expression: x, awaitPromise: true, returnByValue: true })).result.value;
-  const on = f => {
-    subs.add(f);
-    return () => subs.delete(f);
-  };
-  const chrome = { send, S, ev, on };
   const loads = [];
   for (const W of widths) {
     const H = W < 600 ? 844 : 900;
@@ -815,7 +736,7 @@ try {
     });
   }
   try {
-    await Promise.race([send("Browser.close"), sleep(3000)]);
+    await Promise.race([cdp.send("Browser.close"), sleep(3000)]);
   } catch {
     /* closing */
   }

@@ -1,11 +1,11 @@
 # Record
 
-A taste is one site's pack, `<skill>/tastes/<name>/`: `design-system.txt` (measured values from the
-script, judgment written by you), `taste.json` (when to use it and which kit parts carry it),
-`assets/` (its own animations, components, effects and scenes in the `taste` kit's formats),
-`references/`, and `shots/` and `capture/` (screenshots and the raw capture). Git ignores the whole
-`tastes/` folder: a pack stays on this machine, so it may keep anything captured. It needs Node 22+
-and, for a URL, Chrome, Edge or Chromium (`CHROME_PATH` names the binary).
+A taste is one site's pack, `<skill>/tastes/<name>/`. For new packs, `taste.json`
+(version 2) owns the reviewed design and `design-system.txt` is its generated guide.
+`assets/` holds own parts; `references/`, `shots/` and `capture/` hold supporting
+material. See taste's `references/taste-contract.md` for the schema, evidence and
+house/reference behavior. Git ignores `tastes/`; recorded packs stay on this machine.
+Capture needs Node 22+ and Chrome, Edge or Chromium (`CHROME_PATH` names the binary).
 
 | Ask                                                 | Do                                       |
 | --------------------------------------------------- | ---------------------------------------- |
@@ -26,9 +26,10 @@ From a tab: evaluate the whole of `<skill>/scripts/record-capture.js` in it, sav
 then `node <skill>/scripts/record.mjs --from <json>... --name <name>`; take the shots with your own tool.
 
 A consent wall, a login or a bot check in the way: stop and say so; never click through one.
-A name that exists stops the script. `--keep-doc` captures a saved taste again and keeps its
-`design-system.txt` (use it to give an older taste its `capture/`); `--force` replaces that file and
-what was written into it, only on the user's word. Neither touches `taste.json`, `assets/` or `references/`.
+A name that exists stops the script. `--keep-doc` captures again while preserving the
+guide; `--force` replaces a legacy guide on the user's word or regenerates a version 2
+guide from its definition. Both preserve `taste.json`, `assets/`, `references/`
+and immutable capture evidence. Use `guide NAME` to refresh a version 2 guide explicitly.
 
 ## Look
 
@@ -36,38 +37,30 @@ Read every file in `shots/` before writing.
 
 ## Write
 
-Replace every `<!-- write: ... -->` slot, at the depth of https://r1cco.com/design-systems/base.txt:
+Review `taste.json` against every screenshot. Correct measured roles in its `tokens`,
+choose explicit font sources and fallbacks, and write its `guidance` and field evidence.
+For local font sources, copy the named files with the same relative paths beside the
+exported CSS (or beside the page for a kit head). HTTPS sources remain explicit URLs;
+output generation never downloads or substitutes fonts.
+Keep raw observations unchanged. Resolve required null values before CSS/head output;
+do not turn missing measurements into kit defaults. Define the supported layout and
+motion choices before planning a new page.
 
-| Slot            | What goes there                                                                                                  |
-| --------------- | ---------------------------------------------------------------------------------------------------------------- |
-| intro           | the visual DNA in one bold sentence, then the character in one line                                              |
-| When to use     | three bullets: what to build with it, the words that should call it                                              |
-| Usage rules     | 6 to 10 numbered rules a builder could break: the primary action's colour, text sizes, borders, radii, dark mode |
-| Stop and ask    | drift and mixing (the brand-assets line is printed: keep it)                                                     |
-| Composition     | how a page is assembled: the hero's structure, section rhythm, density, where pictures sit                       |
-| Signature       | the two or three things that make it recognisable, and how to get the same feeling with your own material        |
-| component Rules | under each measured component, what never changes                                                                |
-| Kit overrides   | `\| Check \| Why \|` rows for the `taste` kit's look checks this taste breaks on purpose, or `None.`             |
-
-Change no measured value; one that looks wrong goes under Provenance and caveats. Check the Colors
-table and the **Primary button** line against the shots: the ink must read on the page ground and the
-primary is the button the page asks you to press. A wrong one is a capture bug to report, not a value to
-hand-correct on the page.
-Kit overrides name only the checks `taste`'s `references/gate.md` (Taste overrides) allows, each Why
-citing the Usage rule or Signature it serves; write `None.` until a page in this taste meets one.
-Done when `grep -c "<!-- write:" <file>` prints 0.
+Run `node <skill>/scripts/record.mjs guide <name>` after editing. The generated guide
+is for reading; edits to it do not affect version 2 CSS or head output. Legacy packs
+retain their existing Markdown and corrections path, described in the taste contract.
 
 ## Extract
 
 `capture/candidates.json` lists everything that moved, stuck, reacted or was drawn. Settle each one in
-`taste.json` → `settled`, following `taste`'s `references/extract.md`: `fits:<family>/<id>` (a kit part
+`taste.json` â†’ `settled`, following `taste`'s `references/extract.md`: `fits:<family>/<id>` (a kit part
 already does it), `variant:<family>/<id>` (a kit part with other numbers, written under `variants`),
 `own:<family>/<id>` (you built it in `assets/`, with its `spec.md`), or `skip: <why>`. Fill `use_when`,
 and list under `signature` the two or three items a page in this taste must carry.
 
 ## Check
 
-`node <taste skill>/scripts/pack.mjs check <name>` must end `PACK: PASS`. A record is not done before it.
+`node <taste skill>/scripts/taste.mjs pack check <name>` must end `PACK: PASS`. A record is not done before it.
 
 ## Apply
 
@@ -76,15 +69,11 @@ and list under `signature` the two or three items a page in this taste must carr
   as the file's Install section says, and note `taste: <name>` in `.agents/ui.md`. From then on the
   file is the project's tokens: `compose`, `style` and `shape` read its Usage rules, Composition,
   Signature and component tables. A value it lacks is a Stop and ask, not a guess.
-- **A new page through the `taste` kit** (`page`): deal with `start.mjs plan … --taste <name>`. Its head
-  block is `record.mjs kit <name>`, pasted in place of `start.mjs css` or `brand` (its step 4); the
-  pack's own parts and the kit parts it lists as fits are dealt, its signature items always. Read the whole
-  taste file before the copy notes. Where a dealt part breaks the taste's Usage rules, Composition or
-  Signature (a light band on a dark-only taste, a scene unlike its pages), deal that part again and
-  say so on plan line 2; never just drop it, since the gate fails a dealt moment or scene left out.
-  The block names the taste (`<meta name="taste">`) and carries its faces (an h1-only face stays on the
-  h1), type sizes, button height and shadow: keep it whole and never restyle those back to the kit's. A
-  kit check the taste breaks on purpose goes in the taste's Kit overrides, never in the page's waivers.
+- **A new page through the `taste` kit** (`page`): compile with
+  `taste.mjs plan --mode reference â€¦ --taste <name>`. Read the resolved plan and guide.
+  Use `record.mjs kit <name>` for its head block and apply the printed contract
+  attributes. If a part conflicts with the intended design, correct the definition
+  and replan; do not reroll a house dealer or drop a required signature part.
 
 Either way a page built from a taste carries your own text, pictures, name and mark, never the site's,
 and `motion/laws.md` outranks a recorded duration or curve.
