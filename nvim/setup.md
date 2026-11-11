@@ -5,17 +5,18 @@
 Remove existing Neovim configuration files to avoid conflicts:
 
 ```bash
-rm -f /Users/rafaelricco/.config/nvim/init.lua
-rm -rf /Users/rafaelricco/.config/nvim/lua
-rm -f /Users/rafaelricco/.config/nvim/lazy-lock.json
+rm -f ~/.config/nvim/init.lua
+rm -rf ~/.config/nvim/lua
+rm -f ~/.config/nvim/lazy-lock.json
 ```
 
 ## Step 2: Create symbolic links
 
-Create symbolic links that point to your dotfiles folder:
+Create symbolic links that point to your dotfiles folder. Run from the root of your dotfiles clone:
 
 ```bash
-ln -s /Users/rafaelricco/projects/r1cco/dotfiles/nvim/init.lua /Users/rafaelricco/.config/nvim/init.lua
-ln -s /Users/rafaelricco/projects/r1cco/dotfiles/nvim/lua /Users/rafaelricco/.config/nvim/lua
-ln -s /Users/rafaelricco/projects/r1cco/dotfiles/nvim/lazy-lock.json /Users/rafaelricco/.config/nvim/lazy-lock.json
+mkdir -p ~/.config/nvim
+ln -s "$PWD/nvim/init.lua" ~/.config/nvim/init.lua
+ln -s "$PWD/nvim/lua" ~/.config/nvim/lua
+ln -s "$PWD/nvim/lazy-lock.json" ~/.config/nvim/lazy-lock.json
 ```

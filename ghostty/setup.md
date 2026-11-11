@@ -2,9 +2,11 @@
 
 Named themes are loaded from `~/.config/ghostty/themes/<name>` (no extension).
 
+Run from the root of your dotfiles clone:
+
 ```bash
-mkdir -p /Users/rafaelricco/.config/ghostty
-ln -s /Users/rafaelricco/Projects/personal/dotfiles/ghostty/themes /Users/rafaelricco/.config/ghostty/themes
+mkdir -p ~/.config/ghostty
+ln -s "$PWD/ghostty/themes" ~/.config/ghostty/themes
 ```
 
 Then set in the live Ghostty config:
