@@ -128,7 +128,7 @@ picture or the visual of one split section.
 A visit or contact section shows the real streets around the place, as a map app would, in the page's
 colours: the judges marked a contour pattern standing in for a map as a fake drawing.
 
-- **Bake once** at build time: `node assets/components/fx-map/bake.mjs --lat <lat> --lon <lon> --out
+- **Bake once** at build time: `node scripts/fx-map-bake.mjs --lat <lat> --lon <lon> --out
 map.json` fetches the streets, water, parks, rails and stations from OpenStreetMap (one request to
   an Overpass server) and writes a small JSON (about 55 KB, 18 KB gzipped, for 3 x 2 km of a city):
   streets in four classes, water (the sea built from coastlines too), parks, rails and trams, up to

@@ -94,7 +94,7 @@
       }
     </style>
   </head>
-  <!-- grounds (tech only; assets/backgrounds/pick.mjs deals 0 to 2 section grounds, never a page ground):
+  <!-- grounds (tech only; scripts/backgrounds-pick.mjs deals 0 to 2 section grounds, never a page ground):
      a section ground is one class on its <section>; bg-topglow goes on a wrapper round the nav and the
      hero only when the deal lists it. On kind other (product, service, place: cafes, shops, studios) no
      ground class at all, and no data-ground on <html>: flat colour and photographs. -->
@@ -187,12 +187,12 @@
 
     <main id="top">
       <!-- HERO: exactly the first screen; the fixed header lies over its top. Paste the dealt hero from
-       assets/layout/hero-<id>.html (layout/deal.mjs deals it; heroes.json has its numbers) in place of
+       assets/layout/hero-<id>.html (scripts/layout-deal.mjs deals it; heroes.json has its numbers) in place of
        this one, keeping its shape: section.hero > .wrap > .hero-text (+ one docked strip at most), and give it
        data-enter="<the dealt entrance>" (its one entrance on load from the deck: rise, set-type, focus, exposure,
        aperture, line-blocks, doors, product-at-work, still; data-enter alone is the rise; motion.md, The entrance
        deck; the head line above makes it run).
-       A place's hero is always assets/layout/hero-place.html in the form deal.mjs deals: copy its section and set
+       A place's hero is always assets/layout/hero-place.html in the form layout-deal.mjs deals: copy its section and set
        data-form="band|bleed|split|name" (layout.css 0b); never words, a scrim or a gradient on its photograph.
        Every later section's h2 and lead photograph rise once as it comes on screen (motion.js, automatic; never a
        card, row or tile); data-still on a section keeps it still.

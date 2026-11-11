@@ -3,7 +3,7 @@
   A plain script with no imports, so a checker can evaluate its source in any page:
       const src = fs.readFileSync('<skill>/assets/layout/layout-check.js', 'utf8');
       await page.evaluate(src + '; window.lyCheck()')      // -> { vw, vh, L, R, nav, sections, findings }
-  assets/layout/check.mjs runs it in one headless Chrome at 1440x900 and 390x844.
+  scripts/layout-check.mjs runs it in one headless Chrome at 1440x900 and 390x844.
 
   Rules checked (each finding: { rule, where, detail }):
     edge-left / edge-right   a block of the page (text column, frame, card, grid, button row, the nav's

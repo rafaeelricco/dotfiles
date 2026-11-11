@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-// fx-map/bake.mjs: the real streets, water, parks and rails around one place, taken from OpenStreetMap
+// fx-map-bake.mjs: the real streets, water, parks and rails around one place, taken from OpenStreetMap
 // once at build time and written as a small JSON that fx-map draws in the page's own colours, with the
 // walk from a station (only with --from). One request to an Overpass server; the page itself loads nothing from a
 // map service and needs no key.
 //
-//   node bake.mjs --lat 52.4879 --lon 13.4301 --out map.json
-//   node bake.mjs --lat 52.4879 --lon 13.4301 --from 52.4862,13.4246 --from-name "U Hermannplatz" --out map.json
+//   node <skill>/scripts/fx-map-bake.mjs --lat 52.4879 --lon 13.4301 --out map.json
+//   node <skill>/scripts/fx-map-bake.mjs --lat 52.4879 --lon 13.4301 --from 52.4862,13.4246 --from-name "U Hermannplatz" --out map.json
 //
 //   --from none (default): no walk, only the streets around the pin; --from auto: the nearest named rail,
 //   metro or tram station 150 m to 1.6 km away, drawn as a walk (a client whose brief names a station). --w / --h: the area in metres (default 3000 x 2000). --in <file>: a saved Overpass answer
@@ -23,7 +23,7 @@ const lat = +opt("lat"),
   lon = +opt("lon");
 if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
   console.error(
-    'usage: node bake.mjs --lat <deg> --lon <deg> [--from none|auto|lat,lon] [--from-name "Name"] [--w 3000] [--h 2000] [--out map.json] [--in saved.json] [--save saved.json]',
+    'usage: node <skill>/scripts/fx-map-bake.mjs --lat <deg> --lon <deg> [--from none|auto|lat,lon] [--from-name "Name"] [--w 3000] [--h 2000] [--out map.json] [--in saved.json] [--save saved.json]',
   );
   process.exit(2);
 }

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /*
-  taste-skill backgrounds check.mjs - measures the contrast of the page ink (7:1) and the muted ink (4.5:1)
+  taste-skill backgrounds-check.mjs - measures the contrast of the page ink (7:1) and the muted ink (4.5:1)
   on every ground, on every palette, from real pixels.
 
-    node assets/backgrounds/check.mjs --profile <profile-dir> [--palettes id,id] [--grounds mist,halo]
+    node scripts/backgrounds-check.mjs --profile <profile-dir> [--palettes id,id] [--grounds mist,halo]
                                       [--lit sand,painting] [--json out.json] [--save dir] [--min-ink 7] [--min-muted 4.5] [--port 5967]
 
   It serves the skill folder over http on 127.0.0.1 (5965-5969) and opens check.html in ONE headless Chrome (WebGL on the CPU flags, no window; closed by its own PID),
@@ -20,7 +20,7 @@ import { fileURLToPath } from "node:url";
 import { spawn, execFileSync } from "node:child_process";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const SKILL = path.resolve(HERE, "..", "..");
+const SKILL = path.resolve(HERE, "..");
 const args = process.argv.slice(2);
 const opt = (k, d) => {
   const i = args.indexOf("--" + k);
@@ -43,7 +43,7 @@ const MIN_INK = +opt("min-ink", 7),
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 /* ---------------------------------------------------------------- data */
-const meta = JSON.parse(fs.readFileSync(path.join(HERE, "index.json"), "utf8")).grounds;
+const meta = JSON.parse(fs.readFileSync(path.join(SKILL, "assets", "backgrounds", "index.json"), "utf8")).grounds;
 const zones = {}; // box id -> text zone
 for (const g of meta) {
   zones[g.id] = g.textZone;

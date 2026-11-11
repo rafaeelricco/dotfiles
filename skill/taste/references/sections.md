@@ -113,7 +113,7 @@ LAYOUT for place (dealt away from the last pages; build exactly these, write the
 ```
 
 In testing, pages of one kind had the same parts in the same order (one place hero, one close,
-the same visit split): only the palette told them apart. The hero comes from `assets/layout/deal.mjs`
+the same visit split): only the palette told them apart. The hero comes from `scripts/layout-deal.mjs`
 (a place: one of its four forms, `layout-v4.md` section 3). Write the results on plan line 2 and in the
 comment at the top of `<body>`, and build exactly those. A composition the page has no section for
 is skipped ("not used" on plan line 2); one composition never on two neighbouring sections. Deal one part again only when its recipe's
@@ -186,7 +186,7 @@ game's world, feature cards and real platform icons. So:
   never an invented date.
 - **Key art in the hero and the world sections, full bleed:** the client's trailer (a film hero),
   key art and in-engine shots, one grade, as layers or on the column lines. Deal the hero with
-  `deal.mjs --type software --kind gaming --has film,photo` when the art is supplied.
+  `layout-deal.mjs --type software --kind gaming --has film,photo` when the art is supplied.
 - **The world and the crew carry the page, not the hero object** (section 1, One object): the
   hero object whole in the hero and two more sections at most; the world, the crew at their jobs,
   the trailer frame and the screenshot strip carry the rest. Art the brief names gets its slot
@@ -196,7 +196,7 @@ game's world, feature cards and real platform icons. So:
   a photograph of the game's setting**, never an effect or a random object in its place. Search the
   place its world is set in, in plain words (`photos.mjs search "flooded coastal town at dusk"`, a
   harbour at night, a desert mining town, a city in rain), keep three to five frames of one light
-  and grade with nothing readable on them, and deal `deal.mjs --type software --kind gaming --has
+  and grade with nothing readable on them, and deal `layout-deal.mjs --type software --kind gaming --has
 setting`: it prints the `photo` hero, the game's name as the h1 set large in the box (or straight
   on a dark, empty part of the frame, `data-box="none"`), the status line under it. The world
   section takes the widest of the frames full bleed in a `media-band` or `dark-band`, the h2 above
@@ -286,7 +286,7 @@ id>"` and `value="<colour id>"` (an id of the spec's `colors`), and `auto.js` sw
   frame only when it shows the same kind of thing whole or in use (a cargo bike for a cargo bike,
   never a wheel for a bicycle), with no maker's name, logo or badge readable (crop it out or drop
   the frame), no face passed off as a customer, and one light and grade across the set. Deal the
-  hero with `deal.mjs --type product --has photo` (hardware adds `--kind tech`). The page is the
+  hero with `layout-deal.mjs --type product --has photo` (hardware adds `--kind tech`). The page is the
   **full product page**, never the short page: the plan gives each section one picture of its own
   kind (the product whole, its use, parts close up, people with it, where it lives), the product
   whole in three sections at most (rule 2), the hero first and the order card last, no other fixed
@@ -303,7 +303,7 @@ id>"` and `value="<colour id>"` (an id of the spec's `colors`), and `auto.js` sw
   kit's product-render helper (`effects-objects.md`, Product renders): a short JSON spec of its own
   parts, sized from the brief's figures, in its own materials and colours (never a kit spec shipped
   as the client's), its posters made with `make-posters.mjs`, mounted on the `product` stage
-  (`deal.mjs --type product --has object`), each section a different view (`effects-objects.md`,
+  (`layout-deal.mjs --type product --has object`), each section a different view (`effects-objects.md`,
   Views). Stills by default, live only when asked, at most one live context, on the page's flat
   ground; props only where a headline's promise needs them (the four crates of "takes four
   crates"), never a set added for mood. The heading and the text say what the thing is; no line
@@ -387,7 +387,7 @@ These three names mean only these lengths everywhere in the skill.
 
 ### The deal
 
-Never by taste: `deal.mjs --type place` deals the hero's form (band, bleed, split, name) and
+Never by taste: `layout-deal.mjs --type place` deals the hero's form (band, bleed, split, name) and
 `start.mjs deal --page place --trade <trade>` prints the LAYOUT block (section 2): nav, footer,
 close, buttons, mark, the bands and a composition for the visit, the offer, the showcase (the
 place), rooms or goods and the form. With no photograph left for the close, `close-photo` and
@@ -600,7 +600,7 @@ Each starts hero, visit; the rest in this order, 4 to 6 screens:
 Under 8 usable, whatever the trade (the count in Plan and length): three screens, 2,700px at most at 1440 (the tablet
 runs longer, below; four with no photograph, Its one moment below): hero, one `--h: 1` section holding the
 visit and the offer, footer.closing. With one or two good photographs, the best is the hero's and
-the other is the section's, in one row with the groups (With its photograph, below). With none, the hero is a statement on `.ground-brand` (`deal.mjs --hero statement`: the
+the other is the section's, in one row with the groups (With its photograph, below). With none, the hero is a statement on `.ground-brand` (`layout-deal.mjs --hero statement`: the
 h1, the sub-line, the inverted button) and the section has no picture on purpose (the one
 exception to "two picture-less sections are never neighbours").
 

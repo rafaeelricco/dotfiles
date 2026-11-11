@@ -11,7 +11,7 @@
   Type      start.mjs deals the pairing (VI-02) and prints --font-*, --display-weight (400; 400 to 500
             on tech) and --display-tracking; a page may add --display-stretch, --display-axes and
             --ly-scale (the face's optical size against the default grotesk, 1 when unsure).
-  Place     always hero--place, in the form deal.mjs deals (band, bleed, split, name: section 0b).
+  Place     always hero--place, in the form layout-deal.mjs deals (band, bleed, split, name: section 0b).
             Nothing is laid over a photograph to make words readable, on any type: no scrim,
             gradient or veil (PH-31, VI-49); the bleed form's words stand on a solid panel.
 
@@ -645,7 +645,7 @@ html:is([data-buttons="arrow"], [data-buttons="block"])
   }
 }
 
-/* 0b. the place hero's four forms, dealt by deal.mjs --type place (data-form on the section; none = band).
+/* 0b. the place hero's four forms, dealt by layout-deal.mjs --type place (data-form on the section; none = band).
    In testing every place page had the same hero (a photograph band, the h1 left, the line right, then
    120 to 200px of empty ground under it), so two cafes could not be told apart without their colours.
      band   the photograph under the header down to the words, which end on the fold (no empty band)

@@ -241,7 +241,7 @@ class Packs(Sandbox):
         # runs against an empty tastes dir: the library frames are not on disk, so no record may be dealt without them
         out = self.run_node("photos.mjs", "pick", "--trade", "cafe", "--json", "--seed", "s1")
         self.assertEqual(out.returncode, 0, out.stderr)
-        records = {p["id"]: p for p in json.loads((TASTE / "assets/photos/photos.json").read_text(encoding="utf-8"))["photos"]}
+        records = {p["id"]: p for p in json.loads((TASTE / "library/photos.json").read_text(encoding="utf-8"))["photos"]}
         roots = [TASTE / "assets/photos/img", self.tastes / "house/assets/photos/img"]
         for dealt in json.loads(out.stdout)["photos"]:
             record = records.get(dealt.get("id"))

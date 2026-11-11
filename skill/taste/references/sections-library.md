@@ -1195,7 +1195,7 @@ faq (four questions), footer.closing. Flat grounds, no shader ground; the hero's
 **With no photographs yet** (_Pellum, a desk lamp_): the lamp is shown in photographs, never
 hidden and never a render by default. `photos.mjs search "desk lamp"` and `"desk lamp detail"`
 give the stand-ins: a desk lamp of the same build whole, its dial or joint close up, a lamp lit on
-a desk at dusk, no maker's name readable, one grade. The hero (`deal.mjs --type product --has
+a desk at dusk, no maker's name readable, one grade. The hero (`layout-deal.mjs --type product --has
 photo`) holds the lamp whole; product-statement shows the dial close up with three facts (parts);
 what it does as a split (the warm pool of light on a desk, the lamp cut by the frame's edge; use);
 how it is used as three steps; specs as `rows--spec` with the real icons of the component brands
@@ -1225,7 +1225,7 @@ anywhere.
 **With no art files** (named but not supplied, or none): the hero is type over a photograph of the
 setting, never an effect or a random object in its place. `photos.mjs search "flooded village"`,
 `"harbour at dusk"`, `"fishing boat at night"` give the stand-ins, kept at full size: one grade,
-nothing readable, no faces. Dealt `deal.mjs --type software --kind gaming --has setting`: hero
+nothing readable, no faces. Dealt `layout-deal.mjs --type software --kind gaming --has setting`: hero
 `photo`, the widest calm frame (water at dusk under a dark sky) full bleed, h1 "Kelpmoor, a co-op
 sailing game" set large in the box, "Coming to Steam in spring." and "Add to Steam wishlist" under
 it. Then the trailer frame (client-slots: the harbour frame as the poster, the play control to the

@@ -3,7 +3,7 @@
   taste-skill layout check - runs assets/layout/layout-check.js on a page in one headless Chrome (WebGL on
   the CPU), at each width, and prints every finding. Closes Chrome by its own PID.
 
-    node <skill>/assets/layout/check.mjs --url <url or file> --profile <own chrome dir>
+    node <skill>/scripts/layout-check.mjs --url <url or file> --profile <own chrome dir>
          [--sizes 1440x900,1024x768,820x1180,768x1024,390x844] [--shots <dir>] [--root <dir>] [--json]
 
   After the layout rules it runs the finish checks (layout-check.js lyFinish: empty-band, blank-screen,
@@ -32,6 +32,7 @@ import { spawn, execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+const LAYOUT = path.join(here, "..", "assets", "layout");
 const args = process.argv.slice(2);
 const opt = (k, d) => {
   const i = args.indexOf("--" + k);
@@ -68,7 +69,7 @@ const sizes = String(opt("sizes", "1440x900,1024x768,820x1180,768x1024,390x844")
   .map(s => s.split("x").map(Number));
 if (!target || target === true || rootArg === true) {
   console.error(
-    "usage: check.mjs --url <url or file> [--profile <dir in the OS temp folder or .taste-skill>] [--sizes 1440x900,1024x768,820x1180,768x1024,390x844] [--shots dir] [--root dir] [--json]",
+    "usage: layout-check.mjs --url <url or file> [--profile <dir in the OS temp folder or .taste-skill>] [--sizes 1440x900,1024x768,820x1180,768x1024,390x844] [--shots dir] [--root dir] [--json]",
   );
   process.exit(2);
 }
@@ -85,7 +86,7 @@ if (!chrome) {
   console.error("no Chrome found (set CHROME_PATH)");
   process.exit(2);
 }
-const src = fs.readFileSync(path.join(here, "layout-check.js"), "utf8");
+const src = fs.readFileSync(path.join(LAYOUT, "layout-check.js"), "utf8");
 // a page file is served from its folder (or --root) over http on 127.0.0.1 (5770-5779), never opened from file://
 let url = target,
   server = null;
@@ -171,7 +172,7 @@ if (!/^https?:\/\//i.test(target)) {
   }
   url = `http://127.0.0.1:${port}/${path.relative(root, file).split(path.sep).map(encodeURIComponent).join("/")}`;
 }
-const { heroes } = JSON.parse(fs.readFileSync(path.join(here, "heroes.json"), "utf8"));
+const { heroes } = JSON.parse(fs.readFileSync(path.join(LAYOUT, "heroes.json"), "utf8"));
 // the stress: the page's own h1 markup (from its source, before layout.js split it) with words from the
 // lead added to its last plain text until it holds maxChars characters; the letters moment is left off
 const STRESS = String.raw`(async (maxChars) => {
@@ -325,7 +326,7 @@ try {
   let reveal = false;
   try {
     reveal = /data-(m-)?reveal|\bm-reveal\b|is-revealed/.test(
-      fs.readFileSync(path.join(here, "..", "motion", "motion.js"), "utf8"),
+      fs.readFileSync(path.join(here, "..", "assets", "motion", "motion.js"), "utf8"),
     );
   } catch {
     /* no kit beside it */

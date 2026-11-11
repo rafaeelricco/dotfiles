@@ -38,7 +38,7 @@
       figures (counter-rolls), archive for the client's own body of pictures, film, route; moments and scenes
       that need more are not dealt.
       the whole deal in one block, for any model: it runs the dealers themselves (start.mjs deal for the palettes,
-      the type and the LAYOUT block; assets/layout/deal.mjs for the hero; moments.mjs pick --scene deal for 2-3
+      the type and the LAYOUT block; scripts/layout-deal.mjs for the hero; moments.mjs pick --scene deal for 2-3
       moments and 0-1 scene; effects.mjs pick for 0-1 effect) and deals the hero's entrance from
       assets/motion/meta.json by fit. It ends with PLAN: one line per part, each naming the file or recipe to copy.
       The hero's history goes to layout-history.json beside the --history file.
@@ -952,7 +952,7 @@ if (cmd === "deal") {
     ...flag("no-recent"),
   ]);
   // 2. the hero
-  const heroOut = run(path.join(skill, "assets", "layout", "deal.mjs"), [
+  const heroOut = run(path.join(skill, "scripts", "layout-deal.mjs"), [
     "--type",
     pageType,
     "--has",
@@ -1043,7 +1043,7 @@ if (cmd === "deal") {
   const head = t => console.log(`\n==== ${t} ${"=".repeat(Math.max(4, 72 - t.length))}`);
   head("PALETTES, TYPE, LAYOUT (start.mjs deal)");
   console.log(dealOut);
-  head("HERO (assets/layout/deal.mjs)");
+  head("HERO (scripts/layout-deal.mjs)");
   console.log(heroOut);
   head("MOMENTS AND SCENE (moments.mjs pick --scene deal)");
   console.log(momOut);

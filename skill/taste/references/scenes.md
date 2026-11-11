@@ -151,8 +151,8 @@ only where that pack is on disk.
 ## Check it
 
 ```bash
-node <skill>/assets/scenes/_demo/shoot.mjs shoot --out <dir> --profile <your own Chrome profile dir> [--only <id>] [--page <url>] [--reduced] [--port 5836]
-node <skill>/assets/scenes/_demo/shoot.mjs index [--out <file|dir>]   # from the project folder: its own index.json
+node <skill>/scripts/scenes-shoot.mjs shoot --out <dir> --profile <your own Chrome profile dir> [--only <id>] [--page <url>] [--reduced] [--port 5836]
+node <skill>/scripts/scenes-shoot.mjs index [--out <file|dir>]   # from the project folder: its own index.json
 ```
 
 `index` writes the project's own `assets/scenes/index.json` when run from a project folder that has `assets/scenes` (or with `--out <file|dir>`).

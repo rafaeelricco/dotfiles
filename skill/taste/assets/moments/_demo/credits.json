@@ -1,5 +1,5 @@
 {
-  "about": "Photographs used only by the moment demo pages. All are Unsplash photographs served by Lorem Picsum (picsum.photos) under the Unsplash License, from the skill's vetted library (assets/photos/photos.json). Mid to dark tones with edges and detail only: a pale dusk sky reads lavender and shows no ripple.",
+  "about": "Photographs used only by the moment demo pages. All are Unsplash photographs served by Lorem Picsum (picsum.photos) under the Unsplash License, from the skill's vetted library (library/photos.json). Mid to dark tones with edges and detail only: a pale dusk sky reads lavender and shows no ripple.",
   "photos": [
     {
       "file": "photo-855.jpg",

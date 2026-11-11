@@ -2,8 +2,8 @@
 
 The layout spec for every page (house rules 3, 4 and 6). `system.css` implements the tokens, the
 section box, the grid and the hero frame; `assets/layout/` holds the heroes (`layout.css`,
-`layout.js`, `heroes.json`, `hero-<id>.html`), the hero dealer (`deal.mjs`) and the check
-(`layout-check.js`, `check.mjs`). Link `layout.css` after `system.css`, `ui/cards.css`,
+`layout.js`, `heroes.json`, `hero-<id>.html`), the hero dealer (`layout-deal.mjs`) and the check
+(`layout-check.js`, `layout-check.mjs`). Link `layout.css` after `system.css`, `ui/cards.css`,
 `motion/motion.css` and (tech) `backgrounds/backgrounds.css`; load `layout.js` after `system.js`
 (`starter.html` does both). Tokens, buttons and the nav: `system.md`.
 
@@ -149,7 +149,7 @@ Dealt by kind and by the material the brief really has, never by taste, never th
 pages; a place gets the place hero in a dealt form (below):
 
 ```bash
-node <skill>/assets/layout/deal.mjs --type software|product|place|service [--kind gaming|tech] --has photo,ui,film,object,setting --history .taste-skill/layout-history.json
+node <skill>/scripts/layout-deal.mjs --type software|product|place|service [--kind gaming|tech] --has photo,ui,film,object,setting --history .taste-skill/layout-history.json
 ```
 
 `--type` is the page type (`flow-taste.md` section 1: a game is `software`, hardware `product`; a place
@@ -194,7 +194,7 @@ caption under the picture.
 
 ### The place hero
 
-Every place page: one still photograph of the place leads the first screen, in the form `deal.mjs
+Every place page: one still photograph of the place leads the first screen, in the form `layout-deal.mjs
 --type place` deals (`data-form` on `<section class="hero hero--place">`, layout.css 0b; the
 markup is the same for all four, so only the attribute changes). In testing every place had the
 same band hero with 120 to 200px of empty ground under its words; two cafes could not be told apart.
@@ -292,11 +292,11 @@ It enters once on load like every hero (`motion.md`, The hero's entrance).
 
 ## 6. The check
 
-`layout-check.js` frames every section as a reviewer frames a shot; `check.mjs` runs it in one headless
+`layout-check.js` frames every section as a reviewer frames a shot; `layout-check.mjs` runs it in one headless
 Chrome (WebGL on the CPU, closed by its own PID) and writes the framed shots:
 
 ```bash
-node <skill>/assets/layout/check.mjs --url index.html --profile <own dir> \
+node <skill>/scripts/layout-check.mjs --url index.html --profile <own dir> \
      --sizes 1440x900,1024x768,820x1180,768x1024,390x844 [--shots <dir>] [--json]     # pass these five: the judges shoot the tablet at 768x1024 and 820x1180
 ```
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /*
-  taste-skill backgrounds pick.mjs - deals a page's grounds at random, in a calm rhythm.
+  taste-skill backgrounds-pick.mjs - deals a page's grounds at random, in a calm rhythm.
 
-    node <skill>/assets/backgrounds/pick.mjs --type software --sections hero-split,logo-row,features-2x2,bento,quote-stat,pricing-three,faq,closing-band
+    node <skill>/scripts/backgrounds-pick.mjs --type software --sections hero-split,logo-row,features-2x2,bento,quote-stat,pricing-three,faq,closing-band
                                              [--roles hero,body,body,proof,close] [--effect] [--seed S] [--mode light|dark] [--history .taste-skill/bg-history.json] [--json]
 
   Grounds are dealt to software, tech and gaming pages only (VI-41, VI-42). --type product, service or place
@@ -18,7 +18,7 @@
   chosen by hand under effects-usage.md); --effect says another effect is already dealt, and the textured
   grounds (field, stage, deep, liquid) are skipped too. The result is a list: one ground or "plain"
   per section. A section that brings its own ground (hero-photo, photo-band, closing-photo, closing-band)
-  is kept as it is and counts as a strong neighbour. Also an ES module: import { deal } from './pick.mjs'.
+  is kept as it is and counts as a strong neighbour. Also an ES module: import { deal } from './backgrounds-pick.mjs'.
 
   The rhythm rules (references/backgrounds.md) are checked on every deal, by random attempts until one
   holds: 2 grounds a page (the cap, VI-42); each ground once; two grounds that list each other in "avoids" never
@@ -245,7 +245,7 @@ export function deal(index, opts = {}) {
 }
 
 export function readIndex() {
-  return JSON.parse(fs.readFileSync(path.join(HERE, "index.json"), "utf8"));
+  return JSON.parse(fs.readFileSync(path.join(HERE, "..", "assets", "backgrounds", "index.json"), "utf8"));
 }
 
 /* ---------------------------------------------------------------- command line */

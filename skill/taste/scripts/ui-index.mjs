@@ -2,13 +2,13 @@
 /*
   Rebuilds assets/ui/index.json from every <fragment>/meta.json (the header prose, motion, cards and grounds, is kept from the index.json already there), in the order below (a fragment not
   listed goes before the second choices). Run after changing a meta.json:
-    node assets/ui/_lab/build-index.mjs
+    node scripts/ui-index.mjs
 */
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const UI = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const UI = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "assets", "ui");
 const ORDER = [
   "window",
   "chat",

@@ -6,7 +6,7 @@
   always gets hero-place, in one of four forms dealt here (band, bleed, split, name: layout.css 0b),
   away from the last two places' forms; --form <id> prints that one. No photograph: the statement hero.
 
-    node <skill>/assets/layout/deal.mjs --type software|product|place|service
+    node <skill>/scripts/layout-deal.mjs --type software|product|place|service
          [--kind tech]                         hardware or a tech device (page type product, kind tech): the grounds, moments
                                                and effects print as for software; without it a product, service or
                                                place prints none (kind other is flat)
@@ -39,6 +39,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+const LAYOUT = path.join(here, "..", "assets", "layout");
 const args = process.argv.slice(2);
 const opt = (k, d) => {
   const i = args.indexOf("--" + k);
@@ -48,7 +49,7 @@ const opt = (k, d) => {
     : true
   );
 };
-const { heroes } = JSON.parse(fs.readFileSync(path.join(here, "heroes.json"), "utf8"));
+const { heroes } = JSON.parse(fs.readFileSync(path.join(LAYOUT, "heroes.json"), "utf8"));
 const TYPES = ["software", "product", "place", "service"];
 let type = opt("type");
 if (type === "gaming") type = "software"; // a game is page type software, kind gaming

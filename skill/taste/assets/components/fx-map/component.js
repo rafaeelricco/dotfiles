@@ -1,6 +1,6 @@
 // fx-map: a street map of the real place, in the page's own colours. The streets, water, parks, rails,
 // street names and the walk from the nearest station come from OpenStreetMap, baked once at build time
-// by bake.mjs into a small JSON (inline in <script type="application/json" class="cx-map__data">, or a
+// by fx-map-bake.mjs into a small JSON (inline in <script type="application/json" class="cx-map__data">, or a
 // file named by data-cx-map). Plain SVG: no map service, no key, no WebGL, nothing moves at rest.
 // Pointed at, the walk lights up from the station to the door and the pin's halo answers once.
 // Without baked data (no network at build time) it falls back to a still effect ground with the pin.

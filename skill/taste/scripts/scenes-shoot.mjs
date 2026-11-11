@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 /*
-  scenes/_demo/shoot.mjs - the big scenes' own tools (taste-skill, references/scenes.md). Node 22+, no packages.
+  scenes-shoot.mjs - the big scenes' own tools (taste-skill, references/scenes.md). Node 22+, no packages.
 
-    node assets/scenes/_demo/shoot.mjs index [--out <file|dir>] [--in-skill]
+    node scripts/scenes-shoot.mjs index [--out <file|dir>] [--in-skill]
          scan assets/scenes/<id>/meta.json into index.json. It writes to --out, else to the project's own
          assets/scenes/index.json (under the folder it runs from), else next to this script when this copy is not
          the installed skill; it never rewrites the skill's own index.json unless --in-skill says so
-    node assets/scenes/_demo/shoot.mjs shoot --out <out-dir> --profile <profile-dir>
+    node scripts/scenes-shoot.mjs shoot --out <out-dir> --profile <profile-dir>
          [--only a,b] [--widths 1440,390] [--states start,middle,end | 0,0.25,0.5,0.75,1] [--port 5833]
          [--reduced] [--page <url>]      (--page shoots that page's own big scene instead of the demos)
-    node assets/scenes/_demo/shoot.mjs probe --only <id> --p 0.5 --expr "<js>" --profile <dir>   (one scene at one progress: prints the expression)
-    node assets/scenes/_demo/shoot.mjs make --html <url path> --save <file.png> --profile <dir>
+    node scripts/scenes-shoot.mjs probe --only <id> --p 0.5 --expr "<js>" --profile <dir>   (one scene at one progress: prints the expression)
+    node scripts/scenes-shoot.mjs make --html <url path> --save <file.png> --profile <dir>
          (opens the page, waits for window.__out, a data: URL, and saves it: the demo's object render)
 
   shoot opens each scene's demo page in one headless Chrome with WebGL on the CPU (SwiftShader), one page at
@@ -29,8 +29,8 @@ import { spawn, execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const DIR = path.resolve(HERE, ".."); // assets/scenes
-const ROOT = path.resolve(DIR, "..", ".."); // the taste-skill folder
+const ROOT = path.resolve(HERE, ".."); // the taste-skill folder
+const DIR = path.join(ROOT, "assets", "scenes");
 const INDEX = path.join(DIR, "index.json");
 const IN_SKILL = fs.existsSync(path.join(ROOT, "SKILL.md")); // this assets/scenes is the installed skill's own
 const FITS = ["hero", "statement", "product", "between", "closing"];
@@ -694,5 +694,5 @@ else if (cmd === "make") cmdMake();
 else if (cmd === "probe") cmdProbe();
 else
   die(
-    'usage: shoot.mjs index [--out <file|dir>] [--in-skill] | shoot --out <dir> [--profile <dir>] [--only ids] | probe --only <id> --p 0.5 --expr "<js>" --profile <dir> | make --html <path> --save <png> --profile <dir>',
+    'usage: scenes-shoot.mjs index [--out <file|dir>] [--in-skill] | shoot --out <dir> [--profile <dir>] [--only ids] | probe --only <id> --p 0.5 --expr "<js>" --profile <dir> | make --html <path> --save <png> --profile <dir>',
   );

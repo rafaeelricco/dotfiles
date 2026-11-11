@@ -31,7 +31,7 @@
   The checks, one at a time, each in its own headless Chrome with its own temp profile:
     consistency.mjs --quick --widths 1440,390 --json   (with the marker's --page kind, --category, --primary, --root;
                                                         it walks the page at 320x640 too: overflow, collide, tap-size)
-    assets/layout/check.mjs --sizes 1440x900,390x844 --json   (the layout rules, then the finish checks of
+    scripts/layout-check.mjs --sizes 1440x900,390x844 --json   (the layout rules, then the finish checks of
         layout-check.js lyFinish: empty-band, blank-screen, placeholder, moment-target, moment-hidden, motion-visible,
         reveal-none, and console-error for every error or failed file on load; its WARNs (empty-band 15-25%,
         subject-repeat, number-repeat, heading-repeat, moment-idle) never block)
@@ -1023,7 +1023,7 @@ async function dealDrift(html, dot, kind, taste) {
         check: "deal-drift",
         where: `hero data-form="${built}"`,
         msg: `the place hero was dealt the form ${pf} (layout-history.json); the page builds ${built}${built === "band" ? ", the band hero the deal moves away from" : ""}`,
-        fix: `data-form="${pf}" on <section class="hero hero--place">, built as <skill>/assets/layout/hero-place.html and layout.css 0b show it (deal.mjs --type place --form ${pf} prints its markup)`,
+        fix: `data-form="${pf}" on <section class="hero hero--place">, built as <skill>/assets/layout/hero-place.html and layout.css 0b show it (layout-deal.mjs --type place --form ${pf} prints its markup)`,
       });
   }
   // the close and the compositions: the last value dealt per part for this kind
@@ -1386,12 +1386,12 @@ async function browserChecks(target, proj, opts, gateDir) {
       }
     }
   }
-  // check.mjs: every finding fails
+  // layout-check.mjs: every finding fails
   if (left() > 60000) {
     const prof = freshProfile("layout"),
       t = Date.now();
     const r = await run(
-      path.join(SKILL, "assets", "layout", "check.mjs"),
+      path.join(SKILL, "scripts", "layout-check.mjs"),
       ["--url", target, "--profile", prof, "--sizes", sizes, "--json", ...root],
       proj,
       300000,
@@ -1400,9 +1400,9 @@ async function browserChecks(target, proj, opts, gateDir) {
     rmProfile(prof);
     res.seconds.layout = Math.round((Date.now() - t) / 1000);
     const rep = parseJson(r.out);
-    if (r.timedOut) res.crashed.push("check.mjs timed out");
+    if (r.timedOut) res.crashed.push("layout-check.mjs timed out");
     else if (r.code === 2 || !Array.isArray(rep))
-      res.crashed.push(`check.mjs could not run (exit ${r.code}${errLine(r.err)})`);
+      res.crashed.push(`layout-check.mjs could not run (exit ${r.code}${errLine(r.err)})`);
     // every finding fails but the finish checks' WARNs (empty-band under 25%, the repeats, moment-idle)
     else
       for (const s of rep)
@@ -1415,7 +1415,7 @@ async function browserChecks(target, proj, opts, gateDir) {
             widths: [Number(String(s.size).split("x")[0])],
             from: "layout",
           });
-  } else res.crashed.push("no time left for check.mjs");
+  } else res.crashed.push("no time left for layout-check.mjs");
   return res;
 }
 

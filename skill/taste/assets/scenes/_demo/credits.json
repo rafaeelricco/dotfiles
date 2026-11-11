@@ -63,12 +63,12 @@
   "stills": [
     {
       "file": "globe.png",
-      "what": "assets/objects/print-globe rendered once (shoot.mjs still): the object-through-giant-type demo's still",
+      "what": "assets/objects/print-globe rendered once (scenes-shoot.mjs still): the object-through-giant-type demo's still",
       "by": "the skill's own object"
     },
     {
       "file": "cards.png",
-      "what": "assets/objects/print-cards rendered once (shoot.mjs still): the fixed-hero-object demo's still",
+      "what": "assets/objects/print-cards rendered once (scenes-shoot.mjs still): the fixed-hero-object demo's still",
       "by": "the skill's own object"
     }
   ]

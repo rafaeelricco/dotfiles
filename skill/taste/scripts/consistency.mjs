@@ -8064,7 +8064,7 @@ const areaMod = (() => {
         sr = sec.getBoundingClientRect();
       if (s0.display === "none" || s0.position === "fixed" || sr.height < 160 || sr.width < 200) continue;
       if (sec.tagName === "FOOTER" && !sec.matches(".closing")) continue;
-      // the statement hero (deal.mjs --hero statement) is type on its ground by design: with no picture in it, its h1,
+      // the statement hero (layout-deal.mjs --hero statement) is type on its ground by design: with no picture in it, its h1,
       // sub-line and button leave most of the screen ground at every width (sections.md section 4), so it is not judged
       if (
         sec === top[0]
@@ -15182,7 +15182,7 @@ function lib() {
         quiet = false;
       } // on a picture or an effect ground
       // a dealt statement moment's own section is type by design (once, never beside another picture-less section: sections.md).
-      // A statement hero is dealt (deal.mjs --hero statement: a tech or gaming page with no art, a product's short page) and is
+      // A statement hero is dealt (layout-deal.mjs --hero statement: a tech or gaming page with no art, a product's short page) and is
       // type on its ground by design, on any page; a statement section (the statement a text moment is dealt with) likewise.
       // The short page's one section holds the offer and the visit as ruled text, with no picture on purpose (sections.md §4,
       // the short page): on a page marked data-page-mode="short" only the hero is judged for a visual.

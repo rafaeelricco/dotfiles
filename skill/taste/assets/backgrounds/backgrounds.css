@@ -8,7 +8,7 @@
   Every ground sets the page tokens for its own children (--bg --surface --ink --muted --accent --card
   --action --line, --fx-*), so the system's cards, buttons and fragments work on it unchanged. It draws on
   the page palette (--p-*) and the lit ground (--ground-*, system.css). Body text keeps 7:1 and muted text
-  4.5:1 on its text zone (index.json "textZone"; check.mjs measures it on every palette). The one
+  4.5:1 on its text zone (index.json "textZone"; backgrounds-check.mjs measures it on every palette). The one
   exception is .bg-stage, a panel for a visual: words on it sit on a card, never on the stage itself.
 
   Knobs, all optional, on :root or on one section:

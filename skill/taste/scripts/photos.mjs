@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
-  taste-skill photos.mjs - vetted photographs for place pages (assets/photos/photos.json).
+  taste-skill photos.mjs - vetted photographs for place pages (library/photos.json).
 
     node <skill>/scripts/photos.mjs list                          the trades, with how many photographs each holds
     node <skill>/scripts/photos.mjs list --trade hotel            every photograph a trade may be dealt
@@ -84,7 +84,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 // a path printed in a command: absolute, forward slashes, quoted when it holds a space (the same in Git Bash, PowerShell and cmd)
 const slash = p => path.resolve(p).replace(/\\/g, "/");
 const cmdPath = p => (/\s/.test(slash(p)) ? '"' + slash(p) + '"' : slash(p));
-const LIB_FILE = path.join(HERE, "..", "assets", "photos", "photos.json");
+const LIB_FILE = path.join(HERE, "..", "library", "photos.json");
 const UA = "taste-photos/1.0";
 const lib = JSON.parse(fs.readFileSync(LIB_FILE, "utf8"));
 const byId = new Map(lib.photos.map(p => [p.id, p]));
@@ -139,7 +139,7 @@ const PRODUCT =
   + "(2) until they exist, stand-ins found with photos.mjs search: the same kind of thing whole (a cargo bike for a cargo bike, never a wheel for a bicycle), "
   + "in use where it lives, close-ups of the parts the page names, one light and grade across the set, no maker's name, logo or face readable; "
   + "every one listed in the build report as a stand-in with the client's photograph to shoot in its place, nothing on the page saying so; "
-  + "(3) a render from assets/objects/product-render (effects-objects.md, Product renders) only when the brief asks for 3D or a render (deal.mjs --has object). "
+  + "(3) a render from assets/objects/product-render (effects-objects.md, Product renders) only when the brief asks for 3D or a render (layout-deal.mjs --has object). "
   + "The page is the full product page (the product, what it carries, how it is used, specs as rows, a live order card), never the short page. "
   + 'Never a drawn SVG or a drawing of the product (PH-07), never mood stock (a forest for "the ride", groceries for "what it carries"), never an object of another kind. '
   + "The report also lists the photographs to shoot (the product on one plain backdrop, three angles, a detail of each part, the product in use). "
@@ -1663,7 +1663,7 @@ function sizesFor(p, hero) {
     return `(max-width: 639px) ${Math.round(r * 125)}vw, (max-width: 1023px) 100vw, 50vw`;
   return "(max-width: 1023px) 100vw, 50vw";
 }
-// the library's frames live in the first root that has them (the house pack); its records stay in assets/photos/photos.json
+// the library's frames live in the first root that has them (the house pack); its records stay in library/photos.json
 const LIB_DIR =
   assetRoots(null)
     .map(r => path.join(r, "photos"))

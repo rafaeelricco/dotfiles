@@ -78,7 +78,7 @@ starter's tags as written, with `/assets/...` paths and `is:inline` on each scri
 ## The checks
 
 - Fix rounds may run on the dev server: `gate.mjs --start http://localhost:5173/`, and the same URL for
-  `consistency.mjs`, `check.mjs --url` and `shoot.mjs --url`; the server must be running. The gate opens only a
+  `consistency.mjs`, `layout-check.mjs --url` and `shoot.mjs --url`; the server must be running. The gate opens only a
   local page.
 - The last gate run and `perf.mjs` go on the production build: a static export served from its folder
   (`--start out/index.html --root out`; Vite: `dist`) or the production server on a local port

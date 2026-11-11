@@ -31,7 +31,7 @@ node <skill>/scripts/gate.mjs --start index.html --kind <kind> --category "<what
   file, else the `index.html` of the only folder below that has one.
 - **The checks**, one at a time, each in its own headless Chrome with a fresh profile:
   `consistency.mjs --quick --widths 1440,390` (with the kind the page declares, else the marker's, and its category, primary and
-  root, as step 6 runs it) and `assets/layout/check.mjs --sizes 1440x900,390x844`. The consistency run includes
+  root, as step 6 runs it) and `scripts/layout-check.mjs --sizes 1440x900,390x844`. The consistency run includes
   `empty-area` (a section over 35% empty inside its container WARNs, over 50% FAILs) and the `basics`
   block (names, alt, labels, heading order, the Tab walk, lang, head tags, map links, assumed facts):
   their FAILs block like the others; their WARNs (skip-link, share-meta, action-repeat at two,

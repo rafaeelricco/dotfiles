@@ -25,7 +25,7 @@ same order at 390. Photograph layers and the tech grounds below do not count amo
 - **The brand band** (`.ground-brand`, product and place): one section in the brand's own colour
   (from the product or the shopfront) may replace the dark band, once, in the second half. On a
   place its lightness is 0.03 to 0.60 and its saturation 0.25 or more, never a neutral near-black;
-  every word on it (heading, text, label, link) takes the colour that passes 7:1, the one number: darken the brand colour until it does (`check.mjs` and `consistency.mjs` ask 7:1 for text people read and 4.5:1 for labels, so 7:1 clears both); the primary button is inverted. Otherwise
+  every word on it (heading, text, label, link) takes the colour that passes 7:1, the one number: darken the brand colour until it does (`backgrounds-check.mjs` and `consistency.mjs` ask 7:1 for text people read and 4.5:1 for labels, so 7:1 clears both); the primary button is inverted. Otherwise
   saturated colour lives in the accent and the pictures; one mid-tone section at most, never as the
   main ground.
 - Grounds change in big blocks at the section edge: never on `.wrap` or a wrapper, no border-top or
@@ -45,7 +45,7 @@ same order at 390. Photograph layers and the tech grounds below do not count amo
 Product, service and place (site-kind other): every ground and panel is a flat CSS colour and
 photographs are shown as they are. No gradient (a hard-stop two-tone included), grain, paper,
 halo, texture, pattern, glass, contour, canvas, `backdrop-filter`, gradient mask, or shadow or tint
-on the interface. Never run `pick.mjs` for them: its `index.json` still lists grounds for product,
+on the interface. Never run `backgrounds-pick.mjs` for them: its `index.json` still lists grounds for product,
 service and place, and those are not used. A product page with site-kind tech is dealt as tech.
 
 ## Tech: the CSS grounds
@@ -55,7 +55,7 @@ Sixteen grounds drawn in CSS (no WebGL) in `assets/backgrounds`. Link `backgroun
 section or the hero's wrapper (`<section class="section bg-halo">`); `stage` only as `<div
 class="bg-stage">` around one visual card; `paper` on `<body>` and `topglow` around the nav and hero
 set no tokens, the thirteen section grounds set the page tokens so cards and buttons work unchanged.
-Ink keeps 7:1 and muted 4.5:1 on every palette (`check.mjs` measures it). `index.json` holds each
+Ink keeps 7:1 and muted 4.5:1 on every palette (`backgrounds-check.mjs` measures it). `index.json` holds each
 ground's mood, roles, pairs, avoids and sections.
 
 - **Soft:** `mist` colour wash; `halo` light behind a heading; `ruled` fine grid on the container's
@@ -67,7 +67,7 @@ ground's mood, roles, pairs, avoids and sections.
 - **Deal:**
 
   ```bash
-  node <skill>/assets/backgrounds/pick.mjs --type software --sections <the plan's ids> --mode light|dark --history .taste-skill/bg-history.json
+  node <skill>/scripts/backgrounds-pick.mjs --type software --sections <the plan's ids> --mode light|dark --history .taste-skill/bg-history.json
   ```
 
   Hardware runs it as `--type product --kind tech`; with an effect or scene already dealt, add

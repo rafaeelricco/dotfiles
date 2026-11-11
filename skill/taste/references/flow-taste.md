@@ -214,7 +214,7 @@ Read `copy.md`, `copy-voice.md`, `system.md`, `layout-v4.md` and `sections.md` i
 
    ```bash
    node <skill>/scripts/start.mjs deal --page <kind> --trade <trade> --history .taste-skill/history.json    # palettes, pairings and the LAYOUT block (nav, footer, close, buttons, mark, bands, compositions); add --axis after a word or editorial hero
-   node <skill>/assets/layout/deal.mjs --type <page type> --has <photo,ui,film,object,setting> --history .taste-skill/layout-history.json   # the hero; a game adds --kind gaming, hardware --kind tech
+   node <skill>/scripts/layout-deal.mjs --type <page type> --has <photo,ui,film,object,setting> --history .taste-skill/layout-history.json   # the hero; a game adds --kind gaming, hardware --kind tech
    node <skill>/scripts/moments.mjs pick --page <kind> --scene deal --history .taste-skill/history.json   # every kind: 0-1 scene, two moments (--long: three)
    node <skill>/scripts/effects.mjs pick --page <kind> --palette light|dark --slots hero --history .taste-skill/history.json   # tech; a place, service or product: --slots band, quiet treatments only
    node <skill>/scripts/start.mjs css --page <kind> --palette <id> --type <id> --radius soft --history .taste-skill/history.json
@@ -273,12 +273,12 @@ Read `copy.md`, `copy-voice.md`, `system.md`, `layout-v4.md` and `sections.md` i
    node <skill>/scripts/copy-lint.mjs index.html --kind <kind> --category "<what is sold>"
    node <skill>/scripts/motion-lint.mjs index.html --kind <kind>
    node <skill>/scripts/consistency.mjs index.html --widths 1440,1024,820,768,390 --rhythm-widths 1440,820,768,390 --profile <dir> --page <kind> --category "<what is sold>" --primary "<main action>"
-   node <skill>/assets/layout/check.mjs --url index.html --profile <dir> --sizes 1440x900,1024x768,820x1180,768x1024,390x844 --shots shots/layout
+   node <skill>/scripts/layout-check.mjs --url index.html --profile <dir> --sizes 1440x900,1024x768,820x1180,768x1024,390x844 --shots shots/layout
    node <skill>/scripts/shoot.mjs --url index.html --w 1440 --out shots/1440.png --profile <dir>
    node <skill>/scripts/perf.mjs index.html --profile <dir>
    ```
 
-   Shoot 1024, 820x1180, 768x1024 and 390 as well. Every `check.mjs` finding fails the page (no `--no-stress`).
+   Shoot 1024, 820x1180, 768x1024 and 390 as well. Every `layout-check.mjs` finding fails the page (no `--no-stress`).
    copy-lint and motion-lint open no browser and take under a second. Fix every FAIL (a copy-lint WARN too, or say
    why it stays) and read the copy aloud (`copy-voice.md` section 6); shoot again and read every
    screenshot against the checklist. In the fix rounds run `consistency.mjs --quick --widths
@@ -311,7 +311,7 @@ Read `copy.md`, `copy-voice.md`, `system.md`, `layout-v4.md` and `sections.md` i
 
 ## 5. Checklist
 
-Each line names its checks: `consistency.mjs` ids in brackets, `check.mjs` findings in braces,
+Each line names its checks: `consistency.mjs` ids in brackets, `layout-check.mjs` findings in braces,
 `perf.mjs` rows. The last line is for your eyes.
 
 - **First screen:** the hero (h1, eyebrow, lead) says what is sold, for whom or where, within five
