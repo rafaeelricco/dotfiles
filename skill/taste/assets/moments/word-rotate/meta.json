@@ -1,0 +1,34 @@
+{
+  "id": "word-rotate",
+  "name": "Word rotates",
+  "kind": "text",
+  "fits": ["hero", "statement", "closing"],
+  "trigger": "loop",
+  "cost": "low",
+  "webgl": 0,
+  "tones": ["playful", "tech", "product", "warm"],
+  "intensity": "lively",
+  "look": "One word of a headline changes every two seconds, sliding up out of its mask as the next rises in, underlined in the accent; three rounds, then it rests on the written word. In a statement or the close (\"Bread for breakfast / lunch / Sunday\"), or the hero unless the hero is the word hero, which has its own live word.",
+  "reduced": "The written word stands.",
+  "phone": "The written word stands; the other words are not shown.",
+  "maxPerPage": 1,
+  "weight": 1,
+  "needs": {
+    "words": "a headline with one word that can take 2 to 4 alternatives (what the product is for)"
+  },
+  "avoidWith": [],
+  "states": {
+    "start": {
+      "see": true,
+      "wait": 200
+    },
+    "middle": {
+      "see": true,
+      "wait": 2550
+    },
+    "end": {
+      "see": true,
+      "wait": 4800
+    }
+  }
+}

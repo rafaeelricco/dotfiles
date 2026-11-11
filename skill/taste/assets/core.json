@@ -1,0 +1,24 @@
+{
+  "always": [
+    "system.css",
+    "system.js",
+    "motion/motion.css",
+    "motion/motion.js",
+    "layout/layout.css",
+    "layout/layout.js",
+    "backgrounds/backgrounds.css",
+    "backgrounds/backgrounds.js",
+    "icons/icon.css",
+    "ui/ui.js",
+    "ui/base.css",
+    "ui/cards.css",
+    "ui/icons"
+  ],
+  "family": {
+    "moments": ["moments/moments.js", "moments/lib.js"],
+    "scenes": ["scenes/scenes.js", "scenes/scenes.css", "scenes/lib.js"],
+    "effects": ["effects/fx.js"],
+    "components": ["components/base.css", "components/shared.js", "effects/fx.js"],
+    "diagrams": ["diagrams/diagram.js", "diagrams/diagram.css", "diagrams/mount.js", "diagrams/presets.json"]
+  }
+}
