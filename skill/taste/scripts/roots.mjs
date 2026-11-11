@@ -58,6 +58,22 @@ export function inside(root, file) {
   const f = real(file);
   return !!f && [real(root), real(SKILL), real(tastesDir())].some(d => d && within(d, f));
 }
+// How high a preview served without --root climbs for the page's ../ references: up to the page's project (the
+// nearest folder above it holding .taste-skill, .git or package.json; this skill for its own demo pages) and never
+// above it, so a page cannot have the folders around its project served to its own script.
+export function projectOf(file) {
+  const start = path.dirname(path.resolve(file));
+  for (let d = start; ; d = path.dirname(d)) {
+    if (d === SKILL || [".taste-skill", ".git", "package.json"].some(n => fs.existsSync(path.join(d, n)))) return d;
+    if (path.dirname(d) === d) return start;
+  }
+}
+export function climbRoot(file, ups) {
+  const top = projectOf(file);
+  let root = path.dirname(path.resolve(file));
+  for (let i = 0; i < ups && root !== top; i++) root = path.dirname(root);
+  return root;
+}
 // a path as the PLAN prints it
 export const refOf = p =>
   p.startsWith(SKILL + path.sep) ?

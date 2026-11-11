@@ -295,7 +295,7 @@ import { join, resolve, dirname, basename, extname, relative, sep, isAbsolute } 
 import { fileURLToPath } from "node:url";
 import { inflateSync } from "node:zlib";
 import { readCatalogue } from "./moments.mjs";
-import { assetRoots, inside, itemDir } from "./roots.mjs";
+import { assetRoots, climbRoot, inside, itemDir } from "./roots.mjs";
 import { sleep, argv, opt, has, TASTE } from "./consistency/cli.mjs";
 import { isTreatment, sceneFitsKind } from "./consistency/fit.mjs";
 import { visualMod } from "./consistency/modules/visuals.mjs";
@@ -496,8 +496,7 @@ else {
       ),
     ].map(m => m[1].length / 3),
   );
-  let root = dirname(file);
-  for (let i = 0; i < ups; i++) root = dirname(root);
+  let root = climbRoot(file, ups);
   if (ROOT) {
     root = resolve(ROOT);
     const rel = relative(root, file);

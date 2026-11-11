@@ -56,7 +56,7 @@ import zlib from "node:zlib";
 import { spawn, execFileSync } from "node:child_process";
 import http from "node:http";
 import { fileURLToPath } from "node:url";
-import { chromeOrExit, inside } from "./roots.mjs";
+import { chromeOrExit, climbRoot, inside } from "./roots.mjs";
 
 const args = process.argv.slice(2);
 const opt = (k, d) => {
@@ -166,8 +166,7 @@ if (!/^https?:\/\//i.test(url)) {
         .matchAll(/(?:(?:src|href)\s*=\s*|\bfrom\s*|\bimport\s*\(?\s*|url\(\s*)["']?((?:\.\.\/)+)/g),
     ].map(m => m[1].length / 3),
   );
-  let root = path.dirname(file);
-  for (let i = 0; i < ups; i++) root = path.dirname(root);
+  let root = climbRoot(file, ups);
   if (rootArg) {
     root = path.resolve(rootArg);
     const rel = path.relative(root, file);

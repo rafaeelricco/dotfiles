@@ -30,7 +30,7 @@ import os from "node:os";
 import http from "node:http";
 import { spawn, execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { chromeOrExit, inside } from "./roots.mjs";
+import { chromeOrExit, climbRoot, inside } from "./roots.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const LAYOUT = path.join(here, "..", "assets", "layout");
@@ -96,8 +96,7 @@ if (!/^https?:\/\//i.test(target)) {
         .matchAll(/(?:(?:src|href)\s*=\s*|\bfrom\s*|\bimport\s*\(?\s*|url\(\s*)["']?((?:\.\.\/)+)/g),
     ].map(m => m[1].length / 3),
   );
-  let root = path.dirname(file);
-  for (let i = 0; i < ups; i++) root = path.dirname(root);
+  let root = climbRoot(file, ups);
   if (rootArg) {
     root = path.resolve(rootArg);
     const rel = path.relative(root, file);
