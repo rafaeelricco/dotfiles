@@ -46,15 +46,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { pick as dealEffects, filterEffects, SLOTS, KINDS } from "../assets/effects/pick.js";
 import { assertSafeWritePath, writeDealerState } from "./build-state.mjs";
 import { pageKind, fitsKind, FIT, TONES, INTENSITIES } from "./moments.mjs";
-import {
-  assetRoots,
-  chromeOrExit,
-  readTaste,
-  servable,
-  stageItem,
-  tasteName,
-  tastesDir,
-} from "./roots.mjs";
+import { assetRoots, chromeOrExit, readTaste, servable, stageItem, tasteName, tastesDir } from "./roots.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const FX = path.join(ROOT, "assets", "effects");
