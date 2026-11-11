@@ -104,7 +104,7 @@ import os from "node:os";
 import crypto from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { assetRoots, refOf, tastesDir } from "./roots.mjs";
+import { assetRoots, inside, refOf, tastesDir } from "./roots.mjs";
 import { tasteUse } from "./taste-use.mjs";
 
 const SELF = fileURLToPath(import.meta.url);
@@ -1786,7 +1786,16 @@ function applyFlags(m) {
       m.url = null;
     }
   }
-  if (str("root")) m.root = slash(path.relative(projDir, path.resolve(base, str("root")))) || ".";
+  if (str("root")) {
+    // the preview server serves everything under the root, so it stays inside the project
+    const r = path.resolve(base, str("root"));
+    if (!inside(projDir, r)) {
+      console.log(`gate: --root ${str("root")} is not a folder inside ${projDir}`);
+      console.log("GATE: SETUP (--root leaves the project)");
+      process.exit(3);
+    }
+    m.root = slash(path.relative(projDir, r)) || ".";
+  }
   if (kindArg()) m.kind = kindArg();
   for (const k of ["category", "primary"]) if (str(k)) m[k] = str(k);
   return m;
@@ -2026,7 +2035,14 @@ if (setup) {
 
 const target = P.url || P.file;
 const relPage = P.url || slash(path.relative(projDir, P.file));
-const root = typeof marker.root === "string" && marker.root ? path.resolve(projDir, marker.root) : null;
+// a marker can be committed with the project: a root that leaves it (.., /, a link out) is dropped, never served
+const root = (() => {
+  if (typeof marker.root !== "string" || !marker.root) return null;
+  const r = path.resolve(projDir, marker.root);
+  if (inside(projDir, r)) return r;
+  console.error(`gate: the build's root ${marker.root} is not inside ${projDir}; serving from the page's folder`);
+  return null;
+})();
 const kind = (html && kindOf(html)) || (KINDS.test(marker.kind || "") ? marker.kind : "") || "";
 // the build's taste: deal.json's, else the page's <meta name="taste">; a name that is not a taste name, or has no pack, is none
 const buildTaste = (() => {

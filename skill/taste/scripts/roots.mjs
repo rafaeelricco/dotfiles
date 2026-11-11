@@ -41,6 +41,18 @@ export function readTaste(taste) {
     return null;
   }
 }
+// A preview server sends a file only when it is inside the served root once symlinks are resolved: the lexical check
+// alone lets a link committed in the project (escape -> /etc) reach the rest of the disk, and the page's own script
+// can read whatever it is served.
+export function inside(root, file) {
+  try {
+    const r = fs.realpathSync(root),
+      f = fs.realpathSync(file);
+    return f === r || f.startsWith(r + path.sep);
+  } catch {
+    return false;
+  }
+}
 // a path as the PLAN prints it
 export const refOf = p =>
   p.startsWith(SKILL + path.sep) ?

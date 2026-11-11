@@ -295,7 +295,7 @@ import { join, resolve, dirname, basename, extname, relative, sep, isAbsolute } 
 import { fileURLToPath } from "node:url";
 import { inflateSync } from "node:zlib";
 import { readCatalogue } from "./moments.mjs";
-import { assetRoots, itemDir } from "./roots.mjs";
+import { assetRoots, inside, itemDir } from "./roots.mjs";
 import { sleep, argv, opt, has, TASTE } from "./consistency/cli.mjs";
 import { isTreatment, sceneFitsKind } from "./consistency/fit.mjs";
 import { visualMod } from "./consistency/modules/visuals.mjs";
@@ -515,6 +515,7 @@ else {
         return res.end();
       }
       if (statSync(f).isDirectory()) f = join(f, "index.html");
+      if (!inside(root, f)) throw new Error("outside the served root");
       res.writeHead(200, {
         "content-type": MIME[extname(f).toLowerCase()] || "application/octet-stream",
         "content-length": statSync(f).size,
@@ -1978,7 +1979,7 @@ async function shaderLint(GI, base) {
       let text = null;
       if (server && serveRoot) {
         const f = resolve(join(serveRoot, decodeURIComponent(x.pathname)));
-        if (f.startsWith(serveRoot) && existsSync(f) && statSync(f).size < 3e6) text = readFileSync(f, "utf8");
+        if (inside(serveRoot, f) && statSync(f).size < 3e6) text = readFileSync(f, "utf8");
       } else {
         const r = await fetch(u);
         if (r.ok) text = (await r.text()).slice(0, 3e6);

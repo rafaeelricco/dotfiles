@@ -56,7 +56,7 @@ import zlib from "node:zlib";
 import { spawn, execFileSync } from "node:child_process";
 import http from "node:http";
 import { fileURLToPath } from "node:url";
-import { chromeOrExit } from "./roots.mjs";
+import { chromeOrExit, inside } from "./roots.mjs";
 
 const args = process.argv.slice(2);
 const opt = (k, d) => {
@@ -184,6 +184,7 @@ if (!/^https?:\/\//i.test(url)) {
         return res.end();
       }
       if (fs.statSync(f).isDirectory()) f = path.join(f, "index.html");
+      if (!inside(root, f)) throw new Error("outside the served root");
       res.writeHead(200, {
         "content-type": MIME[path.extname(f).toLowerCase()] || "application/octet-stream",
         "content-length": fs.statSync(f).size,

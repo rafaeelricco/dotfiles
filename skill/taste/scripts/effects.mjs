@@ -45,7 +45,7 @@ import { spawn, execFileSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { pick as dealEffects, filterEffects, SLOTS, KINDS } from "../assets/effects/pick.js";
 import { pageKind, fitsKind, FIT, TONES, INTENSITIES } from "./moments.mjs";
-import { assetRoots, chromeOrExit, readTaste, stageItem, tasteName, tastesDir, updateDeal } from "./roots.mjs";
+import { assetRoots, chromeOrExit, inside, readTaste, stageItem, tasteName, tastesDir, updateDeal } from "./roots.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const FX = path.join(ROOT, "assets", "effects");
@@ -653,7 +653,7 @@ function serve(a) {
       return;
     }
     if (fs.existsSync(file) && fs.statSync(file).isDirectory()) file = path.join(file, "index.html");
-    if (!fs.existsSync(file)) {
+    if (!inside(root, file)) {
       res.writeHead(404, { "content-type": "text/plain" }).end("not found");
       return;
     }
