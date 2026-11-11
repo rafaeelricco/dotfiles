@@ -2198,7 +2198,8 @@ if (state.fp === FP && state.found && Array.isArray(state.found.crashed) && !sta
 clearTimeout(guard);
 
 const W = applyWaivers(found.fails, waiverFile);
-const TO = tasteOverrides(P.file);
+// a build checked by URL has no source file: read the page as rendered, as the taste-use checks do
+const TO = tasteOverrides(P.file || path.join(gateDir, "consistency", "rendered.html"));
 if (TO.rows.length) {
   const why = new Map(TO.rows.map(r => [r.check, r.why]));
   const by = f => (f.ids || [f.check]).find(id => why.has(id));
