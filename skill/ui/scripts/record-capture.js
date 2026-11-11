@@ -1,6 +1,7 @@
 (() => {
   // One expression: record.mjs passes it to Runtime.evaluate; an agent can paste it into any page's console.
-  // It measures computed styles only. It never reads or returns page text, picture or link addresses, or attribute values.
+  // It measures computed styles only. It never returns page text, picture or link addresses, or attribute values;
+  // it reads a control's label only to learn that one exists, and class names only to tell a footer or a consent bar.
   const CAP = 4000;
   const safe = (fn, fallback) => {
     try {
@@ -534,12 +535,14 @@
     });
 
   /* ---------------------------------------------------------------- components */
-  // a control painted by a layer inside it (a gradient span under the label) takes that layer's fill
+  // a control painted by a layer inside it (a gradient span under the label) takes that layer's fill; an opaque
+  // layer first, else the control's own tint, else a full-size tint layer (a frosted key's background span)
   const paintOf = (el, cs, r) => {
     const own = fillOf(cs);
     if (own && own[3] >= 0.5) return own;
     if (!el) return own;
     let n = 0;
+    let tint = null;
     for (const d of el.querySelectorAll("*")) {
       if (++n > 40) break;
       const dcs = getComputedStyle(d);
@@ -547,8 +550,9 @@
       if (dr.width * dr.height < r.width * r.height * 0.8 || faint(d, dcs)) continue;
       const f = fillOf(dcs);
       if (f && f[3] >= 0.5) return f;
+      if (f && !tint) tint = f;
     }
-    return own;
+    return own || tint;
   };
   const frame = ({ el, cs, r }) => ({
     h: round(r.height),
@@ -600,24 +604,79 @@
   };
 
   // the primary action: a filled control at least 32px tall that stands off the page ground (a white key on
-  // a white page is a secondary or a mock-up's key), a saturated fill first, the one drawn most often
+  // a white page is a secondary or a mock-up's key). Candidates come in tiers, the first non-empty one wins:
+  //   1. opaque keys in the page's body;
+  //   2. translucent keys with a text label (a tint over the ground, often frosted with a backdrop blur): a site
+  //      whose call to action is a glass key has no opaque one, while a ghost "Log in" or a soft tint beside a
+  //      solid key never outranks it;
+  //   3. the rest: a footer's keys and a form submit below the first screen (a lone newsletter button).
+  // A consent banner's keys never count. Within a tier, a saturated fill first, then the style the page
+  // repeats most, a key in the first screen counting double
+  const CONSENT = /\b(?:cookie|consent|gdpr|onetrust|didomi|truste|trustarc|usercentrics)/i;
+  const consentOf = el => {
+    for (let p = el; p && p !== body; p = p.parentElement)
+      if (CONSENT.test(`${p.id || ""} ${p.getAttribute("class") || ""} ${p.getAttribute("aria-label") || ""}`))
+        return true;
+    return false;
+  };
+  // the site footer, not a card's or a modal's footer row
+  const FOOTER_CLASS = /^(?:site-|page-|main-|global-)?footer(?:$|[_-])/i;
+  const footerOf = el => {
+    if (el.closest('footer, [role="contentinfo"]')) return true;
+    for (let p = el; p && p !== body; p = p.parentElement)
+      if ([...p.classList].some(c => FOOTER_CLASS.test(c))) return true;
+    return false;
+  };
+  const blurOf = cs => {
+    const b = cs.backdropFilter || cs.webkitBackdropFilter || "none";
+    return /blur\(/.test(b) ? b : "none";
+  };
   const primary = safe(() => {
     const cands = [];
     for (const v of buttons) {
-      if (v.r.height < 32 || v.r.width < 40 || faint(v.el, v.cs)) continue;
+      if (v.r.height < 32 || v.r.width < 40 || faint(v.el, v.cs) || consentOf(v.el)) continue;
       const f = paintOf(v.el, v.cs, v.r);
-      if (!f || f[3] < 0.9) continue;
-      const c = hex6(f);
-      if (dist(c, roles.bg) <= 60) continue;
-      cands.push({ v, c });
+      if (!f || f[3] < 0.05) continue;
+      const blur = blurOf(v.cs);
+      const opaque = f[3] >= 0.9;
+      let c;
+      if (opaque) {
+        c = hex6(f);
+        if (dist(c, roles.bg) <= 60) continue;
+      } else {
+        if ((v.el.innerText || v.el.value || "").trim().length < 2) continue;
+        const g = paint(groundOf(v.el) || hex6(page)) || page;
+        c = hex6(over(f, g));
+        if (dist(c, hex6(g)) < 12 && blur === "none") continue;
+      }
+      const top = v.r.top < innerHeight;
+      const aside = footerOf(v.el) || (!top && !!v.el.closest("form"));
+      cands.push({
+        v,
+        c,
+        tier:
+          aside ? 3
+          : opaque ? 1
+          : 2,
+        key: `${hex(f)}|${blur !== "none"}`,
+        weight: top ? 2 : 1,
+        blur,
+      });
     }
-    const sat = cands.filter(x => chroma(x.c) >= 0.2);
-    const pool = sat.length ? sat : cands;
-    const count = new Map();
-    for (const x of pool) bump(count, x.c, 1);
-    pool.sort((a, b) => count.get(b.c) - count.get(a.c) || b.v.r.width * b.v.r.height - a.v.r.width * a.v.r.height);
+    const tier = Math.min(...cands.map(x => x.tier));
+    const level = cands.filter(x => x.tier === tier);
+    const sat = level.filter(x => chroma(x.c) >= 0.2);
+    const pool = sat.length ? sat : level;
+    const score = new Map();
+    for (const x of pool) bump(score, x.key, x.weight);
+    pool.sort(
+      (a, b) =>
+        score.get(b.key) - score.get(a.key)
+        || b.weight - a.weight
+        || b.v.r.width * b.v.r.height - a.v.r.width * a.v.r.height,
+    );
     const x = pool[0];
-    return x ? { ...frame(x.v), shadow: shadowOf(x.v.cs) } : null;
+    return x ? { ...frame(x.v), shadow: shadowOf(x.v.cs), ...(x.blur !== "none" ? { blur: x.blur } : {}) } : null;
   }, null);
   if (primary && chroma(hex6(paint(primary.bg) || [0, 0, 0, 1])) >= 0.2) roles.accent = hex6(paint(primary.bg));
   components.primary = primary;
