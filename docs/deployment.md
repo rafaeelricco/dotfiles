@@ -89,6 +89,7 @@ contains:
 | `/dotfiles/releases/<sha>/` | Immutable release files                  |
 | `/skills/<name>`            | Release-pinned Bash skill launcher       |
 | `/skills/<name>.ps1`        | Release-pinned PowerShell skill launcher |
+| `/taste-media/`             | Demo pictures for the `taste` skill      |
 
 Unknown skill URLs return 404 instead of the portfolio's HTML fallback. Current
 entrypoints must not be cached as immutable; commit-addressed files can be.
