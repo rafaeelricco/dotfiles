@@ -203,6 +203,31 @@ class Packs(Sandbox):
         self.assertTrue((site / "assets/scenes/shared-bit/extra.css").is_file())
 
     @needs_node
+    def test_kit_copy_refuses_to_write_through_a_symlink(self):
+        outside = self.tmp / "outside"
+        outside.mkdir()
+        canary = outside / "canary.txt"
+        canary.write_text("CANARY", encoding="utf-8")
+        cases = [("system.css", "assets/system.css", canary, False), ("assets", "assets", outside, True),
+                 ("motion", "assets/motion", outside, True)]
+        for name, link, target, is_dir in cases:
+            with self.subTest(link=link):
+                site = self.tmp / f"site-{name}"
+                (site / ".taste-skill").mkdir(parents=True)
+                deal = {"taste": None, "moments": [], "scene": None, "effect": None}
+                (site / ".taste-skill/deal.json").write_text(json.dumps(deal), encoding="utf-8")
+                (site / link).parent.mkdir(parents=True, exist_ok=True)
+                try:
+                    os.symlink(target, site / link, target_is_directory=is_dir)
+                except (OSError, NotImplementedError) as e:
+                    self.skipTest(f"symlinks unavailable: {e}")
+                out = self.run_node("kit-copy.mjs", "--to", "assets", cwd=site)
+                self.assertEqual(out.returncode, 2, out.stdout)
+                self.assertIn("is a symlink", out.stderr)
+                self.assertEqual(canary.read_text(encoding="utf-8"), "CANARY")
+                self.assertEqual(sorted(p.name for p in outside.iterdir()), ["canary.txt"])
+
+    @needs_node
     def test_signature_spans_the_families(self):
         signature = ["moments/pack-moment", "scenes/pack-scene", "effects/pack-fx", "ui/chat"]
         pack = make_pack(self.tmp, "sample", signature=signature)

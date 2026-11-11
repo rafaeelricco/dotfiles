@@ -28,9 +28,32 @@ const stat = { files: 0, bytes: 0 };
 const replaced = [];
 const seen = new Set(); // destination files already handled in this run
 
+// Never write through a link: a symlink or junction committed in the project at the --to folder, a folder under it or
+// the file itself would send the kit's bytes to wherever it points and overwrite what is there. Every part from the
+// working folder (or from --to's parent, when --to lies outside it) down to p is checked.
+const linkBase = (r => (r && !r.startsWith("..") && !path.isAbsolute(r) ? process.cwd() : path.dirname(to)))(
+  path.relative(process.cwd(), to)
+);
+function refuseLinks(p) {
+  let at = linkBase;
+  for (const part of path.relative(linkBase, p).split(path.sep).filter(Boolean)) {
+    at = path.join(at, part);
+    let st;
+    try {
+      st = fs.lstatSync(at);
+    } catch (e) {
+      if (e.code === "ENOENT") return; // nothing below a missing part can be a link
+      throw e;
+    }
+    if (st.isSymbolicLink())
+      die(`${path.relative(process.cwd(), at) || at} is a symlink; kit-copy will not write through it. Remove it and run again.`);
+  }
+}
+
 // one file → dest. Identical content is a no-op; different content is overwritten (the kit's copy wins) and listed.
 // Returns the bytes written, or -1 for a no-op.
 function copyFile(src, dest) {
+  refuseLinks(dest);
   const data = fs.readFileSync(src);
   let existed = false;
   if (fs.existsSync(dest)) {
@@ -214,6 +237,7 @@ const families = new Set(items.map(p => p[0]));
 const corePaths = [...(core.always || [])];
 for (const [family, list] of Object.entries(core.family || {})) if (families.has(family)) corePaths.push(...list);
 
+refuseLinks(to); // a linked --to fails before anything is copied
 const scan = [];
 const coreGroup = newGroup();
 for (const rel of corePaths) {
