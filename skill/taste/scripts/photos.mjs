@@ -78,7 +78,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { assertSafeWritePath, writeJsonSafe } from "./build-state.mjs";
+import { assertSafeWritePath, ensureSafeDirectory, writeFileSafe, writeJsonSafe } from "./build-state.mjs";
 import { assetRoots } from "./roots.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -1438,8 +1438,7 @@ async function searchCmd() {
     }
     const ids = new Set(keep.map(p => p.id));
     store.photos = [...(store.photos || []).filter(p => !ids.has(p.id)), ...keep];
-    fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.writeFileSync(file, JSON.stringify(store, null, 1) + "\n");
+    writeJsonSafe(file, store);
   }
   if (opt("json")) {
     console.log(JSON.stringify({ queries, photos: keep, failed }, null, 1));
@@ -1690,6 +1689,8 @@ function fileIn(dir, name) {
     );
   return to;
 }
+// a file fetch writes: fileIn, refused when it, its folder or any folder above is a symlink or junction
+const writeIn = (dir, name) => assertSafeWritePath(fileIn(dir, name));
 const libFile = f => fileIn(path.join(LIB_DIR, "img"), String(f.file).replace(/^img\//, ""));
 // the page's images together (perf.mjs: WARN above 1,200 KiB, FAIL above 2,400 KiB at 1440; references/perf.md). Counted: the file each
 // photograph of the folder loads on a 1440 screen (a hero at 2x the full width: its largest; any other at 2x half the width: 1440 wide, else its largest); the phone crop is not
@@ -1726,8 +1727,13 @@ async function fetchCmd() {
   const lqip = !!opt("lqip");
   const rel = String(opt("dir", "assets/img")).replace(/\\/g, "/").replace(/\/$/, "");
   const dir = path.join(out, rel);
-  fs.mkdirSync(dir, { recursive: true });
-  const credFile = path.join(dir, "credits.json");
+  let credFile;
+  try {
+    ensureSafeDirectory(dir);
+    credFile = assertSafeWritePath(path.join(dir, "credits.json"));
+  } catch (e) {
+    die(e.message);
+  }
   let cred = {
     note: "Credits for the photographs in this folder: photos.mjs credits prints the footer block for the ones the pages use.",
     photos: [],
@@ -1784,20 +1790,20 @@ async function fetchCmd() {
         use = [...new Map(use.map(f => [f.w, f])).values()].sort((x, y) => x.w - y.w);
         for (const f of use) {
           const name = "photo-" + id + "-" + f.w + path.extname(f.file);
-          fs.copyFileSync(libFile(f), fileIn(dir, name));
+          fs.copyFileSync(libFile(f), writeIn(dir, name));
           files.push({ file: name, w: f.w, kb: Math.round(fs.statSync(fileIn(dir, name)).size / 1024) });
         }
       } else {
         const big = Math.min(isHero ? 1920 : 1280, p.width || 1920);
         const sizes = [...STEPS.filter(w => w < big), big];
-        fileIn(dir, "photo-" + id + ".webp"); // the id makes the file names: refused before anything is downloaded
+        writeIn(dir, "photo-" + id + ".webp"); // the id makes the file names: refused before anything is downloaded
         for (const w of sizes) {
           let buf = await download(fileUrl(p, w));
           const webp = toWebp(buf); // WebP when ffmpeg is on the path (PH-27), else the JPEG as served
           if (webp) buf = webp;
           const ext = webp ? ".webp" : ".jpg";
           const file = w === big ? "photo-" + id + ext : "photo-" + id + "-" + w + ext;
-          fs.writeFileSync(fileIn(dir, file), buf);
+          writeFileSafe(writeIn(dir, file), buf);
           files.push({ file, w, kb: Math.round(buf.length / 1024) });
           if (p.source === "commons") await sleep(700); // Commons answers 429 to quick runs
         }
@@ -1824,8 +1830,14 @@ async function fetchCmd() {
     if (isHero) {
       const from = files.find(f => f.w / p.ratio >= HERO_CROP.h) || files.at(-1),
         name = "photo-" + id + "-" + HERO_CROP.w + "x" + HERO_CROP.h + ".webp";
-      if (cropFile(fileIn(dir, from.file), fileIn(dir, name), p.focus))
-        crop = { file: name, kb: kb(fileIn(dir, name)) };
+      let to;
+      try {
+        to = writeIn(dir, name);
+      } catch (e) {
+        failed.push(id + ": " + e.message);
+        continue;
+      }
+      if (cropFile(fileIn(dir, from.file), to, p.focus)) crop = { file: name, kb: kb(fileIn(dir, name)) };
     }
     names = [...files.map(f => f.file), ...(crop ? [crop.file] : [])];
     cred.photos = cred.photos.filter(x => x.id !== id);
@@ -1944,7 +1956,7 @@ async function fetchCmd() {
       );
     saved.push(id);
   }
-  fs.writeFileSync(credFile, JSON.stringify(cred, null, 1) + "\n");
+  writeJsonSafe(credFile, cred);
   // the shared recent file: the next build on this machine puts these frames behind the fresh ones
   const recentLog = readRecent();
   if (recentLog && saved.length) {
@@ -2167,7 +2179,7 @@ function creditsCmd() {
   if (opt("text")) console.log(creditText(used));
   else if (opt("write")) {
     const brand = ((/<title>([^<:]*)/i.exec(html) || [])[1] || "Home").trim() || "Home";
-    fs.writeFileSync(path.join(out, href), creditsPage(out, href, used, brand));
+    writeFileSafe(path.join(out, href), creditsPage(out, href, used, brand));
     console.log(
       "wrote "
         + path.join(out, href)
@@ -2217,10 +2229,15 @@ function creditsCmd() {
 
 if (cmd === "pick") pick();
 else if (cmd === "list") list();
-else if (cmd === "fetch") await fetchCmd();
-else if (cmd === "search") await searchCmd();
-else if (cmd === "credits") creditsCmd();
-else {
+else if (cmd === "fetch") await fetchCmd().catch(e => die(e.message));
+else if (cmd === "search") await searchCmd().catch(e => die(e.message));
+else if (cmd === "credits") {
+  try {
+    creditsCmd();
+  } catch (e) {
+    die(e.message);
+  }
+} else {
   console.log(
     fs
       .readFileSync(fileURLToPath(import.meta.url), "utf8")

@@ -56,6 +56,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { assertSafeWritePath, ensureSafeDirectory, writeFileSafe, writeJsonSafe } from "./build-state.mjs";
 import { chromeOrExit } from "./roots.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -596,8 +597,8 @@ async function fetchCmd(idsOverride, quiet) {
       process.exit(1);
     }
   }
-  fs.mkdirSync(out, { recursive: true });
-  const credFile = path.join(out, "icons-credits.json");
+  ensureSafeDirectory(out);
+  const credFile = assertSafeWritePath(path.join(out, "icons-credits.json"));
   let credits = [];
   try {
     credits = JSON.parse(fs.readFileSync(credFile, "utf8"));
@@ -616,10 +617,7 @@ async function fetchCmd(idsOverride, quiet) {
         r.set === "ui" ? ""
         : r.violet && flag("mono") ? "violet"
         : r.tone || ""; // violet (text colour in diagram.js) only when --mono asks for it
-      fs.writeFileSync(
-        path.join(out, file),
-        dataIc ? r.svg.replace(/^<svg /, '<svg data-ic="' + dataIc + '" ') : r.svg,
-      );
+      writeFileSafe(path.join(out, file), dataIc ? r.svg.replace(/^<svg /, '<svg data-ic="' + dataIc + '" ') : r.svg);
       const m = SETS[r.set];
       credits = credits.filter(c => c.file !== file);
       credits.push({
@@ -717,7 +715,7 @@ async function fetchCmd(idsOverride, quiet) {
     }
   }
   credits.sort((a, b) => a.file.localeCompare(b.file));
-  fs.writeFileSync(credFile, JSON.stringify(credits, null, 2) + "\n");
+  writeJsonSafe(credFile, credits, { spaces: 2 });
   process.exit(failed ? 1 : 0);
 }
 
