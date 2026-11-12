@@ -18,6 +18,8 @@ Windows symlinks require Developer Mode or suitable privileges. Run as your norm
 
 The `taste` skill's checkers need Node 22+ and Chrome, Edge or Chromium. Export
 `CHROME_PATH` and `CHROME` to the browser binary: on macOS some checkers find it no other way.
+Agent-driven browsing in `taste` and `ui` goes through the `browser-use` skill, which needs the
+`browser-use` CLI (`uv tool install browser-use`); its checkers still launch their own headless Chrome.
 `/ui record <url>` saves a site as a taste pack under `skill/ui/tastes/`; it uses the same browser. That
 folder is git-ignored: packs, the `house` pack among them, stay on this machine and are not in a release.
 Keep packs in a Git checkout: a release install replaces its whole bundle on update, packs included.
@@ -64,7 +66,8 @@ The source of truth is [`skill/dependencies.txt`](../skill/dependencies.txt).
 | `babysit`        | `verify`, `commit-message`                   |
 | `create-pr`      | `plan-format`, `commit-message`, `pr-body`   |
 | `pr-body`        | `commit-message`                             |
-| `ui`             | `taste`                                      |
+| `ui`             | `taste`, `browser-use`                       |
+| `taste`          | `browser-use`                                |
 
 Transitive resolution makes a fresh `orchestrate` install contain exactly six
 skills. Companion installation includes conditional workflow steps such as commits.

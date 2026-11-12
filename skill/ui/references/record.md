@@ -6,11 +6,12 @@ A taste is one site's pack, `<skill>/tastes/<name>/`. For new packs, `taste.json
 material. See taste's `references/taste-contract.md` for the schema, evidence and
 house/reference behavior. Git ignores `tastes/`; recorded packs stay on this machine.
 Capture needs Node 22+ and Chrome, Edge or Chromium (`CHROME_PATH` names the binary).
+Capture from a tab uses the `browser-use` skill: load it first.
 
 | Ask                                                 | Do                                       |
 | --------------------------------------------------- | ---------------------------------------- |
 | one or more URLs of one site (`as <name>` optional) | Capture, Look, Write, Extract, Check     |
-| no URL, the page is open in your own browser tool   | Capture from the tab, Look, Write        |
+| no URL, the page is open in Chrome (`browser-use`)  | Capture from the tab, Look, Write        |
 | `list`                                              | `node <skill>/scripts/record.mjs list`   |
 | "like `<name>`", or a URL plus "on my project"      | record it if it is not saved, then Apply |
 
@@ -22,8 +23,16 @@ Capture needs Node 22+ and Chrome, Edge or Chromium (`CHROME_PATH` names the bin
 when missing, `taste.json`. The name defaults to the host (`raycast`); `house` is taken. Give the
 pages that show the system: home, one product page, pricing.
 
-From a tab: evaluate the whole of `<skill>/scripts/record-capture.js` in it, save the JSON it returns,
-then `node <skill>/scripts/record.mjs --from <json>... --name <name>`; take the shots with your own tool.
+From a tab, with `browser-use`: evaluate the whole of `<skill>/scripts/record-capture.js` in it and
+save what it returns, at 1440 and at 390 wide:
+
+```bash
+browser-use <<'PY'
+import json; json.dump(js(open("<skill>/scripts/record-capture.js").read()), open("cap-1440.json", "w"))
+PY
+```
+
+then `node <skill>/scripts/record.mjs --from <json>... --name <name>`; take the shots into `shots/` with `browser-use`.
 
 A consent wall, a login or a bot check in the way: stop and say so; never click through one.
 A name that exists stops the script. `--keep-doc` captures again while preserving the

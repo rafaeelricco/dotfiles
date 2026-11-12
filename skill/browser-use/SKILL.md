@@ -2,7 +2,6 @@
 name: browser-use
 description: "Direct browser control via CDP for web interaction: automation, scraping, testing, screenshots, and site/app work."
 homepage: https://browser-use.com
-disable-model-invocation: true
 metadata:
   {
     "openclaw":

@@ -22,6 +22,9 @@ figma.com and x.ai are the bar (in words: `layout-v4.md` section 1).
 
 `<skill>` is this folder. It needs Node 22+ and Chrome, Edge or Chromium; the scripts also find a Playwright Chromium,
 and `CHROME_PATH` names any other (ffmpeg optional).
+Any browser work outside the scripts (reading a client's live site, a page that needs JS or a click)
+uses the `browser-use` skill: load it first. The checks never do: they run only as the skill's
+scripts (flow step 6).
 
 **A brief that points at a site to follow** ("like this site", "replicate its taste") is first the `ui`
 skill's `record` job: invoke `ui` with it, then build here only if a page with this kit is what is asked.
