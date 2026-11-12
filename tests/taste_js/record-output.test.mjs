@@ -173,3 +173,25 @@ test("legacy width/color borders normalize while none and explicit styles surviv
     fs.rmSync(temp, { recursive: true, force: true });
   }
 });
+
+test("css output gives :root the scheme of the default palette's ground", async () => {
+  const { serializeTasteCss } = await import("../../skill/taste/scripts/taste-output.mjs");
+  const sample = JSON.parse(fs.readFileSync(path.join(ROOT, "tests/fixtures/taste_v2/sample/taste.json"), "utf8"));
+  const rootBlock = css => /:root \{\n {2}color-scheme: (\w+);/.exec(css)?.[1];
+  assert.equal(rootBlock(serializeTasteCss(sample)), "light");
+  for (const [bg, expected] of [
+    ["#07080a", "dark"],
+    ["#000", "dark"],
+    ["rgb(23, 24, 22)", "dark"],
+    ["#ffffff", "light"],
+    ["#767676", "light"],
+    ["oklch(20% 0 0)", "light"],
+  ]) {
+    const definition = structuredClone(sample);
+    definition.tokens.colors.light["--p-bg"] = bg;
+    definition.tokens.colors.dark = null;
+    const css = serializeTasteCss(definition);
+    assert.equal(rootBlock(css), expected, bg);
+    assert.ok(!css.includes('[data-theme="dark"]'), "no dark block without a dark palette");
+  }
+});

@@ -24,6 +24,34 @@ const html = value =>
 const valueText = value => (value === null || value === undefined ? "Not recorded" : String(value));
 const md = value => valueText(value).replaceAll("|", "\\|").replaceAll("\n", " ");
 
+// sRGB relative luminance of a hex or rgb() colour; null for anything else (named colours, oklch, var()).
+function luminance(value) {
+  const text = String(value || "").trim();
+  let channels = null;
+  const hex = /^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.exec(text);
+  if (hex) {
+    const digits = hex[1].length <= 4 ? [...hex[1].slice(0, 3)].map(d => d + d) : hex[1].slice(0, 6).match(/../g);
+    channels = digits.map(d => parseInt(d, 16));
+  } else {
+    const rgb = /^rgba?\(\s*(\d+(?:\.\d+)?)[\s,]+(\d+(?:\.\d+)?)[\s,]+(\d+(?:\.\d+)?)/i.exec(text);
+    if (rgb) channels = rgb.slice(1, 4).map(Number);
+  }
+  if (!channels) return null;
+  const [r, g, b] = channels.map(c => {
+    const v = Math.min(255, c) / 255;
+    return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+// The default palette's own scheme: dark when white text contrasts with its ground more than black does,
+// so a dark-only taste gives native scrollbars and controls a dark scheme without a theme attribute.
+function rootScheme(definition) {
+  const bg = luminance(definition.tokens.colors.light?.["--p-bg"]);
+  if (bg === null) return "light";
+  return 1.05 / (bg + 0.05) > (bg + 0.05) / 0.05 ? "dark" : "light";
+}
+
 function tokenPairs(definition, mode) {
   const pairs = [];
   for (const [name, value] of sorted(definition.tokens.colors[mode])) if (value !== null) pairs.push([name, value]);
@@ -72,7 +100,7 @@ export function serializeTasteCss(definition, { packDir = null } = {}) {
     .map(role => `:root ${role} { font-family: var(--font-${role}); }`);
   return [
     fontCss(taste),
-    block(":root", "light", light),
+    block(":root", rootScheme(taste), light),
     ...(taste.tokens.colors.dark === null ? [] : [block('.dark, [data-theme="dark"]', "dark", dark)]),
     ...surfaceRules,
     ...roleRules,
