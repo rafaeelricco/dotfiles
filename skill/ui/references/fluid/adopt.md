@@ -38,6 +38,7 @@ can edit it or delete it to force a fresh pass. Files forbidden → reply instea
 
 - motion library / reduced motion / font axes: <finding>
 - token map: <existing token -> nearest tier or level>
+- taste: <name applied through `record`, or none>
 - <new behavior asked about>: <date, wanted | declined>
 - check: <a claim not verified yet, phrased as a question>
 

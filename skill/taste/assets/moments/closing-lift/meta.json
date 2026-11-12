@@ -1,0 +1,36 @@
+{
+  "id": "closing-lift",
+  "name": "Closing lift",
+  "kind": "transition",
+  "fits": ["closing"],
+  "trigger": "scroll",
+  "cost": "low",
+  "webgl": 0,
+  "tones": ["warm", "editorial", "product"],
+  "intensity": "lively",
+  "look": "The last content section scrolls away like a sheet and uncovers the closing photograph held under it; the photograph settles from a close crop and the closing line with the one action fades up on it.",
+  "reduced": "A plain closing section with the photograph, the line and the action.",
+  "phone": "A plain closing section with the photograph, the line and the action after the sheet.",
+  "maxPerPage": 1,
+  "weight": 1,
+  "needs": {
+    "photo": true,
+    "words": "a closing line of 3 to 7 words, one line and one action; the closing section of its own, the footer after it",
+    "picture": "a calm, darker lower half where the words stand (sand, water, a wall, a table); the words never on a busy part"
+  },
+  "avoidWith": ["pinned-chapters", "line-carries-colour"],
+  "states": {
+    "start": {
+      "p": 0.08,
+      "wait": 300
+    },
+    "middle": {
+      "p": 0.55,
+      "wait": 300
+    },
+    "end": {
+      "p": 1,
+      "wait": 300
+    }
+  }
+}

@@ -1,10 +1,7 @@
 ---
 name: ui
-description: >
-  Motion and web UI craft. Use when adding, reviewing, or auditing motion in
-  web or video, building or restyling interactive UI components, picking a UI
-  library, or on /ui.
-argument-hint: "[build|review|audit|hunt|prototype|lib|vocab|compose|style|shape|adopt]"
+description: "Motion and web UI craft. Use when adding, reviewing, or auditing motion in web or video, building or restyling interactive UI components, building a landing page or marketing site, picking a UI library, recording a website's look to reuse it (like this site, replicate its taste), or on /ui."
+argument-hint: "[build|review|audit|hunt|prototype|lib|vocab|compose|style|shape|adopt|page|record]"
 ---
 
 # UI
@@ -28,29 +25,33 @@ run explicitly requested jobs in order, keeping each job's scope and gates.
 | hover, press, selection, surfaces, sizes, type          | `style`     | `references/fluid/patterns.md`    |
 | radius, corners, nested surfaces, audit the corners     | `shape`     | `references/fluid/shape.md`       |
 | set up the system in a project                          | `adopt`     | `references/fluid/adopt.md`       |
+| landing page, marketing, company or product site        | `page`      | `references/page.md`              |
+| follow this site's look, record it, list saved tastes   | `record`    | `references/record.md`            |
 
 No row fits → ask which. One ambiguous request → the job they led with; both
 asked → both, in order. `build` adds motion to something that exists;
-`compose` makes the thing.
+`compose` makes the thing; `page` makes a whole marketing page; `record` saves a
+reference site as a taste and applies one. A brief that names a site to follow
+runs `record` before the job that builds.
 
 ## Values
 
 Highest wins:
 
 1. `references/motion/laws.md` — limits for any medium. Never overridden.
-2. The project's own tokens.
+2. The project's own tokens. A taste applied to the project is these (`references/record.md` → Apply).
 3. `references/fluid/system.md` — default web UI tokens.
 
 Geometry is not a token: project radii set the outermost surface, and every
 rounded surface nested inside it follows `system.md` → Surfaces (concentric
 corners), whatever radius the project assigns that component on its own.
 
-A job that needs a number loads `references/motion/laws.md`; web work (a browser UI) also loads
-`references/motion/web.md` and `references/fluid/system.md`. A `build` that
+A job that needs a number loads `references/motion/laws.md`; web work (a browser UI) other than
+`page` also loads `references/motion/web.md` and `references/fluid/system.md`. A `build` that
 matches a recipe (button press, popover and dropdown, tooltip, modal, toast, drawer, accordion,
 tab indicator, group stagger, hold-to-confirm, scroll reveal, gesture physics,
 drag to dismiss, crossfade mask, programmatic WAAPI) also loads `references/motion/recipes.md`; `prototype` loads
 `references/motion/picker.md`; `audit` writing a plan loads
 `references/motion/plan.md`. `compose` and `style` start from `assets/`
 (copy, then adapt), and in a project with no `.agents/ui.md` they run `adopt`
-first. Both finish with the `shape` check on what they touched.
+first, except under `page`. Both finish with the `shape` check on what they touched.

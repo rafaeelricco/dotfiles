@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "assets/components/<id>/meta.json (20 when written)",
+  "type": "object",
+  "required": ["a11y", "default", "effects", "for", "how", "id", "name", "rules"],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "for": {
+      "type": "string"
+    },
+    "effects": {
+      "type": "array"
+    },
+    "default": {
+      "type": "string"
+    },
+    "how": {
+      "type": "string"
+    },
+    "rules": {
+      "type": "array"
+    },
+    "a11y": {
+      "type": "string"
+    },
+    "objects": {
+      "type": "array"
+    },
+    "photo": {
+      "type": "string"
+    },
+    "never": {
+      "type": "string"
+    }
+  }
+}

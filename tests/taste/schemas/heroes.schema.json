@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "assets/layout/heroes.json",
+  "type": "object",
+  "required": ["about", "fields", "heroes"],
+  "properties": {
+    "about": {
+      "type": "string"
+    },
+    "fields": {
+      "type": "object"
+    },
+    "heroes": {
+      "type": "array"
+    }
+  }
+}

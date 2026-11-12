@@ -185,20 +185,20 @@ The approved repository changes are implemented and structural/package checks pa
 
 ### Check results
 
-| Phase       | Command                                                                                                                                                       | Exit | Result                                     |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- | ------------------------------------------ |
-| before      | `python3 -m unittest discover -s skill/sounds-natural/tests`                                                                                                  | 1    | TypeError: unsupported operand type(s) for | : 'type' and 'NoneType'; Ran 1 test in 0.000s; FAILED (errors=1) |
-| before      | `/Users/rafaelricco/.local/bin/python3.12 -m unittest discover -s skill/sounds-natural/tests`                                                                 | 0    | Ran 16 tests in 0.357s; OK                 |
-| before      | `python3 -m unittest discover -s tests -p 'test_packaging.py'`                                                                                                | 0    | Ran 4 tests in 0.055s; OK (skipped=1)      |
-| after       | `python3 /Users/rafaelricco/.codex/skills/.system/skill-creator/scripts/quick_validate.py /Users/rafaelricco/Projects/personal/dotfiles/skill/sounds-natural` | 0    | Skill is valid!                            |
-| after       | `python3 -m unittest discover -s tests -p 'test_packaging.py'`                                                                                                | 0    | Ran 4 tests in 0.042s; OK (skipped=1)      |
-| after       | `git diff --check`                                                                                                                                            | 0    | No findings.                               |
-| after-final | `python3 /Users/rafaelricco/.codex/skills/.system/skill-creator/scripts/quick_validate.py /Users/rafaelricco/Projects/personal/dotfiles/skill/sounds-natural` | 0    | Skill is valid!                            |
-| after-final | `python3 -m unittest discover -s tests -p 'test_packaging.py'`                                                                                                | 0    | Ran 4 tests in 0.046s; OK (skipped=1)      |
-| after-final | `git diff --check`                                                                                                                                            | 0    | No findings.                               |
-| after-fixed | `python3 /Users/rafaelricco/.codex/skills/.system/skill-creator/scripts/quick_validate.py /Users/rafaelricco/Projects/personal/dotfiles/skill/sounds-natural` | 0    | Skill is valid!                            |
-| after-fixed | `python3 -m unittest discover -s tests -p 'test_packaging.py'`                                                                                                | 0    | Ran 4 tests in 0.047s; OK (skipped=1)      |
-| after-fixed | `git diff --check`                                                                                                                                            | 0    | No findings.                               |
+| Phase       | Command                                                                                        | Exit | Result                                     |
+| ----------- | ---------------------------------------------------------------------------------------------- | ---- | ------------------------------------------ |
+| before      | `python3 -m unittest discover -s skill/sounds-natural/tests`                                   | 1    | TypeError: unsupported operand type(s) for | : 'type' and 'NoneType'; Ran 1 test in 0.000s; FAILED (errors=1) |
+| before      | `python3.12 -m unittest discover -s skill/sounds-natural/tests`                                | 0    | Ran 16 tests in 0.357s; OK                 |
+| before      | `python3 -m unittest discover -s tests -p 'test_packaging.py'`                                 | 0    | Ran 4 tests in 0.055s; OK (skipped=1)      |
+| after       | `python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skill/sounds-natural` | 0    | Skill is valid!                            |
+| after       | `python3 -m unittest discover -s tests -p 'test_packaging.py'`                                 | 0    | Ran 4 tests in 0.042s; OK (skipped=1)      |
+| after       | `git diff --check`                                                                             | 0    | No findings.                               |
+| after-final | `python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skill/sounds-natural` | 0    | Skill is valid!                            |
+| after-final | `python3 -m unittest discover -s tests -p 'test_packaging.py'`                                 | 0    | Ran 4 tests in 0.046s; OK (skipped=1)      |
+| after-final | `git diff --check`                                                                             | 0    | No findings.                               |
+| after-fixed | `python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skill/sounds-natural` | 0    | Skill is valid!                            |
+| after-fixed | `python3 -m unittest discover -s tests -p 'test_packaging.py'`                                 | 0    | Ran 4 tests in 0.047s; OK (skipped=1)      |
+| after-fixed | `git diff --check`                                                                             | 0    | No findings.                               |
 
 Packaging ran four tests per phase: three passed, one native downloaded-artifact case skipped because its release-artifact environment was not supplied. Local packaging regressions passed; deployed/native artifact behavior was not exercised. The first Python 3.9 detector failure is confirmed on unchanged baseline code and retained below.
 
@@ -215,9 +215,9 @@ Traceback (most recent call last):
     module = self._get_module_from_name(name)
   File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py", line 377, in _get_module_from_name
     __import__(name)
-  File "/Users/rafaelricco/Projects/personal/dotfiles/skill/sounds-natural/tests/test_detect.py", line 11, in <module>
+  File "skill/sounds-natural/tests/test_detect.py", line 11, in <module>
     import detect  # noqa: E402
-  File "/Users/rafaelricco/Projects/personal/dotfiles/skill/sounds-natural/scripts/detect.py", line 66, in <module>
+  File "skill/sounds-natural/scripts/detect.py", line 66, in <module>
     def scan(text: str, *, allow_dashes: bool = False, max_words: int | None = None) -> list[tuple[int, int, str, str]]:
 TypeError: unsupported operand type(s) for |: 'type' and 'NoneType'
 
@@ -228,7 +228,7 @@ Ran 1 test in 0.000s
 FAILED (errors=1)
 ```
 
-### before: `/Users/rafaelricco/.local/bin/python3.12 -m unittest discover -s skill/sounds-natural/tests`
+### before: `python3.12 -m unittest discover -s skill/sounds-natural/tests`
 
 ```text
 ................
@@ -248,7 +248,7 @@ Ran 4 tests in 0.055s
 OK (skipped=1)
 ```
 
-### after: `python3 /Users/rafaelricco/.codex/skills/.system/skill-creator/scripts/quick_validate.py /Users/rafaelricco/Projects/personal/dotfiles/skill/sounds-natural`
+### after: `python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skill/sounds-natural`
 
 ```text
 Skill is valid!
@@ -270,7 +270,7 @@ OK (skipped=1)
 (no output)
 ```
 
-### after-final: `python3 /Users/rafaelricco/.codex/skills/.system/skill-creator/scripts/quick_validate.py /Users/rafaelricco/Projects/personal/dotfiles/skill/sounds-natural`
+### after-final: `python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skill/sounds-natural`
 
 ```text
 Skill is valid!
@@ -292,7 +292,7 @@ OK (skipped=1)
 (no output)
 ```
 
-### after-fixed: `python3 /Users/rafaelricco/.codex/skills/.system/skill-creator/scripts/quick_validate.py /Users/rafaelricco/Projects/personal/dotfiles/skill/sounds-natural`
+### after-fixed: `python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skill/sounds-natural`
 
 ```text
 Skill is valid!

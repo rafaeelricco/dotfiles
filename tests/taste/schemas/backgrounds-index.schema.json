@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "assets/backgrounds/index.json",
+  "type": "object",
+  "required": ["about", "grounds", "kinds", "knobs", "modifiers", "roles", "version", "weights"],
+  "properties": {
+    "about": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number"
+    },
+    "weights": {
+      "type": "object"
+    },
+    "kinds": {
+      "type": "object"
+    },
+    "roles": {
+      "type": "array"
+    },
+    "modifiers": {
+      "type": "object"
+    },
+    "knobs": {
+      "type": "object"
+    },
+    "grounds": {
+      "type": "array"
+    }
+  }
+}
