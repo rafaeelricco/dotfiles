@@ -21,7 +21,8 @@ consent banner). Never change a file under `raw/`.
 ## design.json
 
 - `colors`: one hex per role (`bg`, `surface`, `ink`, `muted`, `accent`, `border`), from the
-  probe's `colors` and `buttons`, checked against the screenshots. `colors_dark` the same from
+  probe's `colors` and `buttons`, checked against the screenshots; `bg` is `colors.page` when the
+  screenshots show it behind the sections, else the fill they do show. `colors_dark` the same from
   the dark probe, or `null` when the dark screenshot matches light.
 - `type`: h1, h2, h3, body, small, button from the probe's `type` at 1440, with the 390 size
   beside it when it differs.

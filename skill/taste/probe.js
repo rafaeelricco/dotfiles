@@ -258,6 +258,8 @@
   );
 
   // Colours: top 8 backgrounds by painted area (alpha >= 0.5) and top 8 text colours by text area.
+  // `page` is the canvas: html's background, else body's (CSS moves it to the canvas when html has
+  // none), counted over the page so it ranks even when every section is transparent.
   const colors = safe(
     () => {
       const fills = new Map();
@@ -269,10 +271,12 @@
         const c = t > 0 && colorOf(s.color);
         if (c) bump(texts, hex(c), t);
       }
+      const page = [root, body].map(e => fillOf(cs(e))).find(f => f && f[3] >= 0.5);
+      if (page) bump(fills, hex(page), vw * root.scrollHeight);
       const out = m => top(m, 8).map(([h, a]) => ({ hex: h, area: round(a) }));
-      return { fills: out(fills), text: out(texts) };
+      return { page: page ? hex(page) : null, fills: out(fills), text: out(texts) };
     },
-    { fills: [], text: [] },
+    { page: null, fills: [], text: [] },
     "colors",
   );
 
