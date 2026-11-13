@@ -121,8 +121,9 @@ Look at every screenshot before writing. Then, following `extract.md` and `class
 6. the site's entry in `<skill>/catalog/catalog.json` (create the file when missing).
 
 Check every file against its schema using an available Python with `jsonschema`. If unavailable,
-use an ephemeral `uv run --with jsonschema python` environment. Run the body below with the host
-shell's supported syntax, passing `<skill>` and `<name>` as its two script arguments; it does not
+use `uv run --no-project --no-config --isolated --with jsonschema==4.23.0 python -I` to keep project
+configuration and local imports out of validation. Run the body below with the host shell's
+supported syntax, passing `<skill>` and `<name>` as its two script arguments; it does not
 require browser-use. Fix every reported error. If the validator cannot run, validation is incomplete.
 
 ```python
