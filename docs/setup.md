@@ -16,8 +16,9 @@ configured when detected on `PATH` and not skipped; PowerShell also recognizes
 existing agent configuration directories. Cursor is detected through `~/.cursor`. Claude explicit-only skills remain available through explicit invocation.
 Windows symlinks require Developer Mode or suitable privileges. Run as your normal user.
 
-The `taste` skill records reference sites through the `browser-use` skill, which needs the
-`browser-use` CLI (`uv tool install browser-use`) and a Chrome or Chromium it can reach on a debugging port.
+The `taste` skill first discovers the native browser harness; its selection,
+isolation, and cleanup authority is [record.md, section 1](../skill/taste/references/record.md#1-browser).
+Use the [browser-use skill](../skill/browser-use/SKILL.md) as the companion fallback when needed.
 `/ui record <url>` saves a site under `skill/taste/catalog/`. That folder is git-ignored: recorded
 sites stay on this machine and are not in a release. Keep them in a Git checkout: a release install
 replaces its whole bundle on update, the catalog included.

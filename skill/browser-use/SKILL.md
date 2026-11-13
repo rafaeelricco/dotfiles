@@ -48,6 +48,24 @@ PY
   or a page demonstrably pauses rendering while hidden.
 - The normal local flow attaches to the running Chrome/Chromium CDP endpoint. No browser ids or local profile selection.
 
+## Isolated local sessions
+
+When concurrent browser work needs isolation, first inspect the installed
+Browser Use harness for supported connection and shutdown APIs. Launch a
+separate Chrome or Chromium process with a unique temporary user-data directory
+and its own debugging endpoint, using a supported hidden or headless launch
+mode; do not foreground or attach to an existing browser window. Create a
+fresh `BU_NAME` and explicitly pass both it and the owned endpoint on every
+call; strip conflicting inherited endpoint overrides for that call only. An
+endpoint with the default daemon, or `BU_NAME` without the owned endpoint,
+does not establish isolation.
+Before navigation, verify that the controller belongs to the browser process
+you created. Track exact resource IDs and clean up only the tabs, named
+controller, and browser process you own. Verify they are gone before removing
+the temporary profile. Never use or stop a shared daemon. If isolation or
+cleanup cannot be verified, report the failure clearly; do not silently create
+or substitute a paid cloud browser or reuse another session.
+
 ## Local Chrome
 
 On macOS the everyday Chrome is often unreachable: its profile dir is

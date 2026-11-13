@@ -10,7 +10,10 @@
       "description": "what starts it; how to tell from the frames is in references/classify.md",
       "oneOf": [
         { "const": "load", "description": "runs once when the page opens" },
-        { "const": "scroll-in", "description": "plays over time as the element enters view, once or again on each entry" },
+        {
+          "const": "scroll-in",
+          "description": "plays over time as the element enters view, once or again on each entry"
+        },
         { "const": "scroll-linked", "description": "follows the scrollbar and runs back on scroll up" },
         { "const": "pin", "description": "holds still while the page scrolls under or past it" },
         { "const": "hover", "description": "changes under the pointer" },

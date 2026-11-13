@@ -23,17 +23,17 @@ go down through the section; 07 is shot back at 01's position and 08 back at 04'
 inside the section: ignore a change of one pixel row or a few anti-aliased edges, and ignore a
 probe `sticky` element sliding inside its section's clip (that is the `pin`, not more motion).
 
-| Seen                                                                     | Trigger         |
-| ------------------------------------------------------------------------ | --------------- |
-| the entrance frames differ and settle; probe `animations` at the top     | `load`          |
-| scroll frames all alike                                                  | no scroll entry |
-| 01–06 change; 07 is like 06, not 01 (ran once, stays done)               | `scroll-in`     |
-| 01–06 change; 07 is like 01; 08 unlike 04 (replays on each entry)        | `scroll-in`     |
-| 07 is like 01 and 08 like 04, and the frames stop changing once the section is fully on screen (a short reveal that replays) | `scroll-in` |
-| 07 is like 01 and 08 like 04, and the frames keep changing at every step while it is on screen | `scroll-linked` |
-| 07 is like neither 01 nor 06 (it changed with no scroll)                 | `loop`          |
-| probe `sticky` entry (fixed or sticky); not read from frames             | `pin`           |
-| the two hover frames differ                                              | `hover`         |
+| Seen                                                                                                                         | Trigger         |
+| ---------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| the entrance frames differ and settle; probe `animations` at the top                                                         | `load`          |
+| scroll frames all alike                                                                                                      | no scroll entry |
+| 01–06 change; 07 is like 06, not 01 (ran once, stays done)                                                                   | `scroll-in`     |
+| 01–06 change; 07 is like 01; 08 unlike 04 (replays on each entry)                                                            | `scroll-in`     |
+| 07 is like 01 and 08 like 04, and the frames stop changing once the section is fully on screen (a short reveal that replays) | `scroll-in`     |
+| 07 is like 01 and 08 like 04, and the frames keep changing at every step while it is on screen                               | `scroll-linked` |
+| 07 is like neither 01 nor 06 (it changed with no scroll)                                                                     | `loop`          |
+| probe `sticky` entry (fixed or sticky); not read from frames                                                                 | `pin`           |
+| the two hover frames differ                                                                                                  | `hover`         |
 
 A probe animation with `scroll: true` is `scroll-linked` and one with `iterations: "infinite"`
 is `loop`, without the frame test. Say in the entry's `why` which frames decided it, and say so
