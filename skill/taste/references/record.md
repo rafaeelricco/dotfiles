@@ -127,7 +127,11 @@ for i in moving:
     for n, y in enumerate(ys + [ys[0], ys[3]], 1):
         js(f"scrollTo(0,{int(y)})"); wait(0.6)
         r = box(s["sel"]); clip(f"motion/s{i:02d}-scroll/{n:02d}.png", 0, r["y"], 1440, r["h"])
+    close_tab()                                          # one tab a section: do not pile them up
 ```
+
+Step 4 opens a tab for nearly every section and can run for minutes on a long page: give the
+call a 10-minute timeout.
 
 Hover shows CSS `:hover` rules only; a hover run by script does not show and is not claimed.
 A fixed or sticky element is recorded as `pin` from the probe's `sticky`. A shot that comes
