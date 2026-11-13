@@ -107,13 +107,16 @@ for n, t in enumerate(m["hover"], 1):
     clip(f"motion/hover-{n}/02.png", *b)
     cdp("CSS.forcePseudoState", nodeId=node, forcedPseudoClasses=[])
 
-# Scroll: each section holding an animation, a paint effect or a sticky element, each shot in a
-# fresh tab with no pre-scroll so a once-only reveal plays on camera. Fixed bars are hidden while
-# shooting (the record's only write to the page) so they cannot pass for motion; sticky elements
-# inside a section stay. Frames 01-06 run from the section just below the screen to its last 40%
-# on screen; then 07 goes back to 01's position and 08 to 04's (classify.md reads these).
+# Scroll: each section that reaches below the first screen (a reveal run by a CSS transition or
+# a script has finished by the probe and leaves no trace in it) and each section holding an
+# animation, a paint effect or a sticky element, each shot in a fresh tab with no pre-scroll so
+# a once-only reveal plays on camera. Fixed bars are hidden while shooting (the record's only
+# write to the page) so they cannot pass for motion; sticky elements inside a section stay.
+# Frames 01-06 run from the section just below the screen to its last 40% on screen; then 07
+# goes back to 01's position and 08 to 04's (classify.md reads these).
 fixed = [b for b in m["sticky"] if b["position"] == "fixed"]
-moving = sorted({x["section"] for k in ("animations", "effects", "sticky") for x in m[k] if x["section"] is not None})
+moving = sorted({x["section"] for k in ("animations", "effects", "sticky") for x in m[k] if x["section"] is not None}
+                | {s["i"] for s in p["sections"] if s["y"] + s["h"] > H})
 for i in moving:
     at(1440, H, prescroll=False)
     for b in fixed:
