@@ -6,137 +6,108 @@ ask before replacing it. Steps 2–4 only measure and shoot; every judgement is 
 
 ## 1. Browser
 
-Load the `browser-use` skill and start its dedicated Chrome (its Local Chrome section). With no
-Chrome app installed, start the newest Playwright build the same way:
+Discover browser tools and browser skills exposed by the current harness, including deferred
+tools. Read their instructions before choosing a provider. Prefer native tools; load
+`browser-use` only when native tools are absent, cannot capture the required evidence, or cannot
+isolate this recording. Use only documented APIs permitted by the provider.
 
-```bash
-curl -fs -m 1 -o /dev/null http://127.0.0.1:9333/json/version ||
-open -na "$(ls -d ~/Library/Caches/ms-playwright/chromium-*/chrome-*/"Google Chrome for Testing.app" | tail -1)" \
-  --args --remote-debugging-port=9333 --user-data-dir="${XDG_CONFIG_HOME:-$HOME/.config}/browser-harness/chrome-profile" \
-  --no-first-run --no-default-browser-check
-```
+Confirm support for the operations below before capture: owned-page navigation, reload and
+scroll; `probe.js` execution; viewport/DPR and media emulation; saved full-page screenshots and
+document-coordinate clips; forced CSS hover; and timed frames. A screenshot-only tool is insufficient.
 
+Create a recording-owned isolated context/session and retain its exact page handles. An incognito
+context qualifies only when browser state and controller targeting are isolated; a window, tab
+label, or session name alone is not proof. Bind every operation to owned handles, never a URL-only
+lookup or a shared current tab. Attempt supported native isolation before falling back to
+`browser-use` → **Isolated local sessions**. If neither can provide complete, isolated capture,
+stop with the concrete missing capability.
+
+Register each created resource immediately for cleanup: pages, contexts, sessions, controllers,
+browser processes, and temporary profiles. Plan cleanup before creating resources, including
+partial setup failures. Do not navigate, resize, activate, restart, or close pre-existing sessions.
 A consent wall, a login or a bot check in the way: stop and say so. Never click through one.
 
-## The header
+### Common capture operations
 
-Each step below is one `BU_CDP_URL=http://127.0.0.1:9333 browser-use <<'PY' … PY` call. Every
-call is a new Python process, so each one starts with this header, filled in once per record:
+Use the chosen provider's documented APIs for the following operations; this method applies to
+both native and fallback providers. Keep owned handles across bounded calls rather than one long
+capture call. Close temporary pages by their handles when their captures finish.
 
-```python
-import base64, json, os
-URL, D, P = "<url>", "<skill>/catalog/<name>", "<skill>/probe.js"
-
-def at(W, H, prescroll=True):
-    # A fresh tab at one viewport (the override belongs to the tab).
-    # Bring it to the front: a background tab never advances its animations.
-    new_tab(URL); activate_tab(current_tab()); wait_for_load()
-    cdp("Emulation.setDeviceMetricsOverride", width=W, height=H, deviceScaleFactor=1, mobile=W < 600)
-    cdp("Page.reload"); wait_for_load(); wait_for_network_idle()
-    if prescroll:                                        # load lazy media and play reveals before measuring
-        for y in range(0, page_info()["ph"], H): js(f"scrollTo(0,{y})"); wait(0.25)
-    js("scrollTo(0,0)"); wait(1.5)                       # entrances replay at the top; let them finish
-
-def probe():
-    r = cdp("Runtime.evaluate", expression=open(P).read(), returnByValue=True, _response_timeout=60)
-    return r["result"]["value"]
-
-def save(rel, obj):
-    os.makedirs(os.path.dirname(f"{D}/{rel}"), exist_ok=True)
-    json.dump(obj, open(f"{D}/{rel}", "w"), indent=1)
-
-def clip(rel, x, y, w, h):                               # page coordinates; cut at 2400 px tall
-    os.makedirs(os.path.dirname(f"{D}/{rel}"), exist_ok=True)
-    d = cdp("Page.captureScreenshot", format="png", captureBeyondViewport=True,
-            clip=dict(x=x, y=y, width=w, height=min(h, 2400), scale=1), _response_timeout=60)["data"]
-    open(f"{D}/{rel}", "wb").write(base64.b64decode(d))
-
-def box(sel):                                            # an element's box now, in page coordinates
-    return js(f"(()=>{{const r=document.querySelector({json.dumps(sel)}).getBoundingClientRect();"
-              f"return {{y:r.top+scrollY,h:r.height}}}})()")
-```
+- **Prepare a page:** create a fresh owned page for the URL, set the requested viewport at DPR 1
+  (mobile emulation for the mobile width), reload, and wait for load and network idle. Keep light
+  and dark media state separate; section and motion passes use light. Unless a step says no
+  pre-scroll, scroll from 0 to the page height in viewport-height increments, waiting 0.25 s each,
+  to load lazy media and finish reveals. Return to the top and wait 1.5 s.
+- **Measure:** evaluate `<skill>/probe.js` through the permitted page API; save its JSON result
+  unchanged. Check its viewport/DPR against the requested settings before using the measurements.
+- **Shoot:** save PNGs immediately under the output folder using the paths below. Clips use page
+  coordinates and scale 1, with height capped at 2400 px. Remeasure section boxes after scrolling;
+  their document y is the current bounding rectangle's top plus the page's scroll offset.
+- **Render:** use supported background rendering. Do not bring a shared browser forward. If motion
+  cannot render reliably in the background, try a separately controlled browser instance before
+  reporting the limitation. Do not improvise unsupported APIs.
 
 ## 2. Sections, at 1440x900 and 390x844
 
-```python
-for W, H in ((1440, 900), (390, 844)):
-    at(W, H)
-    p = probe(); save(f"raw/probe-{W}.json", p)
-    bar = p["layout"]["header"] or 0
-    for s in p["sections"]:
-        js(f"scrollTo(0,{max(0, s['y'] - bar)})"); wait(1.0)   # a fixed bar sits above the section
-        r = box(s["sel"])                                      # scroll-linked layouts change once in view
-        clip(f"sections/{s['i']:02d}@{W}.png", 0, r["y"], W, r["h"])
-    js("scrollTo(0,0)"); wait(0.5); capture_screenshot(path=f"{D}/raw/page@{W}.png", full=True)
-```
+For each width `W` and height `H`, prepare a page with pre-scroll and save the probe to
+`raw/probe-<W>.json`. Let `bar` be `layout.header`, or 0. For every probe section `s`:
 
-Sections whose count or order differs between the widths are matched by heading in step 5,
+1. Scroll to `max(0, s.y - bar)` and wait 1.0 s so the fixed bar stays above the section.
+2. Remeasure `s.sel` and clip at x=0, its current document y, width W, and its current height.
+   Save `sections/<s.i padded to two digits>@<W>.png`.
+3. After all sections, return to the top, wait 0.5 s, and save the full page to `raw/page@<W>.png`.
+
+Sections whose count or order differs between widths are matched by heading in step 5,
 never by index alone.
 
 ## 3. Dark, at 1440
 
-```python
-at(1440, 900)
-cdp("Emulation.setEmulatedMedia", media="", features=[{"name": "prefers-color-scheme", "value": "dark"}])
-cdp("Page.reload"); wait_for_load(); wait_for_network_idle(); wait(1.5)
-capture_screenshot(path=f"{D}/raw/dark@1440.png")
-save("raw/probe-1440-dark.json", probe())
-```
+Prepare a fresh desktop page with pre-scroll. Emulate `prefers-color-scheme: dark`, reload, wait
+for load and network idle, then wait 1.5 s. Save the viewport screenshot to `raw/dark@1440.png`
+and the unchanged probe to `raw/probe-1440-dark.json`. Close this page; its media state must not
+carry into motion capture.
 
 ## 4. Motion, at 1440
 
-```python
-at(1440, 900, prescroll=False); H = 900                  # no pre-scroll: once-only reveals must play on camera
-p = json.load(open(f"{D}/raw/probe-1440.json")); m = p["motion"]
+Use the desktop viewport with `H=900`; read `p` from `raw/probe-1440.json` and `m=p.motion`.
+Split entrance, hover, and scroll work into bounded calls while preserving owned handles and
+frame order. Use fresh pages with no pre-scroll where specified so once-only reveals play on camera.
 
-# Entrance: reload at the top and shoot the first screen as it settles (no network wait:
-# the entrance is over before the network goes quiet).
-cdp("Page.reload"); wait(0.1); wait_for_load(); t0 = 0
-for n, t in enumerate((0, 0.3, 0.7, 1.5), 1):
-    wait(t - t0); t0 = t; clip(f"motion/entrance/{n:02d}.png", 0, 0, 1440, H)
+### Entrance
 
-# Hover: force :hover (a synthetic mouse move changes the style but not the screenshot).
-cdp("DOM.enable"); cdp("CSS.enable")
-doc = cdp("DOM.getDocument", depth=0)["root"]["nodeId"]
-for n, t in enumerate(m["hover"], 1):
-    js(f"scrollTo(0,{max(0, t['y'] - H // 2)})"); wait(0.5)
-    b = (max(0, t["x"] - 16), t["y"] - 16, t["w"] + 32, t["h"] + 32)
-    clip(f"motion/hover-{n}/01.png", *b)
-    node = cdp("DOM.querySelector", nodeId=doc, selector=t["sel"])["nodeId"]
-    cdp("CSS.forcePseudoState", nodeId=node, forcedPseudoClasses=["hover"]); wait(0.5)
-    clip(f"motion/hover-{n}/02.png", *b)
-    cdp("CSS.forcePseudoState", nodeId=node, forcedPseudoClasses=[])
+Prepare a fresh page without pre-scroll. Reload at the top, wait 0.1 s and then for load, without
+waiting for network idle. From there, shoot the first screen at offsets 0, 0.3, 0.7, and 1.5 s,
+waiting the difference between offsets. Save `motion/entrance/01.png` through `04.png` with clip
+(x=0, y=0, width=1440, height=H). Keep this owned page for the hover pass, then close it.
 
-# Scroll: each section that reaches below the first screen (a reveal run by a CSS transition or
-# a script has finished by the probe and leaves no trace in it) and each section holding an
-# animation, a paint effect or a sticky element, each shot in a fresh tab with no pre-scroll so
-# a once-only reveal plays on camera. Fixed bars are hidden while shooting (the record's only
-# write to the page) so they cannot pass for motion; sticky elements inside a section stay.
-# Frames 01-06 run from the section just below the screen to its last 40% on screen; then 07
-# goes back to 01's position and 08 to 04's (classify.md reads these).
-fixed = [b for b in m["sticky"] if b["position"] == "fixed"]
-moving = sorted({x["section"] for k in ("animations", "effects", "sticky") for x in m[k] if x["section"] is not None}
-                | {s["i"] for s in p["sections"] if s["y"] + s["h"] > H})
-for i in moving:
-    at(1440, H, prescroll=False)
-    for b in fixed:
-        js(f"(e=>e&&(e.style.visibility='hidden'))(document.querySelector({json.dumps(b['sel'])}))")
-    s = p["sections"][i]
-    start, end = max(0, s["y"] - H), min(page_info()["ph"] - H, s["y"] + s["h"] - 0.4 * H)
-    ys = [start + (end - start) * k / 5 for k in range(6)]
-    for n, y in enumerate(ys + [ys[0], ys[3]], 1):
-        js(f"scrollTo(0,{int(y)})"); wait(0.6)
-        r = box(s["sel"]); clip(f"motion/s{i:02d}-scroll/{n:02d}.png", 0, r["y"], 1440, r["h"])
-    close_tab()                                          # one tab a section: do not pile them up
-```
+### Hover
 
-Step 4 opens a tab for nearly every section and can run for minutes on a long page: give the
-call a 10-minute timeout.
+For each target `t` in `m.hover`, numbered from 1, scroll to `max(0, t.y - H // 2)` and wait 0.5 s.
+Clip the before frame at `(max(0, t.x - 16), t.y - 16, t.w + 32, t.h + 32)` to
+`motion/hover-<n>/01.png`. Force CSS `:hover` on `t.sel`, wait 0.5 s, and save the same clip to
+`02.png`. Clear the forced state even if capture fails. Mouse hover is not a substitute: it may
+trigger JavaScript. This pass shows CSS hover only; scripted hover is not claimed.
 
-Hover shows CSS `:hover` rules only; a hover run by script does not show and is not claimed.
+### Scroll
+
+Select the sorted unique section indices referenced by `m.animations`, `m.effects`, or `m.sticky`
+(excluding null indices), plus every section whose `s.y + s.h > H`. A reveal may have finished
+before the probe and left no animation trace, so include sections extending beyond the first screen.
+For each selected section `s`, prepare a fresh page without pre-scroll:
+
+1. Hide elements identified by `m.sticky` with `position == "fixed"` using their selectors and
+   `visibility: hidden`. This capture-only page edit prevents bars from passing for motion;
+   sticky elements inside the section stay visible.
+2. Set `start=max(0, s.y-H)` and `end=min(pageHeight-H, s.y+s.h-0.4*H)`.
+   The six positions are `ys[k]=start+(end-start)*k/5` for k=0 through 5.
+3. Visit `ys[0]` through `ys[5]`, then `ys[0]` and `ys[3]` again. At each position, scroll to its
+   integer value, wait 0.6 s, remeasure `s.sel`, and clip x=0, current document y, width=1440,
+   current section height. Save `motion/s<s.i padded to two digits>-scroll/01.png` through `08.png`.
+4. Close that owned page. Frames 07 and 08 revisit positions 01 and 04 for `classify.md`.
+
 A fixed or sticky element is recorded as `pin` from the probe's `sticky`. A shot that comes
 back blank or cut wrong is taken again once; still wrong, it goes into `site.json` `problems`, as
-does a section taller than 2400 px (its shots are cut there).
+does a section taller than the clip height limit.
 
 ## 5. Write and check
 
@@ -149,10 +120,12 @@ Look at every screenshot before writing. Then, following `extract.md` and `class
 5. `review.md`;
 6. the site's entry in `<skill>/catalog/catalog.json` (create the file when missing).
 
-Check every file against its schema; the `browser-use` tool's Python ships `jsonschema`:
+Check every file against its schema using an available Python with `jsonschema`. If unavailable,
+use an ephemeral `uv run --with jsonschema python` environment. Run the body below with the host
+shell's supported syntax, passing `<skill>` and `<name>` as its two script arguments; it does not
+require browser-use. Fix every reported error. If the validator cannot run, validation is incomplete.
 
-```bash
-"$(uv tool dir)/browser-use/bin/python" - "<skill>" "<name>" <<'PY'
+```python
 import glob, json, sys, jsonschema
 skill, name = sys.argv[1:]; d = f"{skill}/catalog/{name}"
 S = lambda n: jsonschema.Draft202012Validator(json.load(open(f"{skill}/schemas/{n}.schema.json")),
@@ -161,7 +134,16 @@ files = [("site", f"{d}/site.json"), ("design", f"{d}/design.json"), ("catalog",
 files += [("section", f) for f in glob.glob(f"{d}/sections/*.json")] + [("motion", f) for f in glob.glob(f"{d}/motion/*.json")]
 bad = [f"{f}: {list(e.path)} {e.message}" for n, f in files for e in S(n).iter_errors(json.load(open(f)))]
 print("\n".join(bad) or f"{len(files)} files valid")
-PY
 ```
 
-Fix every error, then report the review path and every `null` with its `why`.
+## 6. Close and report
+
+Run cleanup on success, failure, or cancellation while execution is available. Close all resources
+registered in step 1, including the final working page. Close owned child resources without closing
+a pre-existing parent browser. Use the provider's supported cleanup APIs and verify closure through
+its status/listing operations; use the fallback skill's procedure when it supplied the resources.
+Attempt cleanup of the remaining owned resources even if one close fails.
+
+Completion requires validated output and verified cleanup. If cleanup fails, report the exact
+remaining resources and the failure; do not claim completion. Report the review path, capture
+limitations, and every `null` with its `why`.
