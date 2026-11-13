@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "catalog",
+  "type": "object",
+  "required": ["version", "sites"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 1 },
+    "sites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "url", "captured", "kind", "summary", "use_when", "sections", "motion", "path"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "url": { "type": "string" },
+          "captured": { "type": "string", "format": "date" },
+          "kind": { "type": "string" },
+          "summary": { "type": "string" },
+          "use_when": { "type": "array", "items": { "type": "string" } },
+          "sections": { "type": "array", "items": { "type": "string" }, "description": "section types in page order" },
+          "motion": { "type": "array", "items": { "type": "string" }, "description": "distinct motion triggers" },
+          "path": { "type": "string" }
+        }
+      }
+    }
+  }
+}

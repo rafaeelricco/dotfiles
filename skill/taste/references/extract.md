@@ -1,42 +1,87 @@
 # Extract
 
-How a thing seen on a reference site becomes a kit part. `capture/candidates.json` names each one
-with its frames, keyframes and stylesheets; `capture/` holds the site's own CSS and HTML to read.
+What each file says. Field shapes are in `<skill>/schemas/`; this file says how to fill them.
 
-1. **Look.** Read the candidate's frames and the rules its `evidence` names. Say in one line what
-   moves, when (load, loop, hover, scroll) and why the page has it.
-2. **Fits.** Render the proposed part beside the reference crop at matched size. Compare
-   silhouette, chrome, surfaces, type and interaction states. A matching name or purpose is
-   insufficient. Set `reviewVersion: 1` and `matchEvidence[candidateId]` with `reference`,
-   `actual` (pack-relative image paths) and `notes`, then `fits:<family>/<id>`.
-3. **Variant.** A kit part does it with other numbers: an effect's declared params
-   (`assets/effects/index.json`, `params`) under `variants.effects`, its colours as
-   `variants.effects.<id>.palette` (`bg`, `surface`, `ink`, `muted`, `accent`, `accentInk`, hex; the page mounts
-   them as `data-fx-palette`), or a motion token of `motion.md` (Tokens) under `variants.motion`.
-   A `fits:` item is also listed under `fits.<family>` or `signature`, and a `variant:` item under
-   `variants.effects`: a dealer reads those lists, never `settled`. A retired kit item is never a fit.
-4. **Own.** Nothing matches: build it in the pack as `assets/<family>/<id>/`, in that family's
-   format (the same files as a built-in: `meta.json`, its code, `demo.html`), plus `spec.md`.
-   Start from the nearest built-in's folder and from the site's own rules in `capture/css/`.
-   Write it as if it sat in the kit: its code imports `../fx.js` or `../lib.js`, its demo links
-   `../../system.css`, exactly as the built-in does. On a page `kit-copy.mjs` puts it there; in
-   the pack those paths do not resolve, so `pack.mjs check` stages the item inside the kit to load
-   and shoot it (`--render`).
-5. **Skip.** Not part of the look (a cookie bar, a chat widget): `skip: <why>`. A defining
-   navigation, frame, ground or selection treatment cannot be skipped because the kit lacks
-   it. Build an own component, include it in the signature and mount it visibly.
+## Evidence
 
-The hero is no candidate: name in `taste.json` → `heroes` the ids of `assets/layout/heroes.json` that
-open a page as the recorded one does (the taste file's Composition, Hero line: a centred hero is
-`centred`). `start.mjs plan --taste` deals among them, and as usual when none fits the page type and
-what the brief has; `pack.mjs check` refuses an id heroes.json does not hold. A `signature` holds a
-scene or an effect, never both: the big scene is the page's one effect, so the plan deals no scene
-beside a signature effect.
+Every measured value carries `evidence`: a probe path (`raw/probe-1440.json#type.h2`) or a
+screenshot path. The screenshot wins when the two disagree; then keep the screenshot's value and
+say in `why` what the probe got wrong (a gradient averaged to one colour, a hidden element, a
+consent banner). Never change a file under `raw/`.
 
-`spec.md` holds what a rebuild needs: trigger, duration, delay and easing of every step, keyframes,
-scroll range in screens, the layer stack, the element structure, each state, and the capture files
-it came from.
+## sections/NN-<type>.json
 
-Limits for an own item: its code carries no URL of the recorded site, it rests under reduced motion
-(`motion.md`), it stays within the family's budget (`pack.mjs check` prints it), and its id is not a
-built-in's. `node <skill>/scripts/taste.mjs pack check <name>` decides done.
+- `type` and `hero_form` (see `classify.md`); `why` names what in the picture decided it.
+- `layout`: one line, 1440 then 390 ("heading left 5 cols, product window right 7 cols; stacks
+  text first at 390").
+- `boxes`: the probe's tree for this section, cut to what explains the layout (usually 3–10
+  boxes), in percent of the section. Mark repeats with `repeat` instead of listing each card.
+- `motion`: ids of the `motion/*.json` entries that live in this section.
+
+## design.json
+
+- `colors`: one hex per role (`bg`, `surface`, `ink`, `muted`, `accent`, `border`), from the
+  probe's `colors` and `buttons`, checked against the screenshots; `bg` is `colors.page` when the
+  screenshots show it behind the sections, else the fill they do show. `colors_dark` the same from
+  the dark probe, or `null` when the dark screenshot matches light.
+- `type`: h1, h2, h3, body, small, button from the probe's `type` at 1440, with the 390 size
+  beside it when it differs.
+- `fonts`: each family with its source and the nearest free fallback you would use. The source
+  is the absolute URL in the probe's `fonts.faces[].src`: the one face when there is one, else
+  the regular weight. A family split into several unicode-range files with no way to tell which
+  holds Latin is `null` with that `why`.
+- `spacing`: container, gutter, section padding (from the section boxes), card gap.
+- `radius`, `shadows`, `components` (button, card, input). A component's `crop` is a hover frame
+  of it when one exists, else the section shot that shows it (say which part in `why`), else
+  `null`.
+
+## motion/<id>.json
+
+One entry per distinct effect, not per element: six cards rising together are one entry with a
+`stagger`. `what` says in one line what moves and how; `trigger` per `classify.md`; numbers from
+the probe (`animations`, `transitions`) where it has them, else read from the frames and say so
+in `why`.
+
+## site.json
+
+`kind` (one of the schema's ids, by what the site sells), `title` (the page's `<title>`),
+`summary` (what the site sells and to whom, one sentence), `character` (2–3 sentences a designer
+could act on), `use_when` (1–3 kinds of page this taste fits), `widths` (`[1440, 390]`),
+`problems` (shots retaken or missing, sections the probe missed).
+
+## review.md
+
+For a person to check the record in one read. Image paths are relative to the site folder.
+
+```markdown
+# <name> — <url>
+
+<summary> · captured <date> · <kind>
+
+<character>
+
+## 01 · hero (split)
+
+![1440](sections/01@1440.png) ![390](sections/01@390.png)
+**Layout** <layout> · **Motion** <motion ids or none>
+**Why hero/split** <why>
+
+… one block per section …
+
+## Motion
+
+### <id> — <trigger>
+
+<what> · <duration> <easing>
+![](<each path in its frames>) …
+
+## Problems
+
+<problems, or "none">
+```
+
+## catalog.json
+
+One entry per site: `name`, `url`, `captured`, `kind`, `summary`, `use_when`, the list of section
+types in page order, the list of motion triggers, and `path` (`<name>/`). Replace the site's entry
+when re-recording; keep the others.

@@ -26,20 +26,20 @@ run explicitly requested jobs in order, keeping each job's scope and gates.
 | radius, corners, nested surfaces, audit the corners     | `shape`     | `references/fluid/shape.md`       |
 | set up the system in a project                          | `adopt`     | `references/fluid/adopt.md`       |
 | landing page, marketing, company or product site        | `page`      | `references/page.md`              |
-| follow this site's look, record it, list saved tastes   | `record`    | `references/record.md`            |
+| follow this site's look, record it, list saved tastes   | `record`    | invoke the `taste` skill          |
 
 No row fits → ask which. One ambiguous request → the job they led with; both
 asked → both, in order. `build` adds motion to something that exists;
-`compose` makes the thing; `page` makes a whole marketing page; `record` saves a
-reference site as a taste and applies one. A brief that names a site to follow
-runs `record` before the job that builds.
+`compose` makes the thing; `page` makes a whole marketing page; `record` hands a
+reference site to `taste`, which saves it to its catalog. A brief that names a site
+to follow runs `record` before the job that builds.
 
 ## Values
 
 Highest wins:
 
 1. `references/motion/laws.md` — limits for any medium. Never overridden.
-2. The project's own tokens. A taste applied to the project is these (`references/record.md` → Apply).
+2. The project's own tokens. A taste applied to the project is these (`taste` → `references/apply.md`).
 3. `references/fluid/system.md` — default web UI tokens.
 
 Geometry is not a token: project radii set the outermost surface, and every

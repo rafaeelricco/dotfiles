@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "motion",
+  "type": "object",
+  "required": ["id", "trigger", "section", "what", "frames", "evidence"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "trigger": {
+      "description": "what starts it; how to tell from the frames is in references/classify.md",
+      "oneOf": [
+        { "const": "load", "description": "runs once when the page opens" },
+        { "const": "scroll-in", "description": "plays over time as the element enters view, once or again on each entry" },
+        { "const": "scroll-linked", "description": "follows the scrollbar and runs back on scroll up" },
+        { "const": "pin", "description": "holds still while the page scrolls under or past it" },
+        { "const": "hover", "description": "changes under the pointer" },
+        { "const": "loop", "description": "repeats on its own" }
+      ]
+    },
+    "section": { "type": ["integer", "null"] },
+    "target": { "type": "string", "maxLength": 120 },
+    "what": { "type": "string", "maxLength": 160 },
+    "properties": { "type": "array", "items": { "type": "string" } },
+    "duration": { "type": ["number", "null"], "description": "ms" },
+    "delay": { "type": ["number", "null"], "description": "ms" },
+    "stagger": { "type": ["number", "null"], "description": "ms between items" },
+    "easing": { "type": ["string", "null"] },
+    "iterations": { "type": ["number", "string", "null"] },
+    "frames": { "type": "array", "items": { "type": "string" } },
+    "evidence": { "type": "string" },
+    "why": { "type": "string" }
+  }
+}

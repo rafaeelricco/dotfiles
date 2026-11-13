@@ -55,7 +55,7 @@ class LifecycleCases:
         else:
             for name in ("scripts", "skill", "powershell"):
                 shutil.copytree(REPO / name, self.source / name,
-                                ignore=shutil.ignore_patterns("__pycache__", ".pytest_cache", "tests", "tastes"))
+                                ignore=shutil.ignore_patterns("__pycache__", ".pytest_cache", "tests", "catalog"))
             for name in ("INSTRUCTIONS.md", "install.ps1", "update.ps1", "uninstall.ps1"):
                 shutil.copy2(REPO / name, self.source / name)
         self.bin = self.base / "bin"

@@ -59,11 +59,6 @@ jobs:
         with:
           name: dotfiles-release
           path: ${{ runner.temp }}/dotfiles-release
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-      - name: Install the type checker
-        run: npm ci --ignore-scripts
       - name: Verify the downloaded release on this native platform
         env:
           DOTFILES_TEST_RELEASE_DIR: ${{ runner.temp }}/dotfiles-release

@@ -1,6 +1,5 @@
 **/__pycache__/
 nvim.log
 tmp/
-skill/taste/assets/icons/demo/
-skill/ui/tastes/
+skill/taste/catalog/
 node_modules/
