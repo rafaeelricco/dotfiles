@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "section",
+  "type": "object",
+  "required": ["i", "type", "why", "layout", "boxes", "shots", "evidence"],
+  "additionalProperties": false,
+  "properties": {
+    "i": { "type": "integer", "minimum": 0 },
+    "type": {
+      "description": "what the section does for the reader; how to judge it is in references/classify.md",
+      "oneOf": [
+        { "const": "nav", "description": "the site bar: logo, links, one action" },
+        { "const": "hero", "description": "the first screen's h1 and its picture; also set hero_form" },
+        { "const": "logos", "description": "a row of customer or partner marks" },
+        { "const": "proof-quote", "description": "one or a few quotes with names, or a rating with its source" },
+        { "const": "stats", "description": "figures as the content, each with its label" },
+        { "const": "features-grid", "description": "2-6 equal cards, each a feature with a title and a line" },
+        { "const": "bento", "description": "unequal tiles in one grid, each a feature or a picture" },
+        { "const": "split", "description": "text on one side, one picture or product window on the other" },
+        { "const": "tabs-tour", "description": "one product frame whose content changes by tabs or steps" },
+        { "const": "app-frame", "description": "the product's own interface shown big, as the content" },
+        { "const": "steps", "description": "a numbered or ordered how-it-works" },
+        { "const": "showcase", "description": "the physical product or work shown big, on a stage or full bleed" },
+        { "const": "specs", "description": "a sheet of technical figures, label beside value" },
+        { "const": "photo-band", "description": "a full-width photograph or film carrying at most a line" },
+        { "const": "people", "description": "team, founders or instructors with faces" },
+        { "const": "integrations", "description": "a grid or cloud of third-party tool icons" },
+        { "const": "timeline", "description": "dated events along a line" },
+        { "const": "comparison", "description": "a table or two columns against an alternative" },
+        { "const": "pricing", "description": "plans or prices with what each includes" },
+        { "const": "faq", "description": "questions with their answers" },
+        { "const": "close", "description": "the last ask before the footer: a heading and the main action" },
+        { "const": "footer", "description": "link columns, legal row" },
+        { "const": "other", "description": "none of the above; why says what it is" }
+      ]
+    },
+    "hero_form": {
+      "description": "hero only, else null",
+      "oneOf": [
+        { "type": "null" },
+        { "const": "split", "description": "text beside a picture" },
+        { "const": "photo", "description": "full-bleed photograph, words on its calm side" },
+        { "const": "product", "description": "the product big on a stage under a head row" },
+        { "const": "editorial", "description": "the headline is the picture" },
+        { "const": "collage", "description": "text beside a lit frame with a product window and a card" },
+        { "const": "word", "description": "oversized h1" },
+        { "const": "film", "description": "a film frame or video" },
+        { "const": "statement", "description": "one calm sentence, no picture" },
+        { "const": "triptych", "description": "h1 over a changing collage of 3-5 pieces" },
+        { "const": "centred", "description": "centred h1, lead, buttons, then a framed product window" }
+      ]
+    },
+    "heading": { "type": ["string", "null"], "maxLength": 80 },
+    "why": { "type": "string", "maxLength": 160 },
+    "layout": { "type": "string", "maxLength": 200, "description": "one line, 1440 then 390" },
+    "boxes": { "type": "array", "items": { "$ref": "#/$defs/box" } },
+    "spacing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": { "padY": { "type": "number" }, "gap": { "type": "number" } }
+    },
+    "motion": { "type": "array", "items": { "type": "string" } },
+    "shots": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "evidence": { "type": "string" }
+  },
+  "$defs": {
+    "box": {
+      "type": "object",
+      "required": ["role", "x", "y", "w", "h"],
+      "additionalProperties": false,
+      "properties": {
+        "role": { "enum": ["heading", "text", "media", "button", "link", "input", "card", "group"] },
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "w": { "type": "number" },
+        "h": { "type": "number" },
+        "repeat": { "type": "integer", "minimum": 2 },
+        "cols": { "type": "integer", "minimum": 2 },
+        "gap": { "type": "number" },
+        "note": { "type": "string", "maxLength": 80 }
+      }
+    }
+  }
+}

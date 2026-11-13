@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "design",
+  "type": "object",
+  "required": ["colors", "colors_dark", "type", "fonts", "spacing", "radius", "shadows", "components"],
+  "additionalProperties": false,
+  "properties": {
+    "colors": { "$ref": "#/$defs/palette" },
+    "colors_dark": {
+      "description": "null when the dark-scheme screenshot matches light (raw/dark@1440.png is the evidence)",
+      "oneOf": [{ "$ref": "#/$defs/palette" }, { "type": "null" }]
+    },
+    "type": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "h1": { "$ref": "#/$defs/face" },
+        "h2": { "$ref": "#/$defs/face" },
+        "h3": { "$ref": "#/$defs/face" },
+        "body": { "$ref": "#/$defs/face" },
+        "small": { "$ref": "#/$defs/face" },
+        "button": { "$ref": "#/$defs/face" }
+      }
+    },
+    "fonts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["family", "source", "fallback", "evidence"],
+        "additionalProperties": false,
+        "properties": {
+          "family": { "type": "string" },
+          "source": { "type": ["string", "null"], "description": "absolute font file URL, or null with a why" },
+          "fallback": { "type": "string" },
+          "evidence": { "type": "string" },
+          "why": { "type": "string" }
+        }
+      }
+    },
+    "spacing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "container": { "$ref": "#/$defs/measure" },
+        "gutter": { "$ref": "#/$defs/measure" },
+        "sectionPad": { "$ref": "#/$defs/measure" },
+        "cardGap": { "$ref": "#/$defs/measure" }
+      }
+    },
+    "radius": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "control": { "$ref": "#/$defs/measure" },
+        "card": { "$ref": "#/$defs/measure" },
+        "image": { "$ref": "#/$defs/measure" }
+      }
+    },
+    "shadows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["css", "use", "evidence"],
+        "additionalProperties": false,
+        "properties": { "css": { "type": "string" }, "use": { "type": "string" }, "evidence": { "type": "string" } }
+      }
+    },
+    "components": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "button": { "$ref": "#/$defs/component" },
+        "card": { "$ref": "#/$defs/component" },
+        "input": { "$ref": "#/$defs/component" }
+      }
+    }
+  },
+  "$defs": {
+    "color": {
+      "type": "object",
+      "required": ["hex", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "hex": { "type": ["string", "null"], "pattern": "^#[0-9a-f]{6}([0-9a-f]{2})?$" },
+        "evidence": { "type": "string" },
+        "why": { "type": "string" }
+      }
+    },
+    "palette": {
+      "type": "object",
+      "required": ["bg", "surface", "ink", "muted", "accent", "border"],
+      "additionalProperties": false,
+      "properties": {
+        "bg": { "$ref": "#/$defs/color" },
+        "surface": { "$ref": "#/$defs/color" },
+        "ink": { "$ref": "#/$defs/color" },
+        "muted": { "$ref": "#/$defs/color" },
+        "accent": { "$ref": "#/$defs/color" },
+        "border": { "$ref": "#/$defs/color" }
+      }
+    },
+    "face": {
+      "type": "object",
+      "required": ["family", "size", "line", "weight", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "family": { "type": "string" },
+        "size": { "type": "number" },
+        "size390": { "type": "number" },
+        "line": { "type": "number" },
+        "weight": { "type": "number" },
+        "tracking": { "type": "string" },
+        "transform": { "type": "string" },
+        "evidence": { "type": "string" },
+        "why": { "type": "string" }
+      }
+    },
+    "measure": {
+      "type": "object",
+      "required": ["px", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "px": { "type": ["number", "null"] },
+        "evidence": { "type": "string" },
+        "why": { "type": "string" }
+      }
+    },
+    "component": {
+      "type": "object",
+      "required": ["css", "crop", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "css": { "type": "object", "additionalProperties": { "type": ["string", "number"] } },
+        "crop": { "type": ["string", "null"] },
+        "evidence": { "type": "string" },
+        "why": { "type": "string" }
+      }
+    }
+  }
+}

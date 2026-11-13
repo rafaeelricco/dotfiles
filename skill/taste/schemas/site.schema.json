@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "site",
+  "type": "object",
+  "required": ["name", "url", "captured", "kind", "summary", "character", "use_when", "widths", "problems"],
+  "additionalProperties": false,
+  "properties": {
+    "name": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "url": { "type": "string" },
+    "captured": { "type": "string", "format": "date" },
+    "title": { "type": "string" },
+    "kind": { "enum": ["software", "gaming", "tech", "product", "service", "place", "other"] },
+    "summary": { "type": "string", "maxLength": 300 },
+    "character": { "type": "string", "maxLength": 500 },
+    "use_when": { "type": "array", "items": { "type": "string" }, "minItems": 1, "maxItems": 3 },
+    "widths": { "type": "array", "items": { "type": "integer" } },
+    "problems": { "type": "array", "items": { "type": "string" } }
+  }
+}
