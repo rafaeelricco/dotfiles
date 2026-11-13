@@ -327,7 +327,10 @@
   let visited = 0;
   // A face's url() is relative to its own stylesheet: resolve it to an absolute address.
   const absolute = (src, base) =>
-    src.replace(/url\(\s*["']?([^"')]+)["']?\s*\)/g, (_, u) => `url("${safe(() => new URL(u, base).href, u, "font-url")}")`);
+    src.replace(
+      /url\(\s*["']?([^"')]+)["']?\s*\)/g,
+      (_, u) => `url("${safe(() => new URL(u, base).href, u, "font-url")}")`,
+    );
   const walk = (rules, base) => {
     for (const r of rules) {
       if (++visited > 20000) return;
