@@ -32,6 +32,10 @@ gaps exist, they lead.
 
 | Requirement or invariant | Scenario / interface | Check | Result | Evidence |
 
+## Assumptions
+
+- <inferred outcome or unsettled implementation choice> — checked by <check> | unverified
+
 ## Unverified requirements and remaining uncertainty
 
 - …

@@ -25,5 +25,5 @@ Brief each step 6 writer with:
     Apply:      <approved plan path and owned hunks; no saved plan → paste those hunks>
     Boundaries: <editable paths; pinned tests are read-only>
     Role:       <copy or derive, selected by step 6>
-    Return:     files changed; unfinished hunks and why; any stale context
+    Return:     files changed; unfinished hunks and why; any stale context; choices the plan left open
     Do not:     edit outside Boundaries, widen the approved change, re-plan, run checks, commit

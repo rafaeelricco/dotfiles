@@ -28,14 +28,18 @@ Record the repository, base and target revisions, and local changes included.
 An empty diff does not settle a supplied requirement. If neither changes nor a
 concrete outcome are available, report that there is nothing to verify.
 
-Read the original request, accepted decisions, and relevant specifications and
-contracts. Use the diff to locate implementation and affected callers, not to
+Read the original request, accepted decisions, the approved plan's Verify
+section, and relevant specifications and contracts. Use the diff to locate
+implementation and affected callers, not to
 invent the requirements. Resolve material uncertainty from available sources;
 ask only for expected behavior those sources cannot establish.
 
 Map each material requirement and affected invariant to:
 expected outcome → interface/scenario → required evidence.
 Include relevant failure behavior, boundaries, defaults, and compatibility.
+
+An outcome inferred rather than read from a source, and an implementation
+choice the sources do not settle, is an assumption: check it or report it.
 
 For purely explanatory prose, inspect the change and report what was checked
 without a behavioral PASS. Skill instructions and execution configuration
@@ -79,15 +83,16 @@ an unexplained failure. Complete useful independent checks despite blockers.
 ## 4. Challenge the evidence
 
 For changes involving cross-module/runtime interactions, shared contracts or
-configuration, stateful failure/recovery behavior, or unresolved coverage
-assumptions, use one fresh verifier when delegation is available and permitted.
+configuration, or stateful failure/recovery behavior, use one fresh verifier
+when delegation is available and permitted.
 
 Start it with a clean context containing only the original requirements,
 target identity, source paths, and raw check evidence. Set the spawn tool's
 context isolation option explicitly (`fork_turns="none"` in Codex).
 Ask it to identify missing requirements, unexercised paths, and
-unsupported conclusions. It may inspect and run checks, but must not edit,
-invoke this skill recursively, or delegate further.
+unsupported conclusions that affect correctness, and to skip style: a reviewer
+asked for problems always finds some. It may inspect and run checks, but must
+not edit, invoke this skill recursively, or delegate further.
 
 Reproduce consequential findings. Reuse an earlier independent challenge only
 when it covered the same final target and obligations. Without delegation,
