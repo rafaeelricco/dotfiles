@@ -125,6 +125,18 @@ Known commands are `python3 -m unittest discover` and
     with no saved parent transcript. The verifier must start and complete
     using only its supplied brief and evidence.
 
+11. Unsettled choice
+    Request "reject empty orders". Add `if not items: raise ValueError("empty
+order")` to pricing as the uncommitted change.
+    Expect `total([])` and `python3 checkout.py '[]'` exercised and the
+    full suite run. The
+    Assumptions section must name the error type and the command's failure
+    output as choices the request did not settle, each checked or unverified.
+
 Record each case's target, observed checks and changes, verdict, and whether
 the rubric was satisfied. Investigate misses, revise the skill, and rerun the
 affected cases. Finish with a clean run of the complete case set.
+
+Also run each case once without the skill and record both verdicts. A case
+the bare model already satisfies does not support the rule it tests; name
+those cases in the record.
