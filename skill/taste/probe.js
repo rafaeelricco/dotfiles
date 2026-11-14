@@ -420,9 +420,14 @@
         || entries
           .filter(e => /^(fixed|sticky)$/.test(e.s.position) && e.r.top <= 40 && e.r.width >= vw * 0.5)
           .sort((a, b) => a.r.top - b.r.top)[0];
-      return { container: box ? round(box.r.width) : vw, gutter, header: bar ? round(bar.r.height) : null };
+      return {
+        container: box ? round(box.r.width) : vw,
+        gutter,
+        header: bar ? round(bar.r.height) : null,
+        headerSel: bar ? selOf(bar.el) : null,
+      };
     },
-    { container: vw, gutter: 0, header: null },
+    { container: vw, gutter: 0, header: null, headerSel: null },
     "layout",
   );
 
@@ -547,6 +552,35 @@
     [],
     "sticky",
   );
+  // Stage: content that scrolls through fixed or pinned layers, so a section's document box is not
+  // what the reader sees there. Reasons: one section holding most of a long page (a pin spacer or a
+  // single wrapper), a GSAP pin spacer (its pin is fixed only while active, so the layer test can
+  // miss it), or an on-screen fixed layer of half the viewport or more that carries a heading. A
+  // false reason costs only the slower walk, which also works on a normal page; a missed one costs
+  // blank shots. Every element is checked, not the strided sample: one missed layer hides the stage.
+  const stage = safe(
+    () => {
+      const out = [];
+      const ph = root.scrollHeight;
+      for (const s of sections)
+        if (s.h >= 3 * innerHeight && s.h >= 0.5 * ph) out.push(`section ${s.i} is ${s.h}px of a ${ph}px page`);
+      if (document.querySelector(".pin-spacer")) out.push("GSAP pin spacer");
+      const all = body.querySelectorAll("*");
+      if (all.length > 20000) problems.push(`stage: checked 20000 of ${all.length} elements for fixed layers`);
+      const layers = [];
+      for (const el of [...all].slice(0, 20000)) {
+        if (cs(el).position !== "fixed" || layers.some(l => l.contains(el))) continue;
+        if (!el.querySelector("h1, h2, h3") || inConsent(el)) continue;
+        const v = view(el);
+        if (!v || v.r.height < 0.5 * innerHeight || v.r.bottom <= 0 || v.r.top >= innerHeight) continue;
+        layers.push(el);
+        out.push(`fixed layer with a heading: ${selOf(el)}`);
+      }
+      return out.slice(0, 6);
+    },
+    [],
+    "stage",
+  );
   const effects = safe(
     () => {
       const out = [];
@@ -638,6 +672,7 @@
     viewport: { w: innerWidth, h: innerHeight, dpr: devicePixelRatio },
     pageHeight: root.scrollHeight,
     sections,
+    stage,
     colors,
     type,
     fonts,

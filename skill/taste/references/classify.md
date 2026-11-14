@@ -6,7 +6,8 @@ how to choose between them.
 
 ## Sections
 
-- Judge from the 1440 screenshot first, then confirm with the probe's `boxes` and `heading`.
+- Judge from the 1440 screenshot first, then confirm with the probe's `boxes` and `heading`
+  (on a stage page, `record.md` step 2, the screenshot alone).
 - Name what the section does for the reader, not how it is styled: a dark band of three cards
   is `features-grid`, not "dark band".
 - One section, one type. When a section does two jobs (a closing ask above a spec sheet), take
