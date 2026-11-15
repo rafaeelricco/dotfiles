@@ -15,7 +15,8 @@ consent banner). Never change a file under `raw/`.
 - `layout`: one line, 1440 then 390 ("heading left 5 cols, product window right 7 cols; stacks
   text first at 390").
 - `boxes`: the probe's tree for this section, cut to what explains the layout (usually 3–10
-  boxes), in percent of the section. Mark repeats with `repeat` instead of listing each card.
+  boxes), in percent of the section. Mark repeats with `repeat` instead of listing each card. On a
+  stage page (`record.md` step 2) read them from the shot instead and say so in `evidence`.
 - `motion`: ids of the `motion/*.json` entries that live in this section.
 
 ## design.json

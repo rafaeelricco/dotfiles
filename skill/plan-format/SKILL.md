@@ -28,7 +28,7 @@ Sections, in order — nothing else:
 
 1. **Context** — one or two sentences on why. Skip it when the request already says why.
 2. **Diffs** — every change, in apply order.
-3. **Verify** — the command or check that proves it worked.
+3. **Verify** — the end state, the command or check that proves it, and what must not change.
 
 Open questions go inline at the decision they block, never in a section of their own. A skill that loads this one and names its own sections overrides this list.
 
