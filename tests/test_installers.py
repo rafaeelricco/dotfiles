@@ -19,7 +19,7 @@ import zipfile
 REPO = Path(__file__).resolve().parents[1]
 ORCHESTRATE = {
     "orchestrate", "scope-and-plan", "plan-format", "model-tiers",
-    "verify", "commit-message",
+    "verify", "commit-message", "code-simplifier",
 }
 PWSH = os.environ.get("DOTFILES_TEST_PWSH") or shutil.which("pwsh")
 BASH = "/bin/bash" if Path("/bin/bash").exists() else shutil.which("bash")

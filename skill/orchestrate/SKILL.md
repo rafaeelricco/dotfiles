@@ -45,6 +45,10 @@ Load a skill at the step that needs it, not ahead of it.
 
 Ship order after Edit:
 
+0. **simplify?**
+   - Code changed → load `code-simplifier` on the change set, then continue.
+   - Only prose, comments, configuration, or skill instructions changed → skip.
+
 1. **behavior?**
    - Nonbehavioral prose, comments, or formatting → inspect the diff and skip verify.
    - Behavior change, including configuration or skill instructions that affect execution → load `verify`.
