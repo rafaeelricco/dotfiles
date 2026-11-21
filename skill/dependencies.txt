@@ -1,4 +1,4 @@
-orchestrate scope-and-plan verify commit-message code-simplifier
+orchestrate scope-and-plan verify commit-message
 scope-and-plan plan-format model-tiers
 babysit verify commit-message
 create-pr plan-format commit-message pr-body
