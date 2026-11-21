@@ -58,17 +58,17 @@ skills remain linked. Duplicate dependencies are installed once.
 
 The source of truth is [`skill/dependencies.txt`](../skill/dependencies.txt).
 
-| Selected skill   | Direct companions                                               |
-| ---------------- | --------------------------------------------------------------- |
-| `orchestrate`    | `scope-and-plan`, `verify`, `commit-message`, `code-simplifier` |
-| `scope-and-plan` | `plan-format`, `model-tiers`                                    |
-| `babysit`        | `verify`, `commit-message`                                      |
-| `create-pr`      | `plan-format`, `commit-message`, `pr-body`                      |
-| `pr-body`        | `commit-message`                                                |
-| `ui`             | `taste`, `browser-use`                                          |
-| `taste`          | `browser-use`                                                   |
+| Selected skill   | Direct companions                            |
+| ---------------- | -------------------------------------------- |
+| `orchestrate`    | `scope-and-plan`, `verify`, `commit-message` |
+| `scope-and-plan` | `plan-format`, `model-tiers`                 |
+| `babysit`        | `verify`, `commit-message`                   |
+| `create-pr`      | `plan-format`, `commit-message`, `pr-body`   |
+| `pr-body`        | `commit-message`                             |
+| `ui`             | `taste`, `browser-use`                       |
+| `taste`          | `browser-use`                                |
 
-Transitive resolution makes a fresh `orchestrate` install contain exactly seven
+Transitive resolution makes a fresh `orchestrate` install contain exactly six
 skills. Companion installation includes conditional workflow steps such as commits.
 
 ## Options and confirmation

@@ -17,9 +17,9 @@ In PowerShell 7:
 irm https://r1cco.com/skills/orchestrate.ps1 | iex
 ```
 
-Companion skills are included automatically. `orchestrate` installs seven skills:
+Companion skills are included automatically. `orchestrate` installs six skills:
 `orchestrate`, `scope-and-plan`, `plan-format`, `model-tiers`, `verify`,
-`commit-message`, and `code-simplifier`. Replace `orchestrate` in the URL with another
+`commit-message`. Replace `orchestrate` in the URL with another
 available skill. Selected installation preserves other skill links, instructions,
 and terminal settings.
 
