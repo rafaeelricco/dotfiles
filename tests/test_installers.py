@@ -78,7 +78,7 @@ class LifecycleCases:
                            else Path(self.env["XDG_STATE_HOME"])) / "dotfiles"
         self.state = self.state_base / "install-state"
 
-    def invoke(self, args=(), action="install", script=None, env=None):
+    def invoke(self, args=(), action="install", script=None, env=None, cwd=None):
         command_env = self.env.copy()
         if env:
             command_env.update(env)
@@ -93,7 +93,7 @@ class LifecycleCases:
                        "$PROFILE = $env:DOTFILES_TEST_PROFILE; "
                        "$installerArgs = @(ConvertFrom-Json $env:DOTFILES_TEST_ARGS); "
                        "& $env:DOTFILES_TEST_SCRIPT @installerArgs"]
-        return subprocess.run(command, env=command_env, input="", text=True,
+        return subprocess.run(command, env=command_env, cwd=cwd, input="", text=True,
                               capture_output=True, timeout=90)
 
     def assert_success(self, result):
@@ -525,6 +525,24 @@ class LifecycleCases:
 
 @unittest.skipIf(os.name == "nt" or not BASH, "native POSIX Bash required")
 class BashInstallers(LifecycleCases, unittest.TestCase):
+    def test_remote_rejects_glob_in_workflow_companion(self):
+        if not self.release:
+            self.skipTest("requires DOTFILES_TEST_RELEASE_DIR built artifact")
+        from scripts import package_release
+        base_url, first = self.serve_release()
+        manifest = self.source / "skill/dependencies.txt"
+        manifest.write_text(manifest.read_text().replace("deliver review-design ", "deliver review-[d]esign "))
+        version = "f" * 40
+        package_release.build_release(version, first.parent / version, source=self.source, use_git=False)
+        (self.base / "review-design").touch()
+
+        result = self.invoke(self.skip_flags(), script=Path(self.release) / "install.sh", cwd=self.base,
+                             env={"DOTFILES_BASE_URL": base_url, "DOTFILES_VERSION": version})
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("missing or invalid skill entries", result.stderr)
+        self.assertFalse(self.state.exists())
+
     def test_remote_rejects_missing_workflow_companion(self):
         if not self.release:
             self.skipTest("requires DOTFILES_TEST_RELEASE_DIR built artifact")

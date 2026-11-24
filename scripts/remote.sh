@@ -134,10 +134,11 @@ validate_existing_cache() {
 }
 
 validate_payload_skills() {
-  local root="$1" line name
+  local root="$1" line name names=()
   while IFS= read -r line || [ -n "${line}" ]; do
     case "${line}" in ''|\#*) continue ;; esac
-    for name in ${line}; do
+    IFS=$' \t' read -r -a names <<< "${line}"
+    for name in ${names[@]+"${names[@]}"}; do
       [[ "${name}" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] || return 1
       [ -f "${root}/skill/${name}/SKILL.md" ] || return 1
     done
