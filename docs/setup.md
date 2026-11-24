@@ -28,24 +28,24 @@ replaces its whole bundle on update, the catalog included.
 Install or update one skill and its companions:
 
 ```bash
-curl -fsSL https://r1cco.com/skills/orchestrate | bash
+curl -fsSL https://r1cco.com/skills/verify | bash
 ```
 
 ```powershell
-irm https://r1cco.com/skills/orchestrate.ps1 | iex
+irm https://r1cco.com/skills/verify.ps1 | iex
 ```
 
 Choose several skills, preview, or show the available skills and options:
 
 ```bash
-curl -fsSL https://r1cco.com/dotfiles/install.sh | bash -s -- orchestrate ui
-curl -fsSL https://r1cco.com/dotfiles/install.sh | bash -s -- orchestrate --dry-run
+curl -fsSL https://r1cco.com/dotfiles/install.sh | bash -s -- verify ui
+curl -fsSL https://r1cco.com/dotfiles/install.sh | bash -s -- verify --dry-run
 curl -fsSL https://r1cco.com/dotfiles/install.sh | bash -s -- --help
 ```
 
 ```powershell
-& ([scriptblock]::Create((irm 'https://r1cco.com/dotfiles/install.ps1'))) orchestrate ui
-& ([scriptblock]::Create((irm 'https://r1cco.com/dotfiles/install.ps1'))) orchestrate -DryRun
+& ([scriptblock]::Create((irm 'https://r1cco.com/dotfiles/install.ps1'))) verify ui
+& ([scriptblock]::Create((irm 'https://r1cco.com/dotfiles/install.ps1'))) verify -DryRun
 & ([scriptblock]::Create((irm 'https://r1cco.com/dotfiles/install.ps1'))) -Help
 ```
 
@@ -58,18 +58,17 @@ skills remain linked. Duplicate dependencies are installed once.
 
 The source of truth is [`skill/dependencies.txt`](../skill/dependencies.txt).
 
-| Selected skill   | Direct companions                            |
-| ---------------- | -------------------------------------------- |
-| `orchestrate`    | `scope-and-plan`, `verify`, `commit-message` |
-| `scope-and-plan` | `plan-format`, `model-tiers`                 |
-| `babysit`        | `verify`, `commit-message`                   |
-| `create-pr`      | `plan-format`, `commit-message`, `pr-body`   |
-| `pr-body`        | `commit-message`                             |
-| `ui`             | `taste`, `browser-use`                       |
-| `taste`          | `browser-use`                                |
+| Selected skill | Direct companions                                    |
+| -------------- | ---------------------------------------------------- |
+| `babysit`      | `verify`, `commit-message`                           |
+| `create-pr`    | `plan-format`, `commit-message`, `pr-body`, `verify` |
+| `pr-body`      | `commit-message`                                     |
+| `deliver`      | `review-design`, `create-pr`, `babysit`              |
+| `ui`           | `taste`, `browser-use`                               |
+| `taste`        | `browser-use`                                        |
 
-Transitive resolution makes a fresh `orchestrate` install contain exactly six
-skills. Companion installation includes conditional workflow steps such as commits.
+Companion installation includes transitive dependencies and conditional workflow
+steps such as commits.
 
 ## Options and confirmation
 
@@ -105,7 +104,11 @@ Repeat the same remote install command to update. The complete bundle is refresh
 so already-linked skills using that cache receive updated contents too. Selection
 controls which links are installed, not which files are downloaded.
 
-For a checkout, run `bash scripts/install.sh orchestrate` or `.\install.ps1 orchestrate`.
+If your installation includes `orchestrate`, `scope-and-plan`, or `model-tiers`,
+download the current public installer and run full setup without skill names.
+Full setup removes the stale managed links.
+
+For a checkout, run `bash scripts/install.sh verify` or `.\install.ps1 verify`.
 The script uses its own checkout location and never changes Git state. Full setup
 uses the same command without skill names. Edits to existing linked skills take
 effect immediately; rerun installation to reconcile added or removed skills.

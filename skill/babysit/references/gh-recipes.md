@@ -6,7 +6,7 @@ contributor's fork and holds no Actions runs.
 ## Resolve the PR
 
 ```bash
-gh pr view --json number,url,state,mergedAt,closedAt,headRefName,headRefOid,baseRefName,mergeable,mergeStateStatus,reviewDecision
+gh pr view --json number,url,state,isDraft,mergedAt,closedAt,headRefName,headRefOid,baseRefName,mergeable,mergeStateStatus,reviewDecision
 ```
 
 No positional argument resolves the PR from the current branch.

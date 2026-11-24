@@ -73,12 +73,6 @@ Raw: "I'm a bit scared with technical chats not because I'm I'm dumb or somethin
 Polished: [Skip this line. Start with the answer to the question.]
 Rule: don't announce a fear; start with the answer.
 
-## Why this company
-
-Raw: "To be honest, I didn't take a look in the website and the whole purpose. I have been so busy in the last days"
-Polished: "What caught my attention is [one true thing about the company or the role]."
-Rule: answer with what draws you, not with what you didn't do.
-
 ## Weak ending
 
 Raw: "Yeah, it's just that. I don't know if I answered your question, but it's..."

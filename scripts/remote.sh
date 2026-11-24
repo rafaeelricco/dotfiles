@@ -121,7 +121,6 @@ validate_payload() {
   for path in scripts/install.sh scripts/update.sh scripts/uninstall.sh scripts/remote.sh scripts/lib/lifecycle.sh skill/dependencies.txt; do
     [ -f "${root}/${path}" ] && [ ! -L "${root}/${path}" ] || return 1
   done
-  [ -f "${root}/skill/orchestrate/SKILL.md" ] || return 1
 }
 
 validate_existing_cache() {
@@ -132,6 +131,21 @@ validate_existing_cache() {
   version="$(version_file "${DOTFILES_HOME}/VERSION" 2>/dev/null || true)"
   [ -n "${version}" ] || die "DOTFILES_HOME exists but is not a verified release bundle: ${DOTFILES_HOME}; choose a separate DOTFILES_HOME"
   validate_payload "${DOTFILES_HOME}" "${version}" || die "DOTFILES_HOME is incomplete or invalid: ${DOTFILES_HOME}"
+}
+
+validate_payload_skills() {
+  local root="$1" line name
+  while IFS= read -r line || [ -n "${line}" ]; do
+    case "${line}" in ''|\#*) continue ;; esac
+    for name in ${line}; do
+      [[ "${name}" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] || return 1
+      [ -f "${root}/skill/${name}/SKILL.md" ] || return 1
+    done
+  done < "${root}/skill/dependencies.txt"
+  for name in "${root}"/skill/*/SKILL.md; do
+    [ ! -f "${name}" ] || return 0
+  done
+  return 1
 }
 
 main() {
@@ -175,6 +189,7 @@ main() {
   tar -xzf "${archive}" -C "${DOTFILES_TMP}/unpack" || die "failed to extract release archive"
   payload="${DOTFILES_TMP}/unpack/dotfiles"
   validate_payload "${payload}" "${release}" || die "downloaded release is incomplete or has a mismatched VERSION"
+  validate_payload_skills "${payload}" || die "downloaded release has missing or invalid skill entries"
   if [ "${action}" = uninstall ]; then
     bash "${payload}/scripts/uninstall.sh" "$@"
   else

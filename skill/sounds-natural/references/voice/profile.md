@@ -77,7 +77,7 @@ sample from the register file above.
 - Write for the user to read aloud, with connected clauses and natural pauses.
   Sentence length follows the thought and breathing, without a fixed word cap.
 - Preserve natural continuation and list endings where the example uses them.
-- Keeps the warmth: "I actually started in design", "That's why this role caught my attention".
+- Keeps the warmth: "I actually started in design".
 
 ## Written
 

@@ -1,7 +1,6 @@
-orchestrate scope-and-plan verify commit-message
-scope-and-plan plan-format model-tiers
 babysit verify commit-message
-create-pr plan-format commit-message pr-body
+create-pr plan-format commit-message pr-body verify
 pr-body commit-message
+deliver review-design create-pr babysit
 ui taste browser-use
 taste browser-use

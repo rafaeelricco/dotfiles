@@ -15,6 +15,13 @@ gaps exist, they lead.
 
 ## Shape
 
+For an isolated change with a clear target, report the verdict, the command and
+observed result for each material check, and any material gap or assumption.
+Include revision details if the invocation names a branch or PR.
+
+Use the expanded format when several flows, targets, or environments make the
+evidence hard to follow. Omit sections that have no relevant information.
+
 ```markdown
 ## Verdict: PASS | FAIL | PARTIAL | BLOCKED
 

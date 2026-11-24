@@ -210,7 +210,7 @@ class DeploymentTests(unittest.TestCase):
                 for script, expected in (
                     ("update.ps1", "RECEIVED=--dry-run|alpha"),
                     ("uninstall.ps1", "RECEIVED=uninstall|--dry-run|alpha"),
-                    ("skills/orchestrate.ps1", "RECEIVED=orchestrate|--dry-run|alpha"),
+                    ("skills/verify.ps1", "RECEIVED=verify|--dry-run|alpha"),
                 ):
                     result = subprocess.run(
                         [pwsh, "-NoProfile", "-File", str(release / script), "--dry-run", "alpha"],

@@ -51,7 +51,7 @@ class Documentation(unittest.TestCase):
         self.assertIn("Upgrade from the legacy clone installer", setup)
         self.assertIn("preserves the existing profile", (ROOT / "scripts/windows/README.md").read_text())
         readme = (ROOT / "README.md").read_text()
-        self.assertIn("https://r1cco.com/skills/orchestrate", readme)
+        self.assertIn("https://r1cco.com/skills/verify", readme)
         self.assertIn("docs/deployment.md", readme)
         for row in (ROOT / "skill/dependencies.txt").read_text().splitlines():
             if not row or row.startswith("#"):
