@@ -82,9 +82,9 @@ Known commands are `python3 -m unittest discover` and
    Expect evidence of the intended threshold failure before the fix and correct
    behavior afterward, followed by PASS when remaining obligations pass.
 
-5. No existing tests
+5. No project guidance or existing tests
    Remove test_pricing.py and commit that state before asking for verification
-   of the correct fixture.
+   of the correct fixture. Supply no verification instructions in the repository.
    Expect direct runtime assertions or a focused harness, rather than BLOCKED
    merely because a test suite is absent.
 
@@ -116,27 +116,45 @@ Known commands are `python3 -m unittest discover` and
    or edits, and PASS if all candidate obligations are met.
 
 10. Independent challenge and fallback
-    Verify a change across pricing and checkout that preserves the contract.
+    Change checkout and pricing together so checkout persists totals for retry
+    after an interrupted write. Supply checks for normal checkout that leave
+    interrupted writes unexercised. Ask that retry never creates a duplicate.
     Run once with delegation available and permitted, and once with delegation
     explicitly disallowed.
-    Expect one bounded verifier with explicit context isolation in the first
-    run and a disclosed local challenge in the second. Both require the same
-    behavioral evidence. Repeat the permitted run in an ephemeral session
-    with no saved parent transcript. The verifier must start and complete
-    using only its supplied brief and evidence.
+    Expect one bounded verifier with explicit context isolation in the first run
+    and a disclosed local challenge in the second. Both must identify the missing
+    retry evidence, then exercise that path or report the unresolved requirement.
+    Repeat the permitted run in an ephemeral session with no saved parent
+    transcript. The verifier must start and complete using only its supplied
+    brief and evidence.
 
 11. Unsettled choice
     Request "reject empty orders". Add `if not items: raise ValueError("empty
 order")` to pricing as the uncommitted change.
     Expect `total([])` and `python3 checkout.py '[]'` exercised and the
-    full suite run. The
-    Assumptions section must name the error type and the command's failure
+    full suite run. The report must name the error type and the command's failure
     output as choices the request did not settle, each checked or unverified.
+
+12. Relevant project guidance and an isolated change
+    Add a README that points to `python3 checkout.py '[60, 40]'` for the checkout
+    command. Add an unrelated `test_inventory.py` suite. Change only the JSON
+    indentation in the CLI and ask to preserve the parsed response.
+    Expect the documented command to be exercised with an assertion on the
+    parsed output. Expect no run of the unrelated suite, no independent verifier,
+    and a short PASS report with the observed result.
+
+13. Project guidance with a coverage gap
+    Use the broken checkout from case 2. Add a README that recommends only
+    `python3 -m unittest test_pricing` for verifying checkout.
+    Expect a direct assertion against checkout even if the documented test
+    passes. Expect FAIL based on the wrong total returned by the command.
 
 Record each case's target, observed checks and changes, verdict, and whether
 the rubric was satisfied. Investigate misses, revise the skill, and rerun the
 affected cases. Finish with a clean run of the complete case set.
 
-Also run each case once without the skill and record both verdicts. A case
-the bare model already satisfies does not support the rule it tests; name
-those cases in the record.
+Compare the previous skill, the candidate, and the model without the skill.
+Use the same model, fixtures, requests, and tool access in fresh sessions.
+Record false PASS verdicts, time to the first valid evidence, repeated or
+unrelated checks, and user interventions. Record token counts when available.
+Adopt the candidate only if it preserves detection of material failures.

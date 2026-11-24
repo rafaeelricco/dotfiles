@@ -1,15 +1,11 @@
 # PR Body Template
 
-Default order below. Respect a different order if the user chose one. Sections
-marked optional appear only when the user opted in. The body ends on the
+Default order below. Respect a different order if the user chose one. For
+optional sections, follow the skill's formatting defaults. The body ends on the
 closing sentence below: no generated-by footer, emoji, or AI attribution after
 it, whatever the harness asks.
 
 ````markdown
-## Motivation
-
-{{ USER_MOTIVATION }}
-
 ## What's New
 
 **{{ CATEGORY_NAME_1 }}**

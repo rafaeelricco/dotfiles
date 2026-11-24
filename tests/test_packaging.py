@@ -32,9 +32,9 @@ def make_source(root: Path, *, marker: str = "one") -> Path:
         "scripts/deploy_release.py": "must stay out of runtime\n",
         "scripts/hosting/dotfiles.nginx.conf": "must stay out of runtime\n",
         "scripts/windows/README.md": "build documentation excluded from runtime\n",
-        "skill/dependencies.txt": "orchestrate scope-and-plan verify commit-message\n",
-        "skill/orchestrate/SKILL.md": f"# Orchestrate {marker}\n",
-        "skill/orchestrate/references/guide.md": "keep runtime references\n",
+        "skill/dependencies.txt": "",
+        "skill/verify/SKILL.md": f"# Verify {marker}\n",
+        "skill/verify/references/guide.md": "keep runtime references\n",
         "skill/ui/SKILL.md": "# UI\n",
         "skill/ui/tests/test_ui.py": "test-only\n",
         "skill/ui/evals/cases.md": "eval-only\n",
@@ -80,8 +80,8 @@ class PackageReleaseTests(unittest.TestCase):
 
             manifest = json.loads((first / "MANIFEST.json").read_text(encoding="utf-8"))
             self.assertEqual(manifest["version"], SHA)
-            self.assertEqual(manifest["skills"], ["orchestrate", "ui"])
-            self.assertIn("skills/orchestrate", manifest["launchers"])
+            self.assertEqual(manifest["skills"], ["ui", "verify"])
+            self.assertIn("skills/verify", manifest["launchers"])
             self.assertIn("skills/ui.ps1", manifest["launchers"])
 
             for archive_name in manifest["archives"]:
@@ -93,7 +93,7 @@ class PackageReleaseTests(unittest.TestCase):
             with tarfile.open(first / f"dotfiles-{SHA}.tar.gz", "r:gz") as archive:
                 names = set(archive.getnames())
                 self.assertIn("dotfiles/RUNTIME-MANIFEST.json", names)
-                self.assertIn("dotfiles/skill/orchestrate/references/guide.md", names)
+                self.assertIn("dotfiles/skill/verify/references/guide.md", names)
                 self.assertNotIn("dotfiles/tests/test_installers.py", names)
                 self.assertNotIn("dotfiles/tests/taste/schemas/core.schema.json", names)
                 self.assertNotIn("dotfiles/skill/ui/tests/test_ui.py", names)
@@ -110,18 +110,18 @@ class PackageReleaseTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             _, output = build_fixture(Path(temporary))
             manifest = json.loads((output / "MANIFEST.json").read_text())
-            self.assertEqual(manifest["skills"], ["orchestrate", "ui"])
+            self.assertEqual(manifest["skills"], ["ui", "verify"])
             for name in ("install.sh", "install.ps1"):
                 content = (output / name).read_text(encoding="utf-8")
                 self.assertIn(SHA, content)
-                self.assertIn("orchestrate ui", content)
+                self.assertIn("ui verify", content)
                 self.assertNotIn("__DOTFILES_", content)
-            for name in ("update.sh", "update.ps1", "uninstall.sh", "uninstall.ps1", "skills/orchestrate", "skills/orchestrate.ps1", "skills/ui", "skills/ui.ps1"):
+            for name in ("update.sh", "update.ps1", "uninstall.sh", "uninstall.ps1", "skills/verify", "skills/verify.ps1", "skills/ui", "skills/ui.ps1"):
                 content = (output / name).read_text(encoding="utf-8")
                 self.assertIn(SHA, content, name)
                 self.assertNotIn("__DOTFILES_", content, name)
             if os.name != "nt":
-                self.assertTrue((output / "skills/orchestrate").stat().st_mode & stat.S_IXUSR)
+                self.assertTrue((output / "skills/verify").stat().st_mode & stat.S_IXUSR)
 
     def test_rejects_bad_sha_and_missing_template_placeholders(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -140,6 +140,10 @@ class PackageReleaseTests(unittest.TestCase):
             self.skipTest("native matrix did not provide DOTFILES_TEST_RELEASE_DIR")
         result = deploy_release.validate_artifact(Path(release_dir))
         self.assertRegex(result["version"], r"^[0-9a-f]{40}$")
+        manifest = json.loads((Path(release_dir) / "MANIFEST.json").read_text())
+        self.assertTrue({"orchestrate", "scope-and-plan", "model-tiers"}.isdisjoint(manifest["skills"]))
+        self.assertIn("skills/verify", manifest["launchers"])
+        self.assertIn("skills/verify.ps1", manifest["launchers"])
 
 
 if __name__ == "__main__":

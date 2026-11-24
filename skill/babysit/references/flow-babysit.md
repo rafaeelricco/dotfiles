@@ -95,11 +95,14 @@ is not pending merely because it reviewed an earlier head: let Watch clear and
 send the eligible Re-request first. Start its grace when that request is sent;
 do not assume every known bot is installed.
 
-While waiting, have the harness recheck in 5 minutes, reusing an existing
-scheduled continuation rather than creating duplicates. Preserve the PR,
-head SHA, trigger time, and pending work in the handoff; refresh them on resume.
-If scheduling is unavailable, report that limitation and the next check time.
-Report waiting, never merge-ready, and suspend this cycle until the continuation.
+If the caller is following this PR in the current session, wait there and
+refresh the PR state before proceeding.
+
+If the caller uses a scheduled continuation, request a recheck in 5 minutes
+and reuse any existing continuation. Preserve the PR, head SHA, trigger time,
+and pending work for the handoff. If scheduling is unavailable, report the
+limitation and the next check time. Otherwise, report waiting and suspend this
+cycle until the continuation.
 Carry its Scope Gate decisions, trusted review context, pushed commits, addressed
 sources/reviewers, and pending/completed post-push steps. A continuation resumes
 the same logical cycle: “this cycle” eligibility includes its earlier invocations.
@@ -117,9 +120,10 @@ checks.
 
 - Resolve the PR from the user's URL/number, or the current branch via
   `git`/`gh`.
-- Snapshot state, mergeability, merge-state status, review decision, worktree
-  cleanliness, and whether the branch is behind base. Unrelated uncommitted
-  changes → stop and ask.
+- Snapshot state, draft status, mergeability, merge-state status, review decision, worktree
+  cleanliness, and whether the branch is behind base. If the checkout contains
+  unrelated work, use a clean checkout of the PR head when allowed. If none
+  is available, continue read-only and report any fix that needs a clean checkout.
 - Read unresolved, non-outdated review threads: body plus the minimum
   file/line/URL context.
 - Three sources: inline review threads, review submissions, PR issue comments.
@@ -138,13 +142,11 @@ checks.
 
 ## Scope Gate
 
-Present the table and reuse existing authorization for the same PR, scope,
-and actions. If that grant is missing, ask for approval of the table before
-those actions. The grant covers fixing
-every ADDRESS cluster (reproved functional bugs only), Already-fixed-reply
-every ALREADY_FIXED known-bot source, and Skip- or Disagree-reply every SKIP
-known-bot source per Phase-1 `ACTION` (Comment routing). UNSURE stays blocked for that
-thread only; granted ADDRESS and SKIP work still runs.
+Present the table and reuse existing authorization for each action on the
+same PR and scope. Keep actions without a grant pending. Continue authorized
+fixes and CI work while approval for a reply, resolution, or re-request is
+pending. Follow Comment routing for replies and keep UNSURE blocked for that
+thread only.
 Human replies require authorization for the exact text; human re-requests
 require authorization for that action. Reuse it when already given. This gate
 is the plan.
@@ -168,7 +170,7 @@ is the plan.
   per login (bot: filled `review-prompt.md` comment; human: confirm the
   `--add-reviewer LOGIN` action only — no request text, no extra comment).
 - **Review delta:** if this cycle will push a commit and Gather already
-  has a trusted review, post `./review-delta.md` after Watch (auto).
+  has a trusted review, include the delta in the scope of any authorized posts.
 
 ## CI classification
 
@@ -209,8 +211,8 @@ Treat non-GitHub-Actions providers as report-only unless asked.
 
 ## Review delta
 
-Load `./review-delta.md` when this cycle pushed at least one commit and
-Gather had a trusted review. Skip otherwise. Then **Re-request**.
+Load `./review-delta.md` when this cycle pushed at least one commit, Gather had
+a trusted review, and posting the delta is authorized. Then **Re-request**.
 
 ## Re-request
 
@@ -234,11 +236,11 @@ Every cycle ends. It ends early when a blocker needs a human:
 An UNSURE (bug-vs-intent) finding is not an early-stop: report it, leave
 that thread blocked, and finish granted ADDRESS and SKIP work.
 
-After **Wait gate** clears, green + mergeable ends the cycle.
-"Green" requires at least one **completed** check; report zero checks or
-missing expected results without claiming merge-ready.
-Report merge-ready only off a fresh read showing mergeable and required checks
-green.
+After **Wait gate** clears, use a fresh snapshot to report readiness. Report
+merge-ready only when the PR is open, ready for review, mergeable, and free of
+GitHub merge gates, with green required checks and at least one completed check.
+Report drafts, missing approvals, requested changes, zero checks, and missing
+expected results as their observed states.
 
 ## Report
 

@@ -28,11 +28,11 @@ Record the repository, base and target revisions, and local changes included.
 An empty diff does not settle a supplied requirement. If neither changes nor a
 concrete outcome are available, report that there is nothing to verify.
 
-Read the original request, accepted decisions, the approved plan's Verify
-section, and relevant specifications and contracts. Use the diff to locate
-implementation and affected callers, not to
-invent the requirements. Resolve material uncertainty from available sources;
-ask only for expected behavior those sources cannot establish.
+Read the original request, accepted decisions, and relevant specifications and
+contracts. If an approved plan exists, read its Verify section. Use the diff to
+locate implementation and affected callers, not to invent requirements. Resolve
+material uncertainty from available sources. Ask only for expected behavior
+those sources cannot establish.
 
 Map each material requirement and affected invariant to:
 expected outcome → interface/scenario → required evidence.
@@ -47,9 +47,14 @@ require behavioral verification.
 
 ## 2. Find the evidence
 
-Inspect repository commands, CI requirements, existing tests, dependencies,
-available runtimes, and running services. Determine what each check actually
-covers and which obligations remain uncovered.
+Look for verification instructions for the affected interface in project
+guidance, such as the README or a linked runbook. Read the relevant entries.
+Confirm that the commands apply to the target and that their assertions cover
+the required behavior.
+
+If project guidance is absent, incomplete, or stale, inspect existing tests,
+CI, and runnable interfaces for the missing checks. Use the smallest set of
+checks that covers the affected behavior and repository requirements.
 
 Use the existing test layer where suitable. Fill material gaps with a focused
 regression test, fixture-driven runtime invocation, replay, or temporary harness.
@@ -72,9 +77,11 @@ fails for the intended reason on the broken baseline. For changed validators
 or harnesses, check known valid and invalid cases. Keep deliberate faults in
 isolated copies. Preservation checks may correctly pass before and after.
 
-Run the complete affected regression suites and repository-required checks.
-Include affected consumers of shared code or configuration; expand to the
-repository-wide checks when the dependency scope requires them.
+Run the affected regression checks and all repository-required checks. If a
+focused check covers an isolated change, use it instead of the full suite
+unless the repository requires the full suite. If shared code or configuration
+changes, include affected consumers. Run broader suites when the dependency
+scope requires them.
 
 Investigate failures and retain their evidence. Attribute a failure to the
 baseline only after checking that claim. A later passing retry does not erase
@@ -82,9 +89,10 @@ an unexplained failure. Complete useful independent checks despite blockers.
 
 ## 4. Challenge the evidence
 
-For changes involving cross-module/runtime interactions, shared contracts or
-configuration, or stateful failure/recovery behavior, use one fresh verifier
-when delegation is available and permitted.
+For a change that alters a shared contract or stateful failure and recovery, or
+when evidence leaves a material doubt across modules or runtimes, use one fresh
+verifier when delegation is available and permitted. Name the failure mode or
+coverage gap the verifier should challenge.
 
 Start it with a clean context containing only the original requirements,
 target identity, source paths, and raw check evidence. Set the spawn tool's

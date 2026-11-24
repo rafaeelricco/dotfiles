@@ -17,10 +17,7 @@ import zipfile
 
 
 REPO = Path(__file__).resolve().parents[1]
-ORCHESTRATE = {
-    "orchestrate", "scope-and-plan", "plan-format", "model-tiers",
-    "verify", "commit-message",
-}
+CREATE_PR = {"create-pr", "plan-format", "commit-message", "pr-body", "verify"}
 PWSH = os.environ.get("DOTFILES_TEST_PWSH") or shutil.which("pwsh")
 BASH = "/bin/bash" if Path("/bin/bash").exists() else shutil.which("bash")
 
@@ -81,7 +78,7 @@ class LifecycleCases:
                            else Path(self.env["XDG_STATE_HOME"])) / "dotfiles"
         self.state = self.state_base / "install-state"
 
-    def invoke(self, args=(), action="install", script=None, env=None):
+    def invoke(self, args=(), action="install", script=None, env=None, cwd=None):
         command_env = self.env.copy()
         if env:
             command_env.update(env)
@@ -96,7 +93,7 @@ class LifecycleCases:
                        "$PROFILE = $env:DOTFILES_TEST_PROFILE; "
                        "$installerArgs = @(ConvertFrom-Json $env:DOTFILES_TEST_ARGS); "
                        "& $env:DOTFILES_TEST_SCRIPT @installerArgs"]
-        return subprocess.run(command, env=command_env, input="", text=True,
+        return subprocess.run(command, env=command_env, cwd=cwd, input="", text=True,
                               capture_output=True, timeout=90)
 
     def assert_success(self, result):
@@ -128,31 +125,31 @@ class LifecycleCases:
         self.addCleanup(server.shutdown)
         return "http://127.0.0.1:" + str(server.server_port) + "/dotfiles", immutable
 
-    def test_orchestrate_dependencies_and_repeat(self):
-        self.assert_success(self.invoke(["orchestrate"] + self.skip_flags()))
-        self.assertEqual(self.names(), ORCHESTRATE)
-        for name in ORCHESTRATE:
+    def test_create_pr_dependencies_and_repeat(self):
+        self.assert_success(self.invoke(["create-pr"] + self.skip_flags()))
+        self.assertEqual(self.names(), CREATE_PR)
+        for name in CREATE_PR:
             self.assertTrue((self.skills / name).is_symlink(), name)
             self.assertEqual((self.skills / name).resolve(), (self.source / "skill" / name).resolve())
         self.assertTrue(self.state.is_file())
         first = self.state.read_text()
-        self.assert_success(self.invoke(["orchestrate"] + self.skip_flags()))
+        self.assert_success(self.invoke(["create-pr"] + self.skip_flags()))
         lines = self.state.read_text().splitlines()
         self.assertEqual(len(lines), len(set(lines)), "state must not accumulate duplicate records")
-        self.assertEqual(self.names(), ORCHESTRATE)
+        self.assertEqual(self.names(), CREATE_PR)
         self.assertIn("dotfiles-lifecycle-state-v2", first.splitlines()[0])
 
-    def test_scope_and_plan_installs_companions(self):
-        self.assert_success(self.invoke(["scope-and-plan"] + self.skip_flags()))
-        self.assertEqual(self.names(), {"scope-and-plan", "plan-format", "model-tiers"})
+    def test_deliver_installs_workflow_companions(self):
+        self.assert_success(self.invoke(["deliver"] + self.skip_flags()))
+        self.assertEqual(self.names(), CREATE_PR | {"deliver", "review-design", "babysit"})
 
     def test_selected_retains_other_skills_and_guidance(self):
         guidance = self.home / ".codex" / "AGENTS.md"
         guidance.parent.mkdir(parents=True)
         guidance.write_text("My existing instructions\n")
         self.assert_success(self.invoke(["ui"] + self.skip_flags()))
-        self.assert_success(self.invoke(["orchestrate"] + self.skip_flags()))
-        self.assertEqual(self.names(), ORCHESTRATE | {"ui", "taste", "browser-use"})
+        self.assert_success(self.invoke(["create-pr"] + self.skip_flags()))
+        self.assertEqual(self.names(), CREATE_PR | {"ui", "taste", "browser-use"})
         self.assertEqual(guidance.read_text(), "My existing instructions\n")
         self.assertFalse(guidance.is_symlink())
 
@@ -176,7 +173,7 @@ class LifecycleCases:
 
     def test_dry_run_does_not_install(self):
         option = "--dry-run" if self.runtime == "bash" else "-DryRun"
-        self.assert_success(self.invoke(["orchestrate", option] + self.skip_flags()))
+        self.assert_success(self.invoke(["create-pr", option] + self.skip_flags()))
         self.assertFalse(self.state.exists())
         self.assertEqual(self.names(), set())
         self.assertFalse(self.home.joinpath(".codex", "AGENTS.md").exists())
@@ -196,7 +193,7 @@ class LifecycleCases:
         option = "--help" if self.runtime == "bash" else "-Help"
         result = self.invoke([option])
         self.assert_success(result)
-        self.assertIn("orchestrate", result.stdout)
+        self.assertIn("create-pr", result.stdout)
         self.assertIn("ui", result.stdout)
         flags = (["--dry-run", "--help", "--skip-claude", "--skip-codex", "--skip-grok", "--skip-cursor", "--skip-hermes"]
                  if self.runtime == "bash" else
@@ -209,32 +206,32 @@ class LifecycleCases:
         foreign = self.skills / "ui"
         foreign.mkdir(parents=True)
         (foreign / "mine").write_text("keep")
-        result = self.invoke(["ui", "orchestrate"] + self.skip_flags())
+        result = self.invoke(["ui", "create-pr"] + self.skip_flags())
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual((foreign / "mine").read_text(), "keep")
-        self.assertFalse((self.skills / "orchestrate").exists())
+        self.assertFalse((self.skills / "create-pr").exists())
         self.assertFalse(self.state.exists())
 
     def test_duplicate_roots_and_dependency_cycle_terminate(self):
-        (self.source / "skill" / "dependencies.txt").write_text("orchestrate ui\nui orchestrate\n")
-        self.assert_success(self.invoke(["orchestrate", "ui", "orchestrate"] + self.skip_flags()))
-        self.assertEqual(self.names(), {"orchestrate", "ui"})
+        (self.source / "skill" / "dependencies.txt").write_text("create-pr ui\nui create-pr\n")
+        self.assert_success(self.invoke(["create-pr", "ui", "create-pr"] + self.skip_flags()))
+        self.assertEqual(self.names(), {"create-pr", "ui"})
 
     def test_missing_dependency_fails_before_state(self):
-        (self.source / "skill" / "dependencies.txt").write_text("orchestrate absent-companion\n")
-        self.assertNotEqual(self.invoke(["orchestrate"] + self.skip_flags()).returncode, 0)
+        (self.source / "skill" / "dependencies.txt").write_text("create-pr absent-companion\n")
+        self.assertNotEqual(self.invoke(["create-pr"] + self.skip_flags()).returncode, 0)
         self.assertFalse(self.state.exists())
         self.assertEqual(self.names(), set())
 
     def test_uninstall_retains_source_and_backups(self):
-        self.assert_success(self.invoke(["orchestrate"] + self.skip_flags()))
+        self.assert_success(self.invoke(["create-pr"] + self.skip_flags()))
         backup = self.home / "instructions.backup"
         backup.write_text("valuable original\n")
         with self.state.open("a") as stream:
             stream.write("backup\t" + str(self.home / ".codex" / "AGENTS.md") + "\t" + str(backup) + "\n")
         self.assert_success(self.invoke(action="uninstall"))
         self.assertEqual(self.names(), set())
-        self.assertTrue((self.source / "skill" / "orchestrate" / "SKILL.md").is_file())
+        self.assertTrue((self.source / "skill" / "create-pr" / "SKILL.md").is_file())
         self.assertEqual(backup.read_text(), "valuable original\n")
         self.assert_success(self.invoke(action="uninstall"))
 
@@ -296,7 +293,7 @@ class LifecycleCases:
         self.assertEqual((backups[0] / "mine").read_text(), "keep me")
 
     def test_tampered_state_cannot_remove_unrelated_user_link(self):
-        self.assert_success(self.invoke(["orchestrate"] + self.skip_flags()))
+        self.assert_success(self.invoke(["create-pr"] + self.skip_flags()))
         unrelated = self.home / "work/ui"
         unrelated.parent.mkdir()
         unrelated.symlink_to(self.source / "skill/ui", target_is_directory=True)
@@ -308,7 +305,7 @@ class LifecycleCases:
     def test_mutation_lock_is_respected(self):
         lock = Path(str(self.state) + ".lock")
         lock.mkdir(parents=True)
-        result = self.invoke(["orchestrate"] + self.skip_flags())
+        result = self.invoke(["create-pr"] + self.skip_flags())
         self.assertNotEqual(result.returncode, 0)
         self.assertTrue(lock.is_dir())
         self.assertFalse(self.state.exists())
@@ -324,8 +321,8 @@ class LifecycleCases:
         legacy.write_text("dotfiles-local-lifecycle-state-v1\nsource\t" + str(old) +
                           "\nlink\t" + str(self.skills / "ui") + "\t" + str(old / "skill" / "ui") + "\n")
         original = legacy.read_bytes()
-        self.assert_success(self.invoke(["orchestrate"] + self.skip_flags()))
-        self.assertEqual(self.names(), ORCHESTRATE | {"ui"})
+        self.assert_success(self.invoke(["create-pr"] + self.skip_flags()))
+        self.assertEqual(self.names(), CREATE_PR | {"ui"})
         self.assertEqual((self.skills / "ui").resolve(), old / "skill" / "ui")
         self.assertEqual(legacy.read_bytes(), original)
         self.assert_success(self.invoke(action="uninstall"))
@@ -335,10 +332,10 @@ class LifecycleCases:
     def test_legacy_directory_link_preserves_existing_skills(self):
         self.skills.parent.mkdir(parents=True)
         self.skills.symlink_to(self.source / "skill", target_is_directory=True)
-        self.assert_success(self.invoke(["orchestrate"] + self.skip_flags()))
+        self.assert_success(self.invoke(["create-pr"] + self.skip_flags()))
         self.assertTrue((self.skills / "ui" / "SKILL.md").exists())
         self.assertTrue((self.source / "skill" / "ui" / "SKILL.md").exists())
-        self.assertTrue((self.source / "skill" / "orchestrate" / "SKILL.md").exists())
+        self.assertTrue((self.source / "skill" / "create-pr" / "SKILL.md").exists())
 
     def test_foreign_skill_directory_link_blocks_unattended_install(self):
         foreign = self.base / "foreign"
@@ -356,9 +353,9 @@ class LifecycleCases:
         other = self.base / "other"
         shutil.copytree(self.source, other, symlinks=True)
         self.assert_success(self.invoke(["ui"] + self.skip_flags(), script=other / ("scripts/install.sh" if self.runtime == "bash" else "install.ps1")))
-        self.assert_success(self.invoke(["orchestrate"] + self.skip_flags()))
+        self.assert_success(self.invoke(["create-pr"] + self.skip_flags()))
         shutil.rmtree(other)
-        result = self.invoke(["orchestrate"] + self.skip_flags())
+        result = self.invoke(["create-pr"] + self.skip_flags())
         self.assert_success(result)
         self.assertIn("lifecycle source is unavailable or invalid", result.stderr)
         self.assert_success(self.invoke(action="uninstall"))
@@ -372,16 +369,16 @@ class LifecycleCases:
         version = (release / "VERSION").read_text().strip()
         base_url, immutable = self.serve_release()
         remote = release / ("install.sh" if self.runtime == "bash" else "install.ps1")
-        options = ["orchestrate"] + self.skip_flags()
+        options = ["create-pr"] + self.skip_flags()
         dry = "--dry-run" if self.runtime == "bash" else "-DryRun"
         self.assert_success(self.invoke(options + [dry], script=remote, env={"DOTFILES_BASE_URL": base_url}))
         cache = Path(self.env["XDG_DATA_HOME"]) / "dotfiles"
         self.assertFalse(cache.exists())
         self.assertFalse(self.state.exists())
         self.assert_success(self.invoke(options, script=remote, env={"DOTFILES_BASE_URL": base_url}))
-        self.assertEqual(self.names(), ORCHESTRATE)
+        self.assertEqual(self.names(), CREATE_PR)
         self.assertEqual((cache / "VERSION").read_text().strip(), version)
-        for name in ORCHESTRATE:
+        for name in CREATE_PR:
             self.assertEqual((self.skills / name).resolve(), (cache / "skill" / name).resolve())
         before = (cache / "VERSION").read_bytes()
         suffix = ".zip" if self.runtime == "powershell" else ".tar.gz"
@@ -389,7 +386,7 @@ class LifecycleCases:
         result = self.invoke(options, script=remote, env={"DOTFILES_BASE_URL": base_url})
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual((cache / "VERSION").read_bytes(), before)
-        self.assertEqual(self.names(), ORCHESTRATE)
+        self.assertEqual(self.names(), CREATE_PR)
 
     def test_remote_refreshes_contents_when_links_are_unchanged(self):
         if not self.release:
@@ -399,7 +396,7 @@ class LifecycleCases:
         remote = Path(self.release) / ("install.sh" if self.runtime == "bash" else "install.ps1")
         env = {"DOTFILES_BASE_URL": base_url}
         self.assert_success(self.invoke(["ui"] + self.skip_flags(), script=remote, env=env))
-        self.assert_success(self.invoke(["orchestrate"] + self.skip_flags(), script=remote, env=env))
+        self.assert_success(self.invoke(["create-pr"] + self.skip_flags(), script=remote, env=env))
         cache = Path(self.env["XDG_DATA_HOME"]) / "dotfiles"
         (self.source / "skill/ui/SKILL.md").write_text("# Updated unrequested skill\n")
         version = "f" * 40
@@ -408,16 +405,41 @@ class LifecycleCases:
         env["DOTFILES_VERSION"] = version
         dry = "--dry-run" if self.runtime == "bash" else "-DryRun"
         before = self.state.read_bytes()
-        self.assert_success(self.invoke(["orchestrate", dry] + self.skip_flags(), script=remote, env=env))
+        self.assert_success(self.invoke(["create-pr", dry] + self.skip_flags(), script=remote, env=env))
         self.assertNotEqual((cache / "VERSION").read_text().strip(), version)
         self.assertEqual(self.state.read_bytes(), before)
-        self.assert_success(self.invoke(["orchestrate"] + self.skip_flags(), script=remote, env=env))
+        self.assert_success(self.invoke(["create-pr"] + self.skip_flags(), script=remote, env=env))
         self.assertEqual((cache / "VERSION").read_text().strip(), version)
         self.assertEqual((self.skills / "ui/SKILL.md").read_text(), "# Updated unrequested skill\n")
-        self.assertEqual(self.names(), ORCHESTRATE | {"ui", "taste", "browser-use"})
+        self.assertEqual(self.names(), CREATE_PR | {"ui", "taste", "browser-use"})
         self.assert_success(self.invoke(["uninstall"], script=remote, env=env))
         self.assertEqual(self.names(), set())
         self.assertTrue((cache / "VERSION").is_file())
+
+    def test_current_remote_installer_removes_retired_skill_links(self):
+        if not self.release:
+            self.skipTest("requires DOTFILES_TEST_RELEASE_DIR built artifact")
+        retired = {"orchestrate", "scope-and-plan", "model-tiers"}
+        cache = Path(self.env["XDG_DATA_HOME"]) / "dotfiles"
+        shutil.copytree(self.source, cache)
+        (cache / "VERSION").write_text("e" * 40 + "\n")
+        for name in retired:
+            skill = cache / "skill" / name
+            skill.mkdir()
+            (skill / "SKILL.md").write_text(f"# {name}\n")
+        entrypoint = "scripts/install.sh" if self.runtime == "bash" else "install.ps1"
+        self.assert_success(self.invoke(sorted(retired) + ["verify"] + self.skip_flags(),
+                                        script=cache / entrypoint))
+        self.assertEqual(self.names(), retired | {"verify"})
+
+        base_url, _ = self.serve_release()
+        remote = Path(self.release) / ("install.sh" if self.runtime == "bash" else "install.ps1")
+        self.assert_success(self.invoke(self.skip_flags(), script=remote,
+                                        env={"DOTFILES_BASE_URL": base_url}))
+        self.assertTrue(retired.isdisjoint(self.names()))
+        self.assertTrue((self.skills / "verify" / "SKILL.md").is_file())
+        self.assertEqual((cache / "VERSION").read_bytes(),
+                         (Path(self.release) / "VERSION").read_bytes())
 
     def test_full_install_prunes_removed_managed_skill_only(self):
         obsolete = self.source / "skill/obsolete-skill"
@@ -454,7 +476,7 @@ class LifecycleCases:
         (immutable / asset).write_bytes(content)
         (immutable / "SHA256SUMS").write_text(hashlib.sha256(content).hexdigest() + "  " + asset + "\n")
         remote = Path(self.release) / ("install.sh" if self.runtime == "bash" else "install.ps1")
-        result = self.invoke(["orchestrate"] + self.skip_flags(), script=remote, env={"DOTFILES_BASE_URL": base_url})
+        result = self.invoke(["create-pr"] + self.skip_flags(), script=remote, env={"DOTFILES_BASE_URL": base_url})
         self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertFalse(self.state.exists())
         self.assertFalse((Path(self.env["XDG_DATA_HOME"]) / "dotfiles").exists())
@@ -475,21 +497,21 @@ class LifecycleCases:
         legacy.write_text("dotfiles-lifecycle-state-v1\nlink\t" + str(link) + "\t" + str(old / "skill/ui") + "\n")
         original = legacy.read_bytes()
         env = {"DOTFILES_DIR": str(old)}
-        self.assert_success(self.invoke(["orchestrate"] + self.skip_flags(), env=env))
-        self.assertEqual(self.names(), ORCHESTRATE | {"ui"})
+        self.assert_success(self.invoke(["create-pr"] + self.skip_flags(), env=env))
+        self.assertEqual(self.names(), CREATE_PR | {"ui"})
         self.assert_success(self.invoke(action="uninstall", env=env))
         self.assertFalse(link.is_symlink())
         self.assertEqual(legacy.read_bytes(), original)
         self.assertEqual((old / "valuable-local-edit").read_text(), "preserve checkout")
 
-    def test_short_public_command_installs_orchestrate(self):
+    def test_short_public_command_installs_verify(self):
         if not self.release:
             self.skipTest("requires DOTFILES_TEST_RELEASE_DIR built artifact")
         base_url, _immutable = self.serve_release()
         env = self.env.copy()
         env["DOTFILES_BASE_URL"] = base_url
         suffix = ".ps1" if self.runtime == "powershell" else ""
-        env["DOTFILES_TEST_URL"] = base_url.removesuffix("/dotfiles") + "/skills/orchestrate" + suffix
+        env["DOTFILES_TEST_URL"] = base_url.removesuffix("/dotfiles") + "/skills/verify" + suffix
         if self.runtime == "bash":
             command = [BASH, "-c", 'set -o pipefail; curl -fsSL "$DOTFILES_TEST_URL" | bash']
         else:
@@ -498,11 +520,53 @@ class LifecycleCases:
                        "Invoke-RestMethod $env:DOTFILES_TEST_URL | Invoke-Expression"]
         result = subprocess.run(command, env=env, input="", text=True, capture_output=True, timeout=90)
         self.assert_success(result)
-        self.assertEqual(self.names(), ORCHESTRATE)
+        self.assertEqual(self.names(), {"verify"})
 
 
 @unittest.skipIf(os.name == "nt" or not BASH, "native POSIX Bash required")
 class BashInstallers(LifecycleCases, unittest.TestCase):
+    def test_remote_rejects_glob_in_workflow_companion(self):
+        if not self.release:
+            self.skipTest("requires DOTFILES_TEST_RELEASE_DIR built artifact")
+        from scripts import package_release
+        base_url, first = self.serve_release()
+        manifest = self.source / "skill/dependencies.txt"
+        manifest.write_text(manifest.read_text().replace("deliver review-design ", "deliver review-[d]esign "))
+        version = "f" * 40
+        package_release.build_release(version, first.parent / version, source=self.source, use_git=False)
+        (self.base / "review-design").touch()
+
+        result = self.invoke(self.skip_flags(), script=Path(self.release) / "install.sh", cwd=self.base,
+                             env={"DOTFILES_BASE_URL": base_url, "DOTFILES_VERSION": version})
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("missing or invalid skill entries", result.stderr)
+        self.assertFalse(self.state.exists())
+
+    def test_remote_rejects_missing_workflow_companion(self):
+        if not self.release:
+            self.skipTest("requires DOTFILES_TEST_RELEASE_DIR built artifact")
+        from scripts import package_release
+        base_url, first = self.serve_release()
+        remote = Path(self.release) / "install.sh"
+        env = {"DOTFILES_BASE_URL": base_url}
+        self.assert_success(self.invoke(["deliver"] + self.skip_flags(), script=remote, env=env))
+        cache = Path(self.env["XDG_DATA_HOME"]) / "dotfiles"
+        before_version = (cache / "VERSION").read_bytes()
+        before_state = self.state.read_bytes()
+
+        (self.source / "skill/review-design/SKILL.md").unlink()
+        version = "f" * 40
+        package_release.build_release(version, first.parent / version, source=self.source, use_git=False)
+        env["DOTFILES_VERSION"] = version
+        result = self.invoke(self.skip_flags(), script=remote, env=env)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("missing or invalid skill entries", result.stderr)
+        self.assertEqual((cache / "VERSION").read_bytes(), before_version)
+        self.assertEqual(self.state.read_bytes(), before_state)
+        self.assertTrue((self.skills / "review-design/SKILL.md").is_file())
+
     def test_symlinked_agent_home_uninstalls_its_links(self):
         actual = self.home / "actual-claude"
         actual.mkdir()

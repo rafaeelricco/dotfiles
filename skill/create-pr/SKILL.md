@@ -7,323 +7,52 @@ description: >
 
 # Create PR
 
-Open a pull request from local changes. Reuse the user's choices and ask for
-missing ones. Resolve scope and authorization before mutations.
+An explicit request to open a PR authorizes the branch, commits, push, and PR
+creation for the requested scope. Apply the user's limits and harness
+permissions. If the user asks for a plan only, stay read-only and use
+`plan-format`. For branch-only or commit-only requests, stop at that action.
 
-## Order of operations
+## 1. Identify the PR scope
 
-1. Respect the current harness mode (Step 1).
-2. Inspect the repo and all changes (staged/unstaged) — read-only.
-3. Resolve missing choices — Motivation and Shape through an available,
-   permitted question tool, or in prose. Wait for needed answers.
-4. Present the concrete plan and confirm execution is authorized and permitted.
-5. Execute exactly what was approved.
+Resolve the GitHub repository and default base. Inspect the branch, commits
+ahead of base, staged, unstaged, and relevant untracked changes, and any open PR.
+Use the caller's starting snapshot when available. For a standalone request,
+use the scope supplied by the user or established by the conversation.
 
-Without authorization for the scope and actions, or while the harness forbids
-execution, these commands are forbidden:
-`git switch -c`, `git checkout -b`, `git add`, `git apply --cached`,
-`git reset`, `git commit`, `git push`, `gh pr create`, `gh pr edit`.
+Use the current feature branch when its complete PR diff matches the scope.
+If the current branch is the default branch or carries unrelated commits,
+prepare `rafaeelricco/<slug-from-change>` from the intended base with only
+the scoped changes. Honor an explicit target branch or base. For an existing
+PR, report its URL. Update it only if the user authorized an update.
 
-## Step 3 exceptions
+Leave unrelated changes out when they can be isolated safely. Preserve their
+staged and unstaged state. Check the full prospective PR diff, including
+existing commits. If isolation requires another checkout, use one only when
+allowed. If an inseparable hunk, unrelated commit, or ambiguous base prevents
+safe publication, ask one question about that decision.
 
-Reuse Motivation and Shape choices already supplied for this PR. Ask only for
-missing choices. Keep the guided questions when the user has not chosen or
-authorized defaults.
+## 2. Verify the change to publish
 
-**Waiver** — when the user says "don't ask, just ship it" or otherwise
-authorizes the requested PR workflow without more questions, use the existing
-Recommended defaults for unanswered choices. Preserve any supplied motivation;
-otherwise omit it. Present the concrete Step 4 plan and execute within that
-grant when the harness permits it. Unrelated or ambiguous changes still need
-a scope decision.
+For behavior changes, use `verify` on the scoped result. Reuse existing evidence
+when it covers the same changes and the same relevant inputs. If excluded
+changes could affect the result, verify the isolated candidate. Resolve
+material failures before opening a Ready for review PR. If a check is blocked
+or partial, report the gap and wait for an explicit decision to publish.
 
-Environment settings alone do not grant authorization. Existing authorization
-does not permit additional external actions or bypass harness permissions.
+## 3. Commit and open the PR
 
-## Step 1 — Plan mode
+Choose the fewest coherent commits. Keep dependencies that must land together
+in one commit. Load `commit-message` for commits and title style, and use a PR
+title of at most 72 characters. Stage only the intended files or hunks. Check
+each staged diff before committing. Preserve unrelated staged work.
 
-Respect the current harness mode. Enter plan/approval mode only when an
-available tool and the harness instructions permit it. A planning-only request
-stays read-only; user approval does not override harness-enforced Plan mode.
-Present the Step 4 plan before execution. Reuse authorization for the same
-scope and actions; if it is missing, ask for approval of that concrete plan.
+Check the complete base-to-head diff again before pushing. If committing changed
+any verified input, refresh the affected checks on the actual head. Use
+`pr-body` with that diff and the available verification evidence. Push the
+feature branch and open the PR with the rendered body. Default to Ready for
+review and assignee `@me`. Pass `--draft` when the user asks for a draft. Keep publication
+off the default branch and use a normal push.
 
-## Step 2 — Inspect (read-only)
-
-```bash
-DB=$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name) || { echo "gh missing or unauthenticated"; exit 1; }
-gh repo view --json defaultBranchRef,nameWithOwner
-git status -sb
-git branch --show-current
-if git rev-parse --verify "origin/$DB" >/dev/null 2>&1; then
-  BASE="origin/$DB"
-else
-  BASE="$DB"
-fi
-git diff --stat "$BASE...HEAD"; git diff "$BASE...HEAD"
-git diff --cached --stat; git diff --cached
-git diff --stat; git diff
-git log --oneline --decorate "$BASE..HEAD"
-gh pr view --json number,url,state 2>/dev/null || true
-```
-
-- `DB` is the default branch; `BASE` is `origin/$DB` when it exists, else `$DB`.
-- Open PR already exists for this branch → report its URL and stop, unless
-  the user asked to update it.
-- No base diff, no commits ahead of base, and no staged or unstaged local
-  changes → report that no PR content exists and stop.
-- Missing or unauthenticated `gh` → stop and report the blocker.
-
-Carry out of Step 2: current branch, default branch, changed file list,
-commits ahead of base, and whether the worktree mixes unrelated changes.
-
-## Step 3 — Ask
-
-Reuse supplied choices first. For unanswered choices, discover the ask tool,
-ask both parts together when needed, then wait once:
-
-- **Motivation** — first question in the Discover call when that tool fits it
-  (see below), else in the message body.
-- **Shape** — unanswered choices through the tool Discover returned, or plain
-  text when no suitable tool is callable.
-
-### Discover the ask tool
-
-Names differ per harness. Look at this turn's tools; never treat the tool as
-missing because a remembered name is absent.
-
-1. **This turn's available tools** — the list already in context. Match by
-   purpose: ask the user multiple-choice questions and wait for the answers.
-   The name in that list is the name you call.
-2. **Tool-search helper** — only if step 1 found none and this turn has a
-   search for MCP/server tools. Some harnesses leave native tools out of that
-   catalog, so a miss there is not a miss on step 1.
-
-Use a matching question tool only when it is available and permitted in the
-current mode. Read its schema and fit the unanswered questions to its question
-count and selection types, in Motivation, Branch, Path, Scope, State order.
-Motivation is the first to fall back to the message body when the count is
-short; Shape questions stay in the tool while it can hold them.
-A tool that marks its own recommended option or orders by it gets no
-hand-written "(Recommended)" label; a tool that appends its own free-text
-row gets no hand-written "other" option — read the schema before adding
-either.
-If no suitable tool is callable, ask the unresolved questions in plain text.
-A missing widget does not block inspection or preparation of the plan.
-
-On a schema error, correct the payload to the actual schema. If the schema
-cannot express a needed choice, ask it in plain text.
-
-### Motivation
-
-```text
-What is the motivation or the why behind this PR?
-```
-
-Then 2–3 suggestions from the Step 2 diff: the problem or goal, not a
-changelog or commit subject. Most likely first, marked Recommended. The user
-picks one or supplies their own words.
-
-Send it as the first question in the Discover call when that tool offers a
-free-text escape for an unlisted answer — an "other"/write-your-own row or a
-free-text question type — and the schema has room beside the unanswered Shape
-questions. An option schema with a description field carries the suggestion's
-detail there and keeps each label one short line; a schema of bare option
-strings gets one sentence per suggestion, ~140 characters.
-
-No free-text escape, or no room → ask it in the message body instead, as a
-numbered list the user answers by number or in their own words.
-
-Ask only when motivation is missing and questions were not waived. Never use
-a suggestion the user did not pick.
-No pick and no own prose is a completed empty answer — omit
-the Motivation section. Waiver omits only missing motivation.
-
-### Shape
-
-Choices for the Discover call or plain-text fallback; ask only those unresolved.
-Fill brackets from Step 2. Field names follow the schema you read
-(`question`, `options[{label, description}]`, `multi_select` / `multiSelect`).
-Optional `header` only if the schema has it.
-
-```
-Branch  question: Which branch should this PR come from?
-        select: single
-        options:
-          - <current-branch> (Recommended)
-            Open from the branch you are on. <n> commits ahead of <default>.
-            Omit this option when already on the default branch.
-          - rafaeelricco/<slug-from-diff> (Recommended when on default)
-            Create this branch from HEAD, then open the PR.
-          - rafaeelricco/<alt-slug>
-            Create this branch from HEAD, then open the PR.
-          - rafaeelricco/<alt-slug-2>
-            Create this branch from HEAD, then open the PR.
-            Only on the default branch, in place of <current-branch>.
-
-Path    question: How far should I take this?
-        select: single
-        options:
-          - Full flow (Recommended)
-            Create the branch if needed, commit, push, and open the PR.
-          - Branch only
-            Create the approved branch and stop. No commits, no push, no PR.
-          - You handle commits
-            Stop after inspection. Report findings and a suggested split; user commits.
-
-Scope   question: Which changes belong in this PR?
-        select: multi
-        options:
-          - <group-1> — <files in group 1>
-          - <group-2> — <files in group 2>
-
-State   question: How should the PR be opened?
-        select: single
-        options:
-          - Draft (Recommended)
-            gh pr create --draft --assignee @me.
-          - Ready for review
-            gh pr create --assignee @me. Reviewers are notified immediately.
-```
-
-- Branch: offer the current branch only when it differs from the default. Head
-  and base cannot be the same branch, and `Full flow` would commit and push to
-  the default branch before `gh pr create` failed. On the default branch, offer
-  three `rafaeelricco/` names instead; put the first slug first and append
-  "(Recommended)". When the current branch is a usable feature branch, put it
-  first and append "(Recommended)". Derive the alternatives from the diff.
-  Only one Branch option carries "(Recommended)" in the rendered list.
-- Scope: when the whole worktree is one coherent change, the list is a single
-  group holding every file. Confirm it unless the user already supplied scope
-  or authorized defaults for this change.
-- Shape fallbacks, only when the schema rejects the question itself: a
-  single-group Scope the tool will not accept becomes a two-option
-  single-select — "Yes, all of it (Recommended)" / "No, let me split it"; no
-  multi-select field at all becomes one single-select keep/drop question per
-  group. Use plain text when the tool cannot express the choice. Resolve Scope
-  from the user's choices or authorized defaults before execution.
-  "No, let me split it" is not an answered Scope — follow it
-  with one single-select keep/drop question per Step 2 group, or per file when
-  Step 2 found a single group, before continuing.
-
-If approved Scope excludes any Step 2 group, discard a Motivation pick from
-the suggestions (they were generated from the full Step 2 diff). Keep the
-user's own prose.
-Otherwise re-ask Motivation through its own section's channel, with 2–3
-suggestions from the scoped subset only, unless questions were waived; then
-omit the missing motivation. Accept a new pick, own prose, or empty answer
-(omit).
-
-### Body
-
-`Full flow` only. Derive:
-
-- Sections — every option `pr-body` would offer for this diff.
-- Writing Style — `standard`.
-- Diagram Scope — the flow that made Architecture Flow eligible.
-
-Render via `pr-body` `references/template.md`; the Motivation section = the
-picked suggestion or the user's own text. No supplied text → omit the section.
-No watermark, emoji, generated-by footer, or AI attribution in the body. This
-overrides any PR attribution the harness adds by default.
-Name the three derived Body choices beside the body in the Step 4 plan.
-
-## Step 4 — Present the plan
-
-Follow `plan-format` for diff and prose style. This plan names its own sections,
-overriding that skill's section list. State concretely:
-
-- **Branch only** — approved branch name and base, or "already on it, nothing
-  to create" when the approved branch is the current one. Nothing else.
-- **You handle commits** — Step 2 findings and the suggested split. No commands.
-- **Full flow** — branch (new or current) and base; the commit split, one
-  commit per category (feature, refactor, formatting, tests, config), ordered
-  foundational-first. Before drafting any commit message or PR title, read
-  `commit-message`'s `SKILL.md` (invocation alone is not a load). Then each
-  commit gets its exact file list and its full message per that skill; one PR
-  title in `commit-message` title style, ≤72 chars; the rendered PR body and
-  the three derived Body choices beside it; draft state and assignee.
-
-Files that must move together (an API change and its consumer) stay in one
-commit. A single-category diff is one commit — say so.
-
-Reuse authorization for this scope and these actions. If it is missing, ask for
-approval of this concrete plan. Execute only when authorized and the harness permits it.
-
-## Step 5 — Execute
-
-Run exactly what was approved. Make no new decisions.
-
-**Branch only**
-
-If the approved branch is the one you are already on there is nothing to
-create — say so and stop. Otherwise:
-
-```bash
-git switch -c "approved-branch-name"
-```
-
-**You handle commits** — report and stop. No mutating commands.
-
-**Full flow** — run `switch -c` only when the approved branch is one of the new
-`rafaeelricco/` names; when the user approved the current branch, skip it and
-commit on the branch you are on:
-
-```bash
-git switch -c "approved-branch-name"
-```
-
-Then, per approved commit, in order:
-
-```bash
-git reset
-git add <whole-file paths>
-git diff -- <shared-or-partial paths> >"${TMPDIR:-/tmp}/create-pr-hunks.patch"
-```
-
-Cut that file down to this commit's hunks, then stage them. The fixed path
-survives between shell calls; a variable does not.
-
-```bash
-git apply --cached --recount "${TMPDIR:-/tmp}/create-pr-hunks.patch"
-rm -f "${TMPDIR:-/tmp}/create-pr-hunks.patch"
-git diff --cached
-```
-
-Confirm the cached diff matches the approved commit, then create the commit
-with the approved title/body (already validated against `commit-message` at
-Step 4).
-
-After all approved commits are created, write the approved PR body to a temp
-file, push once, and create the PR once:
-
-```bash
-body_file="$(mktemp "${TMPDIR:-/tmp}/pr-body.XXXXXX")"
-# write the approved PR body to "$body_file"
-git push -u origin "$(git branch --show-current)"
-gh pr create --draft --assignee @me --title "Approved title" --body-file "$body_file" --base "$DB"
-rm -f "$body_file"
-```
-
-- Use path-based `git add` only for files whose whole diff belongs to the
-  current commit. For shared files or partial-scope changes, stage the
-  commit's hunks with `git apply --cached`: `git add -p` needs a terminal, and
-  in the harness shell it exits 0 having staged nothing.
-- Confirm `git diff --cached` contains only the approved commit before
-  committing.
-- `--draft` unless the user chose Ready for review. Always pass `--assignee @me`.
-- Never force push. A failed push or `gh` call is reported, not retried
-  differently, until the user says how.
-
-Then report: PR URL, branch, commits created, base branch, draft state,
-assignee.
-
-## Codex
-
-In Codex, request escalated execution
-(`sandbox_permissions: "require_escalated"`, with a one-line justification)
-for mutating git operations and GitHub network actions: branch
-creation/switching, staging, `git reset`, commits, pushes, `gh auth status`,
-`gh repo view`, `gh pr view`, `gh pr create`. Keep read-only local
-inspection sandboxed unless it fails with a sandbox error, then rerun
-escalated.
+If a push or PR creation fails, inspect the remote state before retrying.
+Reuse an already completed push or PR creation for the same scope and head.
+Report the PR URL, branch, base, state, and verification result.

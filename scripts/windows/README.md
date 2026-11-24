@@ -20,7 +20,7 @@ On Windows, install Docker Desktop. This repository no longer installs or shims 
    Install Git if you will clone or develop this checkout.
 2. Run `.\install.ps1` from the checkout for full profile and Windows Terminal
    setup, or run the [published full installer](../../README.md#full-setup).
-   A selected command such as `.\install.ps1 orchestrate` installs skills only.
+   A selected command such as `.\install.ps1 verify` installs skills only.
 3. Install WSL2 and the distro as Admin. Reboot if needed:
 
    ```powershell

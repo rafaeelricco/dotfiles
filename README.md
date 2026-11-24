@@ -8,32 +8,30 @@ Skills are linked into detected Claude Code, Codex, Grok, Cursor, and Hermes ins
 Run as your normal user on macOS or Linux:
 
 ```bash
-curl -fsSL https://r1cco.com/skills/orchestrate | bash
+curl -fsSL https://r1cco.com/skills/verify | bash
 ```
 
 In PowerShell 7:
 
 ```powershell
-irm https://r1cco.com/skills/orchestrate.ps1 | iex
+irm https://r1cco.com/skills/verify.ps1 | iex
 ```
 
-Companion skills are included automatically. `orchestrate` installs six skills:
-`orchestrate`, `scope-and-plan`, `plan-format`, `model-tiers`, `verify`,
-`commit-message`. Replace `orchestrate` in the URL with another
-available skill. Selected installation preserves other skill links, instructions,
-and terminal settings.
+Companion skills are included automatically when required. Replace `verify` in
+the URL with another available skill. Selected installation preserves other
+skill links, instructions, and terminal settings.
 
 To select several skills, preview changes, or list available skills:
 
 ```bash
-curl -fsSL https://r1cco.com/dotfiles/install.sh | bash -s -- orchestrate ui
-curl -fsSL https://r1cco.com/dotfiles/install.sh | bash -s -- orchestrate --dry-run
+curl -fsSL https://r1cco.com/dotfiles/install.sh | bash -s -- verify ui
+curl -fsSL https://r1cco.com/dotfiles/install.sh | bash -s -- verify --dry-run
 curl -fsSL https://r1cco.com/dotfiles/install.sh | bash -s -- --help
 ```
 
 ```powershell
-& ([scriptblock]::Create((irm 'https://r1cco.com/dotfiles/install.ps1'))) orchestrate ui
-& ([scriptblock]::Create((irm 'https://r1cco.com/dotfiles/install.ps1'))) orchestrate -DryRun
+& ([scriptblock]::Create((irm 'https://r1cco.com/dotfiles/install.ps1'))) verify ui
+& ([scriptblock]::Create((irm 'https://r1cco.com/dotfiles/install.ps1'))) verify -DryRun
 & ([scriptblock]::Create((irm 'https://r1cco.com/dotfiles/install.ps1'))) -Help
 ```
 
@@ -62,6 +60,10 @@ Repeat the same install command to update. Selection controls which skill links
 are installed; refreshing the shared bundle also updates the contents used by
 skills already linked into that bundle.
 
+If you installed `orchestrate`, `scope-and-plan`, or `model-tiers`, run the
+current installer from [Full setup](#full-setup) without skill names. Full setup
+removes stale managed links and installs the current skill set.
+
 ## Uninstall
 
 ```bash
@@ -81,15 +83,22 @@ Add `--dry-run` or `-DryRun` to preview removal.
 Run the checked-out scripts directly. They resolve the checkout from their own
 location and never fetch, reset, or clean Git state.
 
-| Action                       | macOS / Linux                                   | PowerShell 7                        |
-| ---------------------------- | ----------------------------------------------- | ----------------------------------- |
-| Install selected skills      | `bash scripts/install.sh orchestrate`           | `.\install.ps1 orchestrate`         |
-| Full setup / reconcile links | `bash scripts/install.sh`                       | `.\install.ps1`                     |
-| Preview                      | `bash scripts/install.sh orchestrate --dry-run` | `.\install.ps1 orchestrate -DryRun` |
-| Uninstall                    | `bash scripts/uninstall.sh`                     | `.\uninstall.ps1`                   |
+| Action                       | macOS / Linux                              | PowerShell 7                   |
+| ---------------------------- | ------------------------------------------ | ------------------------------ |
+| Install selected skills      | `bash scripts/install.sh verify`           | `.\install.ps1 verify`         |
+| Full setup / reconcile links | `bash scripts/install.sh`                  | `.\install.ps1`                |
+| Preview                      | `bash scripts/install.sh verify --dry-run` | `.\install.ps1 verify -DryRun` |
+| Uninstall                    | `bash scripts/uninstall.sh`                | `.\uninstall.ps1`              |
 
 Edits to linked checkout skills take effect immediately. Rerun installation after
 adding or removing skills. The existing update scripts are compatibility entrypoints.
+
+## Deliver a change
+
+Install the workflow and its companion skills with `bash scripts/install.sh deliver`
+or `.\install.ps1 deliver`. In a new session, use `$deliver <implementation task>` to
+implement, verify, open a Ready for review PR, and follow CI and review. Add
+`draft` or a narrower stopping point to the request when you want one.
 
 ## Documentation
 
@@ -97,6 +106,7 @@ adding or removing skills. The existing update scripts are compatibility entrypo
 | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | [Setup guide](docs/setup.md)                                                                  | Commands, flags, prerequisites, installed paths, migration, and troubleshooting. |
 | [Deployment](docs/deployment.md)                                                              | Verified releases, VPS runner, Nginx, and recovery.                              |
+| [Installer verification](docs/deployment.md#installer-checks)                                 | Focused checks for selected install, preview, and release updates.               |
 | [Skills](skill/)                                                                              | Shared agent workflows.                                                          |
 | [Neovim](nvim/)                                                                               | Configuration and setup guides.                                                  |
 | [PowerShell](powershell/)                                                                     | Profile and terminal theme.                                                      |

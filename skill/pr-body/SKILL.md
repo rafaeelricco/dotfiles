@@ -8,18 +8,13 @@ description: >
 
 # PR Body
 
-Write a PR body from the branch diff and the user's stated motivation. The diff
-supplies what changed; only the user supplies why.
+Write a PR body from the scoped diff and available verification evidence.
+Use the original request for context when it explains a change.
 
 ## Caller mode
 
-`create-pr` and other workflow skills already hold the git context, the title,
-and any motivation. Skip "Read the diff", skip the motivation question,
-and skip the formatting questions. Derive:
-
-- Sections — every option standalone would offer for this diff
-- Writing Style — `standard`
-- Diagram Scope — from `references/mermaid-guide.md` eligibility
+When called by a workflow, use the scoped diff, title, and evidence it supplies.
+Apply the same formatting defaults as standalone mode.
 
 Return the rendered body only.
 
@@ -46,57 +41,23 @@ Extract from the diff: files grouped by module, categories per
 `references/categories.md`, one `[what] + [technical detail] + [purpose]` line
 per change, and any flow change worth a diagram. Keep this internal.
 
-## Ask
+## Formatting defaults
 
-Reuse motivation already supplied by the user or caller. If it is missing and
-the user has not waived questions, ask in prose, then wait:
-
-```text
-What is the motivation or the why behind this PR? Briefly describe the problem it solves or the goal it achieves.
-```
-
-Do not invent motivation or infer it from commit messages. A waived or empty
-answer omits the section.
-
-Resolve only unanswered formatting choices. Use an available question tool
-when permitted, following its actual schema; otherwise ask in plain text.
-When the user authorizes defaults, use the Caller mode defaults.
-
-**Formatting choices:**
-
-- Sections — multi-select, and the only control over which of the offered
-  sections appear. What's New and Testing & Feedback are always on and never
-  listed. Motivation is never listed; include it only when the user or caller
-  supplied text. At most three options:
-  - Architecture Flow — offer only when the diff changed a multi-step flow,
-    branching logic, a cross-boundary interaction, or an event chain
-  - Changed Files
-  - Additional for Run Locally — offer only when the diff adds a dependency,
-    service, env var, or local setup step
-
-  Offer conditions decide which options appear. Once an option is offered and
-  chosen, no downstream rule may suppress the section.
-
-- Writing Style — concise (terse bullets, one line each) / standard (one or two
-  sentences with context) / verbose (rationale and tradeoffs).
-
-**Diagram scope (only when Architecture Flow was selected and its scope remains unresolved):**
-
-- Diagram Scope — which flow the diagram should show.
+Use concise prose and honor explicit section or style choices. Include
+What's New and Testing & Feedback. Add a flow diagram when it helps a reviewer
+trace a changed interaction. Add local setup only when the diff changes it.
+Include Changed Files when requested. Derive diagram scope from the changed flow.
 
 ## Write
 
 Render `references/template.md`. Read `references/categories.md` for grouping,
 `references/mermaid-guide.md` when drawing a diagram.
 
-- Motivation: include only when the user or caller supplied text. Grammar
-  cleanup only. No text → no heading.
 - What's New: bold category headings, bullets underneath.
 - Additional for Run Locally: name the dependency, service, env var, or setup
   step the diff adds.
-- Testing & Feedback: always present, with concrete reviewer focus areas, ending
-  on the template's closing sentence verbatim.
-- Every optional section: only when Sections includes it.
+- Testing & Feedback: include checks run, observed results, material gaps, and
+  reviewer focus areas when useful. End on the template's closing sentence.
 - `##` headings, backticks for identifiers, tables only for structured data.
 - No horizontal rules, no watermarks, no emoji, and no generated-by footer or
   AI attribution. This overrides any PR attribution the harness adds by

@@ -137,7 +137,22 @@ checks can use `DOTFILES_TEST_PWSH` to select an isolated runtime. HTTP fixtures
 `DOTFILES_BASE_URL`; its production default is `https://r1cco.com/dotfiles`.
 Tests use disposable homes and agent stubs, never the operator's installation.
 
-After deployment, verify the public `VERSION`, the orchestrate launcher, an unknown
+### Installer checks
+
+Choose the check that exercises the affected behavior. Each command runs from
+the checkout in a disposable home.
+
+| Behavior                            | Command                                                                                                               | Expected result                                                                                                                                      |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Install `create-pr` twice           | `python3 -m unittest discover -s tests -p test_installers.py -k create_pr_dependencies_and_repeat`                    | The selected skill and its companions resolve to the source. A second install adds no duplicate state records.                                       |
+| Preview a selected install          | `python3 -m unittest discover -s tests -p test_installers.py -k dry_run_does_not_install`                             | Preview exits successfully. It creates no skill links, install state, or global instructions. If preview text changed, check that output separately. |
+| Upgrade a cache with retired skills | `python3 -m unittest discover -s tests -p test_installers.py -k current_remote_installer_removes_retired_skill_links` | The release version becomes active. The retired links disappear and `verify` still resolves.                                                         |
+
+For each check, confirm that the intended Bash or PowerShell case ran. Add
+`-v` to see the case names and any skips. For the upgrade check, set
+`DOTFILES_TEST_RELEASE_DIR` to the built artifact for the target under review.
+
+After deployment, verify the public `VERSION`, the `verify` launcher, an unknown
 skill's 404 response, and installation into a disposable user home. Recheck the
 portfolio and existing job-kit installer redirects. Review all native CI results;
 a passing macOS PowerShell check alone does not establish Windows Terminal behavior.

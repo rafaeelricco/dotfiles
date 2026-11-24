@@ -416,7 +416,7 @@ def smoke_test(base_url: str, root: Path, version: str, validation: dict[str, ob
     # bytes that passed validation before they were copied to disk.
     current_paths = ["VERSION", "SHA256SUMS", "MANIFEST.json", "install.sh", "install.ps1", "update.sh", "update.ps1", "uninstall.sh", "uninstall.ps1"]
     skills: list[str] = manifest["skills"]  # type: ignore[assignment]
-    short_skill = "orchestrate" if "orchestrate" in skills else skills[0]
+    short_skill = "verify" if "verify" in skills else skills[0]
     current_paths.append(f"skills/{short_skill}")
     for relative in current_paths:
         local = public_files[relative].read_bytes()
