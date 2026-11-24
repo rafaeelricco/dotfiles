@@ -58,14 +58,16 @@ skills remain linked. Duplicate dependencies are installed once.
 
 The source of truth is [`skill/dependencies.txt`](../skill/dependencies.txt).
 
-| Selected skill | Direct companions                                    |
-| -------------- | ---------------------------------------------------- |
-| `babysit`      | `verify`, `commit-message`                           |
-| `create-pr`    | `plan-format`, `commit-message`, `pr-body`, `verify` |
-| `pr-body`      | `commit-message`                                     |
-| `deliver`      | `review-design`, `create-pr`, `babysit`              |
-| `ui`           | `taste`, `browser-use`                               |
-| `taste`        | `browser-use`                                        |
+| Selected skill  | Direct companions                                    |
+| --------------- | ---------------------------------------------------- |
+| `babysit`       | `verify`, `commit-message`, `model-tiers`            |
+| `verify`        | `model-tiers`                                        |
+| `review-design` | `model-tiers`                                        |
+| `create-pr`     | `plan-format`, `commit-message`, `pr-body`, `verify` |
+| `pr-body`       | `commit-message`                                     |
+| `deliver`       | `review-design`, `create-pr`, `babysit`              |
+| `ui`            | `taste`, `browser-use`                               |
+| `taste`         | `browser-use`                                        |
 
 Companion installation includes transitive dependencies and conditional workflow
 steps such as commits.
@@ -104,7 +106,7 @@ Repeat the same remote install command to update. The complete bundle is refresh
 so already-linked skills using that cache receive updated contents too. Selection
 controls which links are installed, not which files are downloaded.
 
-If your installation includes `orchestrate`, `scope-and-plan`, or `model-tiers`,
+If your installation includes `orchestrate` or `scope-and-plan`,
 download the current public installer and run full setup without skill names.
 Full setup removes the stale managed links.
 

@@ -91,8 +91,9 @@ an unexplained failure. Complete useful independent checks despite blockers.
 
 For a change that alters a shared contract or stateful failure and recovery, or
 when evidence leaves a material doubt across modules or runtimes, use one fresh
-verifier when delegation is available and permitted. Name the failure mode or
-coverage gap the verifier should challenge.
+verifier, a `challenger` routed through `model-tiers` when available, when
+delegation is available and permitted. Name the failure mode or coverage gap
+the verifier should challenge.
 
 Start it with a clean context containing only the original requirements,
 target identity, source paths, and raw check evidence. Set the spawn tool's

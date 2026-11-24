@@ -1,0 +1,32 @@
+# Brief role -> preferred agent type, model and effort per harness.
+# session uses the parent model/effort, subject to SKILL.md's worker rules.
+# Agent types, model availability, and effort control are checked at runtime.
+# Routes follow each provider's model and subagent docs, read 2026-11-24.
+
+# rank: cheapest first. A route never goes above the session (SKILL.md).
+# Off the session model, a worker does not get the session effort, so
+# routes name it. CLAUDE_CODE_EFFORT_LEVEL overrides per-call effort.
+claude:
+  rank: [haiku, sonnet, opus, fable]
+  challenger: { agent: general-purpose, model: session, effort: session }
+  triage: { agent: general-purpose, model: sonnet, effort: medium }
+  prover: { agent: general-purpose, model: sonnet, effort: high }
+
+# Codex docs: Luna at high for explorers; Sol for agents that use tools
+# and check their work; high for reviewers and security. worker edits.
+codex:
+  rank: [gpt-6-luna, gpt-6.2-sol, gpt-6.2-astra]
+  challenger: { agent: default, model: session, effort: session }
+  triage: { agent: explorer, model: gpt-6-luna, effort: high }
+  prover: { agent: default, model: gpt-6.2-sol, effort: high }
+
+# grok-4.5/4.6 cost the same as grok-4.7, and Grok Build documents no
+# per-spawn model or effort control: only the agent type routes.
+# explore has no shell, so roles that run checks use general-purpose.
+grok:
+  challenger: { agent: general-purpose, model: session, effort: session }
+  triage: { agent: explore, model: session, effort: session }
+  prover: { agent: general-purpose, model: session, effort: session }
+
+# Harness not listed above: rank the spawn tool's own options by tier.
+tiers: { challenger: session, triage: one below, prover: one below }

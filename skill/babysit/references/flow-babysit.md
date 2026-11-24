@@ -246,4 +246,5 @@ expected results as their observed states.
 
 PR readiness, then one table: reviewer, comment, solution, commit hash or
 reply-only, repro (evidence ref or `disagree` / `skip` / `blocked`), verification
-result. Then what is blocked and on whom.
+result. Then each spawned worker's requested and resolved route from
+`model-tiers`, with any fallback. Then what is blocked and on whom.

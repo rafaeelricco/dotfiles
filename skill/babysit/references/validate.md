@@ -33,7 +33,8 @@ concurrent across clusters.
 
 ## Phase 1 — Hypothesis (read-only, per cluster)
 
-Spawn one read-only sub-agent per cluster. Brief must include the full
+Spawn one read-only `triage` worker per cluster through `model-tiers`, each with a
+clean context (`fork_turns="none"` in Codex). Brief must include the full
 context pack + that cluster's thread texts.
 
 Return exactly:
@@ -58,12 +59,14 @@ Phase-1 routing:
 | `UNSURE`    | Bug vs intentional product behavior                                                                                                                                      | final `UNSURE`          |
 
 Cannot-fire / already-fixed is not Phase-1 `SKIP` — keep those `CANDIDATE` so Phase 2 can map them.
+Evidence the worker could not read or trace is not `SKIP` either — return `CANDIDATE`.
 
 Ignore reviewer P-labels for routing.
 
 ## Phase 2 — Proof (only CANDIDATE; separate agents)
 
-For each `CANDIDATE`, spawn **different** sub-agent(s) than Phase 1.
+For each `CANDIDATE`, spawn **different** `prover` worker(s) than Phase 1, through `model-tiers`,
+each with a clean context.
 They may run code but never edit the PR worktree. Goal: make the
 hypothesis fire, or show it does not.
 

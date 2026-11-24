@@ -141,7 +141,8 @@ class PackageReleaseTests(unittest.TestCase):
         result = deploy_release.validate_artifact(Path(release_dir))
         self.assertRegex(result["version"], r"^[0-9a-f]{40}$")
         manifest = json.loads((Path(release_dir) / "MANIFEST.json").read_text())
-        self.assertTrue({"orchestrate", "scope-and-plan", "model-tiers"}.isdisjoint(manifest["skills"]))
+        self.assertTrue({"orchestrate", "scope-and-plan"}.isdisjoint(manifest["skills"]))
+        self.assertIn("model-tiers", manifest["skills"])
         self.assertIn("skills/verify", manifest["launchers"])
         self.assertIn("skills/verify.ps1", manifest["launchers"])
 
