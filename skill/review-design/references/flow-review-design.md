@@ -13,12 +13,14 @@ selection rules clear. Include before-and-after event sequences when outcomes
 depend on active work or transition order.
 
 Before presenting a requested plan or making the first authorized edit affected
-by the design, ask one fresh, read-only subagent to challenge the draft. In Codex,
-use `fork_turns="none"`. Brief it with the original request, accepted constraints,
+by the design, ask one fresh, read-only `challenger` to challenge the draft,
+routed through `model-tiers` when available. In Codex, use `fork_turns="none"`.
+Brief it with the original request, accepted constraints,
 draft, source paths, and the [review guide](./review-guide.md). If
 delegation is unavailable or disallowed, set the draft aside and review from the
 requirements and source in a separate pass when possible. Disclose that the
-primary agent reviewed it.
+primary agent reviewed it. Otherwise give the challenger's requested and
+resolved route from `model-tiers` with the review.
 
 Check findings against the source. Incorporate concrete decisions and add
 scenarios with observable expected outcomes for the risks they address. Surface

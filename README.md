@@ -60,7 +60,7 @@ Repeat the same install command to update. Selection controls which skill links
 are installed; refreshing the shared bundle also updates the contents used by
 skills already linked into that bundle.
 
-If you installed `orchestrate`, `scope-and-plan`, or `model-tiers`, run the
+If you installed `orchestrate` or `scope-and-plan`, run the
 current installer from [Full setup](#full-setup) without skill names. Full setup
 removes stale managed links and installs the current skill set.
 

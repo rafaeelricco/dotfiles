@@ -29,3 +29,8 @@ Use a disposable remote and a GitHub CLI fixture for publication and review.
    followed. Separately, simulate green checks and a conflict-free PR with
    `CHANGES_REQUESTED`, a required approval missing, or draft status. Expect
    the observed state to be reported without a merge-ready verdict.
+7. **Worker routing.** Simulate review feedback in two unrelated clusters, one
+   a reproducible defect. Expect one `triage` worker per cluster and one
+   `prover` for the candidate, each on its `tiers.yml` route or a reported
+   documented fallback, any `challenger` on the session model, and the final
+   report listing requested and resolved routes.

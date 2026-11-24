@@ -33,5 +33,6 @@ implementation without publication, run `verify` for behavior changes and stop.
    covers branch work and CI. Keep reviewer actions pending when their grants
    are missing, including any review that needs one of those actions to start.
    Continue independent work.
-5. Report the final PR URL, head, checks, and blockers. Finish when the PR is
-   merge-ready or no authorized action can advance it. Leave merge to the user.
+5. Report the final PR URL, head, checks, blockers, and the worker routes that
+   `review-design`, `verify`, and `babysit` reported. Finish when the PR is merge-ready or no
+   authorized action can advance it. Leave merge to the user.

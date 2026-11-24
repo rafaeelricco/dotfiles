@@ -1,4 +1,6 @@
-babysit verify commit-message
+babysit verify commit-message model-tiers
+verify model-tiers
+review-design model-tiers
 create-pr plan-format commit-message pr-body verify
 pr-body commit-message
 deliver review-design create-pr babysit

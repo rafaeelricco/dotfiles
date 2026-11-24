@@ -17,7 +17,7 @@ import zipfile
 
 
 REPO = Path(__file__).resolve().parents[1]
-CREATE_PR = {"create-pr", "plan-format", "commit-message", "pr-body", "verify"}
+CREATE_PR = {"create-pr", "plan-format", "commit-message", "pr-body", "verify", "model-tiers"}
 PWSH = os.environ.get("DOTFILES_TEST_PWSH") or shutil.which("pwsh")
 BASH = "/bin/bash" if Path("/bin/bash").exists() else shutil.which("bash")
 
@@ -419,7 +419,7 @@ class LifecycleCases:
     def test_current_remote_installer_removes_retired_skill_links(self):
         if not self.release:
             self.skipTest("requires DOTFILES_TEST_RELEASE_DIR built artifact")
-        retired = {"orchestrate", "scope-and-plan", "model-tiers"}
+        retired = {"orchestrate", "scope-and-plan"}
         cache = Path(self.env["XDG_DATA_HOME"]) / "dotfiles"
         shutil.copytree(self.source, cache)
         (cache / "VERSION").write_text("e" * 40 + "\n")
@@ -430,7 +430,7 @@ class LifecycleCases:
         entrypoint = "scripts/install.sh" if self.runtime == "bash" else "install.ps1"
         self.assert_success(self.invoke(sorted(retired) + ["verify"] + self.skip_flags(),
                                         script=cache / entrypoint))
-        self.assertEqual(self.names(), retired | {"verify"})
+        self.assertEqual(self.names(), retired | {"verify", "model-tiers"})
 
         base_url, _ = self.serve_release()
         remote = Path(self.release) / ("install.sh" if self.runtime == "bash" else "install.ps1")
@@ -520,7 +520,7 @@ class LifecycleCases:
                        "Invoke-RestMethod $env:DOTFILES_TEST_URL | Invoke-Expression"]
         result = subprocess.run(command, env=env, input="", text=True, capture_output=True, timeout=90)
         self.assert_success(result)
-        self.assertEqual(self.names(), {"verify"})
+        self.assertEqual(self.names(), {"verify", "model-tiers"})
 
 
 @unittest.skipIf(os.name == "nt" or not BASH, "native POSIX Bash required")

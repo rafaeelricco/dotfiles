@@ -56,4 +56,5 @@ For failures, include the expected and observed result, exact command, exit
 status, and a short relevant output excerpt. Distinguish environment blockers,
 confirmed baseline failures, and unexplained retries. Identify substituted
 dependencies and whether the independent challenge ran. Link substantial
-artifacts instead of pasting full logs.
+artifacts instead of pasting full logs. When a verifier ran, give its
+requested and resolved route from `model-tiers`, with any fallback.
