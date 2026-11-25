@@ -9,7 +9,7 @@ description: >
 # Verify
 
 Verify every material requirement and affected existing behavior with evidence
-from the final changes. The same standard applies to every invocation.
+from the final changes.
 
 `/verify [--local | --branch <name> | --pr <number-or-url>]`
 

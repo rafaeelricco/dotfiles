@@ -9,7 +9,8 @@ description: >
 
 `$deliver <task>` authorizes implementation, commits, push, opening a PR, and
 in-scope PR fixes through follow-up pushes on its branch. Honor narrower user
-instructions. Work in Default and respect the current harness mode.
+instructions. Stay in the harness mode you were started in; don't switch to a
+planning mode.
 
 For a plan-only request, stay read-only and use `plan-format`. For
 implementation without publication, run `verify` for behavior changes and stop.
