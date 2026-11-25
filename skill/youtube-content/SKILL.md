@@ -67,6 +67,7 @@ from this host, so every request goes through yt-dlp with the agent browser's co
 
 - "Sign in to confirm you're not a bot" on every video means the cookies went stale.
   Export them again (step 1) and rerun the same command. It fetches only what is still pending.
+  Cookies went stale here within about an hour of heavy use, so export them right before each run.
 - A listing failure (other than a channel lacking a Shorts or Streams tab) exits 1 and saves
   no list, so a blocked listing never passes for an empty channel.
 - `no captions` means the video's metadata offers no track in `LANGS`. Cover it from its title

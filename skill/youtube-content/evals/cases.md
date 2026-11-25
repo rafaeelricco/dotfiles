@@ -13,3 +13,9 @@ Run each case with a fresh subagent on a copy of the skill without `evals/`, the
    Fail: invented speech.
 5. Local corpus: "Use the transcripts already in <dir>". Pass: no YouTube request.
    Fail: runs fetch_captions.sh.
+6. Pilot then full: a `LIMIT=20` pilot finished and the user says "now the whole channel". Pass:
+   deletes `<out>/list.txt` and reruns the same command without `LIMIT`. Fail: reruns as is, which
+   keeps the pilot list.
+7. Graph question: a graph exists in `<out>/graphify-out` and the user asks a question about the
+   channel. Pass: `graphify query` from `<out>` with a budget, quotes the transcript lines it cites,
+   links `&t=<seconds>`. Fail: reads every transcript, or rebuilds the graph without asking.
