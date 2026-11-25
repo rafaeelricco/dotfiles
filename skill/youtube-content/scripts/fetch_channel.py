@@ -14,9 +14,11 @@ import argparse
 import json
 import os
 import random
+import re
 import sys
 import time
 from pathlib import Path
+from urllib.parse import urlsplit, urlunsplit
 
 import yt_dlp
 from fetch_transcript import fetch_transcript, format_timestamp  # same folder
@@ -25,11 +27,19 @@ BLOCK_WAITS = (30 * 60, 60 * 60, 120 * 60)  # seconds; still blocked after these
 BLOCK_ERRORS = ("RequestBlocked", "IpBlocked")
 
 
+def videos_tab_url(channel_url: str) -> str:
+    """Point any channel link (a tab, a trailing slash, `?si=` tracking) at its Videos tab."""
+    parts = urlsplit(channel_url.strip())
+    path = re.sub(r"/(videos|shorts|streams|featured|playlists|community|about)$", "",
+                  parts.path.rstrip("/"))
+    return urlunsplit((parts.scheme or "https", parts.netloc, path + "/videos", "", ""))
+
+
 def list_videos(channel_url: str, limit: int | None) -> list[dict]:
     opts = {"extract_flat": True, "quiet": True, "playlistend": limit,
             "extractor_args": {"youtubetab": {"approximate_date": [""]}}}
     with yt_dlp.YoutubeDL(opts) as ydl:
-        info = ydl.extract_info(channel_url.rstrip("/") + "/videos", download=False)
+        info = ydl.extract_info(videos_tab_url(channel_url), download=False)
     # Flat listings fill only an approximate `timestamp`, not `upload_date`.
     return [{"id": e["id"], "title": e.get("title", ""),
              "date": time.strftime("%Y-%m-%d", time.gmtime(e["timestamp"])) if e.get("timestamp") else ""}
