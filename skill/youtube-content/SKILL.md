@@ -71,7 +71,6 @@ from this host, so every request goes through yt-dlp with the agent browser's co
 
 4. Answer in the format and language the user asked for; default to a summary.
    Cite as `<title> (https://www.youtube.com/watch?v=<id>&t=<seconds>)`.
-   To query a channel later through a knowledge graph, see [channel](references/channel.md).
 
 ## Pitfalls
 

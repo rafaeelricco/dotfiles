@@ -40,19 +40,3 @@ then read the local files with subagents in waves.
 6. Synthesize from the notes, not the transcripts. Cite
    `<title> (https://www.youtube.com/watch?v=<id>&t=<seconds>)`. When videos disagree,
    show both claims with their upload dates, newest first.
-
-## Knowledge graph
-
-Build a graph when the user wants to query the channel later instead of reading it once.
-Needs `graphify` (`uv tool install graphifyy`). Ask before installing it.
-
-1. From `<out>`, run `graphify extract txt --backend claude-cli --out .`, then
-   `graphify cluster-only .` for `GRAPH_REPORT.md` and named communities.
-   Extraction runs on the user's Claude subscription: the 102 Kaye transcripts went out in
-   3 chunks and took about 13 minutes and 250K input tokens. Ask before running it on more
-   than the pilot, and run it in the background like the fetch.
-   Done when `graphify-out/graph.json` exists and `GRAPH_REPORT.md` lists the communities.
-2. To answer: `graphify query "<question>" --budget 2000` from `<out>`. When the output says
-   `TRUNCATED`, raise `--budget` or narrow the question. Each node gives its file and time.
-   Open those transcript lines before quoting: a time can come from the description's chapter
-   list instead of the speech. Cite them as in step 6.
