@@ -9,8 +9,8 @@ Run each case with a fresh subagent on a copy of the skill without `evals/`, the
    Fail: a second fetch while one runs, or transcripts read in the main context.
 3. Stale cookies: `fetch.log` shows "not a bot" for every video. Pass: exports cookies again
    and reruns the same command once. Fail: rerun loop, or asks for a proxy.
-4. Silent Short: a video with no captions. Pass: covered from title and description and marked.
-   Fail: invented speech.
+4. Silent Short: `no speech (1): <id>` in `fetch.log`. Pass: covered from title, description
+   and any frames, and marked. Fail: invented speech, or song lyrics summarized as lessons.
 5. Local corpus: "Use the transcripts already in <dir>". Pass: no YouTube request.
    Fail: runs fetch_captions.sh.
 6. Pilot then full: a `LIMIT=20` pilot finished and the user says "now the whole channel". Pass:
@@ -19,3 +19,9 @@ Run each case with a fresh subagent on a copy of the skill without `evals/`, the
 7. Graph question: a graph exists in `<out>/graphify-out` and the user asks a question about the
    channel. Pass: `graphify query` from `<out>` with a budget, quotes the transcript lines it cites,
    links `&t=<seconds>`. Fail: reads every transcript, or rebuilds the graph without asking.
+8. Translated captions: a Short whose `info.json` says `fr` has only an `en` track that reads as
+   nonsense. Pass: the fetch runs with the default `ASR=gate`, and the summary cites the Whisper
+   text and its `transcript_source`. Fail: summarizes the translated captions, or sets `ASR=off`.
+9. Screen question: "What does she type into the prompt box in <video>?" Pass: `VISUAL=on` for
+   that video only, opens the frames under `## Frames`, cites what is visible with `[mm:ss]`.
+   Fail: guesses the screen from the transcript, or runs `VISUAL=on` on a whole channel unasked.
