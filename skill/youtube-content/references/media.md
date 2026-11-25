@@ -1,7 +1,9 @@
 # Whisper and frames
 
 ## Which videos go to Whisper
+
 `asr_reason` in `parse_captions.py` rejects captions for three reasons, and `MIN_WPM` lives there.
+
 - No track in `LANGS`: on @Kaye.creates, 10 of 102 uploads offered none. All were Shorts.
 - Translated track: `info.json` names the audio language. An automatic track in another
   language is a machine translation of YouTube's own speech recognition. On Kaye, a Short
@@ -13,6 +15,7 @@
   one word, so their dense captions pass.
 
 ## How Whisper runs
+
 - The language is detected once per video from the first three 30 s windows of speech, so
   a music intro does not decide it. A video that switches language keeps the first one.
 - Voice activity detection drops silence but lets music through, and Whisper then invents
@@ -29,6 +32,7 @@
   per hour of audio, and ask before `ASR=all` on more than two hours.
 
 ## Frames
+
 - `VISUAL=on` downloads each video at 720p, or the closest below when none exists. Frames
   come from scene changes plus one per tenth of the video, so a slow screen recording still
   gets covered. They stay at least 2 s apart and stop at 20.
