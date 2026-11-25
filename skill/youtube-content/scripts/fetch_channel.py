@@ -70,7 +70,8 @@ def write_markdown(path: Path, video: dict, segments: list[dict]) -> None:
     head = (f"---\ntitle: {json.dumps(video['title'], ensure_ascii=False)}\n"
             f"url: https://www.youtube.com/watch?v={video['id']}\n"
             f"date: {video['date']}  # approximate\n---\n")
-    body = "\n".join(f"{format_timestamp(s['start'])} {s['text']}" for s in segments)
+    # One line per segment: every line must start with its timestamp for citations.
+    body = "\n".join(f"{format_timestamp(s['start'])} {' '.join(s['text'].split())}" for s in segments)
     write_atomic(path, head + body + "\n")
 
 
