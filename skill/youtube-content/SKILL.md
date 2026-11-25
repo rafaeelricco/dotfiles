@@ -2,8 +2,10 @@
 name: youtube-content
 description: >
   Fetch a YouTube video's transcript and turn it into a summary, chapters,
-  thread, blog post, or quotes. Use when the user shares a YouTube link or asks
-  to summarize or transcribe a video.
+  thread, blog post, quotes, a reusable skill, or a queryable knowledge graph of a
+  whole channel. Use when the user shares a YouTube link or asks to summarize or
+  transcribe a video, to turn a video's lessons into a skill, or to learn from or
+  answer questions about an entire channel.
 license: MIT (adapted from Hermes Agent, Copyright (c) 2025 Nous Research)
 ---
 
@@ -50,6 +52,8 @@ After fetching the transcript, format it based on what the user asks for:
 - **Thread**: Twitter/X thread format — numbered posts, each under 280 chars
 - **Blog post**: Full article with title, sections, and key takeaways
 - **Quotes**: Notable quotes with timestamps
+- **Skill**: A reusable Claude Code skill built from the video's lessons; follow [video-to-skill](references/video-to-skill.md)
+- **Channel knowledge base**: Every video of a channel as a queryable graph; follow [channel-kb](references/channel-kb.md)
 
 ### Example — Chapters Output
 

@@ -59,17 +59,28 @@ def fetch_transcript(video_id: str, languages: list | None = None):
     Compatible with youtube-transcript-api v1.x.
     """
     try:
+        import requests
         from youtube_transcript_api import YouTubeTranscriptApi
     except ImportError:
         print("Error: youtube-transcript-api not installed. Run this script with `uv run` (see youtube-content/SKILL.md).",
               file=sys.stderr)
         sys.exit(1)
 
-    api = YouTubeTranscriptApi()
+    class TimeoutSession(requests.Session):
+        def request(self, *args, **kwargs):  # a stalled request must not hang a long run
+            kwargs.setdefault("timeout", 30)
+            return super().request(*args, **kwargs)
+
+    api = YouTubeTranscriptApi(http_client=TimeoutSession())
     if languages:
         result = api.fetch(video_id, languages=languages)
     else:
-        result = api.fetch(video_id)
+        # The library's default looks only for English; take English if present, else any track.
+        transcripts = list(api.list(video_id))
+        if not transcripts:
+            raise RuntimeError("No transcript found for this video.")
+        english = [t for t in transcripts if t.language_code.startswith("en")]
+        result = (english or transcripts)[0].fetch()
 
     # v1.x returns FetchedTranscriptSnippet objects; normalize to dicts
     return [
