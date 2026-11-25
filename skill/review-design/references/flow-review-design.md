@@ -1,6 +1,6 @@
 # Design review flow
 
-Draft the contract from the request, accepted decisions, and
+In Default mode, draft the contract from the request, accepted decisions, and
 relevant code. Show the decisions in concrete types, signatures, or a flow, with
 verification scenarios and expected outcomes. An isolated bug with a known
 cause and no affected boundary can go directly to an authorized fix and

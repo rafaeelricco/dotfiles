@@ -136,6 +136,6 @@ one implementation case. Case F exercises the deliberate bypass.
   tool and the original stream stopped gives the tool; completed refinement
   passes its timestamp into the summary. Check that review precedes the final
   proposal and that the fixture stays unchanged.
-- For this smoke test, also compare the skill at the base commit with the candidate.
+- For this smoke test, also compare the previous skill with the candidate.
   Use a fresh session and the same fixture, prompt, model, and tool access for
   each version. Apply the same rubric to both.
