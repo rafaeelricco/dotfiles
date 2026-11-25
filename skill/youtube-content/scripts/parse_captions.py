@@ -7,10 +7,13 @@ or metadata offering a requested track that was not saved.
 Captions are grouped into ~10 s lines stamped [mm:ss].
 """
 import json
+import re
 import sys
 from pathlib import Path
 
 BLOCK_S = 10
+TABS = {"videos", "shorts", "streams"}
+VIDEO_ID = re.compile(r"[A-Za-z0-9_-]{11}")
 
 
 def caption_lines(path: Path) -> list[str]:
@@ -36,12 +39,18 @@ def main() -> None:
     out, langs = Path(sys.argv[1]), sys.argv[2].split(",")
     subs, txt = out / "subs", out / "txt"
     listed, seen = [], set()
-    for line in (out / "list.txt").read_text(encoding="utf-8").splitlines():
-        if line:
-            tab, vid, rest = line.split("|", 2)
-            if vid not in seen:  # a video can show up in two tabs
-                seen.add(vid)
-                listed.append((tab, vid, rest.rsplit("|", 1)[0]))  # titles may contain "|"
+    # Split on "\n" only: titles come from the channel, and splitlines() also breaks on
+    # characters like U+2028, which would let a title forge a record.
+    for line in (out / "list.txt").read_text(encoding="utf-8").split("\n"):
+        if not line:
+            continue
+        tab, vid, rest = (line.split("|", 2) + ["", ""])[:3]
+        if tab not in TABS or not VIDEO_ID.fullmatch(vid):  # vid becomes a file name
+            print(f"skipping malformed list line: {line[:80]!r}", file=sys.stderr)
+            continue
+        if vid not in seen:  # a video can show up in two tabs
+            seen.add(vid)
+            listed.append((tab, vid, rest.rsplit("|", 1)[0]))  # titles may contain "|"
 
     def info(vid: str) -> dict | None:
         try:  # a run killed mid-write leaves a truncated file: treat it as not fetched
