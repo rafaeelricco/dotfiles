@@ -41,7 +41,11 @@ Needs `graphify` (`uv tool install graphifyy`). Ask before installing it.
 
 1. From `<out>`, run `graphify extract txt --backend claude-cli --out .`, then
    `graphify cluster-only .` for `GRAPH_REPORT.md` and named communities.
-   Each transcript goes through a Claude extraction call on the user's subscription,
-   so ask before running it on more than the pilot.
-2. To answer: `graphify query "<question>" --budget 2000` from `<out>`. Open transcript
-   lines only to quote, and cite them as in step 6.
+   Extraction runs on the user's Claude subscription: the 102 Kaye transcripts went out in
+   3 chunks and took about 13 minutes and 250K input tokens. Ask before running it on more
+   than the pilot, and run it in the background like the fetch.
+   Done when `graphify-out/graph.json` exists and `GRAPH_REPORT.md` lists the communities.
+2. To answer: `graphify query "<question>" --budget 2000` from `<out>`. When the output says
+   `TRUNCATED`, raise `--budget` or narrow the question. Each node gives its file and time.
+   Open those transcript lines before quoting: a time can come from the description's chapter
+   list instead of the speech. Cite them as in step 6.
