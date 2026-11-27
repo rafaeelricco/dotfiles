@@ -1,9 +1,9 @@
 ---
 name: youtube-content
 description: >
-  Fetch a YouTube video's transcript and turn it into a summary, chapters,
-  thread, blog post, or quotes. Use when the user shares a YouTube link or asks
-  to summarize or transcribe a video.
+  Summarize, transcribe, or reformat a YouTube video. When the user supplies
+  a list of videos, collect their timestamped transcripts into a persistent
+  local corpus and report coverage for each video.
 license: MIT (adapted from Hermes Agent, Copyright (c) 2025 Nous Research)
 ---
 
@@ -19,7 +19,7 @@ Extract transcripts from YouTube videos and convert them into useful formats.
 
 The helper declares its dependency inline (PEP 723), so `uv run` builds an
 isolated environment on first use. Needs [uv](https://docs.astral.sh/uv/).
-Without uv, install `youtube-transcript-api>=1.0` into a Python 3.10+ virtualenv and replace
+Without uv, install the dependencies listed at the top of the selected script into a Python 3.10+ virtualenv and replace
 `uv run` with that environment's `python3` below.
 
 ## Helper Script
@@ -61,7 +61,26 @@ After fetching the transcript, format it based on what the user asks for:
 31:55 Q&A — audience questions on scalability and next steps
 ```
 
-## Workflow
+## Collect a supplied list of videos
+
+Run the batch helper once with all supplied video URLs or IDs, including
+duplicates. Use the user's output directory when given. Otherwise let the
+helper choose the corpus and report its absolute path.
+
+```bash
+uv run <skill-dir>/scripts/collect_transcripts.py -- URL1 URL2 URL3
+uv run <skill-dir>/scripts/collect_transcripts.py --output CORPUS -- URL1 URL2
+uv run <skill-dir>/scripts/collect_transcripts.py --output CORPUS
+uv run <skill-dir>/scripts/collect_transcripts.py --output CORPUS --retry
+```
+
+Use the third form to resume pending work. Use the fourth when the user asks
+to try failed collection again. A provider block pauses the corpus until that
+explicit retry. Report saved/unique videos, each unresolved ID and reason,
+and any invalid inputs. Link the corpus. If a transformation was requested,
+use the saved transcripts and identify its coverage.
+
+## Single-video workflow
 
 1. **Fetch** the transcript with `uv run` and `--text-only --timestamps`.
 2. **Validate**: confirm the output is non-empty and in the expected language. If empty, retry without `--language` to get any available transcript. If still empty, tell the user the video likely has transcripts disabled.
