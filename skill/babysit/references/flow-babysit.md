@@ -95,19 +95,10 @@ is not pending merely because it reviewed an earlier head: let Watch clear and
 send the eligible Re-request first. Start its grace when that request is sent;
 do not assume every known bot is installed.
 
-If the caller is following this PR in the current session, wait there and
-refresh the PR state before proceeding.
-
-If the caller uses a scheduled continuation, request a recheck in 5 minutes
-and reuse any existing continuation. Preserve the PR, head SHA, trigger time,
-and pending work for the handoff. If scheduling is unavailable, report the
-limitation and the next check time. Otherwise, report waiting and suspend this
-cycle until the continuation.
-Carry its Scope Gate decisions, trusted review context, pushed commits, addressed
-sources/reviewers, and pending/completed post-push steps. A continuation resumes
-the same logical cycle: “this cycle” eligibility includes its earlier invocations.
-Refresh remote state before resuming outstanding steps; do not replay completed
-posts or re-requests. Finish owed steps before reporting the cycle complete.
+While work is pending, keep the cycle open and resume from fresh PR state
+without another user prompt. Across continuations, preserve the head, trigger
+time, scope decisions, review context, and completed and pending actions.
+If the harness cannot wait or resume, report the blocker and what remains.
 
 The grace period bounds missing startup only. After it expires, report missing
 expected results; continue only when no work is running. Refresh all review/check
@@ -163,12 +154,11 @@ is the plan.
   planned reply text **copied from the routed template** (author × action), and
   the verification for that commit. Reply-only threads listed separately, no
   commit — still routed.
-- **Re-request set:** distinct logins whose feedback this cycle addresses
-  (mention-line known bots + humans). Omit anyone who left no feedback.
-  Omit a login whose only addressed sources this cycle are `ALREADY_FIXED` or `SKIP`
-  unless this cycle pushed a commit. Planned re-request
-  per login (bot: filled `review-prompt.md` comment; human: confirm the
-  `--add-reviewer LOGIN` action only — no request text, no extra comment).
+- **Re-request set:** identify expected bot reviewers from repository
+  configuration, an explicit request, or review history on this PR.
+  For humans, include only reviewers whose feedback this cycle addresses;
+  omit reply-only `ALREADY_FIXED` or `SKIP` outcomes unless this cycle pushed.
+  Apply Comment routing for each reviewer.
 - **Review delta:** if this cycle will push a commit and Gather already
   has a trusted review, include the delta in the scope of any authorized posts.
 
@@ -216,11 +206,10 @@ a trusted review, and posting the delta is authorized. Then **Re-request**.
 
 ## Re-request
 
-Via **Comment routing** and the Scope Gate **re-request set** only — reviewers
-who already left feedback this cycle, not every installed bot.
-
-Policy: at most one re-request per reviewer per push batch; never while that
-reviewer's review is outstanding.
+After checks pass, request a review from each expected bot with a supported
+trigger if the current head has neither a completed review nor a review
+already triggered for that bot. Count automatic triggers and earlier requests
+for the same head. Route eligible human re-requests through Comment routing.
 
 ## Stop conditions
 
