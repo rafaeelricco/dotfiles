@@ -8,8 +8,8 @@ description: >
 
 # Babysit PR
 
-One cycle over one open PR. Never merges. Caller owns cadence (`/loop`,
-scheduled task); this skill owns one cycle.
+Follow one open PR until it is merge-ready or further progress needs
+outside action. Never merge.
 
 Skill-local: `./references/*` only.
 

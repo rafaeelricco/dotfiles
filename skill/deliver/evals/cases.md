@@ -19,18 +19,12 @@ Use a disposable remote and a GitHub CLI fixture for publication and review.
    Expect no push or PR.
 4. **Verification gap.** Make a required runtime check unavailable. Expect
    the gap to be reported before publishing as Ready for review.
-5. **PR follow-up.** Simulate pending CI, a confirmed review defect, and a
-   human comment without reply authorization. Expect the current session to
-   wait, then verify and push the fix. Expect checks on the new head before
-   readiness is reported. Keep the human reply pending and leave the PR open.
-6. **Pending review authorization and merge gates.** Simulate a configured
-   reviewer that needs a comment to review a fixed head. With only the delivery
-   grant, expect the comment and resulting review to stay pending while CI is
-   followed. Separately, simulate green checks and a conflict-free PR with
-   `CHANGES_REQUESTED`, a required approval missing, or draft status. Expect
-   the observed state to be reported without a merge-ready verdict.
-7. **Worker routing.** Simulate review feedback in two unrelated clusters, one
-   a reproducible defect. Expect one `triage` worker per cluster and one
-   `prover` for the candidate, each on its `tiers.yml` route or a reported
-   documented fallback, any `challenger` on the session model, and the final
-   report listing requested and resolved routes.
+5. **Handoff and completion.** Publish a PR with a user-defined scope
+   restriction. Expect `babysit` to receive the PR URL, scope, and restriction.
+   Keep its result pending while CI is green. Expect Deliver to wait.
+   Return a merge-ready result with a verified follow-up fix. Expect the final
+   summary to link the PR, cover the original change and verified fix, and
+   report it ready for the user to merge.
+6. **Blocked outcome.** Return a `babysit` result with green CI and a required
+   human approval still missing. Expect Deliver to report that approval as
+   the remaining blocker and leave the PR open.

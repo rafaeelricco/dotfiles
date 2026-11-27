@@ -27,12 +27,8 @@ implementation without publication, run `verify` for behavior changes and stop.
    design scenarios, and current check evidence to `create-pr`. Let it
    verify the scoped result and handle commits, PR description, and
    publication. Reuse evidence for an identical candidate.
-4. After opening the PR, use `babysit` on its URL. Follow pending CI and
-   configured review in this session. Apply confirmed in-scope fixes. Verify
-   each fix batch according to `babysit` before pushing. The delivery grant
-   covers branch work and CI. Keep reviewer actions pending when their grants
-   are missing, including any review that needs one of those actions to start.
-   Continue independent work.
-5. Report the final PR URL, head, checks, blockers, and the worker routes that
-   `review-design`, `verify`, and `babysit` reported. Finish when the PR is merge-ready or no
-   authorized action can advance it. Leave merge to the user.
+4. After publication, invoke `babysit` with the PR URL, task scope, and
+   user constraints. Let it own PR follow-up and wait for its final outcome.
+5. Link the PR and summarize what was implemented, verified, and changed
+   during follow-up. Report the readiness or blocker that `babysit` found.
+   Leave merge to the user.
